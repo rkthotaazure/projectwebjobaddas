@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script type="text/javascript" src="Scripts/app/js/jquery-1.12.3.min.js"></script>
+    <script type="text/javascript" src="Scripts/app/js/bootstrap.min.js"></script>
+    <script src="Scripts/app/js/Angular.js"></script>
+    <script src="Scripts/app/js/Angular-Resource.js"></script>
+    <script src="Scripts/app/js/angular-route.js"></script>
+    <script src="Scripts/app/controllers/UserRegistrationController.js"></script>
+    </head>
+<body  ng-app="ApprovalApp" ng-controller="UserRegistrationController">
+    <div class="row">
+        <div class="col">
+            <div class="row" style="color: red">
+                <div class="col-xs-4 text-right">* Fields are required.</div>
+                <div class="col-xs-4" data-ng-show="ShowMandatoryMessage">Please enter all required fields. </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-4 text-right"><span style="color: red;">*</span>FullName:</div>
+                <div class="col-xs-4" style="width: 66%;">
+                    <input id="Fullname" required="" type="text">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-4 text-right">Email : </div>
+                <div class="col-xs-4">
+                    <div>
+                        <input id="Email" required="" type="text">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-4 text-right">Select Application : </div>
+                <div class="col-xs-4" style="width: 42%">
+                    <div style="float: left;">
+                        <label ng-repeat="application in applications">
+                            <input type="checkbox" value="{{application.name}}" ng-model="application.selected">{{application.name}}<br/>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-4 text-right"></div>
+                <div class="col-xs-4" style="width: 42%">
+                    <button type="submit" class="RegisterButton" data-ng-click="SubmitData()" title="Submit Registration Deatils">Submit</button>
+                    <button class="RegisterButton" data-ng-click="CancelMe()" title="Cancel">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="Popupdiv">
+        <div class="modal-content">
+            
+        </div>
+    </div>
+</body>
+</html>

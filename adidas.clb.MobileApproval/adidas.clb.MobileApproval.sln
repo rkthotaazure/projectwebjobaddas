@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adidas.clb.MobileApproval", "adidas.clb.MobileApproval\adidas.clb.MobileApproval.csproj", "{EEDD59F6-B081-4522-A2D3-62CDC867BC00}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adidas.clb.MobileApprovalUI", "adidas.clb.MobileApprovalUI\adidas.clb.MobileApprovalUI.csproj", "{397C3310-F127-4714-A14C-5444FCFC7099}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adidas.clb.job.UpdateTriggering", "adidas.clb.job.UpdateTriggering\adidas.clb.job.UpdateTriggering.csproj", "{1DDDF367-640B-4050-8DC1-300F297570C9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adidas.clb.job.RequestsUpdate", "adidas.clb.job.RequestsUpdate\adidas.clb.job.RequestsUpdate.csproj", "{13AD7835-DCCC-4A66-957C-F68EB09A4C2E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EEDD59F6-B081-4522-A2D3-62CDC867BC00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEDD59F6-B081-4522-A2D3-62CDC867BC00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEDD59F6-B081-4522-A2D3-62CDC867BC00}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEDD59F6-B081-4522-A2D3-62CDC867BC00}.Release|Any CPU.Build.0 = Release|Any CPU
+		{397C3310-F127-4714-A14C-5444FCFC7099}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{397C3310-F127-4714-A14C-5444FCFC7099}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{397C3310-F127-4714-A14C-5444FCFC7099}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{397C3310-F127-4714-A14C-5444FCFC7099}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DDDF367-640B-4050-8DC1-300F297570C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DDDF367-640B-4050-8DC1-300F297570C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DDDF367-640B-4050-8DC1-300F297570C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DDDF367-640B-4050-8DC1-300F297570C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13AD7835-DCCC-4A66-957C-F68EB09A4C2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13AD7835-DCCC-4A66-957C-F68EB09A4C2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13AD7835-DCCC-4A66-957C-F68EB09A4C2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13AD7835-DCCC-4A66-957C-F68EB09A4C2E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
