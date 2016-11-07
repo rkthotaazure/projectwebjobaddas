@@ -1,4 +1,8 @@
-﻿
+﻿//-----------------------------------------------------------
+// <copyright file="ApprovalAPIController.cs" company="adidas AG">
+// Copyright (C) 2016 adidas AG.
+// </copyright>
+//-----------------------------------------------------------
 using System;
 using System.Collections.Generic;
 using System.IO;

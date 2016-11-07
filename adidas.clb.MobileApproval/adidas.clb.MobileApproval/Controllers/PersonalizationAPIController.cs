@@ -1,221 +1,610 @@
-﻿using System;
+﻿//-----------------------------------------------------------
+// <copyright file="PersonalizationAPIController.cs" company="adidas AG">
+// Copyright (C) 2016 adidas AG.
+// </copyright>
+//-----------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using adidas.clb.MobileApproval.Exceptions;
 using adidas.clb.MobileApproval.Models;
 using adidas.clb.MobileApproval.Utility;
-using Microsoft.Azure;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Table;
 using adidas.clb.MobileApproval.App_Code.BL.Personalization;
 
 namespace adidas.clb.MobileApproval.Controllers
 {
+    /// <summary>
+    /// The controller class which implements action methods for personalization
+    /// </summary>
     public class PersonalizationAPIController : ApiController
     {
-        
-        //GET: api/personalizationapi/backends
+        /// <summary>
+        /// action method to get all backends
+        /// </summary>
+        /// <returns></returns>        
         [Route("api/personalizationapi/backends")]
-        public IEnumerable<BackendEntity> GetBackends()
-        {           
-            UserBackend userbackend = new UserBackend();
-            return userbackend.GetBackends();
-        }
-
-        //Put: api/personalizationapi/users/{userID}
-        [Route("api/personalizationapi/users/{userID}")]
-        public IHttpActionResult PutUsers(UserEntity user, List<UserDeviceEntity> userprovideddevices, List<UserBackendEntity> userprovidedbackends, int maxsyncreplysize)
+        public HttpResponseMessage GetBackends()
         {
-            Personalization personalization = new Personalization();
-            UserBackend userbackend = new UserBackend();
-            Boolean isUserExists = personalization.CheckUser(user.RowKey);
-            Boolean isBackendsProvided = true;
-            Boolean isDevicesProvided = true;
-            if (isUserExists)
+            try
             {
-                personalization.CreateUser(user);                
-                if (isDevicesProvided)
-                {
-                    userbackend.AddDevices(userprovideddevices);
-                }
-                if (isBackendsProvided)
-                {
-                    userbackend.AddBackends(userprovidedbackends);
-                }
-                personalization.TriggerUserRequests(user.RowKey);
-                personalization.CalcSynchTime(userprovidedbackends, maxsyncreplysize);
-            }
-            else
-            {
-                userbackend.UpdateUserProp(user);
-                userbackend.RemoveBackends(user.RowKey, userprovidedbackends);
-                userbackend.RemoveDevices(user.RowKey, userprovideddevices);
-                if (isDevicesProvided)
+                UserBackend userBackend = new UserBackend();
+                PersonalizationResponseListDTO<BackendDTO> allBackends = userBackend.GetBackends();
+                if (allBackends.result != null)
                 {                    
-                    List<UserDeviceEntity> associateddevices = userbackend.GetAssociatedDevices(userprovideddevices);
-                    List<UserDeviceEntity> nonassociateddevices = userbackend.GetNonAssociatedDevices(userprovideddevices,associateddevices);
-                    userbackend.AddDevices(nonassociateddevices);
-                    userbackend.UpdateDevices(associateddevices);
-
+                    return Request.CreateResponse(HttpStatusCode.OK, allBackends);
                 }
-                if (isBackendsProvided)
+                else
                 {
-                    List<UserBackendEntity> associatedbackends = userbackend.GetAssociatedBackends(userprovidedbackends);
-                    List<UserBackendEntity> nonassociatedbackends= userbackend.GetNonAssociatedBackends(userprovidedbackends, associatedbackends);
-                    userbackend.AddBackends(nonassociatedbackends);
-                    userbackend.UpdateBackends(associatedbackends);
+                    return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "User does not have backends", ""));
                 }
             }
-            UserEntity updateduser = personalization.GetUser(user.RowKey);
-            return Ok(updateduser);
+            catch (DataAccessException DALexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", DALexception.Message, DALexception.Message));
+            }
+            catch (BusinessLogicException BLexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", BLexception.Message, BLexception.Message));
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - exception in controller action while retrieving all backends : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
+            }
         }
 
-        //GET: personalization/users/{userID}
+        /// <summary>
+        /// action to insert or update user
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="userprovideddevices"></param>
+        /// <param name="userprovidedbackends"></param>
+        /// <param name="maxsyncreplysize"></param>
+        /// <returns></returns>        
         [Route("api/personalizationapi/users/{userID}")]
-        public IHttpActionResult GetUser(String userID)
+        public HttpResponseMessage PutUsers(PersonalizationRequsetDTO personalizationrequset)
         {
-            Personalization personalization = new Personalization();
-            personalization.GetUser(userID);
-            
+            try
+            {
+                //BL object instances created
+                Personalization personalization = new Personalization();
+                UserBackend userbackend = new UserBackend();
+                UserDevice userdevice = new UserDevice();
+                if (!string.IsNullOrEmpty(personalizationrequset.user.UserID))
+                {
+                    Boolean isUserExists = personalization.CheckUser(personalizationrequset.user.UserID);
+                    Boolean isDevicesProvided, isBackendsProvided;
+
+                    //retracking individual objects from request
+                    IEnumerable<UserDeviceDTO> userdevicesdto = personalizationrequset.user.userdevices;
+                    IEnumerable<UserBackendDTO> userbackendsdto = personalizationrequset.user.userbackends;
+                    UserDTO user = personalizationrequset.user;
+                    UserEntity userentity = personalization.UserEntityGenerator(user);
+                    IEnumerable<UserDeviceEntity> userprovideddevices = userdevice.UserDeviceEntityGenerator(userdevicesdto);
+                    IEnumerable<UserBackendEntity> userprovidedbackends = userbackend.UserBackendEntityGenerator(userbackendsdto);
+
+                    //to check if requset has userdevices or not
+                    if (userprovideddevices != null)
+                    {
+                        isDevicesProvided = true;
+                    }
+                    else { isDevicesProvided = true; }
+
+                    //to check if requset has userbackends or not
+                    if (userprovidedbackends != null)
+                    {
+                        isBackendsProvided = true;
+                    }
+                    else { isBackendsProvided = true; }
+
+                    //create if user not exists else update
+                    if (!isUserExists)
+                    {
+                        personalization.CreateUser(userentity);
+
+                        //add user devices if provided in request
+                        if (isDevicesProvided)
+                        {
+                            userdevice.AddDevices(userprovideddevices.ToList());
+                        }
+
+                        //add user backends if provided in request
+                        if (isBackendsProvided)
+                        {
+                            userbackend.AddBackends(userprovidedbackends.ToList());
+                        }
+
+                        personalization.TriggerUserRequests(personalizationrequset.user.UserID);
+                        personalization.CalcSynchTime(userprovidedbackends);
+                    }
+                    else
+                    {
+                        personalization.UpdateUserProp(userentity);
+                        //remove existing devices to user and add the provided userdevices in requset
+                        if (isDevicesProvided)
+                        {
+                            userdevice.RemoveDevices(personalizationrequset.user.UserID);
+                            userdevice.AddDevices(userprovideddevices.ToList());
+                        }
+                        //remove existing backends to user and add the provided userbackends in requset
+                        if (isBackendsProvided)
+                        {
+                            userbackend.RemoveBackends(personalizationrequset.user.UserID);
+                            userbackend.AddBackends(userprovidedbackends.ToList());
+                        }
+                    }
+
+                    UserDTO updateduser = personalization.GetUser(personalizationrequset.user.UserID);
+                    var ResponseUser = new PersonalizationResponseDTO<UserDTO>();
+                    ResponseUser.result = updateduser;
+                    ResponseUser.query = personalizationrequset;
+                    return Request.CreateResponse(HttpStatusCode.OK, ResponseUser);
+                }
+                else
+                {
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "Error in updating user", ""));
+                }
+            }
+            catch (DataAccessException DALexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDTO>("400", DALexception.Message, DALexception.Message));
+            }
+            catch (BusinessLogicException BLexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDTO>("400", BLexception.Message, BLexception.Message));
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - exception in controller action while inserting/updating user : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDTO>("400", exception.Message, exception.StackTrace));
+            }
         }
 
-        //Delete: api/personalizationapi/users/{userID}
+        /// <summary>
+        /// action to get user entity
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <returns></returns>
         [Route("api/personalizationapi/users/{userID}")]
-        public IHttpActionResult DeleteUser(String userID)
+        public HttpResponseMessage GetUsers(String userID)
         {
-            Personalization personalization = new Personalization();
-            CloudTable ReferenceDataTable = personalization.GetAzureTableInstance(CoreConstants.AzureTables.ReferenceData);
-            TableOperation RetrieveUser = TableOperation.Retrieve<UserEntity>(CoreConstants.AzureTables.User, userID);            
-            TableResult RetrievedResultUser = ReferenceDataTable.Execute(RetrieveUser);
-            UserEntity deleteUserEntity = (UserEntity)RetrievedResultUser.Result;
-            if (deleteUserEntity != null)
+            try
             {
-                TableOperation deleteOperation = TableOperation.Delete(deleteUserEntity);
-                ReferenceDataTable.Execute(deleteOperation);
-                return Ok();
+                if (!string.IsNullOrEmpty(userID))
+                {
+                    Personalization personalization = new Personalization();
+                    UserDTO user = personalization.GetUser(userID);                  
+                    
+                    if (user != null)
+                    {
+                        var ResponseUsers = new PersonalizationResponseDTO<UserDTO>();
+                        ResponseUsers.result = user;
+                        return Request.CreateResponse(HttpStatusCode.OK, ResponseUsers);
+                    }
+                    else
+                    {
+                        return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "user does not exist", ""));
+                    }
+                }
+                else
+                {
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "user does not exist", ""));
+                }
             }
-            else
+            catch (DataAccessException DALexception)
             {
-                return NotFound();
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDTO>("400", DALexception.Message, DALexception.Message));
+            }
+            catch (BusinessLogicException BLexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDTO>("400", BLexception.Message, BLexception.Message));
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - exception in controller action while retreiving user : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDTO>("400", exception.Message, exception.StackTrace));
+            }
+        }
+
+        /// <summary>
+        /// action to delete user
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <returns></returns>
+        [Route("api/personalizationapi/users/{userID}")]
+        public HttpResponseMessage DeleteUsers(String userID)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(userID))
+                {
+                    Personalization personalization = new Personalization();
+                    UserEntity deleteUserEntity = personalization.DeleteUser(userID);
+
+                    if (deleteUserEntity != null)
+                    {
+                        return Request.CreateResponse(HttpStatusCode.OK);
+                    }
+                    else
+                    {
+                        return Request.CreateResponse(HttpStatusCode.NotFound);
+                    }
+                }
+                else
+                {
+                    return Request.CreateResponse(HttpStatusCode.BadRequest);
+                }
+            }
+            catch (DataAccessException DALexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDTO>("400", DALexception.Message, DALexception.Message));
+            }
+            catch (BusinessLogicException BLexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDTO>("400", BLexception.Message, BLexception.Message));
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - exception in controller action while deleting user : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDTO>("400", exception.Message, exception.StackTrace));
             }
 
         }
 
-        //Get: api/personalizationapi/users/{userID}/devices
+        /// <summary>
+        /// action to get userdevices
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <returns></returns>
         [Route("api/personalizationapi/users/{userID}/devices")]
-        public IEnumerable<UserDeviceEntity> GetDevices(String userID)
+        public HttpResponseMessage GetUserAllDevices(String userID)
         {
-            Personalization personalization = new Personalization();
-            CloudTable table = personalization.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
-            TableQuery<UserDeviceEntity> query = new TableQuery<UserDeviceEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, "BCK"));
-            List<UserDeviceEntity> userDevices = (List<UserDeviceEntity>)table.ExecuteQuery(query);
-            return userDevices;
+            try
+            {
+                if (!string.IsNullOrEmpty(userID))
+                {
+                    UserDevice userdevices = new UserDevice();
+                    IEnumerable<UserDeviceDTO> alluserdevices = userdevices.GetUserAllDevices(userID);
+                    if (alluserdevices != null)
+                    {
+                        //adding userdevice dto to responsedto
+                        var ResponseUserDevices = new PersonalizationResponseListDTO<UserDeviceDTO>();
+                        ResponseUserDevices.result = alluserdevices;
+                        return Request.CreateResponse(HttpStatusCode.OK, ResponseUserDevices);
+                    }
+                    else
+                    {
+                        return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "user does not have associated devices", ""));
+                    }
+                    
+                }
+                else
+                {
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "user does not have associated devices", ""));
+                }
+            }
+            catch (DataAccessException DALexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", DALexception.Message, DALexception.Message));
+            }
+            catch (BusinessLogicException BLexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", BLexception.Message, BLexception.Message));
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - exception in controller action while retreiving all userdevcies for user : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", exception.Message, exception.StackTrace));
+            }
         }
 
-        //Post: api/personalizationapi/users/{userID}/devices
+        /// <summary>
+        /// action to insert userdevices
+        /// </summary>
+        /// <param name="userdeviceentity"></param>
+        /// <returns></returns>
         [Route("api/personalizationapi/users/{userID}/devices")]
-        public IHttpActionResult PostDevices(UserDeviceEntity userDevice)
+        public HttpResponseMessage PostDevices(PersonalizationRequsetDTO personalizationrequset)
         {
-            Personalization personalization = new Personalization();
-            CloudTable table = personalization.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
-            TableOperation insertOperation = TableOperation.Insert(userDevice);            
-            table.Execute(insertOperation);
-            return Ok();
+            try
+            {
+                
+                UserDevice userdevice = new UserDevice();
+                if(personalizationrequset.userdevices!=null)
+                {
+                    userdevice.PostDevices(personalizationrequset);
+                    return Request.CreateResponse(HttpStatusCode.OK);
+                }
+               else
+                {
+                    return Request.CreateResponse(HttpStatusCode.BadRequest);
+                }
+            }
+            catch (DataAccessException DALexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", DALexception.Message, DALexception.Message));
+            }
+            catch (BusinessLogicException BLexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", BLexception.Message, BLexception.Message));
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - exception in controller action while inserting userdevcie : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", exception.Message, exception.StackTrace));
+            }
         }
 
-        //Get: api/personalizationapi/users/{userID}/devices/{userDeviceID}
+        /// <summary>
+        /// action to get single userdevice
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <param name="userDeviceID"></param>
+        /// <returns></returns>
         [Route("api/personalizationapi/users/{userID}/devices/{userDeviceID}")]
-        public IHttpActionResult GetUserDevice(String userID, String userDeviceID)
+        public HttpResponseMessage GetUserDevice(String userID, String userDeviceID)
         {
-            Personalization personalization = new Personalization();
-            CloudTable table = personalization.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
-            TableOperation retrieveUser = TableOperation.Retrieve<UserEntity>("User", userDeviceID);            
-            TableResult retrievedResult = table.Execute(retrieveUser);
-            if (retrievedResult.Result == null)
+            try
             {
-                return NotFound();
+                if (!(string.IsNullOrEmpty(userID) || string.IsNullOrEmpty(userDeviceID)))
+                {
+                    UserDevice userdevice = new UserDevice();
+                    PersonalizationResponseDTO<UserDeviceDTO> ResponseUserDevice = userdevice.GetUserDevice(userID, userDeviceID);
+                    if (ResponseUserDevice.result != null)
+                    {
+                        return Request.CreateResponse(HttpStatusCode.OK, ResponseUserDevice);
+                    }
+                    else
+                    {
+                        return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", "user does not have associated device", ""));
+                    }
+                }
+                else
+                {
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", "userid or deviceid can't be empty or null ", ""));
+                }
             }
-            return Ok(retrievedResult.Result);
+            catch (DataAccessException DALexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", DALexception.Message, DALexception.Message));
+            }
+            catch (BusinessLogicException BLexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", BLexception.Message, BLexception.Message));
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - exception in controller action while retreving single userdevcie with deviceID : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", exception.Message, exception.StackTrace));
+            }
         }
 
-        //Delete: api/personalizationapi/users/{userID}/devices/{userDeviceID}
+        /// <summary>
+        /// action to delete single userdevice
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <param name="userDeviceID"></param>
+        /// <returns></returns>
         [Route("api/personalizationapi/users/{userID}/devices/{userDeviceID}")]
-        public IHttpActionResult DeleteUserDevice(String userID, String userDeviceID)
+        public HttpResponseMessage DeleteUserDevice(String userID, String userDeviceID)
         {
-            Personalization personalization = new Personalization();
-            CloudTable table = personalization.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
-            TableOperation retrieveUserDevice = TableOperation.Retrieve<UserEntity>("User", userDeviceID);            
-            TableResult retrievedUser = table.Execute(retrieveUserDevice);
-            UserEntity deleteUserDeviceEntity = (UserEntity)retrievedUser.Result;
-            if (deleteUserDeviceEntity != null)
+            try
             {
-                TableOperation deleteOperation = TableOperation.Delete(deleteUserDeviceEntity);                
-                table.Execute(deleteOperation);
-                return Ok();
+                if (!(string.IsNullOrEmpty(userID) || string.IsNullOrEmpty(userDeviceID)))
+                {
+                    UserDevice userdevice = new UserDevice();
+                    UserDeviceEntity deleteUserDeviceEntity = userdevice.DeleteUserDevice(userID, userDeviceID);
+
+                    if (deleteUserDeviceEntity != null)
+                    {
+                        return Request.CreateResponse(HttpStatusCode.OK);
+                    }
+                    else
+                    {
+                        return Request.CreateResponse(HttpStatusCode.NotFound);
+                    }
+                }
+                else
+                {
+                    return Request.CreateResponse(HttpStatusCode.BadRequest);
+                }
             }
-            else
+            catch (DataAccessException DALexception)
             {
-                return NotFound();
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", DALexception.Message, DALexception.Message));
             }
-        }
-        
-        //Get: api/personalizationapi/users/{userID}/backends
-        [Route("api/personalizationapi/users/{userID}/backends")]
-        public IEnumerable<UserDeviceEntity> GetBackends(String userID)
-        {
-            Personalization personalization = new Personalization();
-            CloudTable table = personalization.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
-            TableQuery<UserDeviceEntity> query = new TableQuery<UserDeviceEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, "BCK"));
-            List<UserDeviceEntity> userBackends = (List<UserDeviceEntity>)table.ExecuteQuery(query);
-            return userBackends;
+            catch (BusinessLogicException BLexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", BLexception.Message, BLexception.Message));
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - exception in controller action while deleting single userdevcie with deviceID : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", exception.Message, exception.StackTrace));
+            }
         }
 
-        //Post: api/personalizationapi/users/{userID}/backends
+        /// <summary>
+        /// action to get userbackends
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <returns></returns>
         [Route("api/personalizationapi/users/{userID}/backends")]
-        public IHttpActionResult PostBackends(UserBackendEntity userBackend)
+        public HttpResponseMessage GetUserAllBackends(String userID)
         {
-            Personalization personalization = new Personalization();
-            CloudTable table = personalization.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
-            TableOperation insertOperation = TableOperation.Insert(userBackend);            
-            table.Execute(insertOperation);
-            return Ok();
+            try
+            {
+                if (!string.IsNullOrEmpty(userID))
+                {
+                    UserBackend userdevices = new UserBackend();
+                    IEnumerable<UserBackendDTO> alluserbackends = userdevices.GetUserAllBackends(userID);
+                    if (alluserbackends != null)
+                    {
+                        //converting userbackendsentity to Responsedto
+                        var ResponseUserBackends = new PersonalizationResponseListDTO<UserBackendDTO>();
+                        ResponseUserBackends.result = alluserbackends;
+                        return Request.CreateResponse(HttpStatusCode.OK, ResponseUserBackends);
+                    }
+                    else
+                    {
+                        return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "user does not have associated backends", ""));
+                    }                    
+                }
+                else
+                {
+                    return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "user does not exists", ""));
+                }
+            }
+            catch (DataAccessException DALexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", DALexception.Message, DALexception.Message));
+            }
+            catch (BusinessLogicException BLexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", BLexception.Message, BLexception.Message));
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - exception in controller action while retreiving all userbackends : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
+            }
         }
 
-        //Get: api/personalizationapi/users/{userID}/backends/{userBackendID}
+        /// <summary>
+        /// action to insert userbackends
+        /// </summary>
+        /// <param name="userBackendentity"></param>
+        /// <returns></returns>
+        [Route("api/personalizationapi/users/{userID}/backends")]
+        public HttpResponseMessage PostBackends(PersonalizationRequsetDTO personalizationrequset)
+        {
+            try
+            {
+                if (personalizationrequset.userbackends != null)
+                {
+                    UserBackend userbackend = new UserBackend();
+                    userbackend.PostBackends(personalizationrequset);
+                    return Request.CreateResponse(HttpStatusCode.OK);
+                }
+                else
+                {
+                    return Request.CreateResponse(HttpStatusCode.BadRequest);
+                }                
+            }
+            catch (DataAccessException DALexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", DALexception.Message, DALexception.Message));
+            }
+            catch (BusinessLogicException BLexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", BLexception.Message, BLexception.Message));
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - exception in controller action while inserting single userbackend : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
+            }
+        }
+
+        /// <summary>
+        /// method to get single userbackend
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <param name="userBackendID"></param>
+        /// <returns></returns>
         [Route("api/personalizationapi/users/{userID}/backends/{userBackendID}")]
-        public IHttpActionResult GetUserBackend(String userID, String userBackendID)
+        public HttpResponseMessage GetUserBackend(String userID, String userBackendID)
         {
-            Personalization personalization = new Personalization();
-            CloudTable table = personalization.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
-            TableOperation retrieveUserBackend = TableOperation.Retrieve<UserEntity>("User", userBackendID);            
-            TableResult retrievedResult = table.Execute(retrieveUserBackend);
-            if (retrievedResult.Result == null)
+            try
             {
-                return NotFound();
+                if (!(string.IsNullOrEmpty(userID) || string.IsNullOrEmpty(userBackendID)))
+                {
+                    UserBackend userbackend = new UserBackend();
+                    PersonalizationResponseDTO<UserBackendDTO> ResponseUserBackend = userbackend.GetUserBackend(userID, userBackendID);                    
+                    
+                    if (ResponseUserBackend.result != null)
+                    {
+                        return Request.CreateResponse(HttpStatusCode.OK, ResponseUserBackend);
+                    }
+                    return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "user does not have associated backends", ""));
+                }
+                else
+                {
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "userid or associated deviceid empty or null", ""));
+                }
             }
-            return Ok(retrievedResult.Result);
+            catch (DataAccessException DALexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", DALexception.Message, DALexception.Message));
+            }
+            catch (BusinessLogicException BLexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", BLexception.Message, BLexception.Message));
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - exception in controller action while retreving single userbackend : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
+            }
         }
 
-        //Delete: api/personalizationapi/users/{userID}/devices/{userBackendID}
-        [Route("api/personalizationapi/users/{userID}/devices/{userBackendID}")]
-        public IHttpActionResult DeleteUserBackend(String userID, String userBackendID)
+        /// <summary>
+        /// method to delete single userbackend
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <param name="userBackendID"></param>
+        /// <returns></returns>        
+        [Route("api/personalizationapi/users/{userID}/backends/{userBackendID}")]
+        public HttpResponseMessage DeleteUserBackend(String userID, String userBackendID)
         {
-            Personalization personalization = new Personalization();
-            CloudTable table = personalization.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
-            TableOperation retrieveUserBackend = TableOperation.Retrieve<UserEntity>("User", userBackendID);            
-            TableResult retrievedUserBackend = table.Execute(retrieveUserBackend);
-            UserEntity deleteUserBackendEntity = (UserEntity)retrievedUserBackend.Result;
-            if (deleteUserBackendEntity != null)
+            try
             {
-                TableOperation deleteOperation = TableOperation.Delete(deleteUserBackendEntity);                
-                table.Execute(deleteOperation);
-                return Ok();
+                if (!(string.IsNullOrEmpty(userID) || string.IsNullOrEmpty(userBackendID)))
+                {
+                    UserBackend userbackend = new UserBackend();
+                    UserBackendEntity deleteUserBackendEntity = userbackend.DeleteUserBackend(userID, userBackendID);
+
+                    if (deleteUserBackendEntity != null)
+                    {
+                        return Request.CreateResponse(HttpStatusCode.OK);
+                    }
+                    else
+                    {
+                        return Request.CreateResponse(HttpStatusCode.NotFound);
+                    }
+                }
+                else
+                {
+                    return Request.CreateResponse(HttpStatusCode.BadRequest);
+                }
             }
-            else
+            catch (DataAccessException DALexception)
             {
-                return NotFound();
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", DALexception.Message, DALexception.Message));
+            }
+            catch (BusinessLogicException BLexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", BLexception.Message, BLexception.Message));
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - exception in controller action while inserting single userbackend : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
             }
 
         }
