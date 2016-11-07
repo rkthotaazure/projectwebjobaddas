@@ -26,14 +26,20 @@ namespace adidas.clb.MobileApproval.Utility
             public const string Trace = "Trace";
             public const string Error = "Error";
         }
-        //Azure Table Names
+
+        //Azure Table constants
         public struct AzureTables
         {
-            public const string ReferenceData = "ReferenceData";
+            public const string ReferenceData = "ReferenceData";            
+            public const string UserDeviceConfiguration = "UserDeviceConfiguration";
+            public const string AzureStorageConnectionString = "GenericMobileStorageConnectionString";
             public const string PartitionKey = "PartitionKey";
             public const string Backend = "Backend";
             public const string User = "User";
-            public const string UserDeviceConfiguration = "UserDeviceConfiguration";
+            public const string UserDevicePK = "UD_";
+            public const string UserBackendPK = "UB_";
+            public const string BackendSynchPK = "BS_";
+
         }
         // Get the root video portal url
         public static string RootSiteUrl

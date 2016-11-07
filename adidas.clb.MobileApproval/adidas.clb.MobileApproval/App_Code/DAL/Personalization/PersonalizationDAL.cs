@@ -1,45 +1,117 @@
-﻿using System;
+﻿//-----------------------------------------------------------
+// <copyright file="PersonalizationDAL.cs" company="adidas AG">
+// Copyright (C) 2016 adidas AG.
+// </copyright>
+//-----------------------------------------------------------
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Web;
-using Microsoft.Azure;
-using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using adidas.clb.MobileApproval.Models;
 using adidas.clb.MobileApproval.Utility;
+using adidas.clb.MobileApproval.Exceptions;
 
 namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
 {
+    /// <summary>
+    /// The class which implements methods for data access layer of personalization.
+    /// </summary>    
     public class PersonalizationDAL
     {
         /// <summary>
-        /// method to get user details
+        /// method to get user entity with UserID
         /// </summary>
-        /// <param name="userprops"></param>
-        /// <returns></returns>        
-        public UserEntity GetUser(String UserName)
+        /// <param name="UserID"></param>
+        /// <returns>userentity</returns>                     
+        public UserEntity GetUser(String UserID)
         {
-            CloudTable ReferenceDataTable = GetAzureTableInstance(CoreConstants.AzureTables.ReferenceData);
-            TableOperation RetrieveUser = TableOperation.Retrieve<UserEntity>(CoreConstants.AzureTables.User, UserName);
-            TableResult RetrievedResultUser = ReferenceDataTable.Execute(RetrieveUser);
-            return (UserEntity)RetrievedResultUser.Result;            
+            try
+            {
+                CloudTable ReferenceDataTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.ReferenceData);
+                TableOperation RetrieveUser = TableOperation.Retrieve<UserEntity>(CoreConstants.AzureTables.User, UserID);
+                TableResult RetrievedResultUser = ReferenceDataTable.Execute(RetrieveUser);
+                return (UserEntity)RetrievedResultUser.Result;
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error while retrieving user from ReferenceData azure table in DAL : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new DataAccessException();
+            }
         }
 
         /// <summary>
-        /// method to get user details
+        /// method to create newuser
         /// </summary>
-        /// <param name="userprops"></param>
+        /// <param name="user"></param>
         /// <returns></returns>        
-        public CloudTable GetAzureTableInstance(String TableName)
+        public void CreateUser(UserEntity user)
         {
-            // Retrieve the storage account from the connection string.
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
-            CloudConfigurationManager.GetSetting("AzureStorageConnectionString"));
-            // Create the table client.
-            CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-            // Create the CloudTable object that represents the "backends" table.
-            CloudTable table = tableClient.GetTableReference(TableName);
-            return table;
+            try
+            {
+                CloudTable ReferenceDataTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.ReferenceData);
+                TableOperation insertOperation = TableOperation.Insert(user);
+                ReferenceDataTable.Execute(insertOperation);
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error while creating user into ReferenceData azure table in DAL : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new DataAccessException();
+            }
+        }
+
+        /// <summary>
+        /// method to update existing user props
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public void UpdateUserProp(UserEntity user)
+        {
+            try
+            {
+                CloudTable ReferenceDataTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.ReferenceData);
+                //adding ETag to user for replace operattion
+                user.ETag = "*";
+                TableOperation updateOperation = TableOperation.Replace(user);
+                ReferenceDataTable.Execute(updateOperation);
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error while updating user props into ReferenceData azure table in DAL : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new DataAccessException();
+            }
+        }
+
+        /// <summary>
+        /// method to delete user entity
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>        
+        public UserEntity DeleteUser(String UserID)
+        {
+            try
+            {
+                CloudTable ReferenceDataTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.ReferenceData);
+                TableOperation RetrieveUser = TableOperation.Retrieve<UserEntity>(CoreConstants.AzureTables.User, UserID);
+                //get user entity with UserID
+                TableResult RetrievedResultUser = ReferenceDataTable.Execute(RetrieveUser);
+                //delete retrieved user entity
+                UserEntity deleteUserEntity = (UserEntity)RetrievedResultUser.Result;
+                if (deleteUserEntity != null)
+                {
+                    TableOperation deleteOperation = TableOperation.Delete(deleteUserEntity);
+                    ReferenceDataTable.Execute(deleteOperation);
+                }
+                return deleteUserEntity;
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error while deleting user from ReferenceData azure table in DAL : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new DataAccessException();
+            }
         }
     }
 }

@@ -1,29 +1,253 @@
-﻿using System;
+﻿//-----------------------------------------------------------
+// <copyright file="UserBackendDAL.cs" company="adidas AG">
+// Copyright (C) 2016 adidas AG.
+// </copyright>
+//-----------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using Microsoft.Azure;
-using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
+using adidas.clb.MobileApproval.Exceptions;
 using adidas.clb.MobileApproval.Models;
 using adidas.clb.MobileApproval.Utility;
 
 namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
 {
+    /// <summary>
+    /// The class which implements methods for data access layer of userbackend.
+    /// </summary>
     public class UserBackendDAL
     {
         /// <summary>
-        ///method to get list all backends
+        /// method to add userbackends
         /// </summary>
-        /// <param name="userprops"></param>
+        /// <param name="backendofuser"></param>
+        public void AddBackends(List<UserBackendEntity> backendofuser)
+        {
+            try
+            {
+                CloudTable UserBackendConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
+                TableBatchOperation batchOperation = new TableBatchOperation();
+                foreach (UserBackendEntity usrbackendentity in backendofuser)
+                {
+                    batchOperation.Insert(usrbackendentity);
+                }
+                UserBackendConfigurationTable.ExecuteBatch(batchOperation);
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error while adding userbackends to  userdeviceconfig azure table in DAL : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new DataAccessException();
+            }
+        }
+
+        /// <summary>
+        /// method to update userbackends
+        /// </summary>
+        /// <param name="backendofuser"></param>
+        public void UpdateBackends(List<UserBackendEntity> backendofuser)
+        {
+            try
+            {
+                CloudTable UserBackendConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
+                TableBatchOperation batchOperation = new TableBatchOperation();
+                foreach (UserBackendEntity usrbackendentity in backendofuser)
+                {
+                    batchOperation.Add(TableOperation.Replace(usrbackendentity));
+                }
+                UserBackendConfigurationTable.ExecuteBatch(batchOperation);
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error while updating userbackends to  userdeviceconfig azure table in DAL : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new DataAccessException();
+            }
+        }
+
+        /// <summary>
+        /// method to remove user backends
+        /// </summary>
+        /// <param name="backendofuser"></param>
+        public void RemoveBackends(List<UserBackendEntity> backendofuser)
+        {
+            try
+            {
+                CloudTable UserBackendConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
+                TableBatchOperation batchOperation = new TableBatchOperation();
+                foreach (UserBackendEntity usrbackendentity in backendofuser)
+                {
+                    batchOperation.Add(TableOperation.Delete(usrbackendentity));
+                }
+                UserBackendConfigurationTable.ExecuteBatch(batchOperation);
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error while removing userbackends from  userdeviceconfig azure table in DAL : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new DataAccessException();
+            }
+        }
+
+        /// <summary>
+        ///method to get list of all backends
+        /// </summary>        
         /// <returns></returns>        
         public List<BackendEntity> GetBackends()
         {
-            PersonalizationDAL personalizationdal = new PersonalizationDAL();
-            CloudTable ReferenceDataTable = personalizationdal.GetAzureTableInstance(CoreConstants.AzureTables.ReferenceData);
-            TableQuery<BackendEntity> query = new TableQuery<BackendEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, CoreConstants.AzureTables.Backend));
-            List<BackendEntity> allBackends = (List<BackendEntity>)ReferenceDataTable.ExecuteQuery(query);
-            return allBackends;            
-        }        
+            try
+            {
+                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.ReferenceData);
+                TableQuery<BackendEntity> query = new TableQuery<BackendEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, CoreConstants.AzureTables.Backend));
+                List<BackendEntity> allBackends = UserDeviceConfigurationTable.ExecuteQuery(query).ToList();
+                return allBackends;
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error while retrieving all backends from referencedata azure table in DAL : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new DataAccessException();
+            }
+        }
+
+        /// <summary>
+        /// method to get userbackends
+        /// </summary>
+        /// <param name="UserID"></param>
+        /// <returns></returns>
+        public List<UserBackendEntity> GetUserAllBackends(String UserID)
+        {
+            try
+            {
+                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
+                TableQuery<UserBackendEntity> query = new TableQuery<UserBackendEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.UserBackendPK, UserID)));
+                List<UserBackendEntity> alluserbackends = UserDeviceConfigurationTable.ExecuteQuery(query).ToList();
+                return alluserbackends;
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error while retrieving userbackends from userdeviceconfig azure table in DAL : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new DataAccessException();
+            }
+        }
+
+        /// <summary>
+        /// method to insert single userbackend
+        /// </summary>
+        /// <param name="userbackendentity"></param>
+        public void PostBackends(UserBackendEntity userbackendentity)
+        {
+            try
+            {
+                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
+                TableOperation insertOperation = TableOperation.Insert(userbackendentity);
+                UserDeviceConfigurationTable.Execute(insertOperation);
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error while inserting userbackend to userdeviceconfig azure table in DAL : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new DataAccessException();
+            }
+        }
+
+        /// <summary>
+        /// method to get single userbackend
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <param name="userBackendID"></param>
+        /// <returns></returns>
+        public UserBackendEntity GetUserBackend(String userID, String userBackendID)
+        {
+            try
+            {
+                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
+                TableOperation retrieveUser = TableOperation.Retrieve<UserBackendEntity>(string.Concat(CoreConstants.AzureTables.UserBackendPK, userID), userBackendID);                
+                TableResult retrievedResult = UserDeviceConfigurationTable.Execute(retrieveUser);               
+                return (UserBackendEntity)retrievedResult.Result;
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error while retrieving userbackend from userdeviceconfig azure table in DAL : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new DataAccessException();
+            }
+        }
+
+        /// <summary>
+        /// method to delete user backend
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <param name="userBackendID"></param>
+        /// <returns></returns>
+        public UserBackendEntity DeleteUserBackend(String userID, String userBackendID)
+        {
+            try
+            {
+                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
+                TableOperation retrieveUserBackend = TableOperation.Retrieve<UserBackendEntity>(string.Concat(CoreConstants.AzureTables.UserBackendPK, userID), userBackendID);
+                TableResult retrievedUser = UserDeviceConfigurationTable.Execute(retrieveUserBackend);
+                UserBackendEntity deleteUserBackendEntity = (UserBackendEntity)retrievedUser.Result;
+                if (deleteUserBackendEntity != null)
+                {
+                    TableOperation deleteOperation = TableOperation.Delete(deleteUserBackendEntity);
+                    UserDeviceConfigurationTable.Execute(deleteOperation);
+                }
+                return deleteUserBackendEntity;
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error while deleting userbackend from userdeviceconfig azure table in DAL : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new DataAccessException();
+            }
+        }
+
+        /// <summary>
+        /// method to get all userbackends synch
+        /// </summary>
+        /// <param name="UserID"></param>
+        /// <returns></returns>
+        public List<SynchEntity> GetAllUserBackendsSynch(String UserID)
+        {
+            try
+            {
+                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
+                TableQuery<SynchEntity> query = new TableQuery<SynchEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.BackendSynchPK, UserID)));
+                List<SynchEntity> alluserbackendsynch = UserDeviceConfigurationTable.ExecuteQuery(query).ToList();
+                return alluserbackendsynch;
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error while retrieving all userbackendssynch from userdeviceconfig azure table in DAL : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new DataAccessException();
+            }
+        }
+        
+        /// <summary>
+        /// method to get user backend synch
+        /// </summary>
+        /// <param name="UserID"></param>
+        /// <returns></returns>
+        public SynchEntity GetBackendSynch(String UserID, string UserBackendID)
+        {
+            try
+            {
+                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
+                TableOperation retrieveUserBackendSynch = TableOperation.Retrieve<UserBackendEntity>(string.Concat(CoreConstants.AzureTables.BackendSynchPK, UserID), UserBackendID);
+                TableResult retrievedResult = UserDeviceConfigurationTable.Execute(retrieveUserBackendSynch);
+                return (SynchEntity)retrievedResult.Result;
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error while retrieving userbackendsynch from userdeviceconfig azure table in DAL : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new DataAccessException();
+            }
+        }
     }
 }

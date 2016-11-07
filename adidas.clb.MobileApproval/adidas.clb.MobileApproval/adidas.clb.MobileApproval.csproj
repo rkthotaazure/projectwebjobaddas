@@ -181,6 +181,10 @@
   <ItemGroup>
     <Compile Include="App_Code\BL\Personalization\Personalization.cs" />
     <Compile Include="App_Code\BL\Personalization\UserBackend.cs" />
+    <Compile Include="App_Code\BL\Personalization\UserDevice.cs" />
+    <Compile Include="App_Code\DAL\Personalization\PersonalizationDAL.cs" />
+    <Compile Include="App_Code\DAL\Personalization\UserBackendDAL.cs" />
+    <Compile Include="App_Code\DAL\Personalization\UserDeviceDAL.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\ApprovalAPIController.cs" />
@@ -193,19 +197,31 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\ApprovalEntity.cs" />
+    <Compile Include="Models\BackendDTO.cs" />
     <Compile Include="Models\BackendEntity.cs" />
+    <Compile Include="Models\DeviceDTO.cs" />
+    <Compile Include="Models\ErrorDTO.cs" />
+    <Compile Include="Models\PersonalizationRequsetDTO.cs" />
+    <Compile Include="Models\PersonalizationResponseDTO.cs" />
     <Compile Include="Models\BackendSynchEntity.cs" />
     <Compile Include="Models\DeviceEntity.cs" />
     <Compile Include="Models\FieldEntity.cs" />
     <Compile Include="Models\RequestEntity.cs" />
     <Compile Include="Models\RequestsSyncEntity.cs" />
     <Compile Include="Models\RequestSynchEntity.cs" />
+    <Compile Include="Models\SynchDTO.cs" />
+    <Compile Include="Models\SynchEntity.cs" />
+    <Compile Include="Models\UserBackendDTO.cs" />
+    <Compile Include="Models\UserDeviceDTO.cs" />
+    <Compile Include="Models\UserDTO.cs" />
     <Compile Include="Models\UserEntity.cs" />
     <Compile Include="Models\UserBackendEntity.cs" />
     <Compile Include="Models\UserDeviceEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utility\DataProvider.cs" />
     <Compile Include="Utility\Constants.cs" />
     <Compile Include="Utility\LoggerHelper.cs" />
+    <Compile Include="Utility\Rules.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\web.config" />
@@ -215,8 +231,10 @@
     </Content>
     <Content Include="Service References\Application Insights\ConnectedService.json" />
     <None Include="Properties\PublishProfiles\mobileapproval - FTP %282%29.pubxml" />
+    <None Include="Properties\PublishProfiles\mobileapproval - FTP %283%29.pubxml" />
     <None Include="Properties\PublishProfiles\mobileapproval - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\mobileapproval - Web Deploy %282%29.pubxml" />
+    <None Include="Properties\PublishProfiles\mobileapproval - Web Deploy %283%29.pubxml" />
     <None Include="Properties\PublishProfiles\mobileapproval - Web Deploy.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
