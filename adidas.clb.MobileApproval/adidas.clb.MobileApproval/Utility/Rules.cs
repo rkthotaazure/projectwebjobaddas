@@ -16,7 +16,7 @@ namespace adidas.clb.MobileApproval.Utility
         /// <summary>
         /// The class which implements methods for Rules.
         /// </summary>
-        public static int Rule1(IEnumerable<UserBackendEntity> userbackends)
+        public static int SynchWaitingTime(IEnumerable<UserBackendEntity> userbackends)
         {
             int MaxLatency=userbackends.Max(m => Math.Max(m.AverageAllRequestsLatency, m.LastAllRequestsLatency));            
             return Convert.ToInt32(MaxLatency*1.2);
