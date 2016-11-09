@@ -20,4 +20,16 @@ namespace adidas.clb.MobileApproval.Models
         public DeviceDTO device { get; set; }       
         public UserDeviceDTO() { _type = "userDevice"; }
     }
+
+    /// <summary>
+    /// class which implements model for device data transfer object.
+    /// </summary>
+    public class DeviceDTO
+    {
+        public string DeviceID { get; set; }
+        public string DeviceName { get; set; }
+        public string DeviceBrand { get; set; }
+        public string DeviceModel { get; set; }
+        public int maxSynchReplySize { get; set; }
+    }
 }

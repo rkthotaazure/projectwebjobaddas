@@ -21,13 +21,14 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <summary>
         /// method to check user availability
         /// </summary>
-        /// <param name="UserID"></param>
-        /// <returns></returns>        
+        /// <param name="UserID">takes userid as input</param>
+        /// <returns>returns true if user exists else false</returns>        
         public Boolean CheckUser(String UserID)
         {
             try
             {
-                PersonalizationDAL personalizationdal = new PersonalizationDAL();
+                PersonalizationDAL personalizationdal = new PersonalizationDAL(); 
+                //calling data access layer method               
                 UserEntity user = personalizationdal.GetUser(UserID);
                 //if user exists return true
                 if (user != null)
@@ -50,13 +51,13 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <summary>
         /// method to create newuser
         /// </summary>
-        /// <param name="user"></param>
-        /// <returns></returns>        
+        /// <param name="user">takes user entity to create new user</param>               
         public void CreateUser(UserEntity user)
         {
             try
             {
                 PersonalizationDAL personalizationdal = new PersonalizationDAL();
+                //calling data access layer method                
                 personalizationdal.CreateUser(user);
             }
             catch (DataAccessException DALexception)
@@ -74,13 +75,13 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <summary>
         /// method to update existing userprops
         /// </summary>
-        /// <param name="user"></param>
-        /// <returns></returns>
+        /// <param name="user">takes user entity to update existing user</param>        
         public void UpdateUserProp(UserEntity user)
         {
             try
             {
                 PersonalizationDAL personalizationdal = new PersonalizationDAL();
+                //calling data access layer method
                 personalizationdal.UpdateUserProp(user);
             }
             catch (DataAccessException DALexception)
@@ -98,8 +99,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <summary>
         /// method to trigger user requsets update
         /// </summary>
-        /// <param name="UserID"></param>
-        /// <returns></returns>        
+        /// <param name="UserID"></param>                
         public void TriggerUserRequests(String UserID)
         {
             //code here..
@@ -108,19 +108,19 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <summary>        
         /// method to calculate sync waiting time      
         /// </summary>
-        /// <param name="Backendtouser"></param>
-        /// <param name="MaxSyncReplySize"></param>
-        /// <returns></returns>
+        /// <param name="Backendtouser">takes backends associated to user</param>       
+        /// <returns>returns synch waiting time</returns>
         public int CalcSynchTime(IEnumerable<UserBackendEntity> Backendtouser)
-        {            
-            return Rules.Rule1(Backendtouser); ;
+        {      
+            //calling rules to caliculate synch time      
+            return Rules.SynchWaitingTime(Backendtouser); ;
         }
 
         /// <summary>
         /// method to get user details
         /// </summary>
-        /// <param name="UserID"></param>
-        /// <returns></returns>        
+        /// <param name="UserID">takes user id as input</param>
+        /// <returns> returns user along with associated devices and backends </returns>        
         public UserDTO GetUser(String UserID)
         {
             try
@@ -132,6 +132,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
                 //getting devices and backends associated to that user
                 UserBackend userbackend = new UserBackend();
                 UserDevice userdevice = new UserDevice();
+                ///getting devices and backends associated to that user
                 IEnumerable<UserDeviceDTO> userdevices = userdevice.GetUserAllDevices(UserID);
                 IEnumerable<UserBackendDTO> userbackends = userbackend.GetUserAllBackends(UserID);
                 userdto.userbackends = userbackends;
@@ -153,13 +154,14 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <summary>
         /// method to delete user details
         /// </summary>
-        /// <param name="UserID"></param>
-        /// <returns></returns>        
+        /// <param name="UserID">takes userid as input</param>
+        /// <returns>returns deleted user entity</returns>        
         public UserEntity DeleteUser(String UserID)
         {
             try
             {
                 PersonalizationDAL personalizationdal = new PersonalizationDAL();
+                //calling data access layer method
                 UserEntity deleteuser = personalizationdal.DeleteUser(UserID);
                 return deleteuser;
             }
@@ -175,8 +177,14 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
             }
         }
 
+        /// <summary>
+        ///to create user entity from user data transfer object
+        /// </summary>
+        /// <param name="userdto">takes user dto as input</param>
+        /// <returns>returns user entity</returns>
         public UserEntity UserEntityGenerator(UserDTO userdto)
         {
+            //calling mapper to map propertiews from dto to entity
             UserEntity userentity = DataProvider.ResponseObjectMapper<UserEntity, UserDTO>(userdto);
             userentity.PartitionKey = CoreConstants.AzureTables.User;
             userentity.RowKey = userdto.UserID;

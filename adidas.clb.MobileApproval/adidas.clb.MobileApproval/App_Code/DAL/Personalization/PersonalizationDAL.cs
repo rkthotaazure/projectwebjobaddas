@@ -21,12 +21,13 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         /// <summary>
         /// method to get user entity with UserID
         /// </summary>
-        /// <param name="UserID"></param>
-        /// <returns>userentity</returns>                     
+        /// <param name="UserID">takes userid as input</param>
+        /// <returns>returns user entity</returns>                     
         public UserEntity GetUser(String UserID)
         {
             try
             {
+                //get's azure table instance
                 CloudTable ReferenceDataTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.ReferenceData);
                 TableOperation RetrieveUser = TableOperation.Retrieve<UserEntity>(CoreConstants.AzureTables.User, UserID);
                 TableResult RetrievedResultUser = ReferenceDataTable.Execute(RetrieveUser);
@@ -43,12 +44,12 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         /// <summary>
         /// method to create newuser
         /// </summary>
-        /// <param name="user"></param>
-        /// <returns></returns>        
+        /// <param name="user">takes user entity as input</param>                
         public void CreateUser(UserEntity user)
         {
             try
             {
+                //get's azure table instance
                 CloudTable ReferenceDataTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.ReferenceData);
                 TableOperation insertOperation = TableOperation.Insert(user);
                 ReferenceDataTable.Execute(insertOperation);
@@ -64,12 +65,12 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         /// <summary>
         /// method to update existing user props
         /// </summary>
-        /// <param name="user"></param>
-        /// <returns></returns>
+        /// <param name="user">takes user entity as input</param>        
         public void UpdateUserProp(UserEntity user)
         {
             try
             {
+                //get's azure table instance
                 CloudTable ReferenceDataTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.ReferenceData);
                 //adding ETag to user for replace operattion
                 user.ETag = "*";
@@ -87,18 +88,19 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         /// <summary>
         /// method to delete user entity
         /// </summary>
-        /// <param name="user"></param>
-        /// <returns></returns>        
+        /// <param name="user">takes userid as input</param>
+        /// <returns>returns deleted user entity</returns>        
         public UserEntity DeleteUser(String UserID)
         {
             try
             {
+                //get's azure table instance
                 CloudTable ReferenceDataTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.ReferenceData);
                 TableOperation RetrieveUser = TableOperation.Retrieve<UserEntity>(CoreConstants.AzureTables.User, UserID);
                 //get user entity with UserID
-                TableResult RetrievedResultUser = ReferenceDataTable.Execute(RetrieveUser);
-                //delete retrieved user entity
+                TableResult RetrievedResultUser = ReferenceDataTable.Execute(RetrieveUser);                
                 UserEntity deleteUserEntity = (UserEntity)RetrievedResultUser.Result;
+                //delete retrieved user entity
                 if (deleteUserEntity != null)
                 {
                     TableOperation deleteOperation = TableOperation.Delete(deleteUserEntity);
