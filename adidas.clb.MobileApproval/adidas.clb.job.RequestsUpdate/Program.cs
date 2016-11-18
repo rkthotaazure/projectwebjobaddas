@@ -1,4 +1,9 @@
-﻿using System;
+﻿//-----------------------------------------------------------
+// <copyright file="Program.cs" company="adidas AG">
+// Copyright (C) 2016 adidas AG.
+// </copyright>
+//-----------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;

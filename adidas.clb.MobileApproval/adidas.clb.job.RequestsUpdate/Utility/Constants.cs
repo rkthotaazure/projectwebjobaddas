@@ -26,10 +26,45 @@ namespace adidas.clb.job.RequestsUpdate.Utility
             public const string Trace = "Trace";
             public const string Error = "Error";
         }
-        // Get the root video portal url
-        public static string RootSiteUrl
+        // Azure queue Constants
+        public struct AzureQueues
         {
-            get { return ConfigurationManager.AppSettings["RootSiteUrl"]; }
+            public const string RequsetUpdateQueue = "requsetupdate";
+            public const string RequsetPDFQueue = "requestpdf";
+            public const string Trace = "Trace";
+            public const string Error = "Error";
+        }
+        //Azure Table constants
+        public struct AzureTables
+        {
+            public const string RequestsPK = "Requests_";
+            public const string ApprovalPK = "Approval_";
+            public const string ApproverPK = "Approver";
+            public const string FieldPK = "Field";
+            public const string RequestTransactions = "RequestTransactions";
+            public const string AzureStorageConnectionString = "AzureStorageConnectionString";
+            public const string UnderScore = "_";
+            public const string UserBackendPK = "UB_";
+            public const string BackendPK = "Backend";
+            public const string ReferenceData = "ReferenceData";
+            public const string UserDeviceConfiguration = "UserDeviceConfiguration";
+            public const string PartitionKey = "PartitionKey";
+            public const string BackendId = "BackendID";
+            public const string Status = "status";
+            public const string DueDate = "dueDate";            
+            public const string InProgress = "In-Progress";
+            public const string Waiting = "Waiting";
+        }
+
+        // Azure blob Constants
+        public struct AzureBlob
+        {
+            public const string BlobRequsetPDF = "requestpdf";
+            public const string PDFContentType = "application/pdf";
+            public const string AzureTempBlobStorageAccountName = "AzureTempBlobStorageAccountName";
+            public const string AzureTempBlobStorageAccountKey = "AzureTempBlobStorageAccountKey";
+            public const string RequestPDF = "RequestPDF";
+            public const string RequestPDFExtension = ".pdf";
         }
     }
 }

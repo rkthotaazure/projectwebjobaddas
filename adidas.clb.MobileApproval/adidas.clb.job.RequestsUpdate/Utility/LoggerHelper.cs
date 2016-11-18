@@ -24,18 +24,18 @@ namespace adidas.clb.job.RequestsUpdate.Utility
             Log4NetLogger.Info(string.Concat(System.DateTime.Now.ToString(), " - Category : ", category, " - Priority : ", priority));
 
             // Log4Net Switch case for Exception category
-            switch (category)
-            {
-                case "General":
-                    Log4NetLogger.Info(message);
-                    break;
-                case "Trace":
-                    Log4NetLogger.Info(message);
-                    break;
-                case "Error":
-                    Log4NetLogger.Error(message);
-                    break;
-            }
+            //switch (category)
+            //{
+            //    case "General":
+            //        Log4NetLogger.Info(message);
+            //        break;
+            //    case "Trace":
+            //        Log4NetLogger.Info(message);
+            //        break;
+            //    case "Error":
+            //        Log4NetLogger.Error(message);
+            //        break;
+            //}
         }
 
         /// <summary>

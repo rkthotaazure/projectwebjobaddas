@@ -1,20 +1,119 @@
-﻿using System;
+﻿//-----------------------------------------------------------
+// <copyright file="Functions.cs" company="adidas AG">
+// Copyright (C) 2016 adidas AG.
+// </copyright>
+//-----------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
+using adidas.clb.job.RequestsUpdate.APP_Code.BL;
+using adidas.clb.job.RequestsUpdate.Exceptions;
+using adidas.clb.job.RequestsUpdate.Models;
+using adidas.clb.job.RequestsUpdate.Utility;
+using Newtonsoft.Json;
 
 namespace adidas.clb.job.RequestsUpdate
 {
     public class Functions
     {
         // This function will get triggered/executed when a new message is written 
-        // on an Azure Queue called queue.
-        public static void ProcessQueueMessage([QueueTrigger("queue")] string message, TextWriter log)
+        // on an Azure Queue called RequsetUpdate.
+        public static void ProcessRequsetQueueMessage([QueueTrigger(CoreConstants.AzureQueues.RequsetUpdateQueue)] string message, TextWriter log)
         {
-            log.WriteLine(message);
+            try
+            {
+                //deserialize Queue message to Requests 
+                RequestsUpdateData requestsdata = JsonConvert.DeserializeObject<RequestsUpdateData>(message);
+                List<BackendRequest> backendrequestslist = requestsdata.requests;
+                RequestUpdateBL requsetupdatebl = new RequestUpdateBL();
+                int TotalRequestsize = 0;
+                int TotalRequestlatency = 0;
+                int requestcount = backendrequestslist.Count;
+                //check if requests were available
+                if (backendrequestslist != null)
+                {                
+                    //looping through each request to add requests , approvers and fileds for each requet
+                    foreach (BackendRequest backendrequest in backendrequestslist)
+                    {
+                        //split main backendrequest object into individual entities
+                        List<Approvers> approvers = backendrequest.requset.approvers;
+                        List<Field> genericInfoFields = backendrequest.requset.fields.genericInfo;
+                        List<Field> overviewFields = backendrequest.requset.fields.overview;
+                        Request request = backendrequest.requset;                        
+                        //calling BL methods to add request , approval, approvers and fields                        
+                        requsetupdatebl.AddRequest(backendrequest, requestsdata.UserId, requestsdata.BackendID);                        
+                        requsetupdatebl.AddApproval(request, requestsdata.UserId, requestsdata.BackendID);                        
+                        requsetupdatebl.AddApprovers(approvers, request.id);                        
+                        requsetupdatebl.AddFields(genericInfoFields, overviewFields, request.id);
+                        log.WriteLine("fileds added");
+                        //caliculating request size                        
+                        int requestsize=requsetupdatebl.CalculateRequestSize(backendrequest);
+                        log.WriteLine(requestsize);
+                        //caliculating total of size for all requests
+                        TotalRequestsize = TotalRequestsize+requestsize;
+                        //caliculating total of latency for all requests
+                        TotalRequestlatency = TotalRequestlatency + request.Latency;                   
+                      }                    
+                }
+                log.WriteLine(TotalRequestsize);
+                log.WriteLine(TotalRequestlatency);
+                //calling BL methods to update average sizes and latencies for userbackend and backend     
+                requsetupdatebl.UpdateUserBackend(requestsdata.UserId,requestsdata.BackendID,TotalRequestsize, TotalRequestlatency,requestcount);
+                requsetupdatebl.UpdateBackend(requestsdata.BackendID, TotalRequestsize, TotalRequestlatency, requestcount);
+
+            }
+            catch (DataAccessException dalexception)
+            {
+                //write message to web job dashboard logs
+                log.WriteLine(dalexception.Message);
+            }
+            catch (BusinessLogicException blexception)
+            {
+                //write message to web job dashboard logs
+                log.WriteLine(blexception.Message);
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - exception while processing queue message into entities : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                log.WriteLine(exception.Message);
+            }
+        }
+
+        // This function will get triggered/executed when a new message is written 
+        // on an Azure Queue called requestpdf.
+        public static void ProcessRequsetPDFQueueMessage([QueueTrigger(CoreConstants.AzureQueues.RequsetPDFQueue)] string message, TextWriter log)
+        {
+            try
+            {
+                //deserialize Queue message to get PDF uri 
+                RequestPDF requestPDFdata = JsonConvert.DeserializeObject<RequestPDF>(message);
+                RequestUpdateBL requestupdatebl = new RequestUpdateBL();
+                //calling BL method to add Request PDF to blob
+                Uri PDFuri = requestupdatebl.AddRequestPDFToBlob(new Uri(requestPDFdata.PDF_URL),requestPDFdata.RequestID);
+                //updating request entity with pdf uri
+                requestupdatebl.AddPDFUriToRequest(PDFuri, requestPDFdata.RequestID);
+            }
+            catch (DataAccessException dalexception)
+            {
+                //write message to web job dashboard logs
+                log.WriteLine(dalexception.Message);
+            }
+            catch (BusinessLogicException blexception)
+            {
+                //write message to web job dashboard logs
+                log.WriteLine(blexception.Message);
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - exception while processing queue message into uri to pick pdf from temp blob and upload in requetupdate blob : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                log.WriteLine(exception.Message);
+            }
         }
     }
 }
