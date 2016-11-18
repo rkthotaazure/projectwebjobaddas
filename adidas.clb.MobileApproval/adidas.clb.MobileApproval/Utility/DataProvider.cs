@@ -10,6 +10,7 @@ using System.Web;
 using Microsoft.Azure;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.WindowsAzure.Storage.Queue;
 using adidas.clb.MobileApproval.Models;
 
 namespace adidas.clb.MobileApproval.Utility
@@ -20,7 +21,7 @@ namespace adidas.clb.MobileApproval.Utility
         /// <summary>
         /// method to get azure table storage object instance
         /// </summary>
-        /// <param name="TableName"></param>
+        /// <param name="TableName">takes tablename as input</param>
         /// <returns>Azure Table Instance</returns>        
         public static CloudTable GetAzureTableInstance(String TableName)
         {
@@ -33,14 +34,31 @@ namespace adidas.clb.MobileApproval.Utility
             CloudTable table = tableClient.GetTableReference(TableName);
             return table;
         }
-        
+
+        /// <summary>
+        /// method to get azure queue storage object instance
+        /// </summary>
+        /// <param name="QueueName">takes queuename as inpu</param>
+        /// <returns>Azure Queue Instance</returns>        
+        public static CloudQueue GetAzureQueueInstance(String QueueName)
+        {
+            // Retrieve storage account from connection string.
+            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
+                CloudConfigurationManager.GetSetting(CoreConstants.AzureTables.AzureStorageConnectionString));
+            // Create the queue client.
+            CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
+            // Retrieve a reference to a queue.
+            CloudQueue queue = queueClient.GetQueueReference(QueueName);
+            return queue;
+        }
+
         /// <summary>
         /// Method wich used to map properties of two objects
         /// </summary>
-        /// <typeparam name="T1"></typeparam>
-        /// <typeparam name="T2"></typeparam>
-        /// <param name="inputModel"></param>
-        /// <returns></returns>
+        /// <typeparam name="T1">takes output type</typeparam>
+        /// <typeparam name="T2">takes input type</typeparam>
+        /// <param name="inputModel">takes input object</param>
+        /// <returns>returns mapped object</returns>
         public static T1 ResponseObjectMapper<T1, T2>(T2 inputModel)
         {
             var entity = Activator.CreateInstance<T1>();            
@@ -54,6 +72,14 @@ namespace adidas.clb.MobileApproval.Utility
             return entity;
         }
 
+        /// <summary>
+        /// method to form error response
+        /// </summary>
+        /// <typeparam name="T">takes type as input</typeparam>
+        /// <param name="code">takes code as input</param>
+        /// <param name="shorttext">takes short text as input</param>
+        /// <param name="longtext">takes long text as input</param>
+        /// <returns>returns error response</returns>
         public static PersonalizationResponseDTO<T> PersonalizationResponseError<T>(string code, string shorttext, string longtext)
         {
             var ResponseBackends = new PersonalizationResponseDTO<T>();

@@ -5,6 +5,7 @@
 //-----------------------------------------------------------
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Web;
 using adidas.clb.MobileApproval.Exceptions;
@@ -42,7 +43,45 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
                 throw new BusinessLogicException();
             }
         }
-        
+
+        /// <summary>
+        /// Method to associate all existing backends in the system to user
+        /// </summary>
+        /// <param name="userid">takes userid as input</param>
+        public void AddAllBackends(string userid)
+        {
+            try
+            {
+                UserBackendDAL userbackenddal = new UserBackendDAL();
+                //method to get all backends available in system
+                List<BackendEntity> backends=userbackenddal.GetBackends();
+                List<UserBackendEntity> userbackendslist = new List<UserBackendEntity>();
+                //preparing userbackend obj for each backend obj
+                foreach(BackendEntity backend in backends)
+                {
+                    UserBackendEntity userbackend = new UserBackendEntity();
+                    userbackend.PartitionKey = string.Concat(CoreConstants.AzureTables.UserBackendPK, userid);
+                    userbackend.RowKey = backend.BackendID;
+                    userbackend.BackendID = backend.BackendID;
+                    userbackend.UserID = userid;
+                    userbackend.DefaultUpdateFrequency = Convert.ToInt32(ConfigurationManager.AppSettings[CoreConstants.Config.UpdateFrequency]);
+                    userbackendslist.Add(userbackend);
+                }
+                //calling data access layer method to add backends
+                userbackenddal.AddBackends(userbackendslist);
+            }
+            catch (DataAccessException DALexception)
+            {
+                throw DALexception;
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error in BL while adding userbackends : "
+                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new BusinessLogicException();
+            }
+        }
+
         /// <summary>
         ///method to remove userbackends
         /// </summary>
@@ -81,12 +120,19 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
                 //calling data access layer method
                 List<BackendEntity> backends = userbackenddal.GetBackends();
                 List<BackendDTO> backendslistdto = new List<BackendDTO>();
-                //backends entity converting to data transfer object
-                foreach (BackendEntity backend in backends)
+                //if backends not available return null
+                if (backends != null)
                 {
-                   
-                    BackendDTO backenddto = DataProvider.ResponseObjectMapper<BackendDTO, BackendEntity>(backend);
-                    backendslistdto.Add(backenddto);
+                    //backends entity converting to data transfer object
+                    foreach (BackendEntity backend in backends)
+                    {
+                        BackendDTO backenddto = DataProvider.ResponseObjectMapper<BackendDTO, BackendEntity>(backend);
+                        backendslistdto.Add(backenddto);
+                    }
+                }
+                else
+                {
+                    backendslistdto = null;
                 }
                 var ResponseBackends = new PersonalizationResponseListDTO<BackendDTO>();
                 ResponseBackends.result = backendslistdto;
@@ -94,7 +140,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
             }
             catch (DataAccessException DALexception)
             {
-                throw  DALexception;
+                throw DALexception;
             }
             catch (Exception exception)
             {
@@ -117,21 +163,29 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
                 //calling data access layer method to get user backends
                 List<UserBackendEntity> alluserbackends = userbackenddal.GetUserAllBackends(UserID);
                 //calling data access layer method to get user backend synch
-                List<SynchEntity> allbackendsynch = userbackenddal.GetAllUserBackendsSynch(UserID);                
+                List<SynchEntity> allbackendsynch = userbackenddal.GetAllUserBackendsSynch(UserID);
                 List<UserBackendDTO> userbackendsdtolist = new List<UserBackendDTO>();
-                //converting userdevice entity to userdevice data transfer object
-                foreach (UserBackendEntity userbackendentity in alluserbackends)
+                //check for null
+                if (alluserbackends != null)
                 {
-                    UserBackendDTO userbackenddto = UserBackendEntityDTOMapper(userbackendentity);
-                    SynchEntity synchentity=allbackendsynch.Where(m => m.RowKey.Equals(userbackendentity.BackendID)).FirstOrDefault();
-                    //if user backend synch available then convert to dto
-                    if(synchentity!=null)
+                    //converting userdevice entity to userdevice data transfer object
+                    foreach (UserBackendEntity userbackendentity in alluserbackends)
                     {
-                        SynchDTO synchdto = DataProvider.ResponseObjectMapper<SynchDTO, SynchEntity>(synchentity);
-                        userbackenddto.synch = synchdto;
+                        UserBackendDTO userbackenddto = UserBackendEntityDTOMapper(userbackendentity);
+                        SynchEntity synchentity = allbackendsynch.Where(m => m.RowKey.Equals(userbackendentity.BackendID)).FirstOrDefault();
+                        //if user backend synch available then convert to dto
+                        if (synchentity != null)
+                        {
+                            SynchDTO synchdto = DataProvider.ResponseObjectMapper<SynchDTO, SynchEntity>(synchentity);
+                            userbackenddto.synch = synchdto;
+                        }
+
+                        userbackendsdtolist.Add(userbackenddto);
                     }
-                      
-                    userbackendsdtolist.Add(userbackenddto);
+                }
+                else
+                {
+                    userbackendsdtolist = null;
                 }
 
                 return (IEnumerable<UserBackendDTO>)userbackendsdtolist;
@@ -143,36 +197,6 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
             catch (Exception exception)
             {
                 LoggerHelper.WriteToLog(exception + " - Error in BL while retreiving userbackends : "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
-                throw new BusinessLogicException();
-            }
-        }
-
-        /// <summary>
-        /// method to insert single userbackend
-        /// </summary>
-        /// <param name="userbackendentity">takes personalization requset with userbackend</param>
-        public void PostBackends(PersonalizationRequsetDTO personalizationrequset)
-        {
-            try
-            {
-                UserBackendDAL userbackenddal = new UserBackendDAL();
-                //get userbackend from array of ienumearble items
-                UserBackendDTO userbackendto = personalizationrequset.userbackends.FirstOrDefault();
-                //if user backend available then post it by calling dal method
-                if (userbackendto != null)
-                {
-                    userbackenddal.PostBackends(UserBackendDTOEntityMapper(userbackendto));
-                }
-
-            }
-            catch (DataAccessException DALexception)
-            {
-                throw DALexception;
-            }
-            catch (Exception exception)
-            {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while inserting single userbackend : "
                        + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new BusinessLogicException();
             }
@@ -193,14 +217,22 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
                 SynchEntity synch = userbackenddal.GetBackendSynch(userID, userBackendID);
                 //converting userbackend entity to Response data transfer object
                 var ResponseUserBackend = new PersonalizationResponseDTO<UserBackendDTO>();
-                UserBackendDTO userbackenddto = UserBackendEntityDTOMapper(userbackendentity);
-                //adding synch to user backend
-                if (synch != null)
+                ///check for null
+                if (userbackendentity != null)
                 {
-                    SynchDTO synchdto = DataProvider.ResponseObjectMapper<SynchDTO, SynchEntity>(synch);
-                    userbackenddto.synch = synchdto;
+                    UserBackendDTO userbackenddto = UserBackendEntityDTOMapper(userbackendentity);
+                    //adding synch to user backend
+                    if (synch != null)
+                    {
+                        SynchDTO synchdto = DataProvider.ResponseObjectMapper<SynchDTO, SynchEntity>(synch);
+                        userbackenddto.synch = synchdto;
+                    }
+                    ResponseUserBackend.result = userbackenddto;
+                }
+                else
+                {
+                    ResponseUserBackend.result = null;
                 }              
-                ResponseUserBackend.result = userbackenddto;
                 return ResponseUserBackend;
             }
             catch (DataAccessException DALexception)

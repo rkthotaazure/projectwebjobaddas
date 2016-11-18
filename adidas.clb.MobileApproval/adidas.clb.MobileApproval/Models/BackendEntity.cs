@@ -34,5 +34,7 @@ namespace adidas.clb.MobileApproval.Models
         public int AverageRequestLatency { get; set; }
         public int LastRequestLatency { get; set; }
         public int MissingConfirmationsLimit { get; set; }
+        public int TotalRequestsCount { get; set; }
+        public int TotalBatchRequestsCount { get; set; }
     }
 }

@@ -12,11 +12,11 @@ using Microsoft.WindowsAzure.Storage.Table;
 
 namespace adidas.clb.MobileApproval.Models
 {
+    /// <summary>
+    /// class which implements model for userdeviceentity.
+    /// </summary>
     public class UserDeviceEntity: TableEntity
-    {
-        /// <summary>
-        /// class which implements model for userdeviceentity.
-        /// </summary>
+    {        
         public UserDeviceEntity(string UserRowKey,string DeviceRowKey)
         {
             this.PartitionKey = UserRowKey;
