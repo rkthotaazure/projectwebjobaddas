@@ -81,13 +81,22 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
                 UserDeviceDAL userdevicedal = new UserDeviceDAL();
                 //calling data access layer method
                 List<UserDeviceEntity> alluserdevices = userdevicedal.GetUserAllDevices(UserID);
-                
                 List<UserDeviceDTO> userdevicesdtolist = new List<UserDeviceDTO>();
-                //converting userdevice entity to userdevice dto
-                foreach (UserDeviceEntity userdeviceentity in alluserdevices)
+                //check for null
+                if (alluserdevices != null)
                 {
-                    userdevicesdtolist.Add(UserDeviceEntityDTOMapper(userdeviceentity));
+                    //converting userdevice entity to userdevice dto
+                    foreach (UserDeviceEntity userdeviceentity in alluserdevices)
+                    {
+                        userdevicesdtolist.Add(UserDeviceEntityDTOMapper(userdeviceentity));
+                    }
+
                 }
+                else
+                {
+                    userdevicesdtolist = null;
+                }
+                
 
                 return (IEnumerable<UserDeviceDTO>)userdevicesdtolist;
             }
@@ -102,35 +111,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
                 throw new BusinessLogicException();
             }
         }
-
-        /// <summary>
-        /// method to insert single userdevice
-        /// </summary>
-        /// <param name="userdeviceentity">takes personalization requset with userdevice</param>
-        public void PostDevices(PersonalizationRequsetDTO personalizationrequset)
-        {
-            try
-            {
-                UserDeviceDAL userdevicedal = new UserDeviceDAL();
-                //get userdevice from array of ienumearble items
-                UserDeviceDTO userdevicedto = personalizationrequset.userdevices.FirstOrDefault();
-                //if user device available then post it by calling dal method
-                if (userdevicedto != null)
-                {
-                    userdevicedal.PostDevices(UserDeviceDTOEntityMapper(userdevicedto));
-                }                
-            }
-            catch (DataAccessException DALexception)
-            {
-                throw DALexception;
-            }
-            catch (Exception exception)
-            {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while inserting single userdevice : "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
-                throw new BusinessLogicException();
-            }
-        }
+        
 
         /// <summary>
         /// method to get single userdevice
@@ -146,8 +127,15 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
                 UserDeviceEntity userdeviceentity = userdevicedal.GetUserDevice(userID, userDeviceID);
                 //converting userdevice entity to Response data transfer object
                 var ResponseUserDevice = new PersonalizationResponseDTO<UserDeviceDTO>();
-                UserDeviceDTO userdevicedto = UserDeviceEntityDTOMapper(userdeviceentity);                
-                ResponseUserDevice.result = userdevicedto;
+                if (userdeviceentity != null)
+                {
+                    UserDeviceDTO userdevicedto = UserDeviceEntityDTOMapper(userdeviceentity);
+                    ResponseUserDevice.result = userdevicedto;
+                }
+                else
+                {
+                    ResponseUserDevice.result = null;
+                }                           
                 return ResponseUserDevice;
             }
             catch (DataAccessException DALexception)

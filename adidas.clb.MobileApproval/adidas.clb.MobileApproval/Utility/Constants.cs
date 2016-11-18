@@ -26,11 +26,15 @@ namespace adidas.clb.MobileApproval.Utility
             public const string Trace = "Trace";
             public const string Error = "Error";
         }
-
+        // web.config keys
+        public struct Config
+        {
+            public const string UpdateFrequency = "UpdateFrequency";
+        }
         //Azure Table constants
         public struct AzureTables
         {
-            public const string ReferenceData = "ReferenceData";            
+            public const string ReferenceData = "ReferenceData";
             public const string UserDeviceConfiguration = "UserDeviceConfiguration";
             public const string AzureStorageConnectionString = "GenericMobileStorageConnectionString";
             public const string PartitionKey = "PartitionKey";
@@ -39,6 +43,11 @@ namespace adidas.clb.MobileApproval.Utility
             public const string UserDevicePK = "UD_";
             public const string UserBackendPK = "UB_";
             public const string BackendSynchPK = "BS_";
+        }
+        //Azure Queue constants
+        public struct AzureQueues
+        {
+            public const string UpdateTriggerQueueName = "updatetriggerinputqueue";           
 
         }
         // Get the root video portal url

@@ -27,7 +27,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         {
             try
             {
-                PersonalizationDAL personalizationdal = new PersonalizationDAL(); 
+                PersonalizationDAL personalizationdal = new PersonalizationDAL();
                 //calling data access layer method               
                 UserEntity user = personalizationdal.GetUser(UserID);
                 //if user exists return true
@@ -96,13 +96,41 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
             }
         }
 
-        /// <summary>
+        //// <summary>
         /// method to trigger user requsets update
         /// </summary>
-        /// <param name="UserID"></param>                
-        public void TriggerUserRequests(String UserID)
+        /// <param name="UserID">takes userid as input</param>
+        /// <param name="userbackendslist">takes userbackends list as input</param>
+        public void TriggerUserRequests(String userID, IEnumerable<UserBackendDTO> userbackendslist)
         {
-            //code here..
+            try
+            {
+                UpdateTriggeringMessage updateTriggerMessage = new UpdateTriggeringMessage();
+                updateTriggerMessage.Users.UserID = userID;
+                List<UpdateTriggerBackend> updatetriggerbackendlist = new List<UpdateTriggerBackend>();
+                //adding each user backend details to list for adding to message
+                foreach (UserBackendDTO userbackend in userbackendslist)
+                {
+                    UpdateTriggerBackend triggerbackend = new UpdateTriggerBackend();
+                    triggerbackend.BackendID = userbackend.backend.BackendID;
+                    updatetriggerbackendlist.Add(triggerbackend);
+
+                }
+                updateTriggerMessage.Users.Backends = updatetriggerbackendlist;
+                //calling data access layer method to add message to queue
+                PersonalizationDAL personalizationdal = new PersonalizationDAL();
+                personalizationdal.AddUpdateTriggerMessageToQueue(updateTriggerMessage);
+            }
+            catch (DataAccessException DALexception)
+            {
+                throw DALexception;
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error in BL while formatting updatetriggering message : "
+                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new BusinessLogicException();
+            }
         }
 
         /// <summary>        
@@ -111,9 +139,17 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <param name="Backendtouser">takes backends associated to user</param>       
         /// <returns>returns synch waiting time</returns>
         public int CalcSynchTime(IEnumerable<UserBackendEntity> Backendtouser)
-        {      
-            //calling rules to caliculate synch time      
-            return Rules.SynchWaitingTime(Backendtouser); ;
+        {
+            //calling rules to caliculate synch time 
+            if (Backendtouser != null)
+            {
+                return Rules.SynchWaitingTime(Backendtouser); ;
+            }
+            else
+            {
+                return 0;
+            }
+
         }
 
         /// <summary>
@@ -127,17 +163,24 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
             {
                 PersonalizationDAL personalizationdal = new PersonalizationDAL();
                 UserEntity user = personalizationdal.GetUser(UserID);
-                //converting userentity to user data transfer object                
-                UserDTO userdto= DataProvider.ResponseObjectMapper<UserDTO, UserEntity>(user);
-                //getting devices and backends associated to that user
-                UserBackend userbackend = new UserBackend();
-                UserDevice userdevice = new UserDevice();
-                ///getting devices and backends associated to that user
-                IEnumerable<UserDeviceDTO> userdevices = userdevice.GetUserAllDevices(UserID);
-                IEnumerable<UserBackendDTO> userbackends = userbackend.GetUserAllBackends(UserID);
-                userdto.userbackends = userbackends;
-                userdto.userdevices = userdevices;
-                return userdto;
+                if (user != null)
+                {
+                    //converting userentity to user data transfer object                
+                    UserDTO userdto = DataProvider.ResponseObjectMapper<UserDTO, UserEntity>(user);
+                    //getting devices and backends associated to that user
+                    UserBackend userbackend = new UserBackend();
+                    UserDevice userdevice = new UserDevice();
+                    ///getting devices and backends associated to that user
+                    IEnumerable<UserDeviceDTO> userdevices = userdevice.GetUserAllDevices(UserID);
+                    IEnumerable<UserBackendDTO> userbackends = userbackend.GetUserAllBackends(UserID);
+                    userdto.userbackends = userbackends;
+                    userdto.userdevices = userdevices;
+                    return userdto;
+                }
+                else
+                {
+                    return null;
+                }
             }
             catch (DataAccessException DALexception)
             {

@@ -39,7 +39,7 @@ namespace adidas.clb.MobileApproval.Controllers
                 }
                 else
                 {
-                    return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "User does not have backends", ""));
+                    return Request.CreateResponse(HttpStatusCode.OK, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "User does not have backends", ""));
                 }
             }
             catch (DataAccessException dalexception)
@@ -73,33 +73,35 @@ namespace adidas.clb.MobileApproval.Controllers
                 UserBackend userbackend = new UserBackend();
                 UserDevice userdevice = new UserDevice();
                 //if userID is available in requset then check user exist or not.
-                if (!string.IsNullOrEmpty(personalizationrequset.user.UserID))
+                if (personalizationrequset!=null && !string.IsNullOrEmpty(personalizationrequset.user.UserID))
                 {
                     Boolean isUserExists = personalization.CheckUser(personalizationrequset.user.UserID);
                     Boolean isDevicesProvided, isBackendsProvided;
 
-                    //retracking individual objects from request
+                    //retrackting individual objects from request
                     IEnumerable<UserDeviceDTO> userdevicesdto = personalizationrequset.user.userdevices;
                     IEnumerable<UserBackendDTO> userbackendsdto = personalizationrequset.user.userbackends;
                     UserDTO user = personalizationrequset.user;
                     UserEntity userentity = personalization.UserEntityGenerator(user);
-                    IEnumerable<UserDeviceEntity> userprovideddevices = userdevice.UserDeviceEntityGenerator(userdevicesdto);
-                    IEnumerable<UserBackendEntity> userprovidedbackends = userbackend.UserBackendEntityGenerator(userbackendsdto);
+                    IEnumerable<UserDeviceEntity> userprovideddevices=null;
+                    IEnumerable<UserBackendEntity> userprovidedbackends = null;
 
                     //to check if requset has userdevices or not
-                    if (userprovideddevices != null)
+                    if (userdevicesdto != null)
                     {
                         isDevicesProvided = true;
+                        userprovideddevices = userdevice.UserDeviceEntityGenerator(userdevicesdto);
                     }
-                    else { isDevicesProvided = true; }
+                    else { isDevicesProvided = false; }
 
                     //to check if requset has userbackends or not
-                    if (userprovidedbackends != null)
+                    if (userbackendsdto != null)
                     {
                         isBackendsProvided = true;
+                        userprovidedbackends = userbackend.UserBackendEntityGenerator(userbackendsdto);
                     }
-                    else { isBackendsProvided = true; }
-
+                    else { isBackendsProvided = false; }
+                    UserDTO updateduser;
                     //create if user not exists else update
                     if (!isUserExists)
                     {
@@ -111,13 +113,17 @@ namespace adidas.clb.MobileApproval.Controllers
                             userdevice.AddDevices(userprovideddevices.ToList());
                         }
 
-                        //add user backends if provided in request
+                        //associate user backends if provided in request other wise associate all backends in system
                         if (isBackendsProvided)
                         {
                             userbackend.AddBackends(userprovidedbackends.ToList());
                         }
-
-                        personalization.TriggerUserRequests(personalizationrequset.user.UserID);
+                        else
+                        {
+                            userbackend.AddAllBackends(user.UserID);
+                        }
+                        updateduser = personalization.GetUser(personalizationrequset.user.UserID);
+                        personalization.TriggerUserRequests(personalizationrequset.user.UserID,updateduser.userbackends);
                         personalization.CalcSynchTime(userprovidedbackends);
                     }
                     else
@@ -135,9 +141,12 @@ namespace adidas.clb.MobileApproval.Controllers
                             userbackend.RemoveBackends(personalizationrequset.user.UserID);
                             userbackend.AddBackends(userprovidedbackends.ToList());
                         }
-                    }
-
-                    UserDTO updateduser = personalization.GetUser(personalizationrequset.user.UserID);
+                        else
+                        {
+                            userbackend.RemoveBackends(personalizationrequset.user.UserID);
+                        }
+                        updateduser = personalization.GetUser(personalizationrequset.user.UserID);
+                    }                    
                     var ResponseUser = new PersonalizationResponseDTO<UserDTO>();
                     ResponseUser.result = updateduser;
                     ResponseUser.query = personalizationrequset;
@@ -188,7 +197,7 @@ namespace adidas.clb.MobileApproval.Controllers
                     }
                     else
                     {
-                        return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "user does not exist", ""));
+                        return Request.CreateResponse(HttpStatusCode.OK, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "user does not exist", ""));
                     }
                 }
                 else
@@ -284,7 +293,7 @@ namespace adidas.clb.MobileApproval.Controllers
                     }
                     else
                     {
-                        return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "user does not have associated devices", ""));
+                        return Request.CreateResponse(HttpStatusCode.OK, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "user does not have associated devices", ""));
                     }
 
                 }
@@ -324,7 +333,9 @@ namespace adidas.clb.MobileApproval.Controllers
                 //if user devcies provided in requset
                 if (personalizationrequset.userdevices != null)
                 {
-                    userdevice.PostDevices(personalizationrequset);
+                    IEnumerable<UserDeviceDTO> userdevicesdto = personalizationrequset.userdevices;              
+                    IEnumerable<UserDeviceEntity> userprovideddevices = userdevice.UserDeviceEntityGenerator(userdevicesdto);                  
+                    userdevice.AddDevices(userprovideddevices.ToList());
                     return Request.CreateResponse(HttpStatusCode.OK);
                 }
                 else
@@ -371,7 +382,7 @@ namespace adidas.clb.MobileApproval.Controllers
                     }
                     else
                     {
-                        return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", "user does not have associated device", ""));
+                        return Request.CreateResponse(HttpStatusCode.OK, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", "user does not have associated device", ""));
                     }
 
                 }
@@ -469,7 +480,7 @@ namespace adidas.clb.MobileApproval.Controllers
                     }
                     else
                     {
-                        return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "user does not have associated backends", ""));
+                        return Request.CreateResponse(HttpStatusCode.OK, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "user does not have associated backends", ""));
                     }
 
                 }
@@ -508,7 +519,10 @@ namespace adidas.clb.MobileApproval.Controllers
                 if (personalizationrequset.userbackends != null)
                 {
                     UserBackend userbackend = new UserBackend();
-                    userbackend.PostBackends(personalizationrequset);
+                    
+                    IEnumerable<UserBackendDTO> userbackendsdto = personalizationrequset.userbackends;
+                    IEnumerable<UserBackendEntity> userprovidedbackends = userbackend.UserBackendEntityGenerator(userbackendsdto);
+                    userbackend.AddBackends(userprovidedbackends.ToList());
                     return Request.CreateResponse(HttpStatusCode.OK);
                 }
                 else
@@ -554,7 +568,7 @@ namespace adidas.clb.MobileApproval.Controllers
                         return Request.CreateResponse(HttpStatusCode.OK, ResponseUserBackend);
                     }
 
-                    return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "user does not have associated backends", ""));
+                    return Request.CreateResponse(HttpStatusCode.OK, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "user does not have associated backends", ""));
                 }
                 else
                 {
