@@ -1,4 +1,9 @@
-﻿using log4net;
+﻿//-----------------------------------------------------------
+// <copyright file="LoggerHelper.cs" company="adidas AG">
+// Copyright (C) 2016 adidas AG.
+// </copyright>
+//-----------------------------------------------------------
+using log4net;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,18 +29,18 @@ namespace adidas.clb.job.RequestsUpdate.Utility
             Log4NetLogger.Info(string.Concat(System.DateTime.Now.ToString(), " - Category : ", category, " - Priority : ", priority));
 
             // Log4Net Switch case for Exception category
-            //switch (category)
-            //{
-            //    case "General":
-            //        Log4NetLogger.Info(message);
-            //        break;
-            //    case "Trace":
-            //        Log4NetLogger.Info(message);
-            //        break;
-            //    case "Error":
-            //        Log4NetLogger.Error(message);
-            //        break;
-            //}
+            switch (category)
+            {
+                case "General":
+                    Log4NetLogger.Info(message);
+                    break;
+                case "Trace":
+                    Log4NetLogger.Info(message);
+                    break;
+                case "Error":
+                    Log4NetLogger.Error(message);
+                    break;
+            }
         }
 
         /// <summary>

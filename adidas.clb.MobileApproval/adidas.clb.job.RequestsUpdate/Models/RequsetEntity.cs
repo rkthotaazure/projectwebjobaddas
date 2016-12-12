@@ -40,6 +40,5 @@ namespace adidas.clb.job.RequestsUpdate.Models
         public int Lastrequestlatency { get; set; }
         public int Missingconfirmationslimit { get; set; }
         public string PDFUri { get; set; }
-
     }
 }
