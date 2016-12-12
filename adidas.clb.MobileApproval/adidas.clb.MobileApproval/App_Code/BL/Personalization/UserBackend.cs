@@ -86,15 +86,18 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         ///method to remove userbackends
         /// </summary>
         /// <param name="UserID">takes userid as input</param>        
-        public void RemoveBackends(String UserID)
+        public void RemoveBackends(string UserID)
         {
             try
             {
                 UserBackendDAL userbackenddal = new UserBackendDAL();
                 //to get all backends associated to user
                 List<UserBackendEntity> alluserbackends = userbackenddal.GetUserAllBackends(UserID);
-                //calling data access layer method to remove user backends
-                userbackenddal.RemoveBackends(alluserbackends);
+                if (alluserbackends != null)
+                {
+                    //calling data access layer method to remove user backends
+                    userbackenddal.RemoveBackends(alluserbackends);
+                }
             }
             catch (DataAccessException DALexception)
             {
@@ -155,7 +158,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// </summary>
         /// <param name="UserID">takes userid as input</param>
         /// <returns>returns list of user backend</returns>
-        public IEnumerable<UserBackendDTO> GetUserAllBackends(String UserID)
+        public IEnumerable<UserBackendDTO> GetUserAllBackends(string UserID)
         {
             try
             {
@@ -208,7 +211,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <param name="userID">takes userid as input</param>
         /// <param name="userBackendID">takes user backend id as input</param>
         /// <returns>returns user backend with id associated to user in the form of personalization response</returns>
-        public PersonalizationResponseDTO<UserBackendDTO> GetUserBackend(String userID, String userBackendID)
+        public PersonalizationResponseDTO<UserBackendDTO> GetUserBackend(string userID, string userBackendID)
         {
             try
             {
@@ -253,7 +256,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <param name="userID">takes userid as input</param>
         /// <param name="userBackendID">takes user backend id as input</param>
         /// <returns>returns deleted user backend entity</returns>
-        public UserBackendEntity DeleteUserBackend(String userID, String userBackendID)
+        public UserBackendEntity DeleteUserBackend(string userID, string userBackendID)
         {
             try
             {
@@ -298,8 +301,8 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         public UserBackendEntity UserBackendDTOEntityMapper(UserBackendDTO userbackenddto)
         {
             //converting input backend data transfer object(dto) list to userbackend entity list by using property mapper
-            BackendDTO backenddto = userbackenddto.backend;
-            UserBackendEntity userbackendentity = DataProvider.ResponseObjectMapper<UserBackendEntity, BackendDTO>(backenddto);
+            Backend backenddto = userbackenddto.backend;
+            UserBackendEntity userbackendentity = DataProvider.ResponseObjectMapper<UserBackendEntity, Backend>(backenddto);
             //adding missing properties like userID, partitionkey and Rowkey to entity
             userbackendentity.UserID = userbackenddto.UserID;
             userbackendentity.PartitionKey = string.Concat(CoreConstants.AzureTables.UserBackendPK, userbackendentity.UserID);
@@ -316,7 +319,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         {
             //convertig entity to data transfer object using mapper
             UserBackendDTO userbackenddto = DataProvider.ResponseObjectMapper<UserBackendDTO, UserBackendEntity>(userbackendentity);
-            BackendDTO backenddto = DataProvider.ResponseObjectMapper<BackendDTO, UserBackendEntity>(userbackendentity);
+            Backend backenddto = DataProvider.ResponseObjectMapper<Backend, UserBackendEntity>(userbackendentity);
             userbackenddto.backend = backenddto;
             return userbackenddto;
         }

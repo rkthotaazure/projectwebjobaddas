@@ -23,7 +23,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// </summary>
         /// <param name="UserID">takes userid as input</param>
         /// <returns>returns true if user exists else false</returns>        
-        public Boolean CheckUser(String UserID)
+        public Boolean CheckUser(string UserID)
         {
             try
             {
@@ -101,12 +101,14 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// </summary>
         /// <param name="UserID">takes userid as input</param>
         /// <param name="userbackendslist">takes userbackends list as input</param>
-        public void TriggerUserRequests(String userID, IEnumerable<UserBackendDTO> userbackendslist)
+        public void TriggerUserRequests(string userID, IEnumerable<UserBackendDTO> userbackendslist)
         {
             try
             {
                 UpdateTriggeringMessage updateTriggerMessage = new UpdateTriggeringMessage();
-                updateTriggerMessage.Users.UserID = userID;
+                UserUpdateMsg usermsg = new UserUpdateMsg();
+                usermsg.UserID = userID;
+                updateTriggerMessage.Users = usermsg;
                 List<UpdateTriggerBackend> updatetriggerbackendlist = new List<UpdateTriggerBackend>();
                 //adding each user backend details to list for adding to message
                 foreach (UserBackendDTO userbackend in userbackendslist)
@@ -157,7 +159,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// </summary>
         /// <param name="UserID">takes user id as input</param>
         /// <returns> returns user along with associated devices and backends </returns>        
-        public UserDTO GetUser(String UserID)
+        public UserDTO GetUser(string UserID)
         {
             try
             {
@@ -199,7 +201,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// </summary>
         /// <param name="UserID">takes userid as input</param>
         /// <returns>returns deleted user entity</returns>        
-        public UserEntity DeleteUser(String UserID)
+        public UserEntity DeleteUser(string UserID)
         {
             try
             {

@@ -47,15 +47,18 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         ///method to remove userdevices
         /// </summary>
         /// <param name="UserID">takes userid as input</param>        
-        public void RemoveDevices(String UserID)
+        public void RemoveDevices(string UserID)
         {
             try
             {
                 UserDeviceDAL userdevicedal = new UserDeviceDAL();
                 //get all user devices to remove
                 List<UserDeviceEntity> alluserdevices = userdevicedal.GetUserAllDevices(UserID);
-                //calling data access layer method to remove
-                userdevicedal.RemoveDevices(alluserdevices);
+                if (alluserdevices != null)
+                {
+                    //calling data access layer method to remove
+                    userdevicedal.RemoveDevices(alluserdevices);
+                }
             }
             catch (DataAccessException DALexception)
             {
@@ -74,7 +77,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// </summary>
         /// <param name="UserID">takes userid as input</param>
         /// <returns>returns list of user device</returns>
-        public IEnumerable<UserDeviceDTO> GetUserAllDevices(String UserID)
+        public IEnumerable<UserDeviceDTO> GetUserAllDevices(string UserID)
         {
             try
             {
@@ -119,7 +122,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <param name="userID">takes userid as input</param>
         /// <param name="userDeviceID">takes user device id as input</param>
         /// <returns>returns user device with id associated to user in the form of personalization response</returns>
-        public PersonalizationResponseDTO<UserDeviceDTO> GetUserDevice(String userID, String userDeviceID)
+        public PersonalizationResponseDTO<UserDeviceDTO> GetUserDevice(string userID, string userDeviceID)
         {
             try
             {
@@ -156,7 +159,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <param name="userID">takes userid as input</param>
         /// <param name="userDeviceID">takes user device id as input</param>
         /// <returns>returns deleted user backend entity</returns>
-        public UserDeviceEntity DeleteUserDevice(String userID, String userDeviceID)
+        public UserDeviceEntity DeleteUserDevice(string userID, string userDeviceID)
         {
             try
             {
@@ -205,6 +208,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
             DeviceDTO devicedto = userdevicedto.device;
             UserDeviceEntity userdeviceentity = DataProvider.ResponseObjectMapper<UserDeviceEntity, DeviceDTO>(devicedto);
             //adding missing properties like userID, partitionkey and Rowkey to entity
+            userdeviceentity.DeviceID = string.Concat(userdevicedto.UserID, CoreConstants.AzureTables.UnderScore, userdevicedto.device.DeviceName);
             userdeviceentity.UserID = userdevicedto.UserID;
             userdeviceentity.PartitionKey = string.Concat(CoreConstants.AzureTables.UserDevicePK, userdeviceentity.UserID);
             userdeviceentity.RowKey = userdeviceentity.DeviceID;

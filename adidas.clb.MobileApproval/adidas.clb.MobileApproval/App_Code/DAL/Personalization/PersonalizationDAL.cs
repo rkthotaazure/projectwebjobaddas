@@ -25,18 +25,16 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         /// </summary>
         /// <param name="UserID">takes userid as input</param>
         /// <returns>returns user entity</returns>                     
-        public UserEntity GetUser(String UserID)
+        public UserEntity GetUser(string UserID)
         {
             try
             {
-                //get's azure table instance
-                CloudTable ReferenceDataTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.ReferenceData);
-                TableOperation RetrieveUser = TableOperation.Retrieve<UserEntity>(CoreConstants.AzureTables.User, UserID);
-                TableResult RetrievedResultUser = ReferenceDataTable.Execute(RetrieveUser);
-                return (UserEntity)RetrievedResultUser.Result;
+                //call dataprovider method to retrieve entity from azure table
+                UserEntity user=DataProvider.Retrieveentity<UserEntity>(CoreConstants.AzureTables.ReferenceData,CoreConstants.AzureTables.User, UserID);                
+                return user;
             }
             catch (Exception exception)
-            {
+            {                
                 LoggerHelper.WriteToLog(exception + " - Error while retrieving user from ReferenceData azure table in DAL : "
                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new DataAccessException();
@@ -51,10 +49,8 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         {
             try
             {
-                //get's azure table instance
-                CloudTable ReferenceDataTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.ReferenceData);
-                TableOperation insertOperation = TableOperation.Insert(user);
-                ReferenceDataTable.Execute(insertOperation);
+                //call dataprovider method to insert entity into azure table
+                DataProvider.InsertEntity<UserEntity>(CoreConstants.AzureTables.ReferenceData, user);
             }
             catch (Exception exception)
             {
@@ -72,12 +68,8 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         {
             try
             {
-                //get's azure table instance
-                CloudTable ReferenceDataTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.ReferenceData);
-                //adding ETag to user for replace operattion
-                user.ETag = "*";
-                TableOperation updateOperation = TableOperation.Replace(user);
-                ReferenceDataTable.Execute(updateOperation);
+                //call dataprovider method to update entity to azure table
+                DataProvider.UpdateEntity<UserEntity>(CoreConstants.AzureTables.ReferenceData, user);
             }
             catch (Exception exception)
             {
@@ -92,22 +84,12 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         /// </summary>
         /// <param name="user">takes userid as input</param>
         /// <returns>returns deleted user entity</returns>        
-        public UserEntity DeleteUser(String UserID)
+        public UserEntity DeleteUser(string UserID)
         {
             try
             {
-                //get's azure table instance
-                CloudTable ReferenceDataTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.ReferenceData);
-                TableOperation RetrieveUser = TableOperation.Retrieve<UserEntity>(CoreConstants.AzureTables.User, UserID);
-                //get user entity with UserID
-                TableResult RetrievedResultUser = ReferenceDataTable.Execute(RetrieveUser);
-                UserEntity deleteUserEntity = (UserEntity)RetrievedResultUser.Result;
-                //delete retrieved user entity
-                if (deleteUserEntity != null)
-                {
-                    TableOperation deleteOperation = TableOperation.Delete(deleteUserEntity);
-                    ReferenceDataTable.Execute(deleteOperation);
-                }
+                //call dataprovider method to delete entity from azure table            
+                UserEntity deleteUserEntity = DataProvider.DeleteEntity<UserEntity>(CoreConstants.AzureTables.ReferenceData, CoreConstants.AzureTables.User, UserID);                
                 return deleteUserEntity;
             }
             catch (Exception exception)
@@ -125,14 +107,10 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         public void AddUpdateTriggerMessageToQueue(UpdateTriggeringMessage updateTriggeringMessage)
         {
             try
-            {
-                //get's azure queue instance    
-                CloudQueue queue = DataProvider.GetAzureQueueInstance(CoreConstants.AzureQueues.UpdateTriggerQueueName);
-                //serialize object to string
+            {                
                 string message = JsonConvert.SerializeObject(updateTriggeringMessage);
-                CloudQueueMessage queuemessage = new CloudQueueMessage(message);
-                //adds message to queue
-                queue.AddMessage(queuemessage);
+                //call dataprovider method to add message to azure queue
+                DataProvider.AddMessagetoQueue(CoreConstants.AzureQueues.UpdateTriggerQueueName, message);
             }
             catch (Exception exception)
             {

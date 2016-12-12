@@ -30,6 +30,7 @@ namespace adidas.clb.MobileApproval.Models
         public string DeviceName { get; set; }
         public string DeviceBrand { get; set; }
         public string DeviceModel { get; set; }
+        public string DeviceOS { get; set; }
         public int maxSynchReplySize { get; set; }
     }
 }

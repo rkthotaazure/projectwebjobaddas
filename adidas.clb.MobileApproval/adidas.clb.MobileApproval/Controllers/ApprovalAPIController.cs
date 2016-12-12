@@ -15,6 +15,7 @@ using log4net;
 
 namespace adidas.clb.MobileApproval.Controllers
 {
+    [Authorize]
     public class ApprovalAPIController : ApiController
     {
         private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
