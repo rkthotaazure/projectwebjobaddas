@@ -17,7 +17,8 @@ namespace adidas.clb.job.RequestsUpdate.Models
     public class RequestPDF
     {
         public string _type { get; set; }
-        public string PDF_URL { get; set; }
+        public string PDFUri { get; set; }
+        public string UserId { get; set; }
         public string RequestID { get; set; }
         public RequestPDF() { _type = "requestPDFAddress"; }
     }

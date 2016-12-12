@@ -26,7 +26,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
         /// BL method to add request entity into azure table
         /// </summary>
         /// <param name="request">takes request as input</param>
-        public void AddRequest(BackendRequest backendrequest, string UserID, string backendId)
+        public void AddUpdateRequest(BackendRequest backendrequest, string UserID, string backendId)
         {
             try
             {
@@ -34,13 +34,12 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                 RequsetEntity requestentity = DataProvider.ResponseObjectMapper<RequsetEntity, Request>(backendrequest.requset);
                 requestentity.PartitionKey = string.Concat(CoreConstants.AzureTables.RequestsPK, UserID);
                 requestentity.RowKey = backendrequest.requset.id;
-                //adding default status as in-progress
-                requestentity.status = CoreConstants.AzureTables.InProgress;
+                //adding service layer requestid to entity                
                 requestentity.serviceLayerReqID = backendrequest.serviceLayerReqID;
                 requestentity.BackendID = backendId;
                 //calling DAL method to add request entity
                 RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();                
-                requestupdatedal.AddRequest(requestentity);
+                requestupdatedal.AddUpdateRequest(requestentity);
             }
             catch (DataAccessException DALexception)
             {
@@ -58,7 +57,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
         /// BL method to add approval entity into azure table
         /// </summary>
         /// <param name="request">takes request as input</param>
-        public void AddApproval(Request request, string UserID, string backendId)
+        public void AddUpdateApproval(Request request, string UserID, string backendId)
         {
             try
             {
@@ -71,7 +70,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                 approvalentity.BackendID = backendId;
                 RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
                 //calling DAL method to add request entity
-                requestupdatedal.AddApproval(approvalentity);
+                requestupdatedal.AddUpdateApproval(approvalentity);
             }
             catch (DataAccessException DALexception)
             {
@@ -89,7 +88,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
         /// </summary>
         /// <param name="approvers">takes approvers as input</param>
         /// <param name="requsetid">takes requestid as input</param>
-        public void AddApprovers(List<Approvers> approvers, string requsetid)
+        public void AddUpdateApprovers(List<Approvers> approvers, string requsetid)
         {
             try
             {
@@ -98,11 +97,13 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                 foreach (Approvers approver in approvers)
                 {
                     ApproverEntity approverentity = DataProvider.ResponseObjectMapper<ApproverEntity, Approvers>(approver);
-                    approverentity.PartitionKey = CoreConstants.AzureTables.ApproverPK;
+                    approverentity.PartitionKey = string.Concat(CoreConstants.AzureTables.ApproverPK, requsetid);
                     approverentity.RowKey = string.Concat(requsetid, CoreConstants.AzureTables.UnderScore, approver.order);
                     approversListEntity.Add(approverentity);
                 }
                 RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
+                //calling dal method to remove existing approvers entities
+                requestupdatedal.RemoveExistingApprovers(requsetid);
                 //calling dal method to add approvers entities
                 requestupdatedal.AddApprovers(approversListEntity);
             }
@@ -124,7 +125,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
         /// <param name="genericInfoFields">takes generic fileds as input</param>
         /// <param name="overviewFields">takes over fields as input</param>
         /// <param name="requestid">takes requestid as input</param>
-        public void AddFields(List<Field> genericInfoFields, List<Field> overviewFields, string requestid)
+        public void AddUpdateFields(List<Field> genericInfoFields, List<Field> overviewFields, string requestid)
         {
             try
             {
@@ -133,7 +134,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                 foreach (Field field in genericInfoFields)
                 {
                     FieldEntity fieldentity = DataProvider.ResponseObjectMapper<FieldEntity, Field>(field);
-                    fieldentity.PartitionKey = CoreConstants.AzureTables.FieldPK;
+                    fieldentity.PartitionKey = string.Concat(CoreConstants.AzureTables.FieldPK, requestid);
                     fieldentity.RowKey = string.Concat(requestid, field.name);
                     listfiledsentity.Add(fieldentity);
                 }
@@ -146,6 +147,8 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                     listfiledsentity.Add(fieldentity);
                 }
                 RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
+                //calling dal method to remove existing field entities
+                requestupdatedal.RemoveExistingFields(requestid);
                 //calling DAL method to add fields entities
                 requestupdatedal.AddFields(listfiledsentity);
             }
@@ -191,13 +194,13 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
         /// method to add Request PDF uri to Request entity
         /// </summary>
         /// <param name="urivalue">takes temp blob uri as input</param>        
-        public void AddPDFUriToRequest(Uri urivalue, string RequestID)
+        public void AddPDFUriToRequest(Uri urivalue, string UserId,string RequestID)
         {
             try
             {
                 RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
                 //calling DAL method to add Requset PDF uri to request entity
-                requestupdatedal.AddPDFUriToRequest(urivalue, RequestID);
+                requestupdatedal.AddPDFUriToRequest(urivalue, UserId, RequestID);
             }
             catch (DataAccessException DALexception)
             {

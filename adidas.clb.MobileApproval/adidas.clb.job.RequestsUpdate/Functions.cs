@@ -10,16 +10,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
+using Newtonsoft.Json;
 using adidas.clb.job.RequestsUpdate.APP_Code.BL;
 using adidas.clb.job.RequestsUpdate.Exceptions;
 using adidas.clb.job.RequestsUpdate.Models;
 using adidas.clb.job.RequestsUpdate.Utility;
-using Newtonsoft.Json;
 
 namespace adidas.clb.job.RequestsUpdate
 {
     public class Functions
     {
+        static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
         // This function will get triggered/executed when a new message is written 
         // on an Azure Queue called RequsetUpdate.
         public static void ProcessRequsetQueueMessage([QueueTrigger(CoreConstants.AzureQueues.RequsetUpdateQueue)] string message, TextWriter log)
@@ -36,7 +37,7 @@ namespace adidas.clb.job.RequestsUpdate
                 //check if requests were available
                 if (backendrequestslist != null)
                 {                
-                    //looping through each request to add requests , approvers and fileds for each requet
+                    //looping through each request to add requests , approvers and fields for each requet
                     foreach (BackendRequest backendrequest in backendrequestslist)
                     {
                         //split main backendrequest object into individual entities
@@ -45,22 +46,18 @@ namespace adidas.clb.job.RequestsUpdate
                         List<Field> overviewFields = backendrequest.requset.fields.overview;
                         Request request = backendrequest.requset;                        
                         //calling BL methods to add request , approval, approvers and fields                        
-                        requsetupdatebl.AddRequest(backendrequest, requestsdata.UserId, requestsdata.BackendID);                        
-                        requsetupdatebl.AddApproval(request, requestsdata.UserId, requestsdata.BackendID);                        
-                        requsetupdatebl.AddApprovers(approvers, request.id);                        
-                        requsetupdatebl.AddFields(genericInfoFields, overviewFields, request.id);
-                        log.WriteLine("fileds added");
+                        requsetupdatebl.AddUpdateRequest(backendrequest, requestsdata.UserId, requestsdata.BackendID);                        
+                        requsetupdatebl.AddUpdateApproval(request, requestsdata.UserId, requestsdata.BackendID);                        
+                        requsetupdatebl.AddUpdateApprovers(approvers, request.id);                        
+                        requsetupdatebl.AddUpdateFields(genericInfoFields, overviewFields, request.id);                        
                         //caliculating request size                        
-                        int requestsize=requsetupdatebl.CalculateRequestSize(backendrequest);
-                        log.WriteLine(requestsize);
+                        int requestsize=requsetupdatebl.CalculateRequestSize(backendrequest);                       
                         //caliculating total of size for all requests
                         TotalRequestsize = TotalRequestsize+requestsize;
                         //caliculating total of latency for all requests
                         TotalRequestlatency = TotalRequestlatency + request.Latency;                   
                       }                    
-                }
-                log.WriteLine(TotalRequestsize);
-                log.WriteLine(TotalRequestlatency);
+                }                
                 //calling BL methods to update average sizes and latencies for userbackend and backend     
                 requsetupdatebl.UpdateUserBackend(requestsdata.UserId,requestsdata.BackendID,TotalRequestsize, TotalRequestlatency,requestcount);
                 requsetupdatebl.UpdateBackend(requestsdata.BackendID, TotalRequestsize, TotalRequestlatency, requestcount);
@@ -94,9 +91,10 @@ namespace adidas.clb.job.RequestsUpdate
                 RequestPDF requestPDFdata = JsonConvert.DeserializeObject<RequestPDF>(message);
                 RequestUpdateBL requestupdatebl = new RequestUpdateBL();
                 //calling BL method to add Request PDF to blob
-                Uri PDFuri = requestupdatebl.AddRequestPDFToBlob(new Uri(requestPDFdata.PDF_URL),requestPDFdata.RequestID);
+                //Uri PDFuri = requestupdatebl.AddRequestPDFToBlob(new Uri(requestPDFdata.PDFUri),requestPDFdata.RequestID);
+                Uri PDFuri = new Uri(requestPDFdata.PDFUri);
                 //updating request entity with pdf uri
-                requestupdatebl.AddPDFUriToRequest(PDFuri, requestPDFdata.RequestID);
+                requestupdatebl.AddPDFUriToRequest(PDFuri, requestPDFdata.UserId,requestPDFdata.RequestID);
             }
             catch (DataAccessException dalexception)
             {

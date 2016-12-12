@@ -39,8 +39,8 @@ namespace adidas.clb.job.RequestsUpdate.Utility
         {
             public const string RequestsPK = "Requests_";
             public const string ApprovalPK = "Approval_";
-            public const string ApproverPK = "Approver";
-            public const string FieldPK = "Field";
+            public const string ApproverPK = "Approver_";
+            public const string FieldPK = "Field_";
             public const string RequestTransactions = "RequestTransactions";
             public const string AzureStorageConnectionString = "AzureStorageConnectionString";
             public const string UnderScore = "_";

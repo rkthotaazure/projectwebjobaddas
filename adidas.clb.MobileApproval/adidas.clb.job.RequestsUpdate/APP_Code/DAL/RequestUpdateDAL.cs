@@ -28,18 +28,15 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
     {
 
         /// <summary>
-        /// method to add Request entity to azure table
+        /// method to add/upadte Request entity to azure table
         /// </summary>
         /// <param name="request">takes request entity as input</param>
-        public void AddRequest(RequsetEntity request)
+        public void AddUpdateRequest(RequsetEntity request)
         {
             try
-            {
-                //get's azure table instance            
-                CloudTable ReferenceDataTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.RequestTransactions);
-                //inserts entity in to azure table            
-                TableOperation insertOperation = TableOperation.Insert(request);                
-                ReferenceDataTable.Execute(insertOperation);
+            {                
+                //call dataprovider method to insert entity into azure table
+                DataProvider.InsertReplaceEntity<RequsetEntity>(CoreConstants.AzureTables.RequestTransactions, request);
             }
             catch (Exception exception)
             {
@@ -49,15 +46,16 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
             }
         }
 
-        public void AddApproval(ApprovalEntity approval)
+        /// <summary>
+        /// method to add/upadte Request entity to azure table
+        /// </summary>
+        /// <param name="approval">takes approval entity as input</param>
+        public void AddUpdateApproval(ApprovalEntity approval)
         {
             try
-            {
-                //get's azure table instance            
-                CloudTable ReferenceDataTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.RequestTransactions);
-                //inserts entity in to azure table            
-                TableOperation insertOperation = TableOperation.Insert(approval);
-                ReferenceDataTable.Execute(insertOperation);
+            {                
+                //call dataprovider method to insert entity into azure table
+                DataProvider.InsertReplaceEntity<ApprovalEntity>(CoreConstants.AzureTables.RequestTransactions, approval);
             }
             catch (Exception exception)
             {
@@ -66,6 +64,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
                 throw new DataAccessException();
             }
         }
+
         /// <summary>
         /// method to add approver entities to azure table
         /// </summary>
@@ -73,20 +72,36 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
         public void AddApprovers(List<ApproverEntity> approvers)
         {
             try
-            {
-                //get's azure table instance
-                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.RequestTransactions);
-                TableBatchOperation batchOperation = new TableBatchOperation();
-                //insert list of approver entities into batch operation
-                foreach (ApproverEntity approverentity in approvers)
-                {
-                    batchOperation.Insert(approverentity);
-                }
-                UserDeviceConfigurationTable.ExecuteBatch(batchOperation);
+            {                
+                //call dataprovider method to add entities to azure table
+                DataProvider.AddEntities(CoreConstants.AzureTables.RequestTransactions, approvers);
             }
             catch (Exception exception)
             {
                 LoggerHelper.WriteToLog(exception + " - Error while inserting approvers into requestTransactions azure table in DAL : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new DataAccessException();
+            }
+        }
+
+        /// <summary>
+        /// method to remove existing approvers
+        /// </summary>
+        /// <param name="requestid"></param>
+        public void RemoveExistingApprovers(string requestid)
+        {
+            try
+            {
+                //generate query to retrive approvers 
+                TableQuery<ApproverEntity> query = new TableQuery<ApproverEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.ApproverPK,requestid)));
+                //call dataprovider method to get entities from azure table
+                List<ApproverEntity> existingapprovers = DataProvider.GetEntitiesList<ApproverEntity>(CoreConstants.AzureTables.ReferenceData, query);
+                //call dataprovider method to remove entities from azure table
+                DataProvider.RemoveEntities(CoreConstants.AzureTables.RequestTransactions, existingapprovers);
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error while remove existing approvers into requestTransactions azure table in DAL : "
                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new DataAccessException();
             }
@@ -99,20 +114,32 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
         public void AddFields(List<FieldEntity> fields)
         {
             try
-            {
-                //get's azure table instance
-                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.RequestTransactions);
-                TableBatchOperation batchOperation = new TableBatchOperation();
-                //insert list of entities into batch operation
-                foreach (FieldEntity fieldentity in fields)
-                {
-                    batchOperation.Insert(fieldentity);
-                }
-                UserDeviceConfigurationTable.ExecuteBatch(batchOperation);
+            {                
+                //call dataprovider method to add entities to azure table
+                DataProvider.AddEntities(CoreConstants.AzureTables.RequestTransactions, fields);
             }
             catch (Exception exception)
             {
                 LoggerHelper.WriteToLog(exception + " - Error while inserting fields into requestTransactions azure table in DAL : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new DataAccessException();
+            }
+        }
+
+        public void RemoveExistingFields(string requestid)
+        {
+            try
+            {
+                //generate query to retrive existing fileds 
+                TableQuery<FieldEntity> query = new TableQuery<FieldEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.FieldPK, requestid)));
+                //call dataprovider method to get entities from azure table
+                List<FieldEntity> existingapprovers = DataProvider.GetEntitiesList<FieldEntity>(CoreConstants.AzureTables.ReferenceData, query);
+                //call dataprovider method to remove entities from azure table
+                DataProvider.RemoveEntities(CoreConstants.AzureTables.RequestTransactions, existingapprovers);
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error while removing existing fields into requestTransactions azure table in DAL : "
                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new DataAccessException();
             }
@@ -159,27 +186,19 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
         /// method to add Request PDF uri to Request entity
         /// </summary>
         /// <param name="urivalue">takes temp blob uri as input</param>        
-        public void AddPDFUriToRequest(Uri urivalue, string RequestID)
+        public void AddPDFUriToRequest(Uri urivalue, string userID,string RequestID)
         {
             try
-            {
-                //get's azure table instance
-                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.RequestTransactions);
-                // Create a retrieve operation that takes a customer entity.
-                TableOperation retrieveOperation = TableOperation.Retrieve<RequsetEntity>(CoreConstants.AzureTables.RequestsPK, RequestID);
-                // Execute the operation.
-                TableResult retrievedRequest = UserDeviceConfigurationTable.Execute(retrieveOperation);
-                // Assign the result to a CustomerEntity object.
-                RequsetEntity updateEntity = (RequsetEntity)retrievedRequest.Result;
+            {                
+                //call dataprovider method to get entities from azure table
+                RequsetEntity updateEntity = DataProvider.Retrieveentity<RequsetEntity>(CoreConstants.AzureTables.RequestTransactions, string.Concat(CoreConstants.AzureTables.RequestsPK, userID), RequestID);
                 //check for null
                 if (updateEntity != null)
                 {
                     // Add the PDFUri.
                     updateEntity.PDFUri = urivalue.ToString();
-                    // Create the Replace TableOperation.
-                    TableOperation updateOperation = TableOperation.Replace(updateEntity);
-                    // Execute the operation.
-                    UserDeviceConfigurationTable.Execute(updateOperation);
+                    //call dataprovider method to update entity to azure table
+                    DataProvider.UpdateEntity<RequsetEntity>(CoreConstants.AzureTables.RequestTransactions, updateEntity);
                 }
 
             }
@@ -200,19 +219,13 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
         public UserBackendEntity GetUserBackend(string userid, string backendid)
         {
             try
-            {
-                //get's azure table instance
-                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
-                // Create a retrieve operation that takes a customer entity.
-                TableOperation retrieveOperation = TableOperation.Retrieve<UserBackendEntity>(string.Concat(CoreConstants.AzureTables.UserBackendPK, userid), backendid);
-                // Execute the operation.
-                TableResult retrievedRequest = UserDeviceConfigurationTable.Execute(retrieveOperation);
-                // Assign the result to a CustomerEntity object.
-                UserBackendEntity userbackend = (UserBackendEntity)retrievedRequest.Result;
+            {                
+                //call dataprovider method to get entities from azure table
+                UserBackendEntity userbackend = DataProvider.Retrieveentity<UserBackendEntity>(CoreConstants.AzureTables.UserDeviceConfiguration, string.Concat(CoreConstants.AzureTables.UserBackendPK, userid), backendid);                
                 return userbackend;
             }
             catch (Exception exception)
-            {
+            {                
                 LoggerHelper.WriteToLog(exception + " - Error while getting userbackend entity in DAL : "
                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new DataAccessException();
@@ -228,25 +241,23 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
         public int GetOpenRequestsCount(string userid, string backendid)
         {
             try
-            {
-                //get's azure table instance
-                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.RequestTransactions);
+            {                
                 //adding filters to get count of open requests
                 string partitionFilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.RequestsPK, userid));
                 string rowfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.BackendId, QueryComparisons.Equal, backendid);
                 string statusfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.Status, QueryComparisons.Equal, CoreConstants.AzureTables.InProgress);
                 string finalFilter = TableQuery.CombineFilters(TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowfilter), TableOperators.And, statusfilter);
                 //selecting only few columnas as we are just caliculating count of open requests
-                var query = new TableQuery<RequsetEntity>()
+                TableQuery<RequsetEntity> query = new TableQuery<RequsetEntity>()
                 {
                     SelectColumns = new List<string>()
                     {
                         CoreConstants.AzureTables.PartitionKey, CoreConstants.AzureTables.BackendId
                     }
-                }.Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.RequestsPK, QueryComparisons.Equal, CoreConstants.AzureTables.FieldPK));
-                //executing query to find count of open requests
-                int openrequests = UserDeviceConfigurationTable.ExecuteQuery<RequsetEntity>(query, null).Count();
-                return openrequests;
+                }.Where(finalFilter);
+                //call dataprovider method to get entities from azure table
+                List<RequsetEntity> openequests = DataProvider.GetEntitiesList<RequsetEntity>(CoreConstants.AzureTables.RequestTransactions, query);                                
+                return openequests.Count();
             }
             catch (Exception exception)
             {
@@ -266,25 +277,23 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
         public int GetOpenApprovalsCount(string userid, string backendid)
         {
             try
-            {
-                //get's azure table instance
-                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.RequestTransactions);
+            {                
                 //adding filters to get count of open approvals
                 string partitionFilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.ApprovalPK,userid));
                 string rowfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.BackendId, QueryComparisons.Equal, backendid);
                 string statusfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.Status, QueryComparisons.Equal, CoreConstants.AzureTables.Waiting);
                 string finalFilter = TableQuery.CombineFilters(TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowfilter), TableOperators.And, statusfilter);
                 //selecting only few columnas as we are just caliculating count of open approvals
-                var query = new TableQuery<RequsetEntity>()
+                TableQuery<ApprovalEntity> query = new TableQuery<ApprovalEntity>()
                 {
                     SelectColumns = new List<string>()
                     {
                         CoreConstants.AzureTables.PartitionKey, CoreConstants.AzureTables.BackendId
                     }
-                }.Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.RequestsPK, QueryComparisons.Equal, CoreConstants.AzureTables.FieldPK));
-                //executing query to find count of open requests
-                int openapprovals = UserDeviceConfigurationTable.ExecuteQuery<RequsetEntity>(query, null).Count();
-                return openapprovals;
+                }.Where(finalFilter);
+                //call dataprovider method to get entities from azure table
+                List<ApprovalEntity> openaprovals = DataProvider.GetEntitiesList<ApprovalEntity>(CoreConstants.AzureTables.RequestTransactions, query);
+                return openaprovals.Count();
             }
             catch (Exception exception)
             {
@@ -303,25 +312,23 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
         public int GetUrgentApprovalsCount(string userid, string backendid)
         {
             try
-            {
-                //get's azure table instance
-                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.RequestTransactions);
+            {                
                 //adding filters to get count of open approvals
                 string partitionFilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.ApprovalPK, userid));
                 string rowfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.BackendId, QueryComparisons.Equal, backendid);
                 string statusfilter = TableQuery.GenerateFilterConditionForDate(CoreConstants.AzureTables.DueDate, QueryComparisons.LessThanOrEqual, DateTime.Today);
                 string finalFilter = TableQuery.CombineFilters(TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowfilter), TableOperators.And, statusfilter);
                 //selecting only few columnas as we are just caliculating count of urgent approvals
-                var query = new TableQuery<RequsetEntity>()
+                TableQuery<ApprovalEntity> query = new TableQuery<ApprovalEntity>()
                 {
                     SelectColumns = new List<string>()
                     {
                         CoreConstants.AzureTables.PartitionKey, CoreConstants.AzureTables.BackendId
                     }
-                }.Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.RequestsPK, QueryComparisons.Equal, CoreConstants.AzureTables.FieldPK));
-                //executing query to find count of urgent requests
-                int urgentapprovals = UserDeviceConfigurationTable.ExecuteQuery<RequsetEntity>(query, null).Count();
-                return urgentapprovals;
+                }.Where(finalFilter);
+                //call dataprovider method to get entities from azure table
+                List<ApprovalEntity> urgentaprovals = DataProvider.GetEntitiesList<ApprovalEntity>(CoreConstants.AzureTables.RequestTransactions, query);
+                return urgentaprovals.Count;
             }
             catch (Exception exception)
             {
@@ -338,13 +345,9 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
         public void UpdateUserBackend(UserBackendEntity userbackend)
         {
             try
-            {
-                //get's azure table instance
-                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
-                // Create the Replace TableOperation.
-                TableOperation updateOperation = TableOperation.Replace(userbackend);
-                // Execute the operation.
-                UserDeviceConfigurationTable.Execute(updateOperation);
+            {                
+                //call dataprovider method to update entity to azure table
+                DataProvider.UpdateEntity<UserBackendEntity>(CoreConstants.AzureTables.UserDeviceConfiguration, userbackend);
             }
             catch (Exception exception)
             {
@@ -362,19 +365,13 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
         public BackendEntity GetBackend(string backendid)
         {
             try
-            {
-                //get's azure table instance
-                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.ReferenceData);
-                // Create a retrieve operation that takes a customer entity.
-                TableOperation retrieveOperation = TableOperation.Retrieve<BackendEntity>(CoreConstants.AzureTables.BackendPK, backendid);
-                // Execute the operation.
-                TableResult retrievedRequest = UserDeviceConfigurationTable.Execute(retrieveOperation);
-                // Assign the result to a CustomerEntity object.
-                BackendEntity backend = (BackendEntity)retrievedRequest.Result;
+            {                
+                //call dataprovider method to retrieve entity from azure table
+                BackendEntity backend = DataProvider.Retrieveentity<BackendEntity>(CoreConstants.AzureTables.ReferenceData, CoreConstants.AzureTables.BackendPK, backendid);
                 return backend;
             }
             catch (Exception exception)
-            {
+            {                
                 LoggerHelper.WriteToLog(exception + " - Error while getting backend from azure table in DAL : "
                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new DataAccessException();
@@ -389,15 +386,11 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
         {
             try
             {
-                //get's azure table instance
-                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.ReferenceData);
-                // Create the Replace TableOperation.
-                TableOperation updateOperation = TableOperation.Replace(backend);
-                // Execute the operation.
-                UserDeviceConfigurationTable.Execute(updateOperation);
+                //call dataprovider method to update entity to azure table
+                DataProvider.UpdateEntity<BackendEntity>(CoreConstants.AzureTables.ReferenceData, backend);
             }
             catch (Exception exception)
-            {
+            {                
                 LoggerHelper.WriteToLog(exception + " - Error while updating backend to azure table in DAL : "
                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new DataAccessException();
