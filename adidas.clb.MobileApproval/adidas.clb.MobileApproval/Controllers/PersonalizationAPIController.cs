@@ -18,7 +18,8 @@ namespace adidas.clb.MobileApproval.Controllers
 {
     /// <summary>
     /// The controller class which implements action methods for personalization
-    /// </summary>
+    /// </summary> 
+    //[Authorize]
     public class PersonalizationAPIController : ApiController
     {
         /// <summary>
@@ -179,7 +180,7 @@ namespace adidas.clb.MobileApproval.Controllers
         /// <param name="userID">takes userid as input</param>
         /// <returns>returns user along with is associated devices and backends</returns>
         [Route("api/personalizationapi/users/{userID}")]
-        public HttpResponseMessage GetUsers(String userID)
+        public HttpResponseMessage GetUsers(string userID)
         {
             try
             {
@@ -227,7 +228,7 @@ namespace adidas.clb.MobileApproval.Controllers
         /// <param name="userID">takes userid as input</param>
         /// <returns>returns succes or failure status code for user deletion</returns>
         [Route("api/personalizationapi/users/{userID}")]
-        public HttpResponseMessage DeleteUsers(String userID)
+        public HttpResponseMessage DeleteUsers(string userID)
         {
             try
             {
@@ -274,7 +275,7 @@ namespace adidas.clb.MobileApproval.Controllers
         /// <param name="userID">take userid as input</param>
         /// <returns>returns list of devices associated to user</returns>
         [Route("api/personalizationapi/users/{userID}/devices")]
-        public HttpResponseMessage GetUserAllDevices(String userID)
+        public HttpResponseMessage GetUserAllDevices(string userID)
         {
             try
             {
@@ -366,7 +367,7 @@ namespace adidas.clb.MobileApproval.Controllers
         /// <param name="userDeviceID">takes user device id as input</param>
         /// <returns> returns device with given id associate to user</returns>
         [Route("api/personalizationapi/users/{userID}/devices/{userDeviceID}")]
-        public HttpResponseMessage GetUserDevice(String userID, String userDeviceID)
+        public HttpResponseMessage GetUserDevice(string userID, string userDeviceID)
         {
             try
             {
@@ -414,7 +415,7 @@ namespace adidas.clb.MobileApproval.Controllers
         /// <param name="userDeviceID">takes user device id as input</param>
         /// <returns>returns status code for deletion of user device</returns>
         [Route("api/personalizationapi/users/{userID}/devices/{userDeviceID}")]
-        public HttpResponseMessage DeleteUserDevice(String userID, String userDeviceID)
+        public HttpResponseMessage DeleteUserDevice(string userID, string userDeviceID)
         {
             try
             {
@@ -461,7 +462,7 @@ namespace adidas.clb.MobileApproval.Controllers
         /// <param name="userID">takes userid as input</param>
         /// <returns>returns list of backends</returns>
         [Route("api/personalizationapi/users/{userID}/backends")]
-        public HttpResponseMessage GetUserAllBackends(String userID)
+        public HttpResponseMessage GetUserAllBackends(string userID)
         {
             try
             {
@@ -553,7 +554,7 @@ namespace adidas.clb.MobileApproval.Controllers
         /// <param name="userBackendID">takes user backend id as input</param>
         /// <returns>returns user backend with given backend id associated to user</returns>
         [Route("api/personalizationapi/users/{userID}/backends/{userBackendID}")]
-        public HttpResponseMessage GetUserBackend(String userID, String userBackendID)
+        public HttpResponseMessage GetUserBackend(string userID, string userBackendID)
         {
             try
             {
@@ -598,7 +599,7 @@ namespace adidas.clb.MobileApproval.Controllers
         /// <param name="userBackendID">takes user backend id as input</param>
         /// <returns>returns status code for user backend deletion</returns>        
         [Route("api/personalizationapi/users/{userID}/backends/{userBackendID}")]
-        public HttpResponseMessage DeleteUserBackend(String userID, String userBackendID)
+        public HttpResponseMessage DeleteUserBackend(string userID, string userBackendID)
         {
             try
             {

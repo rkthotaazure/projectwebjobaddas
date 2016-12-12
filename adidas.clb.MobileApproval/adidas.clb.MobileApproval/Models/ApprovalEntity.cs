@@ -14,13 +14,61 @@ namespace adidas.clb.MobileApproval.Models
             this.RowKey = RequestRowKey;
         }
         public ApprovalEntity() { }
-        public string ApprovalRowKey { get; set; }
-        public DateTime ApprovalTimestamp { get; set; }
-        public bool BackendConfirmed { get; set; }
-        public int MissingConfirmations { get; set; }
-        public bool BackendOverwritten { get; set; }
+        public string RequestId { get; set; }
+        public string BackendID { get; set; }
+        public string status { get; set; }
+        private DateTime? dueDate = null;
+        public DateTime DueDate
+        {
+            get
+            {
+                return this.dueDate.HasValue ? this.dueDate.Value : DateTime.Now;
+            }
 
+            set { this.dueDate = value; }
+        }
+        private DateTime? decisionDate = null;
+        public DateTime DecisionDate
+        {
+            get
+            {
+                return this.decisionDate.HasValue ? this.decisionDate.Value : DateTime.Now;
+            }
 
+            set { this.decisionDate = value; }
+        }
+        public Boolean BackendConfirmed { get; set; }
+        public int Missingconfirmations { get; set; }
+        public Boolean Backendoverwritten { get; set; }
+    }
 
+    public class ApprovalDTO
+    {
+        public string RequestId { get; set; }
+        public string BackendID { get; set; }
+        public string status { get; set; }
+        private DateTime? dueDate = null;
+        public DateTime DueDate
+        {
+            get
+            {
+                return this.dueDate.HasValue ? this.dueDate.Value : DateTime.Now;
+            }
+
+            set { this.dueDate = value; }
+        }
+        private DateTime? decisionDate = null;
+        public DateTime DecisionDate
+        {
+            get
+            {
+                return this.decisionDate.HasValue ? this.decisionDate.Value : DateTime.Now;
+            }
+
+            set { this.decisionDate = value; }
+        }
+        public Boolean BackendConfirmed { get; set; }
+        public int Missingconfirmations { get; set; }
+        public Boolean Backendoverwritten { get; set; }
     }
 }

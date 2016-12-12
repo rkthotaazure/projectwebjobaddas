@@ -36,13 +36,24 @@ namespace adidas.clb.MobileApproval.Utility
         {
             public const string ReferenceData = "ReferenceData";
             public const string UserDeviceConfiguration = "UserDeviceConfiguration";
+            public const string RequestTransactions = "RequestTransactions";
             public const string AzureStorageConnectionString = "GenericMobileStorageConnectionString";
             public const string PartitionKey = "PartitionKey";
+            public const string RowKey = "RowKey";
             public const string Backend = "Backend";
             public const string User = "User";
             public const string UserDevicePK = "UD_";
             public const string UserBackendPK = "UB_";
             public const string BackendSynchPK = "BS_";
+            public const string RequestSynchPK = "RequestSynch";
+            public const string RequestsPK = "Requests_";
+            public const string ApproverPK = "Approver_";
+            public const string FieldPK = "Field_";
+            public const string BackendId = "BackendID";
+            public const string UnderScore = "_";
+            public const string Status = "status";
+            public const string InProgress = "In-Progress";
+
         }
         //Azure Queue constants
         public struct AzureQueues

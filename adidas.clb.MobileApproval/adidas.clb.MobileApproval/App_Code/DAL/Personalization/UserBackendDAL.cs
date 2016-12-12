@@ -27,15 +27,8 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         {
             try
             {
-                //get's azure table instance
-                CloudTable UserBackendConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
-                TableBatchOperation batchOperation = new TableBatchOperation();
-                //insert list of entities into batch operation
-                foreach (UserBackendEntity usrbackendentity in backendofuser)
-                {
-                    batchOperation.Insert(usrbackendentity);
-                }
-                UserBackendConfigurationTable.ExecuteBatch(batchOperation);
+                //call dataprovider method to add entities to azure table
+                DataProvider.AddEntities(CoreConstants.AzureTables.UserDeviceConfiguration, backendofuser);
             }
             catch (Exception exception)
             {
@@ -44,7 +37,7 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
                 throw new DataAccessException();
             }
         }
-       
+
         /// <summary>
         /// method to remove user backends
         /// </summary>
@@ -53,15 +46,8 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         {
             try
             {
-                //get's azure table instance
-                CloudTable UserBackendConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
-                TableBatchOperation batchOperation = new TableBatchOperation();
-                //insert list of entities into batch operation
-                foreach (UserBackendEntity usrbackendentity in backendofuser)
-                {
-                    batchOperation.Add(TableOperation.Delete(usrbackendentity));
-                }
-                UserBackendConfigurationTable.ExecuteBatch(batchOperation);
+                //call dataprovider method to delete entities from azure table
+                DataProvider.RemoveEntities(CoreConstants.AzureTables.UserDeviceConfiguration, backendofuser);
             }
             catch (Exception exception)
             {
@@ -78,11 +64,11 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         public List<BackendEntity> GetBackends()
         {
             try
-            {
-                //get's azure table instance
-                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.ReferenceData);
+            {               
+                //generate query to retrive backends 
                 TableQuery<BackendEntity> query = new TableQuery<BackendEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, CoreConstants.AzureTables.Backend));
-                List<BackendEntity> allBackends = UserDeviceConfigurationTable.ExecuteQuery(query).ToList();
+                //call dataprovider method to get entities from azure table
+                List<BackendEntity> allBackends = DataProvider.GetEntitiesList<BackendEntity>(CoreConstants.AzureTables.ReferenceData, query);
                 return allBackends;
             }
             catch (Exception exception)
@@ -98,14 +84,14 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         /// </summary>
         /// <param name="UserID">takes userid as input</param>
         /// <returns> returns list of user backends associated to user</returns>
-        public List<UserBackendEntity> GetUserAllBackends(String UserID)
+        public List<UserBackendEntity> GetUserAllBackends(string UserID)
         {
             try
             {
-                //get's azure table instance
-                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
+                //generate query to get all user associated backends
                 TableQuery<UserBackendEntity> query = new TableQuery<UserBackendEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.UserBackendPK, UserID)));
-                List<UserBackendEntity> alluserbackends = UserDeviceConfigurationTable.ExecuteQuery(query).ToList();
+                //call dataprovider method to get entities from azure table
+                List<UserBackendEntity> alluserbackends = DataProvider.GetEntitiesList<UserBackendEntity>(CoreConstants.AzureTables.UserDeviceConfiguration, query);
                 return alluserbackends;
             }
             catch (Exception exception)
@@ -117,41 +103,18 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         }
 
         /// <summary>
-        /// method to insert single userbackend
-        /// </summary>
-        /// <param name="userbackendentity">takes list of user backend entities</param>
-        public void PostBackends(UserBackendEntity userbackendentity)
-        {
-            try
-            {
-                //get's azure table instance
-                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
-                TableOperation insertOperation = TableOperation.Insert(userbackendentity);
-                UserDeviceConfigurationTable.Execute(insertOperation);
-            }
-            catch (Exception exception)
-            {
-                LoggerHelper.WriteToLog(exception + " - Error while inserting userbackend to userdeviceconfig azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
-                throw new DataAccessException();
-            }
-        }
-
-        /// <summary>
         /// method to get single userbackend
         /// </summary>
         /// <param name="userID"> takes user id as input</param>
         /// <param name="userBackendID">takes user backend id as input</param>
         /// <returns>returns user backend entity</returns>
-        public UserBackendEntity GetUserBackend(String userID, String userBackendID)
+        public UserBackendEntity GetUserBackend(string userID, string userBackendID)
         {
             try
             {
-                //get's azure table instance
-                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
-                TableOperation retrieveUser = TableOperation.Retrieve<UserBackendEntity>(string.Concat(CoreConstants.AzureTables.UserBackendPK, userID), userBackendID);                
-                TableResult retrievedResult = UserDeviceConfigurationTable.Execute(retrieveUser);               
-                return (UserBackendEntity)retrievedResult.Result;
+                //call dataprovider method to get entities from azure table
+                UserBackendEntity userbackend = DataProvider.Retrieveentity<UserBackendEntity>(CoreConstants.AzureTables.UserDeviceConfiguration, string.Concat(CoreConstants.AzureTables.UserBackendPK, userID), userBackendID);
+                return userbackend;
             }
             catch (Exception exception)
             {
@@ -167,22 +130,13 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         /// <param name="userID"> takes userid as input</param>
         /// <param name="userBackendID">takes user backend id as input</param>
         /// <returns>returns deleted user backend entity</returns>
-        public UserBackendEntity DeleteUserBackend(String userID, String userBackendID)
+        public UserBackendEntity DeleteUserBackend(string userID, string userBackendID)
         {
             try
             {
-                //get's azure table instance
-                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
-                TableOperation retrieveUserBackend = TableOperation.Retrieve<UserBackendEntity>(string.Concat(CoreConstants.AzureTables.UserBackendPK, userID), userBackendID);
-                TableResult retrievedUser = UserDeviceConfigurationTable.Execute(retrieveUserBackend);
-                UserBackendEntity deleteUserBackendEntity = (UserBackendEntity)retrievedUser.Result;
-                //if user backend exists delete it
-                if (deleteUserBackendEntity != null)
-                {
-                    TableOperation deleteOperation = TableOperation.Delete(deleteUserBackendEntity);
-                    UserDeviceConfigurationTable.Execute(deleteOperation);
-                }
-
+                //call dataprovider method to delete entities from azure table
+                UserBackendEntity deleteUserBackendEntity = DataProvider.DeleteEntity<UserBackendEntity>(CoreConstants.AzureTables.UserDeviceConfiguration, string.Concat(CoreConstants.AzureTables.UserBackendPK, userID), userBackendID);
+                
                 return deleteUserBackendEntity;
             }
             catch (Exception exception)
@@ -198,14 +152,14 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         /// </summary>
         /// <param name="UserID">takes user id as input</param>
         /// <returns>returns list of backends synch entity for user</returns>
-        public List<SynchEntity> GetAllUserBackendsSynch(String UserID)
+        public List<SynchEntity> GetAllUserBackendsSynch(string UserID)
         {
             try
             {
-                //get's azure table instance
-                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
+                //generate query to get user backend synch from azure table
                 TableQuery<SynchEntity> query = new TableQuery<SynchEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.BackendSynchPK, UserID)));
-                List<SynchEntity> alluserbackendsynch = UserDeviceConfigurationTable.ExecuteQuery(query).ToList();
+                //call dataprovider method to get entities from azure table
+                List<SynchEntity> alluserbackendsynch = DataProvider.GetEntitiesList<SynchEntity>(CoreConstants.AzureTables.UserDeviceConfiguration, query);
                 return alluserbackendsynch;
             }
             catch (Exception exception)
@@ -222,15 +176,13 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         /// <param name="UserID">takes user id as input</param>
         /// /// <param name="UserBackendID">takes user backend id as input</param>
         /// <returns>returns backend synch entity for user</returns>
-        public SynchEntity GetBackendSynch(String UserID, string UserBackendID)
+        public SynchEntity GetBackendSynch(string UserID, string UserBackendID)
         {
             try
             {
-                //get's azure table instance
-                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(CoreConstants.AzureTables.UserDeviceConfiguration);
-                TableOperation retrieveUserBackendSynch = TableOperation.Retrieve<UserBackendEntity>(string.Concat(CoreConstants.AzureTables.BackendSynchPK, UserID), UserBackendID);
-                TableResult retrievedResult = UserDeviceConfigurationTable.Execute(retrieveUserBackendSynch);
-                return (SynchEntity)retrievedResult.Result;
+                //call dataprovider method to get entities from azure table
+                SynchEntity synchentity = DataProvider.Retrieveentity<SynchEntity>(CoreConstants.AzureTables.UserDeviceConfiguration, (string.Concat(CoreConstants.AzureTables.BackendSynchPK, UserID)), UserBackendID);
+                return synchentity;
             }
             catch (Exception exception)
             {

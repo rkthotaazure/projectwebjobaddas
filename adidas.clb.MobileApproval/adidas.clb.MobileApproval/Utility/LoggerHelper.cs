@@ -11,7 +11,7 @@ namespace adidas.clb.MobileApproval.Utility
     /// </summary>
     public class LoggerHelper
     {
-        private static readonly ILog log = LogManager.GetLogger("AdoNetAppender");
+        private static readonly ILog log = LogManager.GetLogger("aiAppender");
 
         /// <summary>
         /// WriteToLog method to handle logs by log4Net based on priority and category

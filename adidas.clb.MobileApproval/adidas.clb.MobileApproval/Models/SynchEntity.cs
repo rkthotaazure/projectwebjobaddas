@@ -12,7 +12,7 @@ using Microsoft.WindowsAzure.Storage.Table;
 namespace adidas.clb.MobileApproval.Models
 {
     /// <summary>
-    /// class which implements model for synch entity.
+    /// class which implements model for userbackend synch entity.
     /// </summary>
     public class SynchEntity:TableEntity
     {
@@ -27,6 +27,17 @@ namespace adidas.clb.MobileApproval.Models
         public int retryAfter { get; set; }
         public int totalReqCount { get; set; }
         public int urgentReqCount { get; set; }
+        private DateTime? lastSynch = null;
+        public DateTime LastSynch
+        {
+            get
+            {
+                return this.lastSynch.HasValue ? this.lastSynch.Value : DateTime.Now;
+            }
+
+            set { this.lastSynch = value; }
+        }
+        public int SynchCount { get; set; }
         public SynchEntity() { }
     }
 }

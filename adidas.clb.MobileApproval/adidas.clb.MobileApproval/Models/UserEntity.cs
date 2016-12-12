@@ -31,6 +31,6 @@ namespace adidas.clb.MobileApproval.Models
         public string Email { get; set; }
         public string Domain { get; set; }
         public string DeviceName { get; set; }
-
+        public string DeviceOS { get; set; }
     }
 }
