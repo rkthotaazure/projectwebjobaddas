@@ -266,6 +266,22 @@ namespace adidas.clb.MobileApproval.Utility
             ResponseBackends.error = new ErrorDTO(code, shorttext, longtext);
             return ResponseBackends;
         }
+
+        /// <summary>
+        /// This method returns ApprovalResponseError
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="code"></param>
+        /// <param name="shorttext"></param>
+        /// <param name="longtext"></param>
+        /// <returns></returns>
+        public static ApprovalResponseDTO<T> ApprovalResponseError<T>(string code, string shorttext, string longtext)
+        {
+            var ApprovalResponse = new ApprovalResponseDTO<T>();
+            ApprovalResponse.result = default(T);
+            ApprovalResponse.error = new ErrorDTO(code, shorttext, longtext);
+            return ApprovalResponse;
+        }
     }
 }
 

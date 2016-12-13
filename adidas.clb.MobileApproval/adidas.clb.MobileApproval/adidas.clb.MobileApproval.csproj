@@ -219,10 +219,12 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App_Code\BL\Approval\ApprovalBL.cs" />
     <Compile Include="App_Code\BL\Personalization\Personalization.cs" />
     <Compile Include="App_Code\BL\Personalization\UserBackend.cs" />
     <Compile Include="App_Code\BL\Personalization\UserDevice.cs" />
     <Compile Include="App_Code\BL\Synch\Synch.cs" />
+    <Compile Include="App_Code\DAL\Approval\ApprovalDAL.cs" />
     <Compile Include="App_Code\DAL\Personalization\PersonalizationDAL.cs" />
     <Compile Include="App_Code\DAL\Personalization\UserBackendDAL.cs" />
     <Compile Include="App_Code\DAL\Personalization\UserDeviceDAL.cs" />
@@ -236,10 +238,15 @@
     <Compile Include="Exceptions\BusinessLogicException.cs" />
     <Compile Include="Exceptions\CoreException.cs" />
     <Compile Include="Exceptions\DataAccessException.cs" />
+    <Compile Include="Exceptions\ServiceLayerException.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\APIController.cs" />
+    <Compile Include="Helpers\AzureQueues.cs" />
+    <Compile Include="Helpers\UrlSettings.cs" />
     <Compile Include="Models\ApprovalEntity.cs" />
+    <Compile Include="Models\ApprovalQuery.cs" />
     <Compile Include="Models\ApprovalRequestDTO.cs" />
     <Compile Include="Models\ApproverDTO.cs" />
     <Compile Include="Models\ApproverEntity.cs" />
