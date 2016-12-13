@@ -29,7 +29,7 @@ namespace adidas.clb.job.RequestsUpdate.Utility
         // Azure queue Constants
         public struct AzureQueues
         {
-            public const string RequsetUpdateQueue = "requsetupdate";
+            public const string RequsetUpdateQueue = "requestupdateinputqueue";
             public const string RequsetPDFQueue = "requestpdf";
             public const string Trace = "Trace";
             public const string Error = "Error";
