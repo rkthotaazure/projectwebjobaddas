@@ -40,6 +40,7 @@ namespace adidas.clb.MobileApproval.Models
         public Boolean BackendConfirmed { get; set; }
         public int Missingconfirmations { get; set; }
         public Boolean Backendoverwritten { get; set; }
+        public string Comment { get; set; }
     }
 
     public class ApprovalDTO
@@ -70,5 +71,6 @@ namespace adidas.clb.MobileApproval.Models
         public Boolean BackendConfirmed { get; set; }
         public int Missingconfirmations { get; set; }
         public Boolean Backendoverwritten { get; set; }
+        public string Comment { get; set; }
     }
 }
