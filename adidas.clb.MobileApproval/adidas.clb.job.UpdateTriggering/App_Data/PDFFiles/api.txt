@@ -1,0 +1,185 @@
+
+GetAllRequestDetailsFromCAR/acharsum/1461283200
+
+http://localhost:62587/api/BackendAgentCarAPI/acharsum/946684800
+
+http://localhost:62587/api/BackendAgentStoreAPI/vermaank/946684800
+
+http://mobbackendservices.azurewebsites.net/api/GetAllPendingTasksFromCAR/acharsum/946684800
+
+http://mobbackendservices.azurewebsites.net/api/GetAllPendingTasksFromStore/vermaank/946684800
+
+
+http://mobbackendservices.azurewebsites.net/api/GetAllPendingTasksFromCAR/acharsum/946684800
+
+
+
+http://localhost:62587/api/GetAllPendingTasksFromCAR/acharsum/946684800
+http://localhost:62587/api/GetAllPendingTasksFromCAR/acharsum/946684800/ApprovalRequest
+
+http://localhost:62587/api/GetAllPendingTasksFromStore/vermaank/946684800
+
+Kilaru, Phani Malathi [External] <phani.malathi.kilaru@externals.adidas-group.com>
+
+-	User ID : adidevelopment@hotmail.com
+-	Password : adidas@123
+
+
+ Thota, Ramakrishna [External]
+Ramakrishna.Thota@externals.adidas-group.com
+
+
+
+
+
+
+                        //foreach (DataRow row in dsPendingTasks.Tables[0].Rows)
+                        //{
+                        //    //Adding all requests from datatable to GenericInfoModel list.
+                        //    lstStorePendingRequests.Add(new GenericInfoModel()
+                        //    {
+                        //        CaseNumber = (row["DisplayBPMID"] != null) ? Convert.ToString(row["DisplayBPMID"]) : string.Empty,
+                        //        CaseID = (row["CaseID"] != null) ? Convert.ToInt64(row["CaseID"]) : 0,
+                        //        RequestInitiator = (row["userName"] != null) ? Convert.ToString(row["userName"]) : string.Empty,
+                        //        RequestInitiationTime = (row["CaseCreationDate"] != null) ? Convert.ToDateTime(row["CaseCreationDate"]) : DateTime.Now,
+                        //        Name = (row["RequestName"] != null) ? Convert.ToString(row["RequestName"]) : string.Empty,
+                        //        Description = (row["KeyMessage"] != null) ? Convert.ToString(row["KeyMessage"]) : string.Empty
+                        //    });
+                        //}
+ 
+
+//List<BackendRequestModel> ICARBackendRequestsBAL.GetPendingRequestFromALLBackend(InputParameterDetails objinputparamDetails)
+        //{
+        //    List<BackendRequestModel> lstAllbackendrequests = new List<BackendRequestModel>();
+        //    try
+        //    {
+                               
+        //        List<GenericInfoModel> lstbackendcardetails = new List<GenericInfoModel>();
+        //        lstbackendcardetails = ObjIbackendCarDAL.GetPendingRequestFromBackend_CAR(objinputparamDetails.UserName, objinputparamDetails.LastUpdatedFetchTimeStamp);
+        //        if (lstbackendcardetails != null)
+        //        {
+        //            lstAllbackendrequests.Add(new BackendRequestModel()
+        //            {
+        //                BackendName = CoreConstants.BackendAgent_CAR,
+        //                PendingRequestsCount = lstbackendcardetails.Count,
+        //                RequestDetails = lstbackendcardetails,
+        //                LastFetchTime = DateTime.Now
+        //            });
+        //        }
+
+        //    }
+        //    catch (BusinessLogicException balException)
+        //    {
+
+        //    }
+        //    return lstAllbackendrequests;
+        //}
+
+
+ //foreach (DataRow row in dsPendingTasks.Tables[0].Rows)
+                        //{
+
+                        //    //Adding all requests from datatable to GenericInfoModel list.
+                        //    lstCarPendingRequests.Add(new GenericInfoModel()
+                        //    {
+                        //        CaseNumber = (row["CaseNumber"] != null) ? Convert.ToString(row["CaseNumber"]) : string.Empty,
+                        //        CaseID = (row["CaseId"] != null) ? Convert.ToInt64(row["CaseId"]) : 0,
+                        //        RequestInitiator = (row["CreatorUserName"] != null) ? Convert.ToString(row["CreatorUserName"]) : string.Empty,
+                        //        RequestInitiationTime = (row["DateofRequest"] != null) ? Convert.ToDateTime(row["DateofRequest"]) : DateTime.Now,
+                        //        Name = (row["Name"] != null) ? Convert.ToString(row["Name"]) : string.Empty,
+                        //        Description = (row["Description"] != null) ? Convert.ToString(row["Description"]) : string.Empty
+                        //    });
+                        //}
+
+
+
+ A network-related or instance-specific error occurred while establishing a connection to SQL Server. The server was not found or was not accessible. Verify that the instance name is correct and that SQL Server is configured to allow remote connections. (provider: SQL Network Interfaces, error: 26 - Error Locating Server/Instance Specified)
+
+
+
+
+
+
+ObjUserBackend.UserName = userName;
+                    ObjUserBackend.BackendName = CoreConstants.BackendAgent_CAR;
+                    ObjApprovalRequest = new ApprovalRequestModel();
+                    
+                    if (dsPendingTasks.Tables[0] != null && dsPendingTasks.Tables[0].Rows.Count > 0)
+                    {
+                        foreach (DataRow row in dsPendingTasks.Tables[0].Rows)
+                        {
+                            objApproval = new Approval()
+                            {
+                                Created = !string.IsNullOrEmpty(Convert.ToString(row["DateofRequest"])) ? Convert.ToDateTime(row["DateofRequest"]) : DateTime.Now,
+                                IsUrgent = !string.IsNullOrEmpty(Convert.ToString(row["IsUrgent"])) ? Convert.ToBoolean(row["IsUrgent"]) : false,
+                                DueDate = !string.IsNullOrEmpty(Convert.ToString(row["EstimatedCompletionDate"])) ? Convert.ToDateTime(row["EstimatedCompletionDate"]) : DateTime.Now,
+                                DecisionDate = !string.IsNullOrEmpty(Convert.ToString(row["EstimatedStartDate"])) ? Convert.ToDateTime(row["EstimatedStartDate"]) : DateTime.Now,
+                                DecisionComment = !string.IsNullOrEmpty(Convert.ToString(row["Description"])) ? Convert.ToString(row["Description"]) : string.Empty,
+                                Status = !string.IsNullOrEmpty(Convert.ToString(row["CurrentCaseStatus"])) ? Convert.ToString(row["CurrentCaseStatus"]) : string.Empty,
+                                IsbackendConfirmed = (dsPendingTasks.Tables[0].Columns.Contains("IsbackendConfirmed") && !string.IsNullOrEmpty(Convert.ToString(row["IsbackendConfirmed"]))) ? Convert.ToBoolean(row["IsbackendConfirmed"]) : false
+
+                            };
+                            ObjRequester = new Requester()
+                            {
+                                Name = !string.IsNullOrEmpty(Convert.ToString(row["CreatorUserName"])) ? Convert.ToString(row["CreatorUserName"]) : string.Empty,
+                                UserID = !string.IsNullOrEmpty(Convert.ToString(row["Requestor"])) ? Convert.ToString(row["Requestor"]) : string.Empty
+                            };
+                            ObjRequest = new Request()
+                            {
+                                RequestID = !string.IsNullOrEmpty(Convert.ToString(row["CaseId"])) ? Convert.ToString(row["CaseId"]) : string.Empty,
+                                Title = !string.IsNullOrEmpty(Convert.ToString(row["Name"])) ? Convert.ToString(row["Name"]) : string.Empty,
+                                Created = !string.IsNullOrEmpty(Convert.ToString(row["DateofRequest"])) ? Convert.ToDateTime(row["DateofRequest"]) : DateTime.Now,
+                                Status = !string.IsNullOrEmpty(Convert.ToString(row["CurrentCaseStatus"])) ? Convert.ToString(row["CurrentCaseStatus"]) : string.Empty,
+                                ECARDetails = !string.IsNullOrEmpty(Convert.ToString(row["eCARDetails"])) ? Convert.ToInt32(row["eCARDetails"]) : 0,
+                            };
+
+                            if (dsPendingTasks.Tables[1] != null && dsPendingTasks.Tables[1].Rows.Count > 0)
+                            {
+                                foreach (DataRow approverrow in dsPendingTasks.Tables[1].Rows)
+                                {
+                                    if (row["eCARDetails"] == approverrow["eCARDetails"])
+                                    {
+                                        ObjApproverDetails = new User()
+                                        {
+                                            UserID = !string.IsNullOrEmpty(Convert.ToString(approverrow["Approver"])) ? Convert.ToString(approverrow["Approver"]) : string.Empty,
+                                            Name = !string.IsNullOrEmpty(Convert.ToString(approverrow["UserName"])) ? Convert.ToString(approverrow["UserName"]) : string.Empty
+                                        };
+                                        objApprover = new Approver()
+                                        {
+                                            ECARDetails = !string.IsNullOrEmpty(Convert.ToString(approverrow["eCARDetails"])) ? Convert.ToInt32(approverrow["eCARDetails"]) : 0,
+                                            Order = !string.IsNullOrEmpty(Convert.ToString(approverrow["ApproverOrder"])) ? Convert.ToInt32(approverrow["ApproverOrder"]) : 0,
+                                            Created = !string.IsNullOrEmpty(Convert.ToString(approverrow["DateofRequest"])) ? Convert.ToDateTime(approverrow["Name"]) : DateTime.Now,
+                                            UserDetails = ObjApproverDetails,
+                                            Status = !string.IsNullOrEmpty(Convert.ToString(approverrow["Decision"])) ? Convert.ToString(approverrow["Decision"]) : string.Empty,
+                                            DueDate = !string.IsNullOrEmpty(Convert.ToString(approverrow["EstimatedCompletionDate"])) ? Convert.ToDateTime(approverrow["EstimatedCompletionDate"]) : DateTime.Now,
+                                            DecisionDate = !string.IsNullOrEmpty(Convert.ToString(approverrow["ActionDate"])) ? Convert.ToDateTime(approverrow["ActionDate"]) : DateTime.Now
+                                            //Removed = DateTime.Now,
+
+                                        };
+                                        break;
+                                    }
+                                   
+                                }
+
+                            }
+
+                            ObjApprovalRequest = new ApprovalRequestModel()
+                            {
+                                ApprovalRequestID = !string.IsNullOrEmpty(Convert.ToString(row["CaseNumber"])) ? Convert.ToString(row["CaseNumber"]) : string.Empty,
+                                UserBackendDetails = ObjUserBackend,
+                                ApprovalDetails = objApproval,
+                                RequestDetails = ObjRequest,
+                                RequesterDetails = ObjRequester,
+                                FieldsDetails = null,
+                                ApproverDetails = objApprover,
+                                RetryAfter = (dsPendingTasks.Tables[0].Columns.Contains("RetryAfter") && !string.IsNullOrEmpty(Convert.ToString(row["RetryAfter"]))) ? Convert.ToInt32(row["RetryAfter"]) : 0
+
+                            };
+                            
+                        }
+                        
+
+
+
+
+                    }
