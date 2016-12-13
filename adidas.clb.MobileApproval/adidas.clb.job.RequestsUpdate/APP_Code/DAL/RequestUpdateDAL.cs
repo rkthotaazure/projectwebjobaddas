@@ -26,22 +26,26 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
     /// </summary>
     public class RequestUpdateDAL
     {
-
+        static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
         /// <summary>
         /// method to add/upadte Request entity to azure table
         /// </summary>
         /// <param name="request">takes request entity as input</param>
         public void AddUpdateRequest(RequsetEntity request)
         {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
             try
-            {                
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //call dataprovider method to insert entity into azure table
                 DataProvider.InsertReplaceEntity<RequsetEntity>(CoreConstants.AzureTables.RequestTransactions, request);
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while inserting request into requestTransactions azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error while inserting request into requestTransactions azure table in DAL", exception, callerMethodName);                
                 throw new DataAccessException();
             }
         }
@@ -52,15 +56,19 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
         /// <param name="approval">takes approval entity as input</param>
         public void AddUpdateApproval(ApprovalEntity approval)
         {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
             try
-            {                
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //call dataprovider method to insert entity into azure table
                 DataProvider.InsertReplaceEntity<ApprovalEntity>(CoreConstants.AzureTables.RequestTransactions, approval);
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while inserting approval into requestTransactions azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error while inserting approval into requestTransactions azure table in DAL ", exception, callerMethodName);                
                 throw new DataAccessException();
             }
         }
@@ -71,15 +79,19 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
         /// <param name="approvers">takes approver entities as input</param>
         public void AddApprovers(List<ApproverEntity> approvers)
         {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
             try
-            {                
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //call dataprovider method to add entities to azure table
                 DataProvider.AddEntities(CoreConstants.AzureTables.RequestTransactions, approvers);
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while inserting approvers into requestTransactions azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error while inserting approvers into requestTransactions azure table in DAL ", exception, callerMethodName);                
                 throw new DataAccessException();
             }
         }
@@ -90,8 +102,12 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
         /// <param name="requestid"></param>
         public void RemoveExistingApprovers(string requestid)
         {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //generate query to retrive approvers 
                 TableQuery<ApproverEntity> query = new TableQuery<ApproverEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.ApproverPK,requestid)));
                 //call dataprovider method to get entities from azure table
@@ -101,8 +117,8 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while remove existing approvers into requestTransactions azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error while remove existing approvers into requestTransactions azure table in DAL ", exception, callerMethodName);                
                 throw new DataAccessException();
             }
         }
@@ -113,23 +129,31 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
         /// <param name="fields">takes fields entities as input</param>
         public void AddFields(List<FieldEntity> fields)
         {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
             try
-            {                
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //call dataprovider method to add entities to azure table
                 DataProvider.AddEntities(CoreConstants.AzureTables.RequestTransactions, fields);
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while inserting fields into requestTransactions azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error while inserting fields into requestTransactions azure table in DAL", exception, callerMethodName);                
                 throw new DataAccessException();
             }
         }
 
         public void RemoveExistingFields(string requestid)
         {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //generate query to retrive existing fileds 
                 TableQuery<FieldEntity> query = new TableQuery<FieldEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.FieldPK, requestid)));
                 //call dataprovider method to get entities from azure table
@@ -139,48 +163,11 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while removing existing fields into requestTransactions azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error while removing existing fields into requestTransactions azure table in DAL", exception, callerMethodName);                
                 throw new DataAccessException();
             }
-        }
-
-        /// <summary>
-        /// method to add Request PDF to Blob
-        /// </summary>
-        /// <param name="urivalue">takes temp blob uri as input</param>
-        /// <returns>returns request pdf blob uri</returns>
-        public Uri AddRequestPDFToBlob(Uri urivalue, string RequestID)
-        {
-            try
-            {
-                //storage credentials for temp storage blob
-                StorageCredentials storageCredentials = new StorageCredentials(CloudConfigurationManager.GetSetting(CoreConstants.AzureBlob.AzureTempBlobStorageAccountName), CloudConfigurationManager.GetSetting(CoreConstants.AzureBlob.AzureTempBlobStorageAccountKey));
-                //get temp storage blob with uri
-                CloudBlockBlob blob = new CloudBlockBlob(urivalue, storageCredentials);
-                //read pdf from temp storage blob
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    blob.DownloadToStream(ms);
-                    //get Requet update blob storage instance                
-                    CloudBlobContainer container = DataProvider.GetAzureBlobContainerInstance(CoreConstants.AzureBlob.BlobRequsetPDF);
-                    string blobname = string.Concat(CoreConstants.AzureBlob.RequestPDF, RequestID, CoreConstants.AzureBlob.RequestPDFExtension);
-                    CloudBlockBlob targetblob = container.GetBlockBlobReference(blobname);
-                    //properties to upload to blob as type PDF
-                    targetblob.Properties.ContentType = CoreConstants.AzureBlob.PDFContentType;
-                    ms.Position = 0;
-                    //upload request pdf to blob
-                    targetblob.UploadFromStream(ms);
-                    return targetblob.Uri;
-                }
-            }
-            catch (Exception exception)
-            {
-                LoggerHelper.WriteToLog(exception + " - Error while inserting request update PDF into requestpdf azure blob in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
-                throw new DataAccessException();
-            }
-        }
+        }        
 
         /// <summary>
         /// method to add Request PDF uri to Request entity
@@ -188,8 +175,12 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
         /// <param name="urivalue">takes temp blob uri as input</param>        
         public void AddPDFUriToRequest(Uri urivalue, string userID,string RequestID)
         {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
             try
-            {                
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //call dataprovider method to get entities from azure table
                 RequsetEntity updateEntity = DataProvider.Retrieveentity<RequsetEntity>(CoreConstants.AzureTables.RequestTransactions, string.Concat(CoreConstants.AzureTables.RequestsPK, userID), RequestID);
                 //check for null
@@ -204,8 +195,8 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while updating request update PDF uri into request entitty in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error while updating request update PDF uri into request entitty in DAL", exception, callerMethodName);                
                 throw new DataAccessException();
             }
         }
@@ -218,16 +209,20 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
         /// <returns>returns user backend</returns>
         public UserBackendEntity GetUserBackend(string userid, string backendid)
         {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
             try
-            {                
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //call dataprovider method to get entities from azure table
                 UserBackendEntity userbackend = DataProvider.Retrieveentity<UserBackendEntity>(CoreConstants.AzureTables.UserDeviceConfiguration, string.Concat(CoreConstants.AzureTables.UserBackendPK, userid), backendid);                
                 return userbackend;
             }
             catch (Exception exception)
-            {                
-                LoggerHelper.WriteToLog(exception + " - Error while getting userbackend entity in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+            {
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error while getting userbackend entity in DAL", exception, callerMethodName);                
                 throw new DataAccessException();
             }
         }
@@ -240,8 +235,12 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
         /// <returns>returns count of open requets per user backend</returns>
         public int GetOpenRequestsCount(string userid, string backendid)
         {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
             try
-            {                
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //adding filters to get count of open requests
                 string partitionFilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.RequestsPK, userid));
                 string rowfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.BackendId, QueryComparisons.Equal, backendid);
@@ -261,8 +260,8 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while getting open requets count in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error while getting open requets count in DAL", exception, callerMethodName);                
                 throw new DataAccessException();
             }
 
@@ -276,8 +275,12 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
         /// <returns>returns count of open approvals per user backend</returns>
         public int GetOpenApprovalsCount(string userid, string backendid)
         {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
             try
-            {                
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //adding filters to get count of open approvals
                 string partitionFilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.ApprovalPK,userid));
                 string rowfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.BackendId, QueryComparisons.Equal, backendid);
@@ -297,8 +300,8 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while getting open approvals count in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error while getting open approvals count in DAL", exception, callerMethodName);                
                 throw new DataAccessException();
             }
         }
@@ -311,8 +314,12 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
         /// <returns>returns count of urgent approvals per user backend</returns>
         public int GetUrgentApprovalsCount(string userid, string backendid)
         {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
             try
-            {                
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //adding filters to get count of open approvals
                 string partitionFilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.ApprovalPK, userid));
                 string rowfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.BackendId, QueryComparisons.Equal, backendid);
@@ -332,8 +339,8 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while getting urgent approvals count in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error while getting urgent approvals count in DAL", exception, callerMethodName);                
                 throw new DataAccessException();
             }
         }
@@ -344,15 +351,19 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
         /// <param name="userbackend">takes userbackend entity as input</param>
         public void UpdateUserBackend(UserBackendEntity userbackend)
         {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
             try
-            {                
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //call dataprovider method to update entity to azure table
                 DataProvider.UpdateEntity<UserBackendEntity>(CoreConstants.AzureTables.UserDeviceConfiguration, userbackend);
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while updating userbackend to azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error while updating userbackend to azure table in DAL", exception, callerMethodName);                
                 throw new DataAccessException();
             }
         }
@@ -364,16 +375,20 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
         /// <returns>returns backend entity</returns>
         public BackendEntity GetBackend(string backendid)
         {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
             try
-            {                
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //call dataprovider method to retrieve entity from azure table
                 BackendEntity backend = DataProvider.Retrieveentity<BackendEntity>(CoreConstants.AzureTables.ReferenceData, CoreConstants.AzureTables.BackendPK, backendid);
                 return backend;
             }
             catch (Exception exception)
-            {                
-                LoggerHelper.WriteToLog(exception + " - Error while getting backend from azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+            {
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error while getting backend from azure table in DAL", exception, callerMethodName);                
                 throw new DataAccessException();
             }
         }
@@ -384,15 +399,19 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
         /// <param name="backend">takes backend entity as input</param>
         public void UpdateBackend(BackendEntity backend)
         {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //call dataprovider method to update entity to azure table
                 DataProvider.UpdateEntity<BackendEntity>(CoreConstants.AzureTables.ReferenceData, backend);
             }
             catch (Exception exception)
-            {                
-                LoggerHelper.WriteToLog(exception + " - Error while updating backend to azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+            {
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error while updating backend to azure table in DAL", exception, callerMethodName);                
                 throw new DataAccessException();
             }
         }

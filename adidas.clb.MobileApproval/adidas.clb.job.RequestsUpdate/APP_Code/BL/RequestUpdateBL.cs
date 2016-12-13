@@ -22,14 +22,19 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
     /// </summary>
     public class RequestUpdateBL
     {
+        static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
         /// <summary>
         /// BL method to add request entity into azure table
         /// </summary>
         /// <param name="request">takes request as input</param>
         public void AddUpdateRequest(BackendRequest backendrequest, string UserID, string backendId)
         {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //generating request entity from input request obj by adding partitionkey and rowkey
                 RequsetEntity requestentity = DataProvider.ResponseObjectMapper<RequsetEntity, Request>(backendrequest.requset);
                 requestentity.PartitionKey = string.Concat(CoreConstants.AzureTables.RequestsPK, UserID);
@@ -47,8 +52,8 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while inserting request : "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error in BL while inserting request", exception, callerMethodName);                
                 throw new BusinessLogicException();
             }
         }
@@ -59,8 +64,12 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
         /// <param name="request">takes request as input</param>
         public void AddUpdateApproval(Request request, string UserID, string backendId)
         {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //generating approval entity from input request obj by adding partitionkey and rowkey
                 ApprovalEntity approvalentity = new ApprovalEntity();
                 approvalentity.PartitionKey = string.Concat(CoreConstants.AzureTables.ApprovalPK,UserID);
@@ -78,8 +87,8 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while inserting Approval : "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error in BL while inserting Approval", exception, callerMethodName);                
                 throw new BusinessLogicException();
             }
         }
@@ -90,8 +99,12 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
         /// <param name="requsetid">takes requestid as input</param>
         public void AddUpdateApprovers(List<Approvers> approvers, string requsetid)
         {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 List<ApproverEntity> approversListEntity = new List<ApproverEntity>();
                 //generating approvers list entities by adding partitionkey and rowkey
                 foreach (Approvers approver in approvers)
@@ -113,8 +126,8 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while inserting approvers : "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error in BL while inserting Approvers", exception, callerMethodName);
                 throw new BusinessLogicException();
             }
         }
@@ -127,8 +140,12 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
         /// <param name="requestid">takes requestid as input</param>
         public void AddUpdateFields(List<Field> genericInfoFields, List<Field> overviewFields, string requestid)
         {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 List<FieldEntity> listfiledsentity = new List<FieldEntity>();
                 //generating fields list entities by adding partitionkey and rowkey
                 foreach (Field field in genericInfoFields)
@@ -158,46 +175,24 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while inserting fields : "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error in BL while inserting fields", exception, callerMethodName);
                 throw new BusinessLogicException();
             }
         }
-
-        /// <summary>
-        /// method to add Request PDF to Blob
-        /// </summary>
-        /// <param name="urivalue">takes temp blob uri as input</param>
-        /// <returns>returns uri of pdf stored in blob</returns>
-        public Uri AddRequestPDFToBlob(Uri urivalue, string RequestID)
-        {
-            try
-            {
-                RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
-                ////calling DAL method to add Requset PDF to blob
-                Uri PDFuri = requestupdatedal.AddRequestPDFToBlob(urivalue, RequestID);
-                return PDFuri;
-            }
-            catch (DataAccessException DALexception)
-            {
-                throw DALexception;
-            }
-            catch (Exception exception)
-            {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while inserting pdf in blob : "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
-                throw new BusinessLogicException();
-            }
-        }
-
+        
         /// <summary>
         /// method to add Request PDF uri to Request entity
         /// </summary>
         /// <param name="urivalue">takes temp blob uri as input</param>        
         public void AddPDFUriToRequest(Uri urivalue, string UserId,string RequestID)
         {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
                 //calling DAL method to add Requset PDF uri to request entity
                 requestupdatedal.AddPDFUriToRequest(urivalue, UserId, RequestID);
@@ -208,8 +203,8 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while updating pdf uri in request entity : "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error in BL while updating pdf uri in request entity", exception, callerMethodName);                
                 throw new BusinessLogicException();
             }
         }
@@ -221,8 +216,12 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
         /// <returns>returns size of request object</returns>
         public int CalculateRequestSize(BackendRequest backendrequest)
         {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //converting object to stream
                 using (Stream stream = new MemoryStream())
                 {
@@ -238,8 +237,8 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while caliculating request size: "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error in BL while caliculating request size", exception, callerMethodName);                
                 throw new BusinessLogicException();
             }
         }
@@ -254,8 +253,12 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
         /// <param name="requestscount">takes request count as input</param>
         public void UpdateUserBackend(string userId, string BackendId, int Totalrequestssize, int TotalRequestlatency, int requestscount)
         {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //calling DAL method to add update userbackend entity
                 RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
                 UserBackendEntity userbackend = requestupdatedal.GetUserBackend(userId, BackendId);
@@ -287,8 +290,8 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while updating userbackend: "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error in BL while updating userbackend", exception, callerMethodName);                
                 throw new BusinessLogicException();
             }
         }
@@ -316,8 +319,12 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
         /// <param name="requestscount">takes request count as input</param>
         public void UpdateBackend(string BackendId, int Totalrequestssize, int TotalRequestlatency, int requestscount)
         {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
                 //calling dal method to get backend entity to be updated
                 BackendEntity backend = requestupdatedal.GetBackend(BackendId);
@@ -341,8 +348,8 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while updating userbackend: "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error in BL while updating backend", exception, callerMethodName);                
                 throw new BusinessLogicException();
             }
         }

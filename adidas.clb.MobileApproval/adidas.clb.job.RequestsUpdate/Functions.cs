@@ -25,8 +25,12 @@ namespace adidas.clb.job.RequestsUpdate
         // on an Azure Queue called RequsetUpdate.
         public static void ProcessRequsetQueueMessage([QueueTrigger(CoreConstants.AzureQueues.RequsetUpdateQueue)] string message, TextWriter log)
         {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //deserialize Queue message to Requests 
                 RequestsUpdateData requestsdata = JsonConvert.DeserializeObject<RequestsUpdateData>(message);
                 List<BackendRequest> backendrequestslist = requestsdata.requests;
@@ -75,8 +79,8 @@ namespace adidas.clb.job.RequestsUpdate
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - exception while processing queue message into entities : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error in Queue trigger while processing request", exception, callerMethodName);
                 log.WriteLine(exception.Message);
             }
         }
@@ -85,13 +89,15 @@ namespace adidas.clb.job.RequestsUpdate
         // on an Azure Queue called requestpdf.
         public static void ProcessRequsetPDFQueueMessage([QueueTrigger(CoreConstants.AzureQueues.RequsetPDFQueue)] string message, TextWriter log)
         {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //deserialize Queue message to get PDF uri 
                 RequestPDF requestPDFdata = JsonConvert.DeserializeObject<RequestPDF>(message);
-                RequestUpdateBL requestupdatebl = new RequestUpdateBL();
-                //calling BL method to add Request PDF to blob
-                //Uri PDFuri = requestupdatebl.AddRequestPDFToBlob(new Uri(requestPDFdata.PDFUri),requestPDFdata.RequestID);
+                RequestUpdateBL requestupdatebl = new RequestUpdateBL();                                
                 Uri PDFuri = new Uri(requestPDFdata.PDFUri);
                 //updating request entity with pdf uri
                 requestupdatebl.AddPDFUriToRequest(PDFuri, requestPDFdata.UserId,requestPDFdata.RequestID);
@@ -108,8 +114,8 @@ namespace adidas.clb.job.RequestsUpdate
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - exception while processing queue message into uri to pick pdf from temp blob and upload in requetupdate blob : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error in Queue trigger while processing pdf uri", exception, callerMethodName);
                 log.WriteLine(exception.Message);
             }
         }
