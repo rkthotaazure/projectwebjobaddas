@@ -17,7 +17,7 @@
     <AssemblyName>adidas.clb.MobileApprovalUI</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
-    <IISExpressSSLPort />
+    <IISExpressSSLPort>44317</IISExpressSSLPort>
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
@@ -25,6 +25,7 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <ApplicationInsightsResourceId>/subscriptions/85610853-3bb2-4371-a47a-73e65eff5d10/resourcegroups/Default-ApplicationInsights-CentralUS/providers/microsoft.insights/components/adidas.clb.MobileApprovalUI</ApplicationInsightsResourceId>
+    <WebProject_DirectoryAccessLevelKey>1</WebProject_DirectoryAccessLevelKey>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -44,6 +45,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.0.0\lib\net45\EntityFramework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.0.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
       <Private>True</Private>
@@ -80,6 +89,10 @@
       <HintPath>..\packages\Microsoft.ApplicationInsights.2.1.0\lib\net45\Microsoft.ApplicationInsights.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.Azure.ActiveDirectory.GraphClient, Version=2.1.10.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Azure.ActiveDirectory.GraphClient.2.1.1\lib\portable-net4+sl5+win+wpa+wp8\Microsoft.Azure.ActiveDirectory.GraphClient.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.Azure.KeyVault.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Azure.KeyVault.Core.1.0.0\lib\net40\Microsoft.Azure.KeyVault.Core.dll</HintPath>
       <Private>True</Private>
@@ -101,8 +114,24 @@
       <HintPath>..\packages\Microsoft.Data.Services.Client.5.6.4\lib\net40\Microsoft.Data.Services.Client.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.IdentityModel.Clients.ActiveDirectory, Version=2.28.2.795, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IdentityModel.Clients.ActiveDirectory.2.28.2\lib\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms, Version=2.28.2.795, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IdentityModel.Clients.ActiveDirectory.2.28.2\lib\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Protocol.Extensions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IdentityModel.Protocol.Extensions.1.0.0\lib\net45\Microsoft.IdentityModel.Protocol.Extensions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.Owin, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Owin.3.0.1\lib\net45\Microsoft.Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Host.SystemWeb, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Host.SystemWeb.3.0.1\lib\net45\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Owin.Security, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -113,6 +142,10 @@
       <HintPath>..\packages\Microsoft.Owin.Security.ActiveDirectory.3.0.1\lib\net45\Microsoft.Owin.Security.ActiveDirectory.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.Owin.Security.Cookies, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.Cookies.3.0.1\lib\net45\Microsoft.Owin.Security.Cookies.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.Owin.Security.Jwt, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Owin.Security.Jwt.3.0.1\lib\net45\Microsoft.Owin.Security.Jwt.dll</HintPath>
       <Private>True</Private>
@@ -120,6 +153,18 @@
     <Reference Include="Microsoft.Owin.Security.OAuth, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Owin.Security.OAuth.3.0.1\lib\net45\Microsoft.Owin.Security.OAuth.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security.OpenIdConnect, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.OpenIdConnect.3.0.1\lib\net45\Microsoft.Owin.Security.OpenIdConnect.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Client, Version=16.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Microsoft.SharePoint.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Client.Runtime, Version=16.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Microsoft.SharePoint.Client.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.WindowsAzure.Configuration, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.WindowsAzure.ConfigurationManager.3.1.0\lib\net40\Microsoft.WindowsAzure.Configuration.dll</HintPath>
@@ -138,12 +183,18 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Data.Services.Client" />
+    <Reference Include="System.IdentityModel" />
     <Reference Include="System.IdentityModel.Tokens.Jwt, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\System.IdentityModel.Tokens.Jwt.4.0.0\lib\net45\System.IdentityModel.Tokens.Jwt.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Net.Http.WebRequest" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Spatial, Version=5.6.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Spatial.5.6.4\lib\net40\System.Spatial.dll</HintPath>
       <Private>True</Private>
@@ -157,6 +208,14 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Http.Common, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Web.Http.Common.4.0.20126.16343\lib\net40\System.Web.Http.Common.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Web" />
@@ -191,20 +250,43 @@
   <ItemGroup>
     <Content Include="ApprovalDetails.html" />
     <Content Include="ApprovalTaskInfo.html" />
+    <Content Include="Content\angular-material.min.css" />
+    <Content Include="Content\AppName.css" />
+    <Content Include="Content\bootstrap-flex.css" />
+    <Content Include="Content\bootstrap-flex.min.css" />
+    <Content Include="Content\bootstrap-grid.css" />
+    <Content Include="Content\bootstrap-grid.min.css" />
+    <Content Include="Content\bootstrap-reboot.css" />
+    <Content Include="Content\bootstrap-reboot.min.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\Site.css" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-Bold.svg" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-Cn.svg" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-CnBold.svg" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-CnMedium.svg" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-Medium.svg" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-Regular.svg" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
-    <Content Include="Home.html" />
-    <Content Include="LandingPage.html" />
+    <Content Include="Images\AdidasLogo.png" />
+    <Content Include="Images\background1.jpg" />
+    <Content Include="Images\background2.jpg" />
+    <Content Include="Images\background3.jpg" />
+    <Content Include="Images\remove.png" />
+    <Content Include="Images\newyork.jpg" />
+    <Content Include="Images\paris.jpg" />
+    <Content Include="Images\sanfran.jpg" />
+    <Content Include="Images\Search.PNG" />
     <Content Include="Scripts\app\controllers\common.js" />
-    <Content Include="Scripts\app\controllers\MobileApprovalApp.js" />
-    <Content Include="Scripts\app\controllers\UserRegistrationController.js" />
+    <Content Include="Scripts\app\controllers\GMController.js" />
     <Content Include="Scripts\app\js\adal-angular.js" />
     <Content Include="Scripts\app\js\adal.js" />
     <Content Include="Scripts\app\js\ai.0.22.19-build00125.js" />
     <Content Include="Scripts\app\js\ai.0.22.19-build00125.min.js" />
+    <Content Include="Scripts\app\js\angular-animate.min.js" />
+    <Content Include="Scripts\app\js\angular-material.js" />
+    <Content Include="Scripts\app\js\angular-material.min.js" />
     <Content Include="Scripts\app\js\angular-resource.js" />
     <Content Include="Scripts\app\js\angular-resource.min.js" />
     <Content Include="Scripts\app\js\angular-route.js" />
@@ -213,34 +295,113 @@
     <Content Include="Scripts\app\js\angular.min.js" />
     <Content Include="Scripts\app\js\bootstrap.js" />
     <Content Include="Scripts\app\js\bootstrap.min.js" />
+    <Content Include="Content\bootstrap-flex.css.map" />
+    <Content Include="Content\bootstrap-flex.min.css.map" />
+    <Content Include="Content\bootstrap-grid.css.map" />
+    <Content Include="Content\bootstrap-grid.min.css.map" />
+    <Content Include="Content\bootstrap-reboot.css.map" />
+    <Content Include="Content\bootstrap-reboot.min.css.map" />
+    <Content Include="Content\bootstrap.css.map" />
+    <Content Include="Content\bootstrap.min.css.map" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-Bold.eot" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-Bold.ttf" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-Bold.woff" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-Bold.woff2" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-BoldItalic.ttf" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-Cn.eot" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-Cn.ttf" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-Cn.woff" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-Cn.woff2" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-CnBold.eot" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-CnBold.ttf" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-CnBold.woff" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-CnBold.woff2" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-CnBoldItalic.ttf" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-CnItalic.ttf" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-CnMedium.eot" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-CnMedium.ttf" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-CnMedium.woff" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-CnMedium.woff2" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-CnMediumItalic.ttf" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-Italic.ttf" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-Medium.eot" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-Medium.ttf" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-Medium.woff" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-Medium.woff2" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-MediumItalic.ttf" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-Regular.eot" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-Regular.ttf" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-Regular.woff" />
+    <Content Include="fonts\AdiHausDin\AdihausDIN-Regular.woff2" />
+    <Content Include="fonts\glyphicons-halflings-regular.woff2" />
+    <None Include="Properties\PublishProfiles\genericmobileapp - FTP %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\genericmobileapp - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\genericmobileapp - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\genericmobileapp - Web Deploy.pubxml" />
+    <Content Include="Scripts\app\js\angular.min.js.map" />
+    <None Include="Properties\PublishProfiles\genericmobiledev - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\genericmobiledev - Web Deploy.pubxml" />
     <None Include="Scripts\app\js\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\app\js\jquery-1.10.2.js" />
     <Content Include="Scripts\app\js\jquery-1.10.2.min.js" />
     <Content Include="Scripts\app\js\jquery-1.12.3.min.js" />
+    <Content Include="Scripts\app\App.js" />
+    <None Include="Scripts\app\js\jquery.validate-vsdoc.js" />
+    <Content Include="Scripts\app\js\jquery.validate.js" />
+    <Content Include="Scripts\app\js\jquery.validate.min.js" />
+    <Content Include="Scripts\app\js\jquery.validate.unobtrusive.js" />
+    <Content Include="Scripts\app\js\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\app\js\modernizr-2.6.2.js" />
+    <Content Include="Scripts\app\js\ui-bootstrap-tpls-2.2.0.min.js" />
+    <Content Include="Scripts\app\MobileApprovalConstants.js" />
     <Content Include="Scripts\app\services\adalService.js" />
-    <Content Include="Scripts\app\services\CommonSvc.js" />
-    <Content Include="Scripts\app\services\PersonalizationSvc.js" />
-    <Content Include="Styles\bootstrap.min.css" />
-    <Content Include="Styles\MobileApproval.css" />
-    <Content Include="UserRegistration.html" />
-    <Content Include="Web.config" />
+    <Content Include="Scripts\app\services\GMService.js" />
+    <Content Include="Content\MobileApproval.css" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
+    <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\APIController.cs" />
+    <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\LandingController.cs" />
     <Compile Include="Exceptions\BusinessLogicException.cs" />
     <Compile Include="Exceptions\CoreException.cs" />
     <Compile Include="Exceptions\DataAccessException.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\ApprovalDetails.cs" />
+    <Compile Include="Models\ApprovalEntity.cs" />
+    <Compile Include="Models\ApprovalQuery.cs" />
+    <Compile Include="Models\ApprovalRequestDTO.cs" />
+    <Compile Include="Models\Backend.cs" />
+    <Compile Include="Models\RequestDetails.cs" />
+    <Compile Include="Models\Device.cs" />
+    <Compile Include="Models\ErrorDetail.cs" />
+    <Compile Include="Models\JSONHelper\ServiceObject.cs" />
+    <Compile Include="Models\NewUser.cs" />
+    <Compile Include="Models\PersonalizationRequsetDTO.cs" />
+    <Compile Include="Models\RequestDTO.cs" />
+    <Compile Include="Models\SynchRequestDTO.cs" />
+    <Compile Include="Models\SynchResponseDTO.cs" />
+    <Compile Include="Models\UserBackendDTO.cs" />
+    <Compile Include="Models\UserBackendEntity.cs" />
+    <Compile Include="Models\UserDeviceDTO.cs" />
+    <Compile Include="Models\UserDTO.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Startup.cs" />
+    <Compile Include="Models\AdalTokenCache.cs" />
+    <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Utility\Constants.cs" />
+    <Compile Include="Utility\Helper.cs" />
     <Compile Include="Utility\LoggerHelper.cs" />
+    <Compile Include="Utility\SettingsHelper.cs" />
+    <Compile Include="Controllers\UserProfileController.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\web.config" />
@@ -253,6 +414,26 @@
     <Content Include="fonts\glyphicons-halflings-regular.ttf" />
     <Content Include="fonts\glyphicons-halflings-regular.eot" />
     <Content Include="Scripts\app\js\jquery-1.10.2.min.map" />
+    <Content Include="Views\_ViewStart.cshtml" />
+    <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="Views\Home\Index.cshtml" />
+    <Content Include="Views\Home\CreateNewUser.cshtml" />
+    <Content Include="Views\Templates\BackEndInfo.cshtml" />
+    <Content Include="Views\Templates\DevicesInfo.cshtml" />
+    <Content Include="Views\Shared\_LoginPartial.cshtml" />
+    <Content Include="Views\UserProfile\Index.cshtml" />
+    <Content Include="Views\UserProfile\Relogin.cshtml" />
+    <Content Include="Views\Account\SignOutCallback.cshtml" />
+    <Content Include="Views\Shared\Error.cshtml" />
+    <Content Include="Service References\AzureAD\ConnectedService.json" />
+    <Content Include="Views\Home\UpdateUser.cshtml" />
+    <Content Include="Views\Error\NotFound.cshtml" />
+    <Content Include="Views\Templates\UserInfo.cshtml" />
+    <Content Include="Views\Landing\ApprovalLanding.cshtml" />
+    <Content Include="Views\Landing\Index.cshtml" />
+    <Content Include="Views\Landing\ApprovalDetails.cshtml" />
+    <Content Include="Views\Home\CreateUser.cshtml" />
+    <Content Include="Views\Landing\DetailTaskInfo.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -262,8 +443,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\" />
     <Folder Include="Scripts\app\directives\" />
+    <Folder Include="Views\APIController\" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
@@ -283,7 +464,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>23265</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:23265/</IISUrl>
+          <IISUrl>https://localhost:44317/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

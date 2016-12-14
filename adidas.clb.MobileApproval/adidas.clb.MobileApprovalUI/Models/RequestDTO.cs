@@ -1,0 +1,62 @@
+﻿//-----------------------------------------------------------
+// <copyright file="RequestDTO.cs" company="adidas AG">
+// Copyright (C) 2016 adidas AG.
+// </copyright>
+//-----------------------------------------------------------
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+
+namespace adidas.clb.MobileApprovalUI.Models
+{
+    /// <summary>
+    /// class which implements model for Request data transfer object.
+    /// </summary>    
+    public class RequestDTO
+    {
+        public string id { get; set; }
+        public string title { get; set; }
+        public DateTime created { get; set; }
+        public string status { get; set; }
+        public int Latency { get; set; }
+        public RequesterDTO requester { get; set; }
+        public List<FieldDTO> fields { get; set; }
+        public List<Approvers> approvers { get; set; }
+    }
+    
+    public class RequesterDTO
+    {
+        public string userID { get; set; }
+        public string name { get; set; }
+    }
+
+    public class Fields
+    {
+        public List<FieldDTO> overview { get; set; }
+        public List<FieldDTO> genericInfo { get; set; }
+    }
+    
+    public class Approvers
+    {
+        public int order { get; set; }
+        public BackendUser user { get; set; }
+        public DateTime created { get; set; }
+        public string status { get; set; }
+        public DateTime dueDate { get; set; }
+        public DateTime creatdecisionDate { get; set; }
+    }
+
+    public class BackendUser
+    {
+        public string userID { get; set; }
+        public string userName { get; set; }
+    }
+    public class FieldDTO
+    {
+        public FieldDTO() { }
+        public string name { get; set; }
+        public string value { get; set; }
+        public string group { get; set; }
+    }
+}

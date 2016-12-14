@@ -1,0 +1,112 @@
+﻿<form name="DetailTask" role="form">
+    <div id="mobile-home" class="page-width" ng-controller="ApprovalDetailstaskController" ng-init="init()">
+        <div class="align-text-top" ng-click="redirect()">
+            <span class="glyphicon glyphicon-triangle-left"></span>
+              PendingApproval</div>
+        <div class="mobile-button row">
+            <div class="col-xs-6 text-align-center first-col">
+                <div ng-click="requestStatus('Rejected',id)">
+                    <span class="glyphicon glyphicon-remove"></span>
+                    Reject
+                </div>
+            </div>
+            <div class="col-xs-6 text-align-center first-col">
+                <div ng-click="requestStatus('Approved',id)">
+                    <span class="glyphicon glyphicon-ok"></span>
+                    Approve
+                </div>
+            </div>
+        </div>
+        <div class="task-details">
+            <div class="title-section row">
+                <div class="title-text">Request Details</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-7">
+                    <label for="Albert" class="control-label">Request#:</label><br/>
+                    {{id}}
+                </div>
+                <div class="col-xs-5">
+                    <label for="Shine" class="control-label">Request Name:</label><br />
+                    {{title}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-7">
+                    <label for="Albert" class="control-label">Status:</label><br />
+                    {{status}}
+                </div>
+                <div class="col-xs-5">
+                    <label for="Albert" class="control-label">Created:</label><br />
+                    {{created | dateFilter | date: "yyyy-MM-dd HH:mm"}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-7">
+                    <label for="Shine" class="control-label">Requester:</label><br />
+                    {{userID}}
+                </div>
+            </div>
+        </div>
+        <div class="task-details">
+            <div class="title-section row">
+                <div class="title-text">Request Overview</div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-inverse" id="tab_logic_Backend">
+                        <tr ng-repeat="field in fields" ng-class-odd="'odd'" ng-class-even="'even'">
+                            <td>
+                                <div class="input-group">
+                                    <b>{{field.name}}</b>
+                                </div>
+                            </td>
+                            <td>:</td>
+                            <td>
+                                <div class="input-group">
+                                    {{field.value}}
+                                </div>
+                            </td>
+                        </tr>
+                </table>
+            </div>
+            
+        </div>
+        <div class="backends">
+            <div class="title-section row">
+                <div class="title-text">
+                    Approvers
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-inverse" id="tab_logic_Backend">
+                    <thead class="thead-inverse">
+                        <tr>
+                            <th><label>User</label></th>
+                            <th><label>Status</label></th>
+                            <th><label>Due Date</label></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="approver in approvers">
+                            <td>
+                                <div class="input-group">
+                                    {{approver.user}}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="input-group">
+                                    {{approver.status}}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="input-group">
+                                    {{approver.dueDate}}
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    </form>

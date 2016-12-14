@@ -1,0 +1,140 @@
+﻿<form name="CreateUser" role="form">
+    <div id="mobile-home" class="page-width" ng-controller="CreateUserController" ng-init="init()">
+        <div class="mobile-button row">
+            <h4 style="color:green" class="text-align-right">{{msg}}</h4>
+            @*<div class="col-xs-6 text-align-center first-col">
+                <div>
+                    <span class="glyphicon glyphicon-remove"></span>
+                    Cancel
+                </div>
+            </div>*@
+            <div class="col-xs-12 text-align-center">
+                <div ng-click="CreateUser.$valid && SendData()">
+                    <span class="glyphicon glyphicon-ok"></span>
+                    Save
+                </div>
+            </div>
+        </div>
+        <div class="user-details">
+            <div class="title-section row">
+                <div class="title-text">User Information</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-7 required">
+                    <label for="Albert" class="control-label">First Name</label>
+                    <input type="text" class="form-control" id="FirstName" name="FirstName" placeholder="Adalard" ng-model="FirstName" ng-required="true" />
+
+                </div>
+                <div class="col-xs-5 required">
+                    <label for="Shine" class="control-label">Last Name</label>
+                    <input type="text" class="form-control" id="LastName" name="LastName" placeholder="Adalard" ng-model="LastName" ng-required="true" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-7 required">
+                    <label for="Albert" class="control-label">Full Name</label>
+                    <input type="text" class="form-control" id="FullName" name="Fullname" placeholder="Adalard Werner" ng-model="Fullname" ng-required="true" />
+                </div>
+                <div class="col-xs-5 required">
+                    <label for="Albert" class="control-label">Email</label>
+                    <input type="text" class="form-control" id="Email" name="Email" ng-model="Email" placeholder="Adalard.Werner@externals.adidas-group.com" ng-required="true">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-7 required">
+                    <label for="Shine" class="control-label">Device Name</label>
+                    <input type="text" class="form-control" id="DeviceName" name="DeviceName" ng-model="DeviceName" placeholder="Apple iPhone" ng-required="true">
+                </div>
+                <div class="col-xs-5 required">
+                    <label for="Shine" class="control-label">Device OS</label>
+                    <input type="text" class="form-control" id="DeviceOS" name="DeviceOS" placeholder="Apple iPhone" ng-model="DeviceOS" ng-required="true" />
+                </div>
+            </div>
+        </div>
+        <div class="backends">
+            <div class="title-section row">
+                <div class="title-text">
+                    Backends
+                    <div class="add">
+                        <div ng-click="addNewBackend()"><span class="glyphicon glyphicon-plus"></span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-inverse" id="tab_logic_Backend">
+                    <thead class="thead-inverse">
+                        <tr>
+                            <th><label>Backend Name</label></th>
+                            <th><label>Update Frequency</label></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="backend in backends">
+                            <td>
+                                <div class="input-group">
+                                    <input class="form-control text-box single-line" id="BackendID" name="BackendID" ng-model="backend.BackendID" type="text" />
+                                </div>
+                            </td>
+                            <td>
+                                <div class="input-group">
+                                    <input class="form-control text-box single-line" id="DefaultUpdateFrequency" name="DefaultUpdateFrequency" ng-model="backend.DefaultUpdateFrequency" type="text" />
+                                    <span class="input-group-addon" id="updateFrequency">
+                                    <select data-role="listview" data-inset="true" ng-options="frq as frq.name for size in frequency " ng-model="item" x-ng-change="update(item)"></select>
+                                    @*<select>
+                                    <option ng-repeat="frq in frequency" value="{{frq.id}}" ng-model="{{frq.name}}"></option>
+                                     </select>*@
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="input-group">
+                                    <div ng-click="removeBackend(backend)"><span class="glyphicon glyphicon-remove"></span></div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        <div class="devices">
+            <div class="title-section row">
+                <div class="title-text">
+                    My Devices
+                    <div class="add">
+                        <div ng-click="addNewdevices()"><span class="glyphicon glyphicon-plus"></span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-inverse" id="tab_logic_Device">
+                    <thead class="thead-inverse">
+                        <tr>
+                            <th><label>Name</label></th>
+                            <th><label>OS</label></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="device in devices">
+                            <td>
+                                <input class="form-control text-box single-line" id="DeviceId" name="DeviceId" ng-model="device.DeviceID" type="text" />
+                            </td>
+                            <td>
+                                <input class="form-control text-box single-line" id="DeviceBrand" name="DeviceBrand" ng-model="device.DeviceBrand" type="text" />
+                            </td>
+                            <td>
+                                <div ng-click="removedevices(device)"><span class="glyphicon glyphicon-remove"></span></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+
+
