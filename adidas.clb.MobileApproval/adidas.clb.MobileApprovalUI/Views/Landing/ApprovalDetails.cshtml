@@ -1,0 +1,46 @@
+﻿<div id="mobile-home" class="page-width" ng-controller="ApprovalDetailsController" ng-init="init()">
+    <div class="align-text-top" ng-click="redirect()">
+     <span class="glyphicon glyphicon-triangle-left"></span>
+        ApprovalLanding</div>
+    <div class="backends">
+        <div class="title-section row">
+            <div class="title-text">
+                Pending Approvals
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-inverse" id="tab_logic_Backend">
+                <thead class="thead-inverse">
+                    <tr>
+                        <th><label>Request#</label></th>
+                        <th><label>Status</label></th>
+                        <th>Take Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="approvaltask in approvalTasks" ng-class-odd="'odd'" ng-class-even="'even'">
+                        <td>
+                            <div class="input-group" ng-click="showDetails(approvaltask.id)">
+                               {{approvaltask.id}}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="input-group">
+                                {{approvaltask.status}}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="input-group">
+                                <div><span class="glyphicon glyphicon-ok" ng-click="requestStatus('Approved',approvaltask.id)">Approve</span></div>
+                            </div>
+                            <div class="input-group">
+                                <div><span class="glyphicon glyphicon-remove" ng-click="requestStatus('Rejected',approvaltask.id)">Reject</span></div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+    

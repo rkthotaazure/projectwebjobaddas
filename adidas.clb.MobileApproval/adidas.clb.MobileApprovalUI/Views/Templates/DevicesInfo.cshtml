@@ -1,0 +1,37 @@
+﻿@model adidas.clb.MobileApprovalUI.Models.UserDTO
+<div id="Devicesservices">
+    <div class="devices">
+        <div class="title-section row">
+            <div class="title-text">
+                My Devices
+                <div class="add">
+                    <div ng-click="addNewdevices()"><span class="glyphicon glyphicon-plus"></span></div>
+               </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-inverse" id="tab_logic_Device">
+                <thead class="thead-inverse">
+                    <tr>
+                        <th><label>Name</label></th>
+                        <th><label>OS</label></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="device in devices">
+                        <td>
+                            <input class="form-control text-box single-line" id="DeviceId" name="DeviceId" ng-model="device.DeviceID" type="text"/>
+                        </td>
+                        <td>
+                            <input class="form-control text-box single-line" id="DeviceBrand" name="DeviceBrand" ng-model="device.DeviceBrand" type="text"/>
+                        </td>
+                        <td>
+                            <div ng-click="removedevices(device)"><span class="glyphicon glyphicon-remove"></span></div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

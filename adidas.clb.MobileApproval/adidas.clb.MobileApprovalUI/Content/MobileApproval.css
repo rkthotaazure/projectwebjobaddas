@@ -7,8 +7,7 @@ body {
 	display: none !important;
 }
 h2 {
-  font-size: 24px;
-  text-transform: uppercase;
+  font-size: 18px;
   color: #303030;
   font-weight: 600;
 }
@@ -30,9 +29,10 @@ h4 {
   background-repeat: no-repeat;
   background-size: 100% auto;
   color: #fff;
-  padding: 50px 25px;
+  padding: 25px 25px;
   margin-bottom: 0;
   font-family: Montserrat, sans-serif;
+  margin-top: 50px;
 }
 .jumbotron > * {
 	background-color: rgba(8,8,8,0.15);
@@ -46,6 +46,12 @@ h4 {
 	padding-top: 10px;
 	padding-bottom: 10px;
 }
+.odd {
+ background-color: white;
+ }
+ .even {
+   background-color: #eee;
+     }
 .bgGray {
   background-color: #f6f6f6;
 }
@@ -97,7 +103,7 @@ h4 {
 	opacity: 1;
 }
 .themeImageSmall {
-  color: #2A2A2A;
+  color: #2A2A2A !important;
   font-size: 50px;
   -webkit-transition: all 0.5s ease;
   transition: all 0.5s ease;
@@ -128,6 +134,101 @@ h4 {
 .btn {
 	cursor: pointer;
 }
+.removebtn {
+    cursor: pointer;
+    width: 60px;
+    background-color: #818a91;
+    border-color: #818a91;
+    height: 20px;
+    font-size: 13px;
+    text-align: center;
+    padding: 3px 14px;
+    border-radius: 3px;
+    color: white !important;
+    background-image:url(../Images/remove.png);
+    background-position: 30px !important;
+    
+}
+.completeDiv {
+    width: 80px !important;
+    height: 80px;
+    background: #1f7921;
+    border-radius: 40px;
+    padding-top: 12px;
+    font-size: 30px;
+}
+.pendingDiv {
+    width: 80px !important;
+    height: 80px;
+    background: #d4a526;
+    border-radius: 40px;
+    padding-top: 12px;
+    font-size: 30px;
+    margin-left: 50px;
+}
+.mobile-button {
+            -webkit-font-smoothing: antialiased;
+            box-sizing: border-box;
+            color: #333333;
+            border: 1px rgba(42, 42, 42, 0.2) solid;
+            border-right-style: none;
+            cursor: pointer;
+            font-size: 20px;
+            position: fixed;
+            z-index: 999;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            background-color: #ffc119 !important;
+            box-shadow: 1px 1px 10px gray;
+            padding: 5px 10px;
+            -webkit-transition: all 1s ease;
+            -moz-transition: all 1s ease;
+            -o-transition: all 1s ease;
+            transition: all 1s ease;
+            opacity: 1;
+            filter: alpha(opacity=100);
+        }
+
+            .mobile-button .glyphicon {
+                font-size: 16px;
+            }
+
+            .mobile-button .first-col {
+                border-right: 1px #fff solid;
+            }
+
+            .mobile-button > div:hover {
+                font-weight: bold;
+            }
+
+        .text-align-center {
+            text-align: center;
+        }
+input.input-validation-error {
+    border: 1px solid #e80c4d !important;
+}
+.addbtn {
+    cursor: pointer;
+    width: 60px;
+    background-color: #818a91;
+    border-color: #818a91;
+    height: 20px;
+    font-size: 13px;
+    text-align: center;
+    padding: 3px 6px;
+    border-radius: 3px;
+    color: white !important;
+    
+}
+div.required label.control-label:after { 
+    color: #d00;
+    content: "*";
+    position: absolute;
+}
+.table-bordered > thead > tr > th, .table-bordered > tbody > tr > th, .table-bordered > tfoot > tr > th, .table-bordered > thead > tr > td, .table-bordered > tbody > tr > td, .table-bordered > tfoot > tr > td {
+    border: 1px solid #ddd;
+}
 .badge {
 	font-size: 25px;
 	margin-bottom: 4px;
@@ -138,8 +239,25 @@ h4 {
 	cursor: pointer;
 }
 .list-group-item {
-	min-height: 70px;
+	min-height: 48px;
 }
+.model-nav {
+    background-color: #1a4e77;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    color: white;
+  }
+.align-middle {
+    vertical-align: middle!important;
+    text-align: center;
+}
+
+.bootstrap-demo{margin:10px;}
+   .card{width:325px;}
 
 
 
@@ -194,7 +312,7 @@ h4 {
   font-style: normal;
 }
 .panel {
-  border: 1px solid #f4511e; 
+  border: 1px solid #428bca; 
   border-radius:0 !important;
   transition: box-shadow 0.5s;
 }
@@ -208,7 +326,7 @@ h4 {
 }
 .panel-heading {
   color: #fff !important;
-  background-color: #f4511e !important;
+  background-color: #428bca !important;
   padding: 25px;
   border-bottom: 1px solid transparent;
   border-top-left-radius: 0px;
@@ -249,6 +367,7 @@ h4 {
 }
 .navbar-brand>img {
 	display: inline;
+    margin-top: 8px;
 }
 .navbar-nav li a:hover, .navbar-nav li.active a {
   color: #FFC119 !important;
@@ -257,6 +376,7 @@ h4 {
 .navbar-default .navbar-toggle {
   border-color: transparent;
   color: #fff !important;
+  margin-right: 10px;
 }
 footer .glyphicon {
   font-size: 20px;
@@ -308,6 +428,14 @@ footer .glyphicon {
 }
 
 
+.clickable{
+    cursor: pointer;   
+}
+
+.panel-heading span {
+	margin-top: -20px;
+	font-size: 15px;
+}
 
 /*Saurabh*/
 button.btn:hover {
@@ -414,4 +542,5 @@ button.btn:hover {
     -ms-transform: translateY(0);
     transform: translateY(0);
   }
+
 }

@@ -26,10 +26,6 @@ namespace adidas.clb.MobileApprovalUI.Utility
             public const string Trace = "Trace";
             public const string Error = "Error";
         }
-        // Get the root video portal url
-        public static string RootSiteUrl
-        {
-            get { return ConfigurationManager.AppSettings["RootSiteUrl"]; }
-        }
+       
     }
 }

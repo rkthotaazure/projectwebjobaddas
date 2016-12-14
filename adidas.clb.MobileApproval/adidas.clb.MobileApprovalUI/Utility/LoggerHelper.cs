@@ -11,7 +11,7 @@ namespace adidas.clb.MobileApprovalUI.Utility
     /// </summary>
     public class LoggerHelper
     {
-        private static readonly ILog log = LogManager.GetLogger("AdoNetAppender");
+        private static readonly ILog log = LogManager.GetLogger("AzureUITableAppender");
 
         /// <summary>
         /// WriteToLog method to handle logs by log4Net based on priority and category
@@ -81,6 +81,21 @@ namespace adidas.clb.MobileApprovalUI.Utility
                     return;
                 Error(exception.ToString(), exception);
             }
+        }
+
+        internal static void WriteToLog(Exception exception, string v)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal static void Trace(string v)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal static void WriteToLog(string v)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -1,0 +1,46 @@
+﻿@model adidas.clb.MobileApprovalUI.Models.UserDTO
+<div id="userdetails">
+    <div class="user-details">
+        <div class="title-section row">
+            <div class="title-text">User Information</div>
+        </div>
+        <div class="row">
+            <div class="col-xs-7 required">
+                <label for="Albert" class="control-label">First Name</label>
+                    <input type="text" class="form-control" id="FirstName" name="FirstName" placeholder="Adalard" ng-model="FirstName" ng-required="true" />
+                 
+            </div>
+            <div class="col-xs-5 required">
+                <label for="Shine" class="control-label">Last Name</label>
+                <input type="text" class="form-control" id="LastName" name="LastName" placeholder="Adalard" ng-model="LastName" ng-required="true"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-7 required">
+                <label for="Albert" class="control-label">Full Name</label>
+                <input type="text" class="form-control" id="FullName" name="Fullname" placeholder="Adalard Werner" ng-model="Fullname" ng-required="true" />
+
+            </div>
+            <div class="col-xs-5 required">
+                <label for="Shine" class="control-label">Domain</label>
+                <input type="text" class="form-control" id="Domain" name="Domain" placeholder="EMEA" ng-model="Domain" ng-required="true" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-7 required">
+                <label for="Albert" class="control-label">Email</label>
+                <input type="text" class="form-control" id="Email" name="Email" placeholder="Adalard.Werner@externals.adidas-group.com" ng-model="Email" ng-required="true"/>
+
+            </div>
+            <div class="col-xs-5 required">
+                <label for="Shine" class="control-label">Device Name</label>
+                <input type="text" class="form-control" id="DeviceName" name="DeviceName" placeholder="Apple iPhone" ng-model="DeviceName" ng-required="true"/>
+            </div>
+        </div>
+        @*<div class="row">
+            <div class="col-xs-12 text-align-right">
+                <input type="submit" value="Create" class="mobile-button" ng-click="CreateUser.$valid && SendData()" />
+            </div>
+        </div>*@
+    </div>
+</div>

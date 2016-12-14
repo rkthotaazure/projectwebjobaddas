@@ -1,0 +1,44 @@
+﻿<div id="Backendservices">
+    <div class="backends">
+            <div class="title-section row">
+                <div class="title-text">
+                    Backends
+                    <div class="add">
+                        <div ng-click="addNewBackend()"><span class="glyphicon glyphicon-plus"></span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-inverse" id="tab_logic_Backend">
+                    <thead class="thead-inverse">
+                        <tr>
+                            <th><label>Backend Name</label></th>
+                            <th><label>Update Frequency</label></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="backend in backends">
+                            <td>
+                                <div class="input-group">
+                                    <input class="form-control text-box single-line" id="BackendID" name="BackendID" ng-model="backend.BackendID" type="text" />
+                                </div>
+                            </td>
+                            <td>
+                                <div class="input-group">
+                                    <input class="form-control text-box single-line" id="DefaultUpdateFrequency" name="DefaultUpdateFrequency" ng-model="backend.DefaultUpdateFrequency" type="text" />
+                                    <span class="input-group-addon" id="updateFrequency">days</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="input-group">
+                                <div ng-click="removeBackend(backend)"><span class="glyphicon glyphicon-remove"></span></div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        
+    </div>
+  </div>
