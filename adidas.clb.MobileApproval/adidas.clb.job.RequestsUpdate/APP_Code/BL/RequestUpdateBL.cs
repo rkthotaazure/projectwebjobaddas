@@ -42,8 +42,11 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                 //adding service layer requestid to entity                
                 requestentity.serviceLayerReqID = backendrequest.serviceLayerReqID;
                 requestentity.BackendID = backendId;
+                //add requester details to request entity
+                requestentity.Requesterid = backendrequest.requset.requester.userID;
+                requestentity.Requestername = backendrequest.requset.requester.name;
                 //calling DAL method to add request entity
-                RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();                
+                RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
                 requestupdatedal.AddUpdateRequest(requestentity);
             }
             catch (DataAccessException DALexception)
@@ -53,7 +56,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
             catch (Exception exception)
             {
                 //write exception into application insights
-                InsightLogger.Exception(exception.Message + " - Error in BL while inserting request", exception, callerMethodName);                
+                InsightLogger.Exception(exception.Message + " - Error in BL while inserting request", exception, callerMethodName);
                 throw new BusinessLogicException();
             }
         }
@@ -72,7 +75,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 //generating approval entity from input request obj by adding partitionkey and rowkey
                 ApprovalEntity approvalentity = new ApprovalEntity();
-                approvalentity.PartitionKey = string.Concat(CoreConstants.AzureTables.ApprovalPK,UserID);
+                approvalentity.PartitionKey = string.Concat(CoreConstants.AzureTables.ApprovalPK, UserID);
                 approvalentity.RowKey = request.id;
                 approvalentity.RequestId = request.id;
                 approvalentity.status = CoreConstants.AzureTables.Waiting;
@@ -88,7 +91,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
             catch (Exception exception)
             {
                 //write exception into application insights
-                InsightLogger.Exception(exception.Message + " - Error in BL while inserting Approval", exception, callerMethodName);                
+                InsightLogger.Exception(exception.Message + " - Error in BL while inserting Approval", exception, callerMethodName);
                 throw new BusinessLogicException();
             }
         }
@@ -180,12 +183,12 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                 throw new BusinessLogicException();
             }
         }
-        
+
         /// <summary>
         /// method to add Request PDF uri to Request entity
         /// </summary>
         /// <param name="urivalue">takes temp blob uri as input</param>        
-        public void AddPDFUriToRequest(Uri urivalue, string UserId,string RequestID)
+        public void AddPDFUriToRequest(Uri urivalue, string UserId, string RequestID)
         {
             //Get Caller Method name
             string callerMethodName = string.Empty;
@@ -204,7 +207,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
             catch (Exception exception)
             {
                 //write exception into application insights
-                InsightLogger.Exception(exception.Message + " - Error in BL while updating pdf uri in request entity", exception, callerMethodName);                
+                InsightLogger.Exception(exception.Message + " - Error in BL while updating pdf uri in request entity", exception, callerMethodName);
                 throw new BusinessLogicException();
             }
         }
@@ -238,7 +241,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
             catch (Exception exception)
             {
                 //write exception into application insights
-                InsightLogger.Exception(exception.Message + " - Error in BL while caliculating request size", exception, callerMethodName);                
+                InsightLogger.Exception(exception.Message + " - Error in BL while caliculating request size", exception, callerMethodName);
                 throw new BusinessLogicException();
             }
         }
@@ -291,7 +294,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
             catch (Exception exception)
             {
                 //write exception into application insights
-                InsightLogger.Exception(exception.Message + " - Error in BL while updating userbackend", exception, callerMethodName);                
+                InsightLogger.Exception(exception.Message + " - Error in BL while updating userbackend", exception, callerMethodName);
                 throw new BusinessLogicException();
             }
         }
@@ -349,7 +352,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
             catch (Exception exception)
             {
                 //write exception into application insights
-                InsightLogger.Exception(exception.Message + " - Error in BL while updating backend", exception, callerMethodName);                
+                InsightLogger.Exception(exception.Message + " - Error in BL while updating backend", exception, callerMethodName);
                 throw new BusinessLogicException();
             }
         }

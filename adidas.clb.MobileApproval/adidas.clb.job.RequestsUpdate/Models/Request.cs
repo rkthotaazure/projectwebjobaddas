@@ -21,7 +21,7 @@ namespace adidas.clb.job.RequestsUpdate.Models
         public DateTime created { get; set; }
         public string status { get; set; }
         public int Latency { get; set; }
-        public Requester  requeter { get; set; }
+        public Requester requester { get; set; }
         public Fields fields { get; set; }
         public List<Approvers> approvers { get; set; }
     }
@@ -30,7 +30,7 @@ namespace adidas.clb.job.RequestsUpdate.Models
     public class Requester
     {
         public string userID { get; set; }
-        public string name { get; set; }       
+        public string name { get; set; }
     }
 
     [Serializable]
@@ -63,6 +63,6 @@ namespace adidas.clb.job.RequestsUpdate.Models
     public class BackendUser
     {
         public string userID { get; set; }
-        public string userName { get; set; }        
+        public string userName { get; set; }
     }
 }
