@@ -52,8 +52,8 @@ namespace adidas.clb.MobileApproval.Utility
         /// <returns>returns whether backend updated or not</returns>
         public static Boolean IsBackendUpdated(UserBackendEntity userbackend)
         {
-            //return (!userbackend.UpdateTriggered) && (userbackend.DefaultUpdateFrequency > 0) && (userbackend.LastUpdate.AddMinutes(userbackend.DefaultUpdateFrequency) > DateTime.Now);
-            return true;
+            return (!userbackend.UpdateTriggered) && (userbackend.DefaultUpdateFrequency > 0) && (userbackend.LastUpdate.AddMinutes(userbackend.DefaultUpdateFrequency) > DateTime.Now);
+            //return true;
         }
 
         /// <summary>

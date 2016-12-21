@@ -18,6 +18,8 @@ namespace adidas.clb.MobileApproval.Models
         public string serviceLayerReqID { get; set; }
         public string id { get; set; }
         public string title { get; set; }
+        public string Requesterid { get; set; }
+        public string Requestername { get; set; }
         public DateTime created { get; set; }
         public string status { get; set; }
         public int Latency { get; set; }

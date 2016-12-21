@@ -105,10 +105,9 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         {
             try
             {
-                UpdateTriggeringMessage updateTriggerMessage = new UpdateTriggeringMessage();
+                UpdateTriggeringMessage updateTriggerMessage = new UpdateTriggeringMessage();                
                 UserUpdateMsg usermsg = new UserUpdateMsg();
-                usermsg.UserID = userID;
-                updateTriggerMessage.Users = usermsg;
+                usermsg.UserID = userID;              
                 List<UpdateTriggerBackend> updatetriggerbackendlist = new List<UpdateTriggerBackend>();
                 //adding each user backend details to list for adding to message
                 foreach (UserBackendDTO userbackend in userbackendslist)
@@ -118,7 +117,11 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
                     updatetriggerbackendlist.Add(triggerbackend);
 
                 }
-                updateTriggerMessage.Users.Backends = updatetriggerbackendlist;
+                usermsg.Backends = updatetriggerbackendlist;
+                //creating list to add users                
+                List<UserUpdateMsg> usermsglist = new List<UserUpdateMsg>();
+                usermsglist.Add(usermsg);
+                updateTriggerMessage.Users = usermsglist;
                 //calling data access layer method to add message to queue
                 PersonalizationDAL personalizationdal = new PersonalizationDAL();
                 personalizationdal.AddUpdateTriggerMessageToQueue(updateTriggerMessage);

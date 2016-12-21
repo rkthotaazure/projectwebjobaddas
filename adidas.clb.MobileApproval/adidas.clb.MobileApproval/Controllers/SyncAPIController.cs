@@ -310,6 +310,15 @@ namespace adidas.clb.MobileApproval.Controllers
                         if (Rules.IsRequestATarget(query, requestentity))
                         {
                             RequestDTO requestdto = DataProvider.ResponseObjectMapper<RequestDTO, RequestEntity>(requestentity);
+                            //fill requester details to request dto
+                            if (!string.IsNullOrEmpty(requestentity.Requestername))
+                            {
+                                Requester requesterdetails = new Requester();
+                                requesterdetails.userID = requestentity.Requesterid;
+                                requesterdetails.name = requestentity.Requestername;
+                                requestdto.requester = requesterdetails;
+                            }
+                            //add fields to request
                             Fields fielddto = new Fields();
                             fielddto.overview = fields;
                             requestdto.fields = fielddto;
