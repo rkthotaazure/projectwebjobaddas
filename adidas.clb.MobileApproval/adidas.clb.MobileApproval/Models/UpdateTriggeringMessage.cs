@@ -17,7 +17,7 @@ namespace adidas.clb.MobileApproval.Models
     public class UpdateTriggeringMessage
     {
         public string _type { get; set; }
-        public UserUpdateMsg Users { get; set; }
+        public IEnumerable<UserUpdateMsg> Users { get; set; }
         public IEnumerable<RequestUpdateMsg> Requests { get; set; }
         public bool VIP { get; set; }
         public bool GetPDFs { get; set; }

@@ -65,14 +65,18 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
             {
                 UpdateTriggeringMessage updateTriggerMessage = new UpdateTriggeringMessage();
                 UserUpdateMsg usermsg = new UserUpdateMsg();
-                usermsg.UserID = userbackend.UserID;
-                updateTriggerMessage.Users = usermsg;                
+                usermsg.UserID = userbackend.UserID;                               
                 List<UpdateTriggerBackend> updatetriggerbackendlist = new List<UpdateTriggerBackend>();
                 //adding backend to message object
                 UpdateTriggerBackend triggerbackend = new UpdateTriggerBackend();
                 triggerbackend.BackendID = userbackend.BackendID;
+                updateTriggerMessage.ChangeAfter = userbackend.LastUpdate;
                 updatetriggerbackendlist.Add(triggerbackend);
-                updateTriggerMessage.Users.Backends = updatetriggerbackendlist;
+                usermsg.Backends = updatetriggerbackendlist;
+                //creating list to add users                
+                List<UserUpdateMsg> usermsglist = new List<UserUpdateMsg>();
+                usermsglist.Add(usermsg);
+                updateTriggerMessage.Users = usermsglist;
                 //calling data access layer method to add message to queue
                 PersonalizationDAL personalizationdal = new PersonalizationDAL();
                 personalizationdal.AddUpdateTriggerMessageToQueue(updateTriggerMessage);

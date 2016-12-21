@@ -21,7 +21,7 @@ namespace adidas.clb.MobileApproval.Models
         public string status { get; set; }
         public int Latency { get; set; }
         public string PDFUri { get; set; }
-        public Requester requeter { get; set; }
+        public Requester requester { get; set; }
         public Fields fields { get; set; }
         public List<Approvers> approvers { get; set; }
     }
