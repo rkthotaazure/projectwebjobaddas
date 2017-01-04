@@ -19,6 +19,7 @@ using System.Collections.Concurrent;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
 using System.Timers;
@@ -245,8 +246,8 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     lstBackend.Add(new Backend()
                     {
                         //Backend ID
-                        ID = objuserBackend.BackendID,
-                        Name = BackendName
+                        BackendID = objuserBackend.BackendID,
+                        BackendName = BackendName
 
                     });
 
@@ -585,9 +586,12 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 var ctsRequests = new CancellationTokenSource();
                 //get's azure table instance
-                CloudTable RequestsMissedDeviceConfigurationTable = DataProvider.GetAzureTableInstance(ConfigurationManager.AppSettings["AzureTables.UserDeviceConfiguration"]);
+                CloudTable RequestsMissedDeviceConfigurationTable = DataProvider.GetAzureTableInstance(ConfigurationManager.AppSettings["AzureTables.RequestTransactions"]);
                 //Get all the userbackends associated with the backend
-                TableQuery<RequestSynchEntity> tquerymissedRequests = new TableQuery<RequestSynchEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.RowKey, QueryComparisons.Equal, backendID));
+
+                string partitionFilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, CoreConstants.AzureTables.RequestSynchPK);
+                string rowfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.BackendID, QueryComparisons.Equal, backendID);
+                TableQuery<RequestSynchEntity> tquerymissedRequests = new TableQuery<RequestSynchEntity>().Where(TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowfilter));
 
                 Task[] taskRequestCollection = new Task[2];
                 var entityMissedupdateRequestsCollection = new BlockingCollection<List<RequestSynchEntity>>();
@@ -733,13 +737,14 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 //create object and assign values to properties for Backend class 
                 Backend objBackend = new Backend()
                 {
-                    ID = objrequestSynch.BackendID,
-                    Name = rBackendName
+                    BackendID = objrequestSynch.BackendID,
+                    BackendName = rBackendName
                 };
                 //create object and assign values to properties for Request class 
                 Request objRequest = new Request()
                 {
-                    ID = objrequestSynch.RequestID,
+                    ID = objrequestSynch.RowKey,
+                    UserID= objrequestSynch.UserID,
                     Backend = objBackend
                 };
                 //create object and assign values to properties for RequestUpdateMsg class 
@@ -812,24 +817,25 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             RequestsUpdateQuery objReqQuery = new RequestsUpdateQuery()
                             {
                                 User = objUser,
-                                BackendID = backend.ID,
-                                requests = null,
+                                BackendID = backend.BackendID,
+                                Requests = null,
                                 VIP = vip,
                                 GetPDFs = generatePDF,
                                 ChangeAfter = changeAfter
                             };
                             //convert RequestsUpdateQuery object into json string
                             backendUserQuery = JsonConvert.SerializeObject(objReqQuery);
+                            InsightLogger.TrackEvent("RequestsUpdateQuery Message:" + backendUserQuery);
                             acknowledgment = string.Empty;
                             //initalize object for api service provider for callingt the web api
                             APIServiceProvider ObjserviceProvider = new APIServiceProvider();
                             //call backend agent api with backendID and input queue message and getting the acknowledgment from API
-                            acknowledgment = ObjserviceProvider.CallBackendAgent(backend.ID, backendUserQuery);
+                            acknowledgment = ObjserviceProvider.CallBackendAgent(backend.BackendID, backendUserQuery);
                             //if acknowledgment is not null or not empty then update the userbackend expected updatetime
                             if (!string.IsNullOrEmpty(acknowledgment))
                             {
                                 //update ExpectedUpdateTime  with the help of update trigger Rule :: R3
-                                this.UpdateUserBackendExpectedUpdateTime(backend.ID, userID);
+                                this.UpdateUserBackendExpectedUpdateTime(backend.BackendID, userID);
                             }
 
                         }
@@ -873,39 +879,46 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     string serviceLayerRequestID = string.Empty;
                     string requestBackendID = string.Empty;
                     //get distinct backends from RequestUpdateMsg list
-                    var bakcends = lstRequests.Select(o => o.request.Backend.ID).Distinct();
-                    IEnumerable<RequestUpdateMsg> lstRequestsByBackend = null;
+                    var bakcends = lstRequests.Select(o => o.request.Backend.BackendID).Distinct();                                      
+                    
                     //foreach backend id
                     foreach (string backendID in bakcends.ToList())
                     {
                         //getting list of RequestUpdateMsg's by same backend
-                        lstRequestsByBackend = lstRequests.Where(x => x.request.Backend.ID.Equals(backendID));
-                        //Prepare RequestsUpdateQuery message
-                        RequestsUpdateQuery objReqQuery = new RequestsUpdateQuery()
-                        {
-                            User = null,
-                            BackendID = backendID,
-                            requests = lstRequestsByBackend,
-                            VIP = vip,
-                            GetPDFs = generatePDF,
-                            ChangeAfter = changeAfter
-                        };
-                        //convert RequestsUpdateQuery object into json string
-                        requestsUpdateQuery = JsonConvert.SerializeObject(objReqQuery);
-                        acknowledgment = string.Empty;
-                        //initalize object for api service provider for callingt the web api
-                        APIServiceProvider ObjserviceProvider = new APIServiceProvider();
-                        //call backend agent api with backendID and input queue message and getting the acknowledgment from API
-                        acknowledgment = ObjserviceProvider.CallBackendAgent(backendID, requestsUpdateQuery);
-                        //if acknowledgment is not null or not empty then update the userbackend expected updatetime
-                        if (!string.IsNullOrEmpty(acknowledgment))
-                        {
-                            //update ExpectedUpdateTime  with the help of update trigger Rule :: R3
-                            this.UpdateRequestExpectedUpdateTime(backendID, serviceLayerRequestID);
+                        var lstRequestsByBackend = (from requests in lstRequests
+                                     where requests.request.Backend.BackendID.Equals(backendID)
+                                     select requests);
+                        if (lstRequestsByBackend != null)
+                        {                            
+                            //Prepare RequestsUpdateQuery message
+                            RequestsUpdateQuery objReqQuery = new RequestsUpdateQuery()
+                            {
+                                User = null,
+                                BackendID = backendID,
+                                Requests = lstRequestsByBackend,
+                                VIP = vip,
+                                GetPDFs = generatePDF,
+                                ChangeAfter = changeAfter
+                            };
+                            //convert RequestsUpdateQuery object into json string
+                            requestsUpdateQuery = JsonConvert.SerializeObject(objReqQuery);
+                            InsightLogger.TrackEvent("RequestsUpdateQuery Message:" + requestsUpdateQuery);
+                            acknowledgment = string.Empty;
+                            //initalize object for api service provider for callingt the web api
+                            APIServiceProvider ObjserviceProvider = new APIServiceProvider();
+                            //call backend agent api with backendID and input queue message and getting the acknowledgment from API
+                            acknowledgment = ObjserviceProvider.CallBackendAgent(backendID, requestsUpdateQuery);
+                            //if acknowledgment is not null or not empty then update the userbackend expected updatetime
+                            if (!string.IsNullOrEmpty(acknowledgment))
+                            {
+                                //update ExpectedUpdateTime  with the help of update trigger Rule :: R3
+                                this.UpdateRequestExpectedUpdateTime(backendID, serviceLayerRequestID);
+                            }
+                            //clearing RequestUpdateMsg list
+                            lstRequestsByBackend = null;
+                            requestsUpdateQuery = string.Empty;
                         }
-                        //clearing RequestUpdateMsg list
-                        lstRequestsByBackend = null;
-                        requestsUpdateQuery = string.Empty;
+                        
                     }
 
                 }
