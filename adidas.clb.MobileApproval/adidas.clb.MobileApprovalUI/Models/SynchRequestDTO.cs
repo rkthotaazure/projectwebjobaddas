@@ -36,6 +36,7 @@ namespace adidas.clb.MobileApprovalUI.Models
     public class Filters
     {
         public List<string> backends { get; set; }
+        public List<string> backendName { get; set; }
         public string reqStatus { get; set; }
         public string apprStatus { get; set; }
         public Boolean isChanged { get; set; }

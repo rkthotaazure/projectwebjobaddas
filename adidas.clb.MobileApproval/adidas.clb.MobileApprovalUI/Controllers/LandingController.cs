@@ -20,7 +20,7 @@ using Newtonsoft.Json;
 
 namespace adidas.clb.MobileApprovalUI.Controllers
 {
-   // [Authorize]
+   //[Authorize]
     public class LandingController : Controller
     {
         // GET: Landing
@@ -46,7 +46,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                 approvalInfo.UserID = userid;
                 //Api Controller object initialization
                 APIController apiControllerObj = new APIController();
-                string stApprovalrequeststatus = await apiControllerObj.SendApprovalInfo(approvalInfo, approvalInfo.ApprovalRequesID);
+                string stApprovalrequeststatus = await apiControllerObj.SendApprovalInfo(approvalInfo, approvalInfo.ApprovalRequestID);
                 
                 List<ApprovalRequestDTO> requestsDetails = new List<ApprovalRequestDTO>();
                
@@ -71,59 +71,76 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                 string stApprovalrequest = await apiControllerObj.GetRequestInfo(syncRequest, requestInfo.requestID);
                 string strApproverList= await apiControllerObj.GetApprovers(syncRequest, requestInfo.requestID);
                 UserRequestJsonData userBackendjsonResponse = JsonConvert.DeserializeObject<UserRequestJsonData>(stApprovalrequest);
+                UserApprovalJsonData userApprovaljsonResponse= JsonConvert.DeserializeObject<UserApprovalJsonData>(strApproverList);
                 List<ApprovalRequestDTO> requestsDetails = new List<ApprovalRequestDTO>();
-                if (userBackendjsonResponse != null)
+                if (userBackendjsonResponse != null && userApprovaljsonResponse != null)
                 {
+                    ApprovalRequestDTO requestObj = new ApprovalRequestDTO();
                     foreach (userBackendRequest userbackendRequestdetails in userBackendjsonResponse.userBackendRequestinfo)
-                    {
-                        ApprovalRequestDTO requestObj = new ApprovalRequestDTO();
+                    { 
                         requestObj.approval = new ApprovalDTO();
                         //requestObj.approval.RequestId = userbackendRequestdetails.approvalDetails.RequestId;
                         //requestObj.approval.status = userbackendRequestdetails.approvalDetails.status;
                         requestObj.request = new RequestDTO();
-                        requestObj.request.id = userbackendRequestdetails.requestDetails.id;
-                        requestObj.request.title = userbackendRequestdetails.requestDetails.title;
-                        requestObj.request.status = userbackendRequestdetails.requestDetails.status;
-                        DateTime? created = userbackendRequestdetails.requestDetails.created;
+                        requestObj.request.ID = userbackendRequestdetails.requestDetails.ID;
+                        requestObj.request.Title = userbackendRequestdetails.requestDetails.Title;
+                        requestObj.request.Status = userbackendRequestdetails.requestDetails.Status;
+                        DateTime? created = userbackendRequestdetails.requestDetails.Created;
                         if (created != null)
                         {
-                            requestObj.request.created = created.Value;
+                            requestObj.request.Created = created.Value;
                         }
-                        requestObj.request.requester = new RequesterDTO();
-                        if(requestObj.request.requester.userID != null)
+                        requestObj.request.Requester = new RequesterDTO();
+                        if(requestObj.request.Requester.UserID == null)
                         {
-                            requestObj.request.requester.userID = userbackendRequestdetails.requestDetails.requester.userID;
+                            requestObj.request.Requester.UserID = userbackendRequestdetails.requestDetails.Requester.UserID;
                         }
-                        if (requestObj.request.requester.name != null)
+                        if (requestObj.request.Requester.Name == null)
                         {
-                            requestObj.request.requester.name = userbackendRequestdetails.requestDetails.requester.name;
+                            requestObj.request.Requester.Name = userbackendRequestdetails.requestDetails.Requester.Name;
                         }
                         List<FieldDTO> requestFields = new List<FieldDTO>();
-                        if(userbackendRequestdetails.requestDetails.fields.overview!=null && userbackendRequestdetails.requestDetails.fields.overview.Count>0)
+                        if(userbackendRequestdetails.requestDetails.Fields.Overview!=null && userbackendRequestdetails.requestDetails.Fields.Overview.Count>0)
                         {
-                            foreach (FieldDTO field in userbackendRequestdetails.requestDetails.fields.overview)
+                            foreach (FieldDTO field in userbackendRequestdetails.requestDetails.Fields.Overview)
                             {
                                 FieldDTO overviewFields = new FieldDTO();
-                                overviewFields.name = field.name;
-                                overviewFields.value = field.value;
+                                overviewFields.Name = field.Name;
+                                overviewFields.Value = field.Value;
+                                overviewFields.Group = field.Group;
                                 requestFields.Add(overviewFields);
                             }
                         }
-                        if (userbackendRequestdetails.requestDetails.fields.genericInfo != null && userbackendRequestdetails.requestDetails.fields.overview.Count > 0)
+                        if (userbackendRequestdetails.requestDetails.Fields.GenericInfo != null && userbackendRequestdetails.requestDetails.Fields.Overview.Count > 0)
                         {
-                            foreach (FieldDTO field in userbackendRequestdetails.requestDetails.fields.genericInfo)
+                            foreach (FieldDTO field in userbackendRequestdetails.requestDetails.Fields.GenericInfo)
                             {
                                 FieldDTO genericInfoFields = new FieldDTO();
-                                genericInfoFields.name = field.name;
-                                genericInfoFields.value = field.value;
+                                genericInfoFields.Name = field.Name;
+                                genericInfoFields.Value = field.Value;
+                                genericInfoFields.Group = field.Group;
                                 requestFields.Add(genericInfoFields);
                             }
                         }
-                        requestObj.request.fields = requestFields;
+                        List<Approvers> approverList = new List<Approvers>();
+                        foreach (ApproversJson userApprovalJsondetails in userApprovaljsonResponse.userApprovalinfo)
+                        {
+                            Approvers userApprovaldetails = new Approvers();
+                            userApprovaldetails.Order = userApprovalJsondetails.Order;
+                            userApprovaldetails.UserID = userApprovalJsondetails.UserID;
+                            userApprovaldetails.UserName = userApprovalJsondetails.UserName;
+                            userApprovaldetails.Status = userApprovalJsondetails.Status;
+                            userApprovaldetails.Created = userApprovalJsondetails.Created;
+                            userApprovaldetails.DueDate = userApprovalJsondetails.DueDate;
+                            userApprovaldetails.DecisionDate = userApprovalJsondetails.DecisionDate;
+                            approverList.Add(userApprovaldetails);
+                         }
+                        requestObj.request.Approvers = approverList;
+                        requestObj.request.Fields = requestFields;
                         requestsDetails.Add(requestObj);
                     }
                 }
-
+                
                 return Json(requestsDetails, JsonRequestBehavior.AllowGet);
             }
             catch (Exception exception)
@@ -148,25 +165,29 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                 syncRequest.userId = userid;
                 //Api Controller object initialization
                 APIController apiControllerObj = new APIController();
-                string stApprovalrequestcount = await apiControllerObj.GetUserBackendTasks(syncRequest, userid, userbackend);
-                UserBackendrequestJsonData userBackendjsonResponse = JsonConvert.DeserializeObject<UserBackendrequestJsonData>(stApprovalrequestcount);
-                //creates list Backend model object
                 List<ApprovalRequestDTO> requestsDetails = new List<ApprovalRequestDTO>();
-                if (userBackendjsonResponse != null)
+                if (syncRequest.parameters.filters.apprStatus == "Waiting")
                 {
-                    foreach (userBackendRequest userbackendRequestdetails in userBackendjsonResponse.userBackendRequestResults[0].userBackendRequestinfo)
-                    {
-                        ApprovalRequestDTO requestObj = new ApprovalRequestDTO();
-                        requestObj.approval = new ApprovalDTO();
-                        //requestObj.approval.RequestId = userbackendRequestdetails.approvalDetails.RequestId;
-                        //requestObj.approval.status = userbackendRequestdetails.approvalDetails.status;
-                        requestObj.request = new RequestDTO();
-                        requestObj.request.id = userbackendRequestdetails.requestDetails.id;
-                        requestObj.request.status= userbackendRequestdetails.requestDetails.status;
-                        requestsDetails.Add(requestObj);
-                    }
+                    string stApprovalPendingDetails = await apiControllerObj.GetUserBackendTasks(syncRequest, userid, userbackend);
+                    UserBackendrequestJsonData userBackendjsonResponse = JsonConvert.DeserializeObject<UserBackendrequestJsonData>(stApprovalPendingDetails);
+                    //creates list Backend model object
+
+                    requestsDetails = ApprovalTasks(userBackendjsonResponse);
                 }
-              return Json(requestsDetails, JsonRequestBehavior.AllowGet);
+                else
+                {
+                    List<ApprovalRequestDTO> requestsRejectedDetails = new List<ApprovalRequestDTO>();
+                    syncRequest.parameters.filters.apprStatus = "Approved";
+                    string stApprovalApprovedDetails = await apiControllerObj.GetUserBackendTasks(syncRequest, userid, userbackend);
+                    UserBackendrequestJsonData userBackendjsonResponse = JsonConvert.DeserializeObject<UserBackendrequestJsonData>(stApprovalApprovedDetails);
+                    requestsDetails = ApprovalTasks(userBackendjsonResponse);
+                    syncRequest.parameters.filters.apprStatus = "Rejected";
+                    string stApprovalRejectedDetails = await apiControllerObj.GetUserBackendTasks(syncRequest, userid, userbackend);
+                    UserBackendrequestJsonData userBackendjsonRejectResponse = JsonConvert.DeserializeObject<UserBackendrequestJsonData>(stApprovalRejectedDetails);
+                    requestsRejectedDetails = ApprovalTasks(userBackendjsonRejectResponse);
+                    requestsDetails.AddRange(requestsRejectedDetails);
+                }
+                return Json(requestsDetails, JsonRequestBehavior.AllowGet);
             }
             catch (Exception exception)
             {
@@ -174,6 +195,25 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 return View("Error");
             }
+        }
+        public List<ApprovalRequestDTO> ApprovalTasks(UserBackendrequestJsonData userBackendjsonResponse)
+        {
+            List<ApprovalRequestDTO> requestsDetails = new List<ApprovalRequestDTO>();
+            if (userBackendjsonResponse != null)
+            {
+                foreach (userBackendRequest userbackendRequestdetails in userBackendjsonResponse.userBackendRequestResults[0].userBackendRequestinfo)
+                {
+                    ApprovalRequestDTO requestObj = new ApprovalRequestDTO();
+                    requestObj.approval = new ApprovalDTO();
+                    requestObj.approval.RequestId = userbackendRequestdetails.approvalDetails.RequestId;
+                    requestObj.approval.Status = userbackendRequestdetails.approvalDetails.Status;
+                    //requestObj.request = new RequestDTO();
+                    //requestObj.request.ID = userbackendRequestdetails.requestDetails.ID;
+                    //requestObj.request.Status= userbackendRequestdetails.requestDetails.Status;
+                    requestsDetails.Add(requestObj);
+                }
+            }
+            return requestsDetails;
         }
         [HttpPost]
         public async Task<ActionResult> GetBackendApprovalrequestcount(SynchRequestDTO syncRequest)
@@ -184,60 +224,89 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                 syncRequest.userId = userid;
                 //Api Controller object initialization
                 APIController apiControllerObj = new APIController();
-                string stApprovalrequestcount = await apiControllerObj.GetApprovalrequestcount(syncRequest, userid);
-                UserBackendrequestJsonData userBackendjsonResponse = JsonConvert.DeserializeObject<UserBackendrequestJsonData>(stApprovalrequestcount);
+                //string stApprovalrequestcount = await apiControllerObj.GetApprovalrequestcount(syncRequest, userid);
+                string stApprovalPendingCount = await apiControllerObj.GetApprovalcompletedcount(syncRequest, userid);
+                syncRequest.parameters.filters.apprStatus = "Approved";
+                string stApprovalApprovedCount = await apiControllerObj.GetApprovalcompletedcount(syncRequest, userid);
+                syncRequest.parameters.filters.apprStatus = "Rejected";
+                string stApprovalRejectedCount = await apiControllerObj.GetApprovalcompletedcount(syncRequest, userid);
+                UserTaskcountJsonData userTaskPendingResponse = JsonConvert.DeserializeObject<UserTaskcountJsonData>(stApprovalPendingCount);
+                UserTaskcountJsonData userTaskApprovedResponse = JsonConvert.DeserializeObject<UserTaskcountJsonData>(stApprovalApprovedCount);
+                UserTaskcountJsonData userTaskRejectedResponse = JsonConvert.DeserializeObject<UserTaskcountJsonData>(stApprovalRejectedCount);
                 //creates list Backend model object
-                List<UserBackendDTO> userBackendinfo = new List<UserBackendDTO>();
+                List<string> userBackends = new List<string>();
+                userBackends = syncRequest.parameters.filters.backends;
+                List<string> userBackendName = syncRequest.parameters.filters.backendName;
                 //Checks whether the JSON response is not null
-                if (userBackendjsonResponse != null)
+                List<UserTaskcountJsonResult> userTaskPendingCount = userTaskPendingResponse.userTaskcountJsonResult;
+                List<UserTaskcountJsonResult> userTaskApprovedCount = userTaskApprovedResponse.userTaskcountJsonResult;
+                List<UserTaskcountJsonResult> userTaskRejectedCount = userTaskRejectedResponse.userTaskcountJsonResult;
+                List<ApprovalCountDTO> approvalCountobj = new List<ApprovalCountDTO>();
+                if (userTaskPendingResponse!=null)
                 {
-                    //Iterate user backend json format result and bind to Model
-                    foreach (UserBackendRequestJsonResult UserbackendInfo in userBackendjsonResponse.userBackendRequestResults)
+                    int i = 0;
+                    foreach (string backendID in userBackends)
                     {
-                        //Create Model object
-                        UserBackendDTO BackendObj = new UserBackendDTO();
-                        BackendObj.UserID = UserbackendInfo.UserID;
-                        BackendObj.backend = new BackendDTO();
-                        //setting the properties of Model
-                        BackendObj.backend.BackendID = UserbackendInfo.userBackend.BackendID;
-                        BackendObj.backend.DefaultUpdateFrequency = UserbackendInfo.userBackend.DefaultUpdateFrequency;
-                        BackendObj.backend.AverageAllRequestsLatency = UserbackendInfo.userBackend.AverageAllRequestsLatency;
-                        BackendObj.backend.AverageAllRequestsSize = UserbackendInfo.userBackend.AverageAllRequestsSize;
-                        BackendObj.backend.AverageRequestLatency = UserbackendInfo.userBackend.AverageRequestLatency;
-                        BackendObj.backend.AverageRequestSize = UserbackendInfo.userBackend.AverageRequestSize;
-                        BackendObj.backend.ExpectedLatency = UserbackendInfo.userBackend.ExpectedLatency;
-                        DateTime? expdate = UserbackendInfo.userBackend.ExpectedUpdate;
-                        if (expdate != null)
-                        {
-                            BackendObj.backend.ExpectedUpdate = expdate.Value;
-                        }
-                        BackendObj.backend.LastAllRequestsLatency = UserbackendInfo.userBackend.LastAllRequestsLatency;
-                        BackendObj.backend.LastAllRequestsSize = UserbackendInfo.userBackend.LastAllRequestsSize;
-                        BackendObj.backend.LastRequestLatency = UserbackendInfo.userBackend.LastRequestLatency;
-                        BackendObj.backend.LastRequestSize = UserbackendInfo.userBackend.LastRequestSize;
-                        DateTime? lstdate = UserbackendInfo.userBackend.LastUpdate;
-                        if (expdate != null)
-                        {
-                            BackendObj.backend.LastUpdate = lstdate.Value;
-                        }
-                        BackendObj.backend.OpenApprovals = UserbackendInfo.userBackend.OpenApprovals;
-                        BackendObj.backend.OpenRequests = UserbackendInfo.userBackend.OpenRequests;
-                        BackendObj.backend.TotalBatchRequestsCount = UserbackendInfo.userBackend.TotalBatchRequestsCount;
-                        BackendObj.backend.TotalRequestsCount = UserbackendInfo.userBackend.TotalRequestsCount;
-                        BackendObj.backend.UpdateTriggered = UserbackendInfo.userBackend.UpdateTriggered;
-                        BackendObj.backend.UrgentApprovals = UserbackendInfo.userBackend.UrgentApprovals;
-
-                        // BackendObj.backend.MissingConfirmationsLimit = UserbackendInfo.userBackend.MissingConfirmationsLimit;
-                        //Adding the Model object to the list
-                        userBackendinfo.Add(BackendObj);
+                        ApprovalCountDTO approvalCount = new ApprovalCountDTO();
+                        approvalCount.BackendID = backendID;
+                        approvalCount.BackendName = userBackendName[i];
+                        approvalCount.WaitingCount= userTaskPendingCount.Where(x => x.BackendID == backendID).First().Count;
+                        approvalCount.ApprovedCount= userTaskApprovedCount.Where(x => x.BackendID == backendID).First().Count;
+                        approvalCount.RejectedCount= userTaskRejectedCount.Where(x => x.BackendID == backendID).First().Count;
+                        approvalCountobj.Add(approvalCount);
+                        i++;
                     }
                 }
+                
+                //if (userBackendjsonResponse != null)
+                //{
+                //    //Iterate user backend json format result and bind to Model
+                //    foreach (UserBackendRequestJsonResult UserbackendInfo in userBackendjsonResponse.userBackendRequestResults)
+                //    {
+                //        //Create Model object
+                //        UserBackendDTO BackendObj = new UserBackendDTO();
+                //        BackendObj.UserID = UserbackendInfo.UserID;
+                //        BackendObj.backend = new BackendDTO();
+                //        //setting the properties of Model
+                //        BackendObj.backend.BackendID = UserbackendInfo.userBackend.BackendID;
+                //        BackendObj.backend.DefaultUpdateFrequency = UserbackendInfo.userBackend.DefaultUpdateFrequency;
+                //        BackendObj.backend.AverageAllRequestsLatency = UserbackendInfo.userBackend.AverageAllRequestsLatency;
+                //        BackendObj.backend.AverageAllRequestsSize = UserbackendInfo.userBackend.AverageAllRequestsSize;
+                //        BackendObj.backend.AverageRequestLatency = UserbackendInfo.userBackend.AverageRequestLatency;
+                //        BackendObj.backend.AverageRequestSize = UserbackendInfo.userBackend.AverageRequestSize;
+                //        BackendObj.backend.ExpectedLatency = UserbackendInfo.userBackend.ExpectedLatency;
+                //        DateTime? expdate = UserbackendInfo.userBackend.ExpectedUpdate;
+                //        if (expdate != null)
+                //        {
+                //            BackendObj.backend.ExpectedUpdate = expdate.Value;
+                //        }
+                //        BackendObj.backend.LastAllRequestsLatency = UserbackendInfo.userBackend.LastAllRequestsLatency;
+                //        BackendObj.backend.LastAllRequestsSize = UserbackendInfo.userBackend.LastAllRequestsSize;
+                //        BackendObj.backend.LastRequestLatency = UserbackendInfo.userBackend.LastRequestLatency;
+                //        BackendObj.backend.LastRequestSize = UserbackendInfo.userBackend.LastRequestSize;
+                //        DateTime? lstdate = UserbackendInfo.userBackend.LastUpdate;
+                //        if (expdate != null)
+                //        {
+                //            BackendObj.backend.LastUpdate = lstdate.Value;
+                //        }
+                //        BackendObj.backend.OpenApprovals = UserbackendInfo.userBackend.OpenApprovals;
+                //        BackendObj.backend.OpenRequests = UserbackendInfo.userBackend.OpenRequests;
+                //        BackendObj.backend.TotalBatchRequestsCount = UserbackendInfo.userBackend.TotalBatchRequestsCount;
+                //        BackendObj.backend.TotalRequestsCount = UserbackendInfo.userBackend.TotalRequestsCount;
+                //        BackendObj.backend.UpdateTriggered = UserbackendInfo.userBackend.UpdateTriggered;
+                //        BackendObj.backend.UrgentApprovals = UserbackendInfo.userBackend.UrgentApprovals;
+
+                //        // BackendObj.backend.MissingConfirmationsLimit = UserbackendInfo.userBackend.MissingConfirmationsLimit;
+                //        //Adding the Model object to the list
+                //        userBackendinfo.Add(BackendObj);
+                //    }
+                //}
 
                 //if (userBackendinfo == null)
                 //{
                 //    return Json(userBackendinfo, JsonRequestBehavior.AllowGet);
                 //}
-                return Json(userBackendinfo, JsonRequestBehavior.AllowGet);
+                return Json(approvalCountobj, JsonRequestBehavior.AllowGet);
             }
             catch (Exception exception)
             {

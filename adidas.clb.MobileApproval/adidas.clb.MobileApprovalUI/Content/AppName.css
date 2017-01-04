@@ -649,7 +649,12 @@ body #s4-bodyContainer {
             margin-top: 2px;
             cursor: pointer;
         }
-
+.approver-lable {
+    font-family: 'AdiHausPS-Reg' !important;
+    font-size: 12px !important;
+    margin: 0;
+}
+}
 /*Homepage CSS - END*/
 /*XYZ page CSS - START*/
 /*XYZ page CSS - END*/
@@ -2361,3 +2366,50 @@ body #s4-bodyContainer {
     filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3); } }
 
 /*# sourceMappingURL=AppName.css.map */
+
+/*loading image*/
+.gly-spin {
+  -webkit-animation: spin 2s infinite linear;
+  -moz-animation: spin 2s infinite linear;
+  -o-animation: spin 2s infinite linear;
+  animation: spin 2s infinite linear;
+}
+.table>tbody>tr>td.gly-spin
+{
+border-top:0px;
+}
+@-moz-keyframes spin {
+  0% {
+    -moz-transform: rotate(0deg);
+  }
+  100% {
+    -moz-transform: rotate(359deg);
+  }
+}
+@-webkit-keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(359deg);
+  }
+}
+@-o-keyframes spin {
+  0% {
+    -o-transform: rotate(0deg);
+  }
+  100% {
+    -o-transform: rotate(359deg);
+  }
+}
+@keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}
+/*loading image*/

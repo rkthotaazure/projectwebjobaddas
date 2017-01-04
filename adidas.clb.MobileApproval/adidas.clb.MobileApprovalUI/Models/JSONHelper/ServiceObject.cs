@@ -42,7 +42,20 @@ namespace adidas.clb.MobileApprovalUI.Models.JSONHelper
         public UserBackendJsonResult userBackendResults { get; set; }
 
     }
-    public class UserBackendrequestJsonData
+    public class UserTaskcountJsonData
+    {
+        [JsonProperty(PropertyName = "result")]
+        public List<UserTaskcountJsonResult> userTaskcountJsonResult { get; set; }
+
+    }
+    public class UserTaskcountJsonResult
+    {
+        public string BackendID { get; set; }
+        public string Status { get; set; }
+        public int Count { get; set; }
+
+    }
+        public class UserBackendrequestJsonData
     {
         [JsonProperty(PropertyName = "result")]
         public UserBackendRequestJsonResult[] userBackendRequestResults { get; set; }
@@ -78,20 +91,27 @@ namespace adidas.clb.MobileApprovalUI.Models.JSONHelper
     }
     public class Request
     {
-        public string id { get; set; }
-        public string title { get; set; }
-        public DateTime created { get; set; }
-        public string status { get; set; }
+        public string ID { get; set; }
+        public string Title { get; set; }
+        public DateTime Created { get; set; }
+        public string Status { get; set; }
         public int Latency { get; set; }
-        public Requester requester { get; set; }
-        public Fields fields { get; set; }
-        public List<Approvers> approvers { get; set; }
+        public Requester Requester { get; set; }
+        public Fields Fields { get; set; }
+        public List<ApproversJson> Approvers { get; set; }
+    }
+
+    public class UserApprovalJsonData
+    {
+        [JsonProperty(PropertyName = "result")]
+        public ApproversJson[] userApprovalinfo { get; set; }
+
     }
     public class Approval
     {
         public string RequestId { get; set; }
         public string BackendID { get; set; }
-        public string status { get; set; }
+        public string Status { get; set; }
         private DateTime? dueDate = null;
         public DateTime DueDate
         {
@@ -118,32 +138,26 @@ namespace adidas.clb.MobileApprovalUI.Models.JSONHelper
     }
     public class Requester
     {
-        public string userID { get; set; }
-        public string name { get; set; }
+        public string UserID { get; set; }
+        public string Name { get; set; }
     }
 
     public class Fields
     {
-        public List<FieldDTO> overview { get; set; }
-        public List<FieldDTO> genericInfo { get; set; }
+        public List<FieldDTO> Overview { get; set; }
+        public List<FieldDTO> GenericInfo { get; set; }
     }
 
-    public class Approvers
+    public class ApproversJson
     {
-        public int order { get; set; }
-        public BackendUser user { get; set; }
-        public DateTime created { get; set; }
-        public string status { get; set; }
-        public DateTime dueDate { get; set; }
-        public DateTime creatdecisionDate { get; set; }
+        public int Order { get; set; }
+        public string UserID { get; set; }
+        public string UserName { get; set; }
+        public DateTime Created { get; set; }
+        public string Status { get; set; }
+        public DateTime DueDate { get; set; }
+        public DateTime DecisionDate { get; set; }
     }
-
-    public class BackendUser
-    {
-        public string userID { get; set; }
-        public string userName { get; set; }
-    }
-
 
     public class UserDeviceJsonData
     {
@@ -178,6 +192,7 @@ namespace adidas.clb.MobileApprovalUI.Models.JSONHelper
     public class userBackend
     {
         public string BackendID { get; set; }
+        public string BackendName { get; set; }
         public Int32 OpenApprovals { get; set; }
         public Int32 DefaultUpdateFrequency { get; set; }
         public bool UpdateTriggered { get; set; }

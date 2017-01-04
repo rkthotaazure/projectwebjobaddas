@@ -20,34 +20,34 @@
                 <div class="title-text">User Information</div>
             </div>
             <div class="row">
-                <div class="col-xs-7 required">
+                <div class="col-xs-6 required">
                     <label for="Albert" class="control-label">First Name</label>
-                    <input type="text" class="form-control" id="FirstName" name="FirstName" placeholder="Adalard" ng-model="FirstName" ng-required="true" />
+                    <input type="text" class="form-control" id="FirstName" name="FirstName" placeholder="Enter First Name" ng-model="FirstName" ng-required="true" />
 
                 </div>
-                <div class="col-xs-5 required">
+                <div class="col-xs-6 required">
                     <label for="Shine" class="control-label">Last Name</label>
-                    <input type="text" class="form-control" id="LastName" name="LastName" placeholder="Adalard" ng-model="LastName" ng-required="true" />
+                    <input type="text" class="form-control" id="LastName" name="LastName" placeholder="Enter Last Name" ng-model="LastName" ng-required="true" />
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-7 required">
+                <div class="col-xs-6 required">
                     <label for="Albert" class="control-label">Full Name</label>
-                    <input type="text" class="form-control" id="FullName" name="Fullname" placeholder="Adalard Werner" ng-model="Fullname" ng-required="true" />
+                    <input type="text" class="form-control" id="FullName" name="Fullname" placeholder="Enter Full Name" ng-model="Fullname" ng-required="true" />
                 </div>
-                <div class="col-xs-5 required">
+                <div class="col-xs-6 required">
                     <label for="Albert" class="control-label">Email</label>
-                    <input type="text" class="form-control" id="Email" name="Email" ng-model="Email" placeholder="Adalard.Werner@externals.adidas-group.com" ng-required="true">
+                    <input type="text" class="form-control" id="Email" name="Email" ng-model="Email" placeholder="Enter Email" ng-required="true">
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-7 required">
+                <div class="col-xs-6 required">
                     <label for="Shine" class="control-label">Device Name</label>
-                    <input type="text" class="form-control" id="DeviceName" name="DeviceName" ng-model="DeviceName" placeholder="Apple iPhone" ng-required="true">
+                    <input type="text" class="form-control" id="DeviceName" name="DeviceName" ng-model="DeviceName" placeholder="Enter Device Name" ng-required="true">
                 </div>
-                <div class="col-xs-5 required">
+                <div class="col-xs-6 required">
                     <label for="Shine" class="control-label">Device OS</label>
-                    <input type="text" class="form-control" id="DeviceOS" name="DeviceOS" placeholder="Andriod" ng-model="DeviceOS" ng-required="true" />
+                    <input type="text" class="form-control" id="DeviceOS" name="DeviceOS" placeholder="Enter Device OS" ng-model="DeviceOS" ng-required="true" />
                 </div>
             </div>
         </div>
@@ -73,12 +73,12 @@
                         <tr ng-repeat="backend in backends">
                             <td>
                                 <div class="input-group">
-                                    <input class="form-control text-box single-line" id="BackendID" name="BackendID" ng-model="backend.BackendID" type="text" />
+                                    <input class="form-control text-box single-line" id="BackendID" name="BackendID" ng-model="backend.BackendName" type="text" />
                                 </div>
                             </td>
                             <td>
                                 <div class="input-group">
-                                    <input class="form-control text-box single-line" id="DefaultUpdateFrequency" name="DefaultUpdateFrequency" ng-model="backend.DefaultUpdateFrequency" type="text" />
+                                    <input class="form-control text-box single-line" id="DefaultUpdateFrequency" name="DefaultUpdateFrequency" ng-model="backend.DefaultUpdateFrequency" type="text" numbers-only />
                                     <span class="input-group-addon" id="updateFrequency">minutes</span>
                                     @*<span class="input-group-addon" id="updateFrequency">
                                         <select data-role="listview" data-inset="true" ng-options="frq as frq.name for frq in frequency " ng-model="backend.Frquency">

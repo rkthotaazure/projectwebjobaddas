@@ -54,6 +54,11 @@ h4 {
      }
 .bgGray {
   background-color: #f6f6f6;
+  border-radius:10px;
+}
+#mobile-home .container-fluid .col-xs-2
+{
+padding-left:0px;
 }
 #services > .row > div {
   padding-top: 20px;
@@ -133,6 +138,14 @@ h4 {
 }
 .btn {
 	cursor: pointer;
+    width: 100%;
+    padding: 1px 1px !important;
+}
+.btnprimary {
+    color: #fff;
+    background-color: #337ab7;
+    border-color: #2e6da4;
+    width: 100% !important;
 }
 .removebtn {
     cursor: pointer;
@@ -326,13 +339,39 @@ div.required label.control-label:after {
 }
 .panel-heading {
   color: #fff !important;
-  background-color: #428bca !important;
-  padding: 25px;
+  background-color: #f5f5f5 !important;
+  border-color: #ddd;
+  padding: 12px;
   border-bottom: 1px solid transparent;
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
   border-bottom-left-radius: 0px;
   border-bottom-right-radius: 0px;
+}
+.panel-title {
+    margin-top: 0;
+    margin-bottom: 0;
+    font-size: 16px;
+    color: black !important;
+}
+.panel-body {
+    padding: 15px;
+    background-color: #fff7ca;
+}
+.clickable{
+    cursor: pointer;   
+}
+.panel-heading .panel-title:after{
+   /* symbol for "opening" panels */
+   font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
+   content: "\e114";
+   float: right;
+   opacity:0.6;
+   color:black;
+}
+.panel-heading.collapsed .panel-title:after  {
+   /* symbol for "collapsed" panels */
+   content: "\e114";
 }
 .panel-footer {
   background-color: white !important;
@@ -430,6 +469,12 @@ footer .glyphicon {
 
 .clickable{
     cursor: pointer;   
+}
+.pagination {
+    display: inline-block !important;
+    padding-left: 0;
+    margin: 20px 0;
+    border-radius: 4px;
 }
 
 .panel-heading span {

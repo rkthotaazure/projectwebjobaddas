@@ -187,6 +187,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                                 BackendObj.backend = new BackendDTO();
                                 //setting the properties of Model
                                 BackendObj.backend.BackendID = UserbackendInfo.userBackend.BackendID;
+                                BackendObj.backend.BackendName = UserbackendInfo.userBackend.BackendName;
                                 BackendObj.backend.DefaultUpdateFrequency = UserbackendInfo.userBackend.DefaultUpdateFrequency;
                                 BackendObj.backend.AverageAllRequestsLatency = UserbackendInfo.userBackend.AverageAllRequestsLatency;
                                 BackendObj.backend.AverageAllRequestsSize = UserbackendInfo.userBackend.AverageAllRequestsSize;

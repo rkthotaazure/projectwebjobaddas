@@ -61,13 +61,16 @@ namespace adidas.clb.MobileApprovalUI.Utility
         }
         public async Task<string> APIPostCall(string endpointUri, PersonalizationRequsetDTO data)
         {
+            UserProfileController userProfileObj = new UserProfileController();
             var result = string.Empty;
             try
             {
                 //create object of client request
                 using (HttpClient client = new HttpClient())
                 {
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    client.DefaultRequestHeaders.Add("Accept", "application/json;odata=verbose");
+                    client.DefaultRequestHeaders.Add("ContentType", "application/json;odata=verbose");
+                    //client.DefaultRequestHeaders.Add("Authorization", "Bearer " + await userProfileObj.GetTokenForApplication());
                     HttpResponseMessage responseMessage = await client.PutAsJsonAsync(endpointUri, data);
                     if ((HttpStatusCode.OK).ToString().Equals(responseMessage.ReasonPhrase))
                     {
@@ -88,6 +91,7 @@ namespace adidas.clb.MobileApprovalUI.Utility
         }
         public async Task<string> SyncAPIPostCall(string endpointUri, SynchRequestDTO request)
         {
+            UserProfileController userProfileObj = new UserProfileController();
             var result = string.Empty;
             try
             {
@@ -95,16 +99,9 @@ namespace adidas.clb.MobileApprovalUI.Utility
                 //create object of client request
                 using (HttpClient client = new HttpClient())
                 {
-                    //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    //HttpResponseMessage responseResults = await client.PostAsJsonAsync(endpointUri, request);
-                    //if ((HttpStatusCode.OK).ToString().Equals(responseResults.ReasonPhrase))
-                    //{
-                    //    result = responseResults.Content.; //"Data has been successfully saved";
-                    //}
-                    //else
-                    //{
-                    //    result = SettingsHelper.ErrorSavedataMsg; //"Error occurred while saving data";
-                    //}
+                    client.DefaultRequestHeaders.Add("Accept", "application/json;odata=verbose");
+                    client.DefaultRequestHeaders.Add("ContentType", "application/json;odata=verbose");
+                    //client.DefaultRequestHeaders.Add("Authorization", "Bearer " + await userProfileObj.GetTokenForApplication());
                     //get API endpoint and format
 
                     var request1 = new HttpRequestMessage(HttpMethod.Post, endpointUri);
@@ -127,6 +124,7 @@ namespace adidas.clb.MobileApprovalUI.Utility
 
         public async Task<string> ApprovalAPIPostCall(string endpointUri, ApprovalQuery ObjApprovalQuery)
         {
+            UserProfileController userProfileObj = new UserProfileController();
             var result = string.Empty;
             try
             {
@@ -134,6 +132,11 @@ namespace adidas.clb.MobileApprovalUI.Utility
                 //create object of client request
                 using (HttpClient client = new HttpClient())
                 {
+
+                    client.DefaultRequestHeaders.Add("Accept", "application/json;odata=verbose");
+                    client.DefaultRequestHeaders.Add("ContentType", "application/json;odata=verbose");
+                    //client.DefaultRequestHeaders.Add("Authorization", "Bearer " + await userProfileObj.GetTokenForApplication());
+                   
                     //get API endpoint and format
 
                     var request1 = new HttpRequestMessage(HttpMethod.Post, endpointUri);
@@ -154,4 +157,5 @@ namespace adidas.clb.MobileApprovalUI.Utility
             return result;
         }
     }
+        
 }
