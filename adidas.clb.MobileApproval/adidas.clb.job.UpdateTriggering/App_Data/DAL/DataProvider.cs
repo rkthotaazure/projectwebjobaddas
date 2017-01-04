@@ -69,13 +69,48 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
             return entity;
         }
 
-        //public static PersonalizationResponseDTO<T> PersonalizationResponseError<T>(string code, string shorttext, string longtext)
-        //{
-        //    var ResponseBackends = new PersonalizationResponseDTO<T>();
-        //    ResponseBackends.result = default(T);
-        //    ResponseBackends.error = new ErrorDTO(code, shorttext, longtext);
-        //    return ResponseBackends;
-        //}
-            
+        /// <summary>
+        /// This method retrieves the azure table entity information
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="tablename"></param>
+        /// <param name="partitionkey"></param>
+        /// <param name="rowkey"></param>
+        /// <returns></returns>
+        public static T Retrieveentity<T>(string tablename, string partitionkey, string rowkey) where T : ITableEntity, new()
+        {
+            //get's azure table instance
+            CloudTable ReferenceDataTable = GetAzureTableInstance(tablename);
+            TableOperation RetrieveUser = TableOperation.Retrieve<T>(partitionkey, rowkey);
+            TableResult RetrievedResultUser = ReferenceDataTable.Execute(RetrieveUser);
+            return (T)RetrievedResultUser.Result;
+        }
+        /// <summary>
+        /// This method updates the azure table entity
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="tablename"></param>
+        /// <param name="entity"></param>
+        public static void UpdateEntity<T>(string tablename, T entity) where T : ITableEntity, new()
+        {
+            CloudTable ReferenceDataTable = GetAzureTableInstance(tablename);
+            entity.ETag = "*";
+            TableOperation updateOperation = TableOperation.Replace(entity);
+            ReferenceDataTable.Execute(updateOperation);
+        }
+        /// <summary>
+        /// This method Inserts thenew entity in azure table
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="tablename"></param>
+        /// <param name="entity"></param>
+        public static void InsertEntity<T>(string tablename, T entity) where T : ITableEntity, new()
+        {
+            CloudTable ReferenceDataTable = GetAzureTableInstance(tablename);
+            //entity.ETag = "*";
+            TableOperation InsertOperation = TableOperation.Insert(entity);
+            ReferenceDataTable.Execute(InsertOperation);
+        }
+
     }
 }

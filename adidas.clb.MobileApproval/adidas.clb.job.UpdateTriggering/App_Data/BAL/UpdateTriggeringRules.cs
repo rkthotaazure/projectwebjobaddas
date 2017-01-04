@@ -83,7 +83,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 DateTime expectedUpdateTime;
                 //Now + Max(Backend.AverageAllRequestsLatency;Backend.LastALLRequestLatency)*1.2
-                expectedUpdateTime = DateTime.UtcNow.AddSeconds((Math.Max(BackendAverageALLRequestLatency, Convert.ToDouble(BackendLastALLRequestLatency)) * Convert.ToDouble(System.Configuration.ConfigurationSettings.AppSettings["ConstantFraction"])));
+                expectedUpdateTime = DateTime.UtcNow.AddSeconds((Math.Max(BackendAverageALLRequestLatency, Convert.ToDouble(BackendLastALLRequestLatency)) * Convert.ToDouble(System.Configuration.ConfigurationManager.AppSettings["ConstantFraction"])));
                 return expectedUpdateTime;
             }
             catch (Exception exception)
@@ -108,7 +108,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 DateTime requestExpectedUpdateTime;
                 //Now + Max(Backend.AverageRequestsLatency;Backend.LastRequestLatency)*1.2
-                requestExpectedUpdateTime = DateTime.UtcNow.AddSeconds((Math.Max(BackendAverageRequestLatency, Convert.ToDouble(BackendLastRequestLatency)) * Convert.ToDouble(System.Configuration.ConfigurationSettings.AppSettings["ConstantFraction"])));
+                requestExpectedUpdateTime = DateTime.UtcNow.AddSeconds((Math.Max(BackendAverageRequestLatency, Convert.ToDouble(BackendLastRequestLatency)) * Convert.ToDouble(System.Configuration.ConfigurationManager.AppSettings["ConstantFraction"])));
                 return requestExpectedUpdateTime;
             }
             catch (Exception exception)

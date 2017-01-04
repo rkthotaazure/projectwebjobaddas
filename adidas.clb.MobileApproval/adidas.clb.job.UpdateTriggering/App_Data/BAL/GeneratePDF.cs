@@ -59,16 +59,23 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                 //Call the stored procedure for gettting the  pdf details from Store backend
                 //clone the result set into StoreApprovalModel class
                 StoreApprovalModel objStoreDetails = objstorePDF.GetPDFDetailsFromStore(requestID);
-                StoreApprovalBasicInfo objstorebasicInfo;
+                StoreApprovalBasicInfo objstorebasicInfo = null; 
                 List<StoreExecutiveSummary> lststoresummary = null;
                 //checking StoreApprovalModel has null or not
                 if (objStoreDetails != null)
                 {
                     //stored procedure returns two result sets
                     //1.Store basic information
-                    objstorebasicInfo = objStoreDetails.StoreBasicInformation;
+                    if (objStoreDetails.StoreBasicInformation != null)
+                    {
+                        objstorebasicInfo = objStoreDetails.StoreBasicInformation;
+                    }
                     //2.Executive summary details
-                    lststoresummary = objStoreDetails.StoreSummaryDetails.ToList();
+                    if (objStoreDetails.StoreSummaryDetails != null)
+                    {
+                        lststoresummary = objStoreDetails.StoreSummaryDetails.ToList();
+                    }                    
+                    
                     //Create folder with requestid name in application Environment.CurrentDirectory and read the folder path
                     string PdfBucketPath = GetPDFPath(requestID);
                     //Pdf file name requestid + yyyyMMddHHmmss
@@ -535,7 +542,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                     string y3 = string.Empty;
                     string y4 = string.Empty;
                     string y5 = string.Empty;
-                    if (lststoresummary.Count > 0)
+                    if (lststoresummary!=null && lststoresummary.Count > 0)
                     {
                         //from list getting years values
                         y0 = lststoresummary[0].Y0;
@@ -611,75 +618,79 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                     cell.BorderWidth = 0.3f;
                     cell.BorderColor = BaseColor.BLACK;
                     table.AddCell(cell);
-
-                    foreach (StoreExecutiveSummary saExecutiveSummary in lststoresummary)
+                    //if StoreExecutiveSummary is not null
+                    if (lststoresummary != null)
                     {
-                        //writing all the StoreExecutiveSummary rows into table from lststoresummary
-                        //Description value
-                        phrase = new Phrase();
-                        phrase.Add(new Chunk(saExecutiveSummary.Description, FontFactory.GetFont(pdfCellFontName, pdfCellSummaryFontSize, Font.BOLD, BaseColor.BLACK)));
-                        cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                        cell.BorderWidth = 0.3f;
-                        cell.BorderColor = BaseColor.BLACK;
-                        cell.PaddingBottom = 5f;
-                        table.AddCell(cell);
-                        //Y0Val value
-                        phrase = new Phrase();
-                        phrase.Add(new Chunk(saExecutiveSummary.Y0Val, FontFactory.GetFont(pdfCellFontName, pdfCellSummaryFontSize, Font.NORMAL, BaseColor.BLACK)));
-                        cell = PhraseCell(phrase, PdfPCell.ALIGN_CENTER);
-                        cell.BorderWidth = 0.3f;
-                        cell.BorderColor = BaseColor.BLACK;
-                        cell.PaddingBottom = 5f;
-                        table.AddCell(cell);
-                        //Y1Val value
-                        phrase = new Phrase();
-                        phrase.Add(new Chunk(saExecutiveSummary.Y1Val, FontFactory.GetFont(pdfCellFontName, pdfCellSummaryFontSize, Font.NORMAL, BaseColor.BLACK)));
-                        cell = PhraseCell(phrase, PdfPCell.ALIGN_CENTER);
-                        cell.BorderWidth = 0.3f;
-                        cell.BorderColor = BaseColor.BLACK;
-                        cell.PaddingBottom = 5f;
-                        table.AddCell(cell);
-                        //Y2Val value
-                        phrase = new Phrase();
-                        phrase.Add(new Chunk(saExecutiveSummary.Y2Val, FontFactory.GetFont(pdfCellFontName, pdfCellSummaryFontSize, Font.NORMAL, BaseColor.BLACK)));
-                        cell = PhraseCell(phrase, PdfPCell.ALIGN_CENTER);
-                        cell.BorderWidth = 0.3f;
-                        cell.BorderColor = BaseColor.BLACK;
-                        cell.PaddingBottom = 5f;
-                        table.AddCell(cell);
-                        //Y3Val value
-                        phrase = new Phrase();
-                        phrase.Add(new Chunk(saExecutiveSummary.Y3Val, FontFactory.GetFont(pdfCellFontName, pdfCellSummaryFontSize, Font.NORMAL, BaseColor.BLACK)));
-                        cell = PhraseCell(phrase, PdfPCell.ALIGN_CENTER);
-                        cell.BorderWidth = 0.3f;
-                        cell.BorderColor = BaseColor.BLACK;
-                        cell.PaddingBottom = 5f;
-                        table.AddCell(cell);
-                        //Y4Val value
-                        phrase = new Phrase();
-                        phrase.Add(new Chunk(saExecutiveSummary.Y4Val, FontFactory.GetFont(pdfCellFontName, pdfCellSummaryFontSize, Font.NORMAL, BaseColor.BLACK)));
-                        cell = PhraseCell(phrase, PdfPCell.ALIGN_CENTER);
-                        cell.BorderWidth = 0.3f;
-                        cell.BorderColor = BaseColor.BLACK;
-                        cell.PaddingBottom = 5f;
-                        table.AddCell(cell);
-                        //Y5Val value
-                        phrase = new Phrase();
-                        phrase.Add(new Chunk(saExecutiveSummary.Y5Val, FontFactory.GetFont(pdfCellFontName, pdfCellSummaryFontSize, Font.NORMAL, BaseColor.BLACK)));
-                        cell = PhraseCell(phrase, PdfPCell.ALIGN_CENTER);
-                        cell.BorderWidth = 0.3f;
-                        cell.BorderColor = BaseColor.BLACK;
-                        cell.PaddingBottom = 5f;
-                        table.AddCell(cell);
-                        //GRSVal value
-                        phrase = new Phrase();
-                        phrase.Add(new Chunk(saExecutiveSummary.GRSVal, FontFactory.GetFont(pdfCellFontName, pdfCellSummaryFontSize, Font.NORMAL, BaseColor.BLACK)));
-                        cell = PhraseCell(phrase, PdfPCell.ALIGN_CENTER);
-                        cell.BorderWidth = 0.3f;
-                        cell.BorderColor = BaseColor.BLACK;
-                        cell.PaddingBottom = 5f;
-                        table.AddCell(cell);
+                        foreach (StoreExecutiveSummary saExecutiveSummary in lststoresummary)
+                        {
+                            //writing all the StoreExecutiveSummary rows into table from lststoresummary
+                            //Description value
+                            phrase = new Phrase();
+                            phrase.Add(new Chunk(saExecutiveSummary.Description, FontFactory.GetFont(pdfCellFontName, pdfCellSummaryFontSize, Font.BOLD, BaseColor.BLACK)));
+                            cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                            cell.BorderWidth = 0.3f;
+                            cell.BorderColor = BaseColor.BLACK;
+                            cell.PaddingBottom = 5f;
+                            table.AddCell(cell);
+                            //Y0Val value
+                            phrase = new Phrase();
+                            phrase.Add(new Chunk(saExecutiveSummary.Y0Val, FontFactory.GetFont(pdfCellFontName, pdfCellSummaryFontSize, Font.NORMAL, BaseColor.BLACK)));
+                            cell = PhraseCell(phrase, PdfPCell.ALIGN_CENTER);
+                            cell.BorderWidth = 0.3f;
+                            cell.BorderColor = BaseColor.BLACK;
+                            cell.PaddingBottom = 5f;
+                            table.AddCell(cell);
+                            //Y1Val value
+                            phrase = new Phrase();
+                            phrase.Add(new Chunk(saExecutiveSummary.Y1Val, FontFactory.GetFont(pdfCellFontName, pdfCellSummaryFontSize, Font.NORMAL, BaseColor.BLACK)));
+                            cell = PhraseCell(phrase, PdfPCell.ALIGN_CENTER);
+                            cell.BorderWidth = 0.3f;
+                            cell.BorderColor = BaseColor.BLACK;
+                            cell.PaddingBottom = 5f;
+                            table.AddCell(cell);
+                            //Y2Val value
+                            phrase = new Phrase();
+                            phrase.Add(new Chunk(saExecutiveSummary.Y2Val, FontFactory.GetFont(pdfCellFontName, pdfCellSummaryFontSize, Font.NORMAL, BaseColor.BLACK)));
+                            cell = PhraseCell(phrase, PdfPCell.ALIGN_CENTER);
+                            cell.BorderWidth = 0.3f;
+                            cell.BorderColor = BaseColor.BLACK;
+                            cell.PaddingBottom = 5f;
+                            table.AddCell(cell);
+                            //Y3Val value
+                            phrase = new Phrase();
+                            phrase.Add(new Chunk(saExecutiveSummary.Y3Val, FontFactory.GetFont(pdfCellFontName, pdfCellSummaryFontSize, Font.NORMAL, BaseColor.BLACK)));
+                            cell = PhraseCell(phrase, PdfPCell.ALIGN_CENTER);
+                            cell.BorderWidth = 0.3f;
+                            cell.BorderColor = BaseColor.BLACK;
+                            cell.PaddingBottom = 5f;
+                            table.AddCell(cell);
+                            //Y4Val value
+                            phrase = new Phrase();
+                            phrase.Add(new Chunk(saExecutiveSummary.Y4Val, FontFactory.GetFont(pdfCellFontName, pdfCellSummaryFontSize, Font.NORMAL, BaseColor.BLACK)));
+                            cell = PhraseCell(phrase, PdfPCell.ALIGN_CENTER);
+                            cell.BorderWidth = 0.3f;
+                            cell.BorderColor = BaseColor.BLACK;
+                            cell.PaddingBottom = 5f;
+                            table.AddCell(cell);
+                            //Y5Val value
+                            phrase = new Phrase();
+                            phrase.Add(new Chunk(saExecutiveSummary.Y5Val, FontFactory.GetFont(pdfCellFontName, pdfCellSummaryFontSize, Font.NORMAL, BaseColor.BLACK)));
+                            cell = PhraseCell(phrase, PdfPCell.ALIGN_CENTER);
+                            cell.BorderWidth = 0.3f;
+                            cell.BorderColor = BaseColor.BLACK;
+                            cell.PaddingBottom = 5f;
+                            table.AddCell(cell);
+                            //GRSVal value
+                            phrase = new Phrase();
+                            phrase.Add(new Chunk(saExecutiveSummary.GRSVal, FontFactory.GetFont(pdfCellFontName, pdfCellSummaryFontSize, Font.NORMAL, BaseColor.BLACK)));
+                            cell = PhraseCell(phrase, PdfPCell.ALIGN_CENTER);
+                            cell.BorderWidth = 0.3f;
+                            cell.BorderColor = BaseColor.BLACK;
+                            cell.PaddingBottom = 5f;
+                            table.AddCell(cell);
+                        }
                     }
+                    
 
                     //add Store Executive financial Summary tabel to pdf document
                     document.Add(table);

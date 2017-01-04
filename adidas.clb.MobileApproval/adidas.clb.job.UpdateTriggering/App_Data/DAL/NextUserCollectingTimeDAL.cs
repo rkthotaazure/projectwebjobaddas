@@ -92,16 +92,9 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
             try
             {
                 //Get Caller Method name from CallerInformation class
-                callerMethodName = CallerInformation.TrackCallerMethodName();
-
-                //get's azure table instance
-                CloudTable tblReferenceDataTable = DataProvider.GetAzureTableInstance(ConfigurationManager.AppSettings["AzureTables.ReferenceData"]);
+                callerMethodName = CallerInformation.TrackCallerMethodName();                
                 // Create a retrieve operation that takes a NextUserCollectingTime Entity.
-                TableOperation RetrieveUser = TableOperation.Retrieve<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.UpdateTriggerNextCollectingTime, backendID);
-                // Execute the operation.
-                TableResult RetrievedResultUser = tblReferenceDataTable.Execute(RetrieveUser);
-                // Assign the result to a NextUserCollectingTimeEntity object.
-                NextUserCollectingTimeEntity ObjNextCollectingTime = (NextUserCollectingTimeEntity)RetrievedResultUser.Result;
+                NextUserCollectingTimeEntity ObjNextCollectingTime = DataProvider.Retrieveentity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, CoreConstants.AzureTables.UpdateTriggerNextCollectingTime, backendID);
                 if (ObjNextCollectingTime != null)
                 {
                     //update the existing entity
@@ -113,13 +106,10 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     ObjNextCollectingTime.MinimumUpdateFrequency = minimumUpdateFrequency;
                     //update  NextCollectingTime value based on new MinimumUpdateFrequency,last collecting Time
                     ObjNextCollectingTime.RegularUpdateNextCollectingTime = lastCollectingTime.AddMinutes(minimumUpdateFrequency);
-
                     //update Missing Update NextCollectingTime based on updatetriggering Rule R5
                     ObjNextCollectingTime.MissingUpdateNextCollectingTime = utRules.GetNextMissingCollectingTime(MissedUpdateLastCollectingTime, avgAllRequestsLatency, lastAllRequestsLatency);
-                    // Create the Replace TableOperation.
-                    TableOperation updateOperation = TableOperation.Replace(ObjNextCollectingTime);
-                    // Execute the operation.
-                    tblReferenceDataTable.Execute(updateOperation);
+                    //call dataprovider method to update entity to azure table
+                    DataProvider.UpdateEntity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, ObjNextCollectingTime);
                 }
                 else
                 {
@@ -132,10 +122,8 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     nextCollectingTime.RegularUpdateNextCollectingTime = collectingTime.AddMinutes(minimumUpdateFrequency);
                     nextCollectingTime.MissingUpdateLastCollectingTime = collectingTime;
                     nextCollectingTime.MissingUpdateNextCollectingTime = utRules.GetNextMissingCollectingTime(collectingTime, avgAllRequestsLatency, lastAllRequestsLatency);
-                    // Create the TableOperation object that inserts the NextUserCollectingTime entity.
-                    TableOperation insertOperation = TableOperation.Insert(nextCollectingTime);
-                    // Execute the insert operation.
-                    tblReferenceDataTable.Execute(insertOperation);
+                    // Create the TableOperation object that inserts the NextUserCollectingTime entity.                                        
+                    DataProvider.InsertEntity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, nextCollectingTime);
 
                 }
             }
@@ -166,26 +154,18 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                //get's azure table instance
-                CloudTable tblReferenceDataTable = DataProvider.GetAzureTableInstance(ConfigurationManager.AppSettings["AzureTables.ReferenceData"]);
                 // Create a retrieve operation that takes a NextUserCollectingTime Entity.
-                TableOperation RetrieveUser = TableOperation.Retrieve<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.UpdateTriggerNextCollectingTime, backendID);
-                // Execute the operation.
-                TableResult RetrievedResultUser = tblReferenceDataTable.Execute(RetrieveUser);
-                // Assign the result to a NextUserCollectingTimeEntity object.
-                NextUserCollectingTimeEntity ObjNextCollectingTime = (NextUserCollectingTimeEntity)RetrievedResultUser.Result;
-                if (ObjNextCollectingTime != null)
+                NextUserCollectingTimeEntity ObjUpdateNextCollectingTime = DataProvider.Retrieveentity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, CoreConstants.AzureTables.UpdateTriggerNextCollectingTime, backendID);
+                if (ObjUpdateNextCollectingTime != null)
                 {
                     //update the existing entity                   
                     DateTime nextCollectingTime = LastCollectingTime.AddMinutes(minimumUpdateFrequency);
                     //update  lastCollectingTime  with previous NextCollectingTime
-                    ObjNextCollectingTime.RegularUpdateLastCollectingTime = LastCollectingTime;
+                    ObjUpdateNextCollectingTime.RegularUpdateLastCollectingTime = LastCollectingTime;
                     //update  NextCollectingTime value based on new MinimumUpdateFrequency,last collecting Time
-                    ObjNextCollectingTime.RegularUpdateNextCollectingTime = nextCollectingTime;
-                    // Create the Replace TableOperation.
-                    TableOperation updateOperation = TableOperation.Replace(ObjNextCollectingTime);
-                    // Execute the operation.
-                    tblReferenceDataTable.Execute(updateOperation);
+                    ObjUpdateNextCollectingTime.RegularUpdateNextCollectingTime = nextCollectingTime;                   
+                    // Execute update operation.
+                    DataProvider.UpdateEntity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, ObjUpdateNextCollectingTime);                   
                 }
             }
             catch (DataAccessException dalexception)
@@ -212,15 +192,9 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                //get's azure table instance
-                CloudTable tblReferenceDataTable = DataProvider.GetAzureTableInstance(ConfigurationManager.AppSettings["AzureTables.ReferenceData"]);
                 // Create a retrieve operation that takes a NextUserCollectingTime Entity.
-                TableOperation RetrieveUser = TableOperation.Retrieve<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.UpdateTriggerNextCollectingTime, backendID);
-                // Execute the operation.
-                TableResult RetrievedResultUser = tblReferenceDataTable.Execute(RetrieveUser);
-                // Assign the result to a NextUserCollectingTimeEntity object.
-                NextUserCollectingTimeEntity ObjNextCollectingTime = (NextUserCollectingTimeEntity)RetrievedResultUser.Result;
-                if (ObjNextCollectingTime != null)
+                NextUserCollectingTimeEntity ObjMissedUpdateNextCollectingTime = DataProvider.Retrieveentity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, CoreConstants.AzureTables.UpdateTriggerNextCollectingTime, backendID);
+                if (ObjMissedUpdateNextCollectingTime != null)
                 {
                     //get backend details by backendid from userconfiguration
                     BackendEntity backendDetails = objdal.GetBackendDetailsByBackendID(backendID);
@@ -228,13 +202,11 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     {
 
                         //update  Missing Update Last CollectingTime  with previous Missing Update NextCollectingTime
-                        ObjNextCollectingTime.MissingUpdateLastCollectingTime = missingUpdateLastCollectingTime;
+                        ObjMissedUpdateNextCollectingTime.MissingUpdateLastCollectingTime = missingUpdateLastCollectingTime;
                         //update Missing Update NextCollectingTime based on updatetriggering Rule R5
-                        ObjNextCollectingTime.MissingUpdateNextCollectingTime = utRules.GetNextMissingCollectingTime(missingUpdateLastCollectingTime, backendDetails.AverageAllRequestsLatency, backendDetails.LastAllRequestsLatency);
-                        // Create the Replace TableOperation.
-                        TableOperation updateOperation = TableOperation.Replace(ObjNextCollectingTime);
-                        // Execute the operation.
-                        tblReferenceDataTable.Execute(updateOperation);
+                        ObjMissedUpdateNextCollectingTime.MissingUpdateNextCollectingTime = utRules.GetNextMissingCollectingTime(missingUpdateLastCollectingTime, backendDetails.AverageAllRequestsLatency, backendDetails.LastAllRequestsLatency);
+                        // Execute update operation.
+                        DataProvider.UpdateEntity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, ObjMissedUpdateNextCollectingTime);
                     }
 
                 }

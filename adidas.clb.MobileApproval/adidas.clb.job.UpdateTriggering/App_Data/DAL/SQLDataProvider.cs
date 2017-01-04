@@ -97,8 +97,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     message = string.Format(CoreConstants.INVALIDPARAMETER_MSG, "sqlParameters");
                 DataAccessException ex = new DataAccessException(message);
                 throw ex;
-            }
-
+            }            
             //Prepare sql command object
             this.PrepareCommand(commandType, strCommandText, sqlParameters);
             //Instantiate new sql data adapter object

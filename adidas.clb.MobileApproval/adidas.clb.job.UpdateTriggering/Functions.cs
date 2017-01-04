@@ -162,13 +162,13 @@ namespace adidas.clb.job.UpdateTriggering
                 //get all the userbackends needs to update
                 List<NextUserCollectingTimeEntity> lstbackends = objnextcollentingTime.GetBackendsNeedsUpdate();
                 UserBackendDAL objdal = new UserBackendDAL();
-                //foreach backend   
-                foreach (NextUserCollectingTimeEntity backend in lstbackends)
+                //foreach backend  
+                Parallel.ForEach<NextUserCollectingTimeEntity>(lstbackends, backend =>               
                 {
                     //getting minutes difference between currenttime and Regular Update Next CollectingTime
                     double regularWaitingMinutes = (backend.RegularUpdateNextCollectingTime - DateTime.UtcNow).TotalMinutes;
                     //if minutes difference is with in RegularChecksWaitingTimeInMinutes(>=-5 and <=0) then invoke CollectUsersNeedUpdateByBackend method()
-                    if (regularWaitingMinutes >= -(Convert.ToDouble(ConfigurationManager.AppSettings["RegularChecksWaitingTimeInMinutes"])) && regularWaitingMinutes <= 0)
+                    if (regularWaitingMinutes >= -(Convert.ToDouble(ConfigurationManager.AppSettings["RegularChecksWaitingTimeInMinutes"])) && regularWaitingMinutes <= 1)
                     {
                         //collect the users needing update and keep the messages in update trigger input queue
                         objdal.CollectUsersNeedUpdateByBackend(backend.BackendID);
@@ -176,7 +176,7 @@ namespace adidas.clb.job.UpdateTriggering
                         objnextcollentingTime.UpdateBackendRegularNextCollectingTime(backend.BackendID, backend.MinimumUpdateFrequency, backend.RegularUpdateNextCollectingTime);
                     }
 
-                }
+                });
                 InsightLogger.TrackEndEvent(callerMethodName);
             }
             catch (BusinessLogicException balexception)
@@ -218,7 +218,7 @@ namespace adidas.clb.job.UpdateTriggering
                 //get all the userbackends needs to update
                 List<NextUserCollectingTimeEntity> lstbackends = objnextcollectingTime.GetBackendsNeedsUpdate();
                 UserBackendDAL objUserBackendDAL = new UserBackendDAL();
-                foreach (NextUserCollectingTimeEntity backend in lstbackends)
+                Parallel.ForEach<NextUserCollectingTimeEntity>(lstbackends, backend =>
                 {
                     //getting minutes difference between currenttime and Missing Update Next CollectingTime
                     double waitingMinutes = (backend.MissingUpdateNextCollectingTime - DateTime.UtcNow).TotalMinutes;
@@ -234,7 +234,7 @@ namespace adidas.clb.job.UpdateTriggering
                         //update the backend entity with new missing update collecting time[i.e MissingUpdateLastCollectingTime= MissingUpdateNextCollectingTime and MissingUpdateNextCollectingTime=Max(]
                         objnextcollectingTime.UpdateMisseduserBackendNextCollectingTime(backend.BackendID, backend.MissingUpdateNextCollectingTime);
                     }
-                }
+                });
                 InsightLogger.TrackEndEvent(callerMethodName);
             }
             catch (BusinessLogicException balexception)
@@ -259,72 +259,7 @@ namespace adidas.clb.job.UpdateTriggering
             }
 
         }
-        /// <summary>
-        /// This method reads the message(RequestID,BackendID) from GeneratePdf Queue and creates pdf 
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="log"></param>
-        public static void ProcessGeneratePdfMessage([QueueTrigger("%pdfQueue%")] string message, TextWriter log)
-        {
-            string callerMethodName = string.Empty;
-            try
-            {
-                //Get Caller Method name from CallerInformation class
-                callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackStartEvent(callerMethodName);
-                if (!string.IsNullOrEmpty(message))
-                {
-                    log.WriteLine("UpdateTriggering :: Process Generate Pdf Message :: start()" + message);
-                    InsightLogger.TrackEvent("UpdateTriggering :: Process Generate Pdf Queue Message :" + message);
-                    //Deserialize input queue message into RequestPdf object
-                    RequestPdf objRequestPdf = JsonConvert.DeserializeObject<RequestPdf>(message);
-
-                    if (objRequestPdf != null)
-                    {
-                        //get Request Pdf details from queue message
-                        string backendID = objRequestPdf.BackendID;
-                        string requestID = objRequestPdf.RequestID;
-                        //check backendID
-                        switch (backendID.ToLower())
-                        {
-                            case CoreConstants.Backends.BPMOnline:
-                                //create pdf file from store backend
-                                GeneratePDF objGenPdf = new GeneratePDF();
-                                objGenPdf.GeneratePDFForStoreApproval(requestID);
-                                break;
-                            case CoreConstants.Backends.CAR:
-                                //create pdf file from store backend
-                                GeneratePDF objGenPdfCAR = new GeneratePDF();
-                                objGenPdfCAR.GeneratePDFForCARApproval(requestID);
-                                break;
-                            default:
-                                break;
-                        }
-                        //get RequestUpdateMsg list from UpdateTriggeringMsg
-
-                        log.WriteLine("UpdateTriggering :: Processing Generate Pdf message :: End()" + message);
-                        InsightLogger.TrackEndEvent(callerMethodName);
-                    }
-                }
-            }
-            catch (DataAccessException dalexception)
-            {
-                //write exception message to web job dashboard logs
-                log.WriteLine(dalexception.Message);
-                //write  Data Access Exception into application insights
-                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
-            }
-            catch (Exception exception)
-            {
-                LoggerHelper.WriteToLog(exception + " - Error while processing the generate Pdf queue message in Functions :: ProcessGeneratePdfMessage(): "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
-                //write exception message to web job dashboard logs
-                log.WriteLine(exception.Message);
-                //write  Exception into application insights
-                InsightLogger.Exception(exception.Message, exception, callerMethodName);
-
-            }
-        }
+                
         /// <summary>
         /// This method generates time intervals based on given minutes time span
         /// </summary>
