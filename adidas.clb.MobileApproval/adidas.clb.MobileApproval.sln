@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adidas.clb.job.UpdateTrigge
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adidas.clb.job.RequestsUpdate", "adidas.clb.job.RequestsUpdate\adidas.clb.job.RequestsUpdate.csproj", "{13AD7835-DCCC-4A66-957C-F68EB09A4C2E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adidas.clb.job.GeneratePDF", "..\..\..\Ram\adidas.clb.MobileApproval\adidas.clb.job.GeneratePDF\adidas.clb.job.GeneratePDF.csproj", "{F174592A-367D-4955-A2CA-7FEF4CF0FB26}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -37,6 +39,10 @@ Global
 		{13AD7835-DCCC-4A66-957C-F68EB09A4C2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{13AD7835-DCCC-4A66-957C-F68EB09A4C2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{13AD7835-DCCC-4A66-957C-F68EB09A4C2E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F174592A-367D-4955-A2CA-7FEF4CF0FB26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F174592A-367D-4955-A2CA-7FEF4CF0FB26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F174592A-367D-4955-A2CA-7FEF4CF0FB26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F174592A-367D-4955-A2CA-7FEF4CF0FB26}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
