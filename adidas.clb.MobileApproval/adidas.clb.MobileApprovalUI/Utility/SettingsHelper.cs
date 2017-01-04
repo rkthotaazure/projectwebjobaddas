@@ -53,9 +53,9 @@ namespace adidas.clb.MobileApprovalUI.Utility
         }
       
         //Graph resource id for authentication
-        public static string GraphResourceID
+        public static string ResourceID
         {
-            get { return ConfigurationManager.AppSettings["GraphResourceID"]; }
+            get { return ConfigurationManager.AppSettings["ResourceID"]; }
         }
         //Tenant id url for authentication
         public static string TenantIdUrl
@@ -156,6 +156,11 @@ namespace adidas.clb.MobileApprovalUI.Utility
         {
             get { return ConfigurationManager.AppSettings["ApprovalAPIReqID"]; }
         }
+        public static string SyncAPIUserBackendReqCompleted
+        {
+            get { return ConfigurationManager.AppSettings["SyncAPIUserBackendReqCompleted"]; }
+        }
         
+
     }
 }

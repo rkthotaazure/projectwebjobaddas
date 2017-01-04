@@ -12,17 +12,19 @@ using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OpenIdConnect;
 using adidas.clb.MobileApprovalUI.Models;
+using adidas.clb.MobileApprovalUI.Utility;
 
 namespace adidas.clb.MobileApprovalUI.Controllers
 {
-    [Authorize]
+   // [Authorize]
     public class UserProfileController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
         private string clientId = ConfigurationManager.AppSettings["ida:ClientId"];
         private string appKey = ConfigurationManager.AppSettings["ida:ClientSecret"];
         private string aadInstance = ConfigurationManager.AppSettings["ida:AADInstance"];
-        private string graphResourceID = "https://graph.windows.net";
+        private string graphResourceID = ConfigurationManager.AppSettings["ResourceID"];
+      
 
         // GET: UserProfile
         public async Task<ActionResult> Index()
@@ -66,16 +68,27 @@ namespace adidas.clb.MobileApprovalUI.Controllers
 
         public async Task<string> GetTokenForApplication()
         {
-            string signedInUserID = ClaimsPrincipal.Current.FindFirst(ClaimTypes.NameIdentifier).Value;
-            string tenantID = ClaimsPrincipal.Current.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid").Value;
-            string userObjectID = ClaimsPrincipal.Current.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier").Value;
-
-            // get a token for the Graph without triggering any user interaction (from the cache, via multi-resource refresh token, etc)
-            ClientCredential clientcred = new ClientCredential(clientId, appKey);
-            // initialize AuthenticationContext with the token cache of the currently signed in user, as kept in the app's database
-            AuthenticationContext authenticationContext = new AuthenticationContext(aadInstance + tenantID, new ADALTokenCache(signedInUserID));
-            AuthenticationResult authenticationResult = await authenticationContext.AcquireTokenSilentAsync(graphResourceID, clientcred, new UserIdentifier(userObjectID, UserIdentifierType.UniqueId));
-            return authenticationResult.AccessToken;
+            try
+            {
+                string signedInUserID = ClaimsPrincipal.Current.FindFirst(ClaimTypes.NameIdentifier).Value;
+                string tenantID = ClaimsPrincipal.Current.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid").Value;
+                string userObjectID = ClaimsPrincipal.Current.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier").Value;
+                LoggerHelper.WriteToLog(clientId + " , secret" + appKey, CoreConstants.Priority.High, CoreConstants.Category.Trace);
+                // get a token for the Graph without triggering any user interaction (from the cache, via multi-resource refresh token, etc)
+                ClientCredential clientcred = new ClientCredential(clientId, appKey);
+                // initialize AuthenticationContext with the token cache of the currently signed in user, as kept in the app's database
+                AuthenticationContext authenticationContext = new AuthenticationContext(Startup.Authority, new ADALTokenCache(userObjectID));
+                LoggerHelper.WriteToLog("about to acquire token", CoreConstants.Priority.High, CoreConstants.Category.Trace);
+                AuthenticationResult authenticationResult = await authenticationContext.AcquireTokenSilentAsync(graphResourceID, clientcred, new UserIdentifier(userObjectID, UserIdentifierType.UniqueId));
+                LoggerHelper.WriteToLog("token recieved - " + authenticationResult.AccessToken, CoreConstants.Priority.High, CoreConstants.Category.Trace);
+                return authenticationResult.AccessToken;
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - ERROR in token : "
+                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                return null;
+            }
         }
     }
 }

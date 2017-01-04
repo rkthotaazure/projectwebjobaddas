@@ -22,7 +22,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
     /// <summary>
     /// The controller that will handle requests to the SharePoint API.
     /// </summary>
-    //[Authorize]
+   // [Authorize]
 
     /// <summary>
     /// The controller that will handle requests to the SharePoint API.
@@ -272,6 +272,40 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                     //Creates the enpoint uri to be called
                     StringBuilder EndPointUri = new StringBuilder(WebApiRootURL);
                     string api = string.Format(SettingsHelper.SyncAPIUserBackend, userid);
+                    //SettingsHelper.PersonalizationAPIUser + userid + "/";
+                    Uri spotlightEndPointUri =
+                        new Uri(EndPointUri.Append(string.Format(api)).ToString());
+                    Helper JsonHelperObj = new Helper();
+                    //Gets the response returned by the Sync API
+                    rspRequestcountinfo = await JsonHelperObj.SyncAPIPostCall(string.Format(spotlightEndPointUri.ToString()), syncData);
+                }
+                else
+                {
+                    //Write the trace in db that no url exists
+                    LoggerHelper.WriteToLog("WebApiRootURL URL is null", CoreConstants.Priority.High, CoreConstants.Category.Error);
+                    return null;
+                }
+            }
+            catch (Exception exception)
+            {
+                // logging an error if in case some exception occurs
+                LoggerHelper.WriteToLog(exception, "Error while fetching the most popular videos" + exception.ToString());
+                throw new DataAccessException("Data Access Exception:-Error while saving user info");
+            }
+
+            return rspRequestcountinfo;
+        }
+        public async Task<string> GetApprovalcompletedcount(SynchRequestDTO syncData, string userid)
+        {
+            string rspRequestcountinfo = string.Empty;
+            try
+            {
+                string WebApiRootURL = SettingsHelper.WebApiUrl;
+                if (!string.IsNullOrEmpty(WebApiRootURL))
+                {
+                    //Creates the enpoint uri to be called
+                    StringBuilder EndPointUri = new StringBuilder(WebApiRootURL);
+                    string api = string.Format(SettingsHelper.SyncAPIUserBackendReqCompleted, userid);
                     //SettingsHelper.PersonalizationAPIUser + userid + "/";
                     Uri spotlightEndPointUri =
                         new Uri(EndPointUri.Append(string.Format(api)).ToString());

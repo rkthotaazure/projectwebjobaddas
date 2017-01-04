@@ -1,14 +1,15 @@
 ﻿<div id="mobile-home" class="page-width" ng-controller="ApprovalDetailsController" ng-init="init()">
     <div class="align-text-top" ng-click="redirect()">
-     <span class="glyphicon glyphicon-triangle-left"></span>
-        ApprovalLanding</div>
+        <span class="glyphicon glyphicon-triangle-left"></span>
+        Approval Dashboard
+    </div><br />
     <div class="backends">
         <div class="title-section row">
             <div class="title-text">
                 Pending Approvals
             </div>
         </div>
-        <div class="table-responsive">
+        <div class="table-responsive">           
             <table class="table table-inverse" id="tab_logic_Backend">
                 <thead class="thead-inverse">
                     <tr>
@@ -18,29 +19,34 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="approvaltask in approvalTasks" ng-class-odd="'odd'" ng-class-even="'even'">
+                    <tr ng-class-odd="'odd'" ng-class-even="'even'" ng-show="loading">
+                        <td></td><td align="center" class="glyphicon glyphicon-refresh gly-spin"></td><td></td>
+                    </tr>
+                    <tr ng-repeat="approvaltask in approvalTasks | filter:paginate" ng-class-odd="'odd'" ng-class-even="'even'">
                         <td>
-                            <div class="input-group" ng-click="showDetails(approvaltask.id)">
-                               {{approvaltask.id}}
+                            <div class="input-group" ng-click="showDetails(approvaltask.RequestId)">
+                                {{approvaltask.RequestId}}
                             </div>
                         </td>
                         <td>
                             <div class="input-group">
-                                {{approvaltask.status}}
+                                {{approvaltask.Status}}
                             </div>
                         </td>
                         <td>
-                            <div class="input-group">
-                                <div><span class="glyphicon glyphicon-ok" ng-click="requestStatus('Approved',approvaltask.id)">Approve</span></div>
-                            </div>
-                            <div class="input-group">
-                                <div><span class="glyphicon glyphicon-remove" ng-click="requestStatus('Rejected',approvaltask.id)">Reject</span></div>
+                            <div class="input-group" ng-show="hideButton">
+                                <div><button type="button" class="btn btn-primary" data-toggle="tooltip" title="Approve" data-placement="top"><span class="glyphicon glyphicon-ok" ng-click="requestStatus('Approved',approvaltask.RequestId)"></span></button>
+                                <button type="button" class="btn btn-primary" data-toggle="tooltip" title="Reject" data-placement="top"><span class="glyphicon glyphicon-remove" ng-click="requestStatus('Rejected',approvaltask.RequestId)"></span></button></div>
                             </div>
                         </td>
                     </tr>
                 </tbody>
             </table>
+            <div class="align-middle"><ul uib-pagination total-items="totalItems" ng-model="currentPage" items-per-page='5'></ul></div>
+             
         </div>
     </div>
 </div>
+
+ 
     

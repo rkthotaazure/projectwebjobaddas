@@ -25,7 +25,7 @@ namespace adidas.clb.MobileApprovalUI.Models
             // look up the entry in the database
             Cache = db.UserTokenCacheList.FirstOrDefault(c => c.webUserUniqueId == userId);
             // place the entry in memory
-            this.Deserialize((Cache == null) ? null : MachineKey.Unprotect(Cache.cacheBits,"ADALCache"));
+            this.Deserialize((Cache == null) ? null : MachineKey.Unprotect(Cache.cacheBits, "ADALCache"));
         }
 
         // clean up the database
@@ -47,14 +47,14 @@ namespace adidas.clb.MobileApprovalUI.Models
                 Cache = db.UserTokenCacheList.FirstOrDefault(c => c.webUserUniqueId == userId);
             }
             else
-            { 
+            {
                 // retrieve last write from the DB
                 var status = from e in db.UserTokenCacheList
                              where (e.webUserUniqueId == userId)
-                select new
-                {
-                    LastWrite = e.LastWrite
-                };
+                             select new
+                             {
+                                 LastWrite = e.LastWrite
+                             };
 
                 // if the in-memory copy is older than the persistent copy
                 if (status.First().LastWrite > Cache.LastWrite)
@@ -71,16 +71,48 @@ namespace adidas.clb.MobileApprovalUI.Models
         void AfterAccessNotification(TokenCacheNotificationArgs args)
         {
             // if state changed
-            if (this.HasStateChanged)
+            //if (this.HasStateChanged)
+            //{
+            //    Cache = new UserTokenCache
+            //    {
+            //        webUserUniqueId = userId,
+            //        cacheBits = MachineKey.Protect(this.Serialize(), "ADALCache"),
+            //        LastWrite = DateTime.Now
+            //    };
+            //    // update the DB and the lastwrite 
+            //    db.Entry(Cache).State = Cache.UserTokenCacheId == 0 ? EntityState.Added : EntityState.Modified;
+            //    db.SaveChanges();
+            //    this.HasStateChanged = false;
+            //}
+            // if state changed
+            if (this.HasStateChanged || Cache == null)
             {
-                Cache = new UserTokenCache
-                {
-                    webUserUniqueId = userId,
-                    cacheBits = MachineKey.Protect(this.Serialize(), "ADALCache"),
-                    LastWrite = DateTime.Now
-                };
+                Cache = Cache ?? new UserTokenCache();
+                Cache.webUserUniqueId = userId;
+                Cache.cacheBits = MachineKey.Protect(this.Serialize(), "ADALCache");
+                Cache.LastWrite = DateTime.Now;
                 // update the DB and the lastwrite 
                 db.Entry(Cache).State = Cache.UserTokenCacheId == 0 ? EntityState.Added : EntityState.Modified;
+                //delete all the previous tokens for the current user
+                //foreach (var cacheEntry in db.UserTokenCacheList)
+                //{
+                //    if (cacheEntry.webUserUniqueId == Cache.webUserUniqueId)
+                //    {
+                //        db.UserTokenCacheList.Remove(cacheEntry);
+                //    }
+                //}
+                //foreach (var cacheEntry in db.UserTokenCacheList.Where
+                //                (p => p.webUserUniqueId == Cache.webUserUniqueId).ToList())
+                //{
+                //    if (cacheEntry.LastWrite != Cache.LastWrite)
+                //    {
+                //        db.UserTokenCacheList.Remove(cacheEntry);
+                //    }
+                //}
+                //db.SaveChanges();
+                //db.SaveChanges();
+                //db.Database.ExecuteSqlCommand("DELETE FROM UserTokenCaches WHERE webUserUniqueId='" + userId + "' and LastWrite!=" + Cache.LastWrite);
+
                 db.SaveChanges();
                 this.HasStateChanged = false;
             }

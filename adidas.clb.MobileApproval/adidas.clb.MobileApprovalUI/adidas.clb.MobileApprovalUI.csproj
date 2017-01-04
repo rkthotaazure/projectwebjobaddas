@@ -278,8 +278,10 @@
     <Content Include="Images\paris.jpg" />
     <Content Include="Images\sanfran.jpg" />
     <Content Include="Images\Search.PNG" />
+    <Content Include="Images\spinner.gif" />
     <Content Include="Scripts\app\controllers\common.js" />
     <Content Include="Scripts\app\controllers\GMController.js" />
+    <Content Include="Scripts\app\directives\GMDirectives.js" />
     <Content Include="Scripts\app\js\adal-angular.js" />
     <Content Include="Scripts\app\js\adal.js" />
     <Content Include="Scripts\app\js\ai.0.22.19-build00125.js" />
@@ -339,8 +341,12 @@
     <None Include="Properties\PublishProfiles\genericmobileapp - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\genericmobileapp - Web Deploy.pubxml" />
     <Content Include="Scripts\app\js\angular.min.js.map" />
+    <None Include="Properties\PublishProfiles\genericmobiledev - FTP %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\genericmobiledev - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\genericmobiledev - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\genericmobiledev - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\mobileapprovalclient - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\mobileapprovalclient - Web Deploy.pubxml" />
     <None Include="Scripts\app\js\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\app\js\jquery-1.10.2.js" />
     <Content Include="Scripts\app\js\jquery-1.10.2.min.js" />
@@ -380,6 +386,7 @@
     <Compile Include="Models\ApprovalQuery.cs" />
     <Compile Include="Models\ApprovalRequestDTO.cs" />
     <Compile Include="Models\Backend.cs" />
+    <Compile Include="Models\ApprovalCountDTO.cs" />
     <Compile Include="Models\RequestDetails.cs" />
     <Compile Include="Models\Device.cs" />
     <Compile Include="Models\ErrorDetail.cs" />
@@ -443,7 +450,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Scripts\app\directives\" />
     <Folder Include="Views\APIController\" />
   </ItemGroup>
   <ItemGroup>
