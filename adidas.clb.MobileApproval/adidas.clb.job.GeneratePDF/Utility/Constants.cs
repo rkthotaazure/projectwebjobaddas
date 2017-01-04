@@ -6,7 +6,7 @@
 using System;
 using System.Configuration;
 
-namespace adidas.clb.job.UpdateTriggering.Utility
+namespace adidas.clb.job.GeneratePDF.Utility
 {
     /// The class that contains the constants used in the application.
     public class CoreConstants

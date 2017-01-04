@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace adidas.clb.job.UpdateTriggering.Models
 {
-    class RequestsUpdateAck
+    public class RequestsUpdateAck
     {
         public string _type { get; set; }
         public RequestsUpdateQuery Query { set; get; }

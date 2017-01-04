@@ -7,6 +7,9 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 namespace adidas.clb.job.UpdateTriggering.Models
 {
+    /// <summary>
+    /// Implements RequestSynchEntity Class
+    /// </summary>
     class RequestSynchEntity : TableEntity
     {
         public RequestSynchEntity(string BackendRowKey, string RequestID)
@@ -18,6 +21,7 @@ namespace adidas.clb.job.UpdateTriggering.Models
 
         public string RequestID { get; set; }
         public string BackendID { get; set; }
+        public string UserID { get; set; }
         public bool UpdateTriggered { get; set; }
         public int ExpectedLatency { get; set; }
         public DateTime LastUpdate { get; set; }

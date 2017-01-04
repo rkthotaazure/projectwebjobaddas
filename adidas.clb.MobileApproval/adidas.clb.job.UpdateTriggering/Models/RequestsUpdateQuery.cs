@@ -14,22 +14,21 @@ namespace adidas.clb.job.UpdateTriggering.Models
     /// <summary>
     /// class which implements model for RequestsUpdateQuery  obj.
     /// </summary>
-    class RequestsUpdateQuery
+    public class RequestsUpdateQuery
     {
         public string _type { get; set; }
         public BackendUser User { get; set; }
-        public string BackendID {get;set;}
-        public IEnumerable<RequestUpdateMsg> requests { get; set; }
+        public IEnumerable<RequestUpdateMsg> Requests { get; set; }
         public bool VIP { get; set; }
         public bool GetPDFs { get; set; }
         public Nullable<DateTime> ChangeAfter { get; set; }
+        public string BackendID { get; set; }
         public RequestsUpdateQuery()
         {
             _type = "requestsUpdateQuery";
         }
     }
-    [Serializable]
-    class BackendUser
+    public class BackendUser
     {
         public string _type { get; set; }
         public string UserID { get; set; }
@@ -39,8 +38,7 @@ namespace adidas.clb.job.UpdateTriggering.Models
             _type = "backendUser";
         }
     }
-    [Serializable]
-    class RequestPdf
+    public class RequestPdf
     {
         public string _type { get; set; }
         public string RequestID { get; set; }
