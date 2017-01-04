@@ -34,8 +34,10 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
                 RequestsUpdateAck Objacknowledgement = null;
                 using (HttpClient client = new HttpClient())
                 {
+                   
                     //get API endpoint and format
                     string backendApiEndpoint = UrlSettings.GetBackendAgentRequestApprovalAPI(backendID);
+                    InsightLogger.TrackEvent("Invoking backend agent API through UpdateTriggering module :: Start ::  \n API Endpont : " + backendApiEndpoint + " \n UpdateTriggeringMessage: " + UpdateTriggeringMessage);
                     //Post Triggers the pulling of updated requests data from a the given backend / given requests
                     var request = new HttpRequestMessage(HttpMethod.Post, backendApiEndpoint);
                     request.Content = new StringContent(UpdateTriggeringMessage, Encoding.UTF8, "application/json");
@@ -53,9 +55,14 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
                             {
                                 acknowledgement = "Backend API has been invoked successfully. ";
                             }
+                            else
+                            {
+                                InsightLogger.TrackEvent("Backend API has thrown an error :: ErrorMessage=" + Objacknowledgement.Error.longtext);
+                            }
                         }
                                                
                     }
+                    InsightLogger.TrackEvent("Invoking backend agent API through UpdateTriggering module :: End");
                 }
                 return acknowledgement;
             }

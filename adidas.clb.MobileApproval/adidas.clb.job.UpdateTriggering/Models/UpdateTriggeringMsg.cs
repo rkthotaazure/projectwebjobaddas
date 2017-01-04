@@ -14,7 +14,7 @@ namespace adidas.clb.job.UpdateTriggering.Models
     /// <summary>
     /// class which implements model for UpdateTriggeringMsg  obj.
     /// </summary>
-    class UpdateTriggeringMsg
+    public class UpdateTriggeringMsg
     {
         public string _type { get; set; }
         public IEnumerable<UserUpdateMsg> Users { get; set; }
@@ -28,8 +28,7 @@ namespace adidas.clb.job.UpdateTriggering.Models
         }
 
     }
-    [Serializable]
-    class UserUpdateMsg
+    public class UserUpdateMsg
     {
         public string _type { get; set; }
         public string UserID { get; set; }
@@ -39,9 +38,8 @@ namespace adidas.clb.job.UpdateTriggering.Models
         {
             _type = "userUpdateMsg";
         }
-    }
-    [Serializable]
-    class RequestUpdateMsg
+    }   
+    public class RequestUpdateMsg
     {
         public string _type { get; set; }
         public string ServiceLayerReqID { get; set; }
@@ -51,24 +49,23 @@ namespace adidas.clb.job.UpdateTriggering.Models
             _type = "requestUpdateMsg";
         }
     }
-    [Serializable]
-    class Backend
+    public class Backend
     {
         public string _type { get; set; }
-        public string ID { get; set; }
-        public string Name { get; set; }
+        public string BackendID { get; set; }
+        public string BackendName { get; set; }
         public Backend()
         {
             _type = "backend";
         }
     }
-    [Serializable]
-    class Request
+    public class Request
     {
         public string _type { get; set; }
         public Backend Backend { get; set; }
         public string ID { get; set; }
         public string Title { get; set; }
+        public string UserID { get; set; }
         public Request()
         {
             _type = "request";
