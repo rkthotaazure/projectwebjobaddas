@@ -6,6 +6,7 @@
 using adidas.clb.job.UpdateTriggering.Exceptions;
 using adidas.clb.job.UpdateTriggering.Helpers;
 using adidas.clb.job.UpdateTriggering.Utility;
+using adidas.clb.job.UpdateTriggering.App_Data.DAL;
 using Microsoft.Azure;
 using Microsoft.Azure.WebJobs;
 using System;
@@ -22,7 +23,7 @@ using System.Timers;
 namespace adidas.clb.job.UpdateTriggering
 {
     // To learn more about Microsoft Azure WebJobs SDK, please see http://go.microsoft.com/fwlink/?LinkID=320976
-    class Program
+    public class Program
     {
         static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
         // Please set the following connection strings in app.config for this WebJob to run:
@@ -30,17 +31,16 @@ namespace adidas.clb.job.UpdateTriggering
         static void Main()
         {
             try
-            {
-               
-                //Download Azcopy.exe from blobcontainer for uploading pdf files into blob container
-                AzCopyConfig.LoadAzCopyConfigFromBlob();
-                //Download Logo from imagescontainer for PDF Files
-                AzCopyConfig.LoadImageFromBlob();
+            {             
+                
                 JobHostConfiguration config = new JobHostConfiguration();
                 // Add Triggers and Binders for Timer Trigger.               
                 config.UseTimers();
                 config.NameResolver = new MyResolver();
                 JobHost host = new JobHost(config);
+                // This method inserts/updates the next collecting time(Regular/Missed) in Azure ReferenceData Table
+                // This method should not run continuously,it runs only when the web job has started.
+                host.Call(typeof(Program).GetMethod("UpdateNextCollectingTime"));
                 // The following code ensures that the WebJob will be running continuously
                 host.RunAndBlock();
 
@@ -83,6 +83,34 @@ namespace adidas.clb.job.UpdateTriggering
                 }
             }
         }
-
+        /// <summary>
+        /// This method inserts/updates the next collecting time(Regular/Missed) in Azure ReferenceData Table
+        /// This method should not run continuously,it runs only when the web job has started
+        /// </summary>
+        [NoAutomaticTrigger]
+        public static void UpdateNextCollectingTime()
+        {
+            string callerMethodName = string.Empty;
+            try
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                ////Create object for NextUserCollectingTime class
+                NextUserCollectingTimeDAL objdal = new NextUserCollectingTimeDAL();
+                //call the UpdateNextCollectingTime method which will update the Next Collecting Time of the each backend
+                objdal.UpdateNextCollectingTime();
+            }
+            catch (DataAccessException dalexception)
+            {               
+                //write data layer exception into application insights
+                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
+            }
+            catch (Exception exception)
+            {               
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+            }
+            
+        }
     }
 }
