@@ -37,7 +37,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
         /// 
         string WebApiRootURL = SettingsHelper.WebApiUrl;
 
-
+        //Async task for getting backend applications
         public async Task<string> Getbackendapplications()
         {
             string allBackendApps = string.Empty;
@@ -69,6 +69,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
             }
             return allBackendApps;
         }
+        //Async task for getting User Details
         public async Task<string> Getuserinfo(string userid)
         {
             string userinfo = string.Empty;
@@ -100,135 +101,8 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                 throw new DataAccessException("Data Access Exception:-Error while fetching Getuserinfo ");
             }
         }
-        public async Task<string> Getuserbackendinfo(string userid)
-        {
-            string userbackendinfo = string.Empty;
-            try
-            {
-                if (!string.IsNullOrEmpty(WebApiRootURL))
-                {
-                    //Creates the enpoint uri to be called
-                    StringBuilder EndPointUri = new StringBuilder(WebApiRootURL);
-                    Uri APIEndPointUri =
-                        new Uri(EndPointUri.Append(string.Format(SettingsHelper.PersonalizationAPIUserBackend, userid)).ToString());
-                    Helper JsonHelperObj = new Helper();
-                    //Gets the response returned by the Personalization API
-                    userbackendinfo = await JsonHelperObj.APIGetCall(string.Format(APIEndPointUri.ToString()));
-                }
-                else
-                {
-                    //Write the trace in db that no url exists
-                    LoggerHelper.WriteToLog("WebApiRootURL URL is null", CoreConstants.Priority.High, CoreConstants.Category.Error);
-                    return null;
-                }
-            }
-            catch (Exception exception)
-            {
 
-                // logging an error if in case some exception occurs
-                LoggerHelper.WriteToLog(exception, "Error while fetching the most popular videos" + exception.ToString());
-                throw new DataAccessException("Data Access Exception:-Error while fetching Getuserbackendinfo ");
-
-            }
-            return userbackendinfo;
-        }
-        public async Task<string> Getselectuserbackendinfo(string userid, string selectedbackend)
-        {
-            string slecteduserbackendinfo = string.Empty;
-            try
-            {
-                if (!string.IsNullOrEmpty(WebApiRootURL))
-                {
-                    //Creates the enpoint uri to be called
-                    StringBuilder EndPointUri = new StringBuilder(WebApiRootURL);
-                    Uri APIEndPointUri =
-                        new Uri(EndPointUri.Append(string.Format(SettingsHelper.PersonalizationAPIBackendId, userid)).ToString());
-                    Helper JsonHelperObj = new Helper();
-                    //Gets the response returned by the Personalization API
-                    slecteduserbackendinfo = await JsonHelperObj.APIGetCall(string.Format(APIEndPointUri.ToString()));
-                }
-                else
-                {
-                    //Write the trace in db that no url exists
-                    LoggerHelper.WriteToLog("WebApiRootURL URL is null", CoreConstants.Priority.High, CoreConstants.Category.Error);
-                    return null;
-                }
-            }
-            catch (Exception exception)
-            {
-
-                // logging an error if in case some exception occurs
-                LoggerHelper.WriteToLog(exception, "Error while fetching the most popular videos" + exception.ToString());
-                throw new DataAccessException("Data Access Exception:-Error while fetching Getselectuserbackendinfo");
-
-            }
-            return slecteduserbackendinfo;
-        }
-        public async Task<string> Getuserdevicesinfo(string userid)
-        {
-            string userdeviceinfo = string.Empty;
-            try
-            {
-                if (!string.IsNullOrEmpty(WebApiRootURL))
-                {
-                    //Creates the enpoint uri to be called
-                    StringBuilder EndPointUri = new StringBuilder(WebApiRootURL);
-                    Uri APIEndPointUri =
-                        new Uri(EndPointUri.Append(string.Format(SettingsHelper.PersonalizationAPIUserDevice, userid)).ToString());
-                    Helper JsonHelperObj = new Helper();
-                    //Gets the response returned by the Personalization API
-                    userdeviceinfo = await JsonHelperObj.APIGetCall(string.Format(APIEndPointUri.ToString()));
-                }
-                else
-                {
-                    //Write the trace in db that no url exists
-                    LoggerHelper.WriteToLog("WebApiRootURL URL is null", CoreConstants.Priority.High, CoreConstants.Category.Error);
-                    return null;
-                }
-            }
-            catch (Exception exception)
-            {
-
-                // logging an error if in case some exception occurs
-                LoggerHelper.WriteToLog(exception, "Error while fetching the most popular videos" + exception.ToString());
-                throw new DataAccessException("Data Access Exception:-Error while fetching userdeviceinfo");
-
-            }
-            return userdeviceinfo;
-        }
-        public async Task<string> Getselectuserdeviceinfo(string userid, int deviceid)
-        {
-            string selectuserdeviceinfo = string.Empty;
-            try
-            {
-                if (!string.IsNullOrEmpty(WebApiRootURL))
-                {
-                    //Creates the enpoint uri to be called
-                    StringBuilder EndPointUri = new StringBuilder(WebApiRootURL);
-                    Uri APIEndPointUri =
-                        new Uri(EndPointUri.Append(string.Format(SettingsHelper.PersonalizationAPIUserDeviceID, userid)).ToString());
-                    Helper JsonHelperObj = new Helper();
-                    //Gets the response returned by the Personalization API
-                    selectuserdeviceinfo = await JsonHelperObj.APIGetCall(string.Format(APIEndPointUri.ToString()));
-                }
-                else
-                {
-                    //Write the trace in db that no url exists
-                    LoggerHelper.WriteToLog("WebApiRootURL URL is null", CoreConstants.Priority.High, CoreConstants.Category.Error);
-                    return null;
-                }
-            }
-            catch (Exception exception)
-            {
-
-                // logging an error if in case some exception occurs
-                LoggerHelper.WriteToLog(exception, "Error while fetching the most popular videos" + exception.ToString());
-                throw new DataAccessException("Data Access Exception:-Error while fetching selectuserdeviceinfo");
-
-
-            }
-            return selectuserdeviceinfo;
-        }
+        //Async task for Saving user details
         public async Task<string> SaveUserinfo(PersonalizationRequsetDTO userdata, string userid)
         {
             string rspSaveinfo = string.Empty;
@@ -261,6 +135,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
             }
             return rspSaveinfo;
         }
+        //Async task for getting approval pending  task count
         public async Task<string> GetApprovalrequestcount(SynchRequestDTO syncData, string userid)
         {
             string rspRequestcountinfo = string.Empty;
@@ -295,6 +170,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
 
             return rspRequestcountinfo;
         }
+        //Async task for getting approval completed task count
         public async Task<string> GetApprovalcompletedcount(SynchRequestDTO syncData, string userid)
         {
             string rspRequestcountinfo = string.Empty;
@@ -329,6 +205,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
 
             return rspRequestcountinfo;
         }
+        //Async task for getting user backend task details
         public async Task<string> GetUserBackendTasks(SynchRequestDTO syncData, string userid, string backendId)
         {
             string rspRequesttasks = string.Empty;
@@ -363,6 +240,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
 
             return rspRequesttasks;
         }
+        //Async task for getting request information for each task
         public async Task<string> GetRequestInfo(SynchRequestDTO syncData,string requestID)
         {
             string rspRequesttasks = string.Empty;
@@ -397,6 +275,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
 
             return rspRequesttasks;
         }
+        //Async task for getting approvers list
         public async Task<string> GetApprovers(SynchRequestDTO syncData, string requestID)
         {
             string rspApprovers = string.Empty;
@@ -431,6 +310,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
 
             return rspApprovers;
         }
+        //Async task for save approval details
         public async Task<string> SendApprovalInfo(ApprovalQuery ObjApprovalQuer, string requestID)
         {
             string rspApprovaltasks = string.Empty;

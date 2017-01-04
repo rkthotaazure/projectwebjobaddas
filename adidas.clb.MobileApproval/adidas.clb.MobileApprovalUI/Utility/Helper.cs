@@ -32,7 +32,7 @@ namespace adidas.clb.MobileApprovalUI.Utility
         /// <param name="credentials">credential needed to connect</param>
         /// <returns>result received from the API</returns>
         /// <exception cref="Exception">Error while connecting to API</exception>
-
+        // Get API call for user details
         public async Task<string> APIGetCall(string endpointUri)
         {
             string result = string.Empty;
@@ -59,6 +59,7 @@ namespace adidas.clb.MobileApprovalUI.Utility
                 throw new DataAccessException("Error While Connecting to an API");
             }
         }
+        //Post call for userinformation save
         public async Task<string> APIPostCall(string endpointUri, PersonalizationRequsetDTO data)
         {
             UserProfileController userProfileObj = new UserProfileController();
@@ -89,6 +90,7 @@ namespace adidas.clb.MobileApprovalUI.Utility
             }
             return result;
         }
+        //Post call for sync api
         public async Task<string> SyncAPIPostCall(string endpointUri, SynchRequestDTO request)
         {
             UserProfileController userProfileObj = new UserProfileController();
@@ -121,7 +123,7 @@ namespace adidas.clb.MobileApprovalUI.Utility
             }
             return result;
         }
-
+        //Post call for approval api
         public async Task<string> ApprovalAPIPostCall(string endpointUri, ApprovalQuery ObjApprovalQuery)
         {
             UserProfileController userProfileObj = new UserProfileController();

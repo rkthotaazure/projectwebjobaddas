@@ -37,11 +37,13 @@ namespace adidas.clb.MobileApprovalUI.Controllers
         {
             return View();
         }
+        // return Index view 
         public ActionResult Index()
         {
             return View();
 
         }
+        //Check user exisits or not
         [HttpGet]
         public async Task<ActionResult> CheckUserExisits()
         {
@@ -66,9 +68,11 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                     newuserjsonResponse = JsonConvert.DeserializeObject<NewuserJsonData>(strUserExisits);
                     if (newuserjsonResponse.userResults != null)
                     {
+                        // Return Json Formate object and pass to UI
                         return Json(newuserjsonResponse, JsonRequestBehavior.AllowGet);
                     }
                 }
+                // Return Json Formate object and pass to UI
                 return Json(newuserjsonResponse, JsonRequestBehavior.AllowGet);
             }
             catch (Exception exception)
@@ -94,7 +98,9 @@ namespace adidas.clb.MobileApprovalUI.Controllers
         {
             //NewUser model object initialization
             UserDTO userdetails = new UserDTO();
+            // Get user details as list
             userdetails = await Getuserdetails();
+            // Return Json Formate object and pass to UI
             return Json(userdetails, JsonRequestBehavior.AllowGet);
         }
 
@@ -120,15 +126,17 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                         //Iterate backend json format result and bind to Model
                         foreach (BackendJsonResult backendid in backendjsonResponse.Results)
                         {
-                            //Create Model object
+                            //Create  UserBackendDTO Model object
                             UserBackendDTO BackendObj = new UserBackendDTO();
                             BackendObj.backend = new BackendDTO();
+                            //Get Backend id
                             BackendObj.backend.BackendID = backendid.BackendID;
                             //Adding the Model object to the list
                             backends.Add(BackendObj);
                         }
                     }
                 }
+                //Return list of backends
                 return backends;
             }
             catch (Exception exception)
@@ -229,6 +237,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                             {
                                 //Create Model object
                                 UserDeviceDTO deviceObj = new UserDeviceDTO();
+                                // Get user device details
                                 deviceObj.UserID = userDeviceInfo.UserID;
                                 deviceObj.device = new DeviceDTO();
                                 deviceObj.device.DeviceID = userDeviceInfo.userDevices.DeviceID;
@@ -236,12 +245,14 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                                 deviceObj.device.DeviceBrand = userDeviceInfo.userDevices.DeviceBrand;
                                 deviceObj.device.DeviceModel = userDeviceInfo.userDevices.DeviceModel;
                                 deviceObj.device.maxSynchReplySize = userDeviceInfo.userDevices.maxSynchReplySize;
+                                // Add details to new model
                                 UserDevicedetails.Add(deviceObj);
                                 userdetails.userdevices = UserDevicedetails;
                             }
                         }
                     }
                 }
+                //Return user details as list object
                 return userdetails;
             }
             catch (Exception exception)
@@ -259,6 +270,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
             {
                 //Api Controller object initialization
                 PersonalizationRequsetDTO Personalization = new PersonalizationRequsetDTO();
+                //creates list user backend dto object
                 List<UserBackendDTO> lstuserbackend = new List<UserBackendDTO>(userinfo.userbackends);
                 List<UserBackendDTO> lstupdateduserbackend = new List<Models.UserBackendDTO>();
                 //Iterate user backend json format result and add UserID 
@@ -267,6 +279,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                     Objuserbackend.UserID = userid;
                     lstupdateduserbackend.Add(Objuserbackend);
                 }
+                //creates list user Devices dto object
                 List<UserDeviceDTO> lstuserdevices = new List<UserDeviceDTO>(userinfo.userdevices);
                 List<UserDeviceDTO> lstupdateduserdevices = new List<Models.UserDeviceDTO>();
                 //Iterate user device json format result and add UserID 
@@ -275,7 +288,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                     Objuserdevices.UserID = userid;
                     lstupdateduserdevices.Add(Objuserdevices);
                 }
-                //Initialing variables
+                //Initialing variables and get user info details
                 userinfo.UserID = userid;
                 userinfo.userbackends = lstupdateduserbackend;
                 userinfo.userdevices = lstupdateduserdevices;
@@ -307,24 +320,28 @@ namespace adidas.clb.MobileApprovalUI.Controllers
         {
             try
             {
+                //Api Controller object initialization
                 PersonalizationRequsetDTO Personalization = new PersonalizationRequsetDTO();
                 userinfo.UserID = userid;
+                //creates list user backend dto object
                 List<UserBackendDTO> lstuserbackend = new List<UserBackendDTO>(userinfo.userbackends);
                 List<UserBackendDTO> lstupdateduserbackend = new List<Models.UserBackendDTO>();
+                //Iterate user Backend json format result and add UserID
                 foreach (UserBackendDTO Objuserbackend in lstuserbackend)
                 {
                     Objuserbackend.UserID = userid;
                     lstupdateduserbackend.Add(Objuserbackend);
                 }
+                //creates list user Devices dto object
                 List<UserDeviceDTO> lstuserdevices = new List<UserDeviceDTO>(userinfo.userdevices);
                 List<UserDeviceDTO> lstupdateduserdevices = new List<Models.UserDeviceDTO>();
+                //Iterate user Backend json format result and add UserID
                 foreach (UserDeviceDTO Objuserdevices in lstuserdevices)
                 {
                     Objuserdevices.UserID = userid;
                     lstupdateduserdevices.Add(Objuserdevices);
                 }
-                //userinfo.userbackends = null;
-                // userinfo.userdevices = null;
+                //Get user info details
                 userinfo.userbackends = lstupdateduserbackend;
                 userinfo.userdevices = lstupdateduserdevices;
                 Personalization.user = userinfo;
@@ -339,6 +356,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                 { LoggerHelper.WriteToLog(" Error while creating client context in UpdateUser method");
                     return View("Error");
                 }
+                // Return Json Formate object and pass to UI
                 return Json(updateResponse, JsonRequestBehavior.AllowGet);
             }
             catch (Exception exception)
