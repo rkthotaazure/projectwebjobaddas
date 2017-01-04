@@ -81,7 +81,7 @@ app.controller('CreateUserController', function ($scope, $http, $location) {
     $scope.SendData = function () {
         var userbackends = [];
         var updatefrq = "";
-        
+        //Iterate backends and push to userbackends variable
         angular.forEach($scope.backends, function (backend) {
          updatefrq = $scope.item;
          userbackends.push({ backend: backend });
@@ -92,6 +92,7 @@ app.controller('CreateUserController', function ($scope, $http, $location) {
             'DeviceBrand': $scope.DeviceOS,
         }
         userdevices.push({ device: currentdevice });
+        //Iterate userdevices and push to userdevices variable
         angular.forEach($scope.devices, function (deviceitems) {
             userdevices.push({ device: deviceitems });
         });
@@ -146,9 +147,11 @@ app.controller('UpdateUserController', function ($scope, $http, $location, Share
                   id: 2,  
                   name: 'days'  
               }];
+            //Iterate backends details and bind to backends scope
             angular.forEach(data.userbackends, function (backendItems) {
                 $scope.backends.push(backendItems.backend);
             });
+            //Iterate Devices details and bind to devices scope
             angular.forEach(data.userdevices, function (deviceItems) {
                     $scope.devices.push(deviceItems.device);
             });
@@ -192,10 +195,12 @@ app.controller('UpdateUserController', function ($scope, $http, $location, Share
     //Post Submited datat to HomeController UpdateUser action
     $scope.SendData = function () {
         var userbackends = [];
+        //Iterate backends and push to userbackends variable
         angular.forEach($scope.backends, function (backend) {
             userbackends.push({ backend: backend});
         });
         var userdevices = [];
+        //Iterate devices and push to userdevices variable
         angular.forEach($scope.devices, function (device) {
             userdevices.push({ device: device });
         });
@@ -210,6 +215,7 @@ app.controller('UpdateUserController', function ($scope, $http, $location, Share
             userbackends: userbackends,
             userdevices: userdevices
         }
+        //Storing in ShareData factory and retrive where ever we need details
         ShareData.userDevices = userdevices;
         ShareData.userBackends = userbackends;
 
@@ -218,17 +224,20 @@ app.controller('UpdateUserController', function ($scope, $http, $location, Share
                 'Content-Type': 'application/json'
             }
         }
-         console.log(request);
+        console.log(request);
+        //Post request variable to update user method
         $http.post("/Home/UpdateUser", JSON.stringify(request), config)
             .success(function (data, status, headers, config) {
                 //console.log(data);
                 //$scope.msg = "Successfully saved";
+                //Redirect to approval landing page
                 $location.path('/approvalLanding');
                
             }).error(function (data, status, header, config) {
                 console.log(data);
             });
     };
+    //On click cancel button go to landing page 
     $scope.GotoLandingpage = function () {
         var userbackends = [];
         angular.forEach($scope.backends, function (backend) {
@@ -258,6 +267,7 @@ app.controller('UpdateUserController', function ($scope, $http, $location, Share
             }
         }
         console.log(request);
+        //Post request variable to update user method
         $http.post("/Home/UpdateUser", JSON.stringify(request), config)
             .success(function (data, status, headers, config) {
                 //console.log(data);
@@ -342,6 +352,7 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
                 'Content-Type': 'application/json'
             }
         }
+        //Post request variable to update user method
         $http.post("/Landing/GetBackendApprovalrequestcount", requestsync, config).success(function (data) {
             console.log(data);
             angular.forEach(data, function (BackendItems) {
@@ -364,6 +375,7 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
     //$scope.SyncUpdate = function () {
     //    window.location.reload();
     //};
+    //On click completed
     $scope.completedCount = function () {
         var backendCount = ShareData.backendCount;
         var approvalStatus = "Completed";
@@ -376,6 +388,7 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
             $scope.backends.push({ BackendID: backend.BackendID, BackendName: backend.BackendName, Pending: Completed });
         });
     }
+    //On click pending
     $scope.pendingCount = function () {
         var backendCount = ShareData.backendCount;
         var approvalStatus = "Waiting";
@@ -385,6 +398,7 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
             $scope.backends.push({ BackendID: backend.BackendID, BackendName: backend.BackendName, Pending: backend.Pending });
         });
     }
+    //On click backend count
     $scope.redirectToDetailsPage = function (backendid) {
         ShareData.backendId = backendid;
         $location.path('/approvalDetails');
@@ -395,7 +409,7 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
         }, 0);
     };
 });
-//AngularJS controller to get Individual backend approval details
+//AngularJS controller to get pending approval details
 app.controller('ApprovalDetailsController', function ($scope, $http, $location, $filter, ShareData) {
     $scope.init = function () {
         $scope.loading = true;
@@ -434,9 +448,10 @@ app.controller('ApprovalDetailsController', function ($scope, $http, $location, 
             }
         }
        
-        console.log(requestsync);
+        //console.log(requestsync);
+        //Post request variable to GetApprovalDetails method
         $http.post("/Landing/GetApprovalDetails", requestsync, config).success(function (data) {
-            console.log(data);
+            //console.log(data);
             
             $scope.hideButton = true;
              angular.forEach(data, function (approvalItems) {
@@ -461,7 +476,7 @@ app.controller('ApprovalDetailsController', function ($scope, $http, $location, 
              console.log(data);
         });      
     };
-   
+   // Show pendind task request information
     $scope.showDetails = function (requestId) {
         ShareData.detailTaskinfo = requestId;
         $location.path('/detailTaskInfo');
@@ -485,9 +500,11 @@ app.controller('ApprovalDetailsController', function ($scope, $http, $location, 
                 'Content-Type': 'application/json'
             }
         }
-        console.log(approvalDetails);
+        //console.log(approvalDetails);
+
+        //Post request variable to SendApprovalstatus method
         $http.post("/Landing/SendApprovalstatus", approvalDetails, config).success(function (data) {
-            console.log(data);
+            //console.log(data);
                 for (var i = 0; i < $scope.approvalTasks.length; i++) {
                     if ($scope.approvalTasks[i].RequestId === requestId) {
                         $scope.approvalTasks.splice(i, 1);
@@ -505,6 +522,7 @@ app.controller('ApprovalDetailsController', function ($scope, $http, $location, 
     //Remove row in Pending Approvals
     
 });
+//AngularJS controller to get details request information 
 app.controller('ApprovalDetailstaskController', function ($scope, $http, $location,$filter, ShareData) {
     $scope.init = function () {
         $scope.hideButton = true;
@@ -546,8 +564,9 @@ app.controller('ApprovalDetailstaskController', function ($scope, $http, $locati
         console.log(requestDetails);
         $scope.fields = [];
         $scope.approvers = [];
+        //Post request variable to GetRequestDetails method
         $http.post("/Landing/GetRequestDetails", requestDetails, config).success(function (data) {
-            console.log(data);
+            //console.log(data);
             $scope.hideButton = true;
             angular.forEach(data, function (approvalItems) {
                 $scope.id = approvalItems.request.ID;
