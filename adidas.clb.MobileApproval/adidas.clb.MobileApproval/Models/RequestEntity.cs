@@ -15,14 +15,14 @@ namespace adidas.clb.MobileApproval.Models
         }
         public RequestEntity() { }
         public string BackendID { get; set; }
-        public string serviceLayerReqID { get; set; }
-        public string id { get; set; }
-        public string title { get; set; }
-        public string Requesterid { get; set; }
-        public string Requestername { get; set; }
-        public DateTime created { get; set; }
-        public string status { get; set; }
+        public string ServiceLayerReqID { get; set; }
+        public string ID { get; set; }
+        public string Title { get; set; }
+        public DateTime Created { get; set; }
+        public string Status { get; set; }
         public int Latency { get; set; }
+        public string RequesterID { get; set; }
+        public string RequesterName { get; set; }
         public int Agentpullingfrequency { get; set; }
         public int Defaultupdatefrequency { get; set; }
         public int Averagerequestsize { get; set; }

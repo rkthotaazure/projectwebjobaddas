@@ -23,11 +23,11 @@ namespace adidas.clb.MobileApproval.Models
             this.RowKey = RequestApprovalId;
         }
         public ApproverEntity() { }
-        public int order { get; set; }
-        public string userID { get; set; }
-        public string userName { get; set; }
-        public DateTime created { get; set; }
-        public string status { get; set; }
+        public int Order { get; set; }
+        public string UserID { get; set; }
+        public string UserName { get; set; }
+        public DateTime Created { get; set; }
+        public string Status { get; set; }
         private DateTime? dueDate = null;
         public DateTime DueDate
         {

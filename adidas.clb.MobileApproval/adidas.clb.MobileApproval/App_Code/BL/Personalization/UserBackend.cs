@@ -93,7 +93,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
                 UserBackendDAL userbackenddal = new UserBackendDAL();
                 //to get all backends associated to user
                 List<UserBackendEntity> alluserbackends = userbackenddal.GetUserAllBackends(UserID);
-                if (alluserbackends != null)
+                if (alluserbackends != null && alluserbackends.Count>0)
                 {
                     //calling data access layer method to remove user backends
                     userbackenddal.RemoveBackends(alluserbackends);
@@ -124,7 +124,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
                 List<BackendEntity> backends = userbackenddal.GetBackends();
                 List<BackendDTO> backendslistdto = new List<BackendDTO>();
                 //if backends not available return null
-                if (backends != null)
+                if (backends != null && backends.Count > 0)
                 {
                     //backends entity converting to data transfer object
                     foreach (BackendEntity backend in backends)
@@ -169,7 +169,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
                 List<SynchEntity> allbackendsynch = userbackenddal.GetAllUserBackendsSynch(UserID);
                 List<UserBackendDTO> userbackendsdtolist = new List<UserBackendDTO>();
                 //check for null
-                if (alluserbackends != null)
+                if (alluserbackends != null && alluserbackends.Count > 0)
                 {
                     //converting userdevice entity to userdevice data transfer object
                     foreach (UserBackendEntity userbackendentity in alluserbackends)

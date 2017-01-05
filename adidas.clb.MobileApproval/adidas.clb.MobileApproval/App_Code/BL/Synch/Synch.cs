@@ -98,7 +98,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
         /// method to add message to queue to trigger request update
         /// </summary>
         /// <param name="request">takes request as input</param>
-        public void TriggerRequestUpdate(RequestEntity request)
+        public void TriggerRequestUpdate(RequestEntity request,string UserID)
         {
             try
             {
@@ -107,8 +107,10 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
                 RequestUpdateMsg triggerrequset = new RequestUpdateMsg();
                 //adding request to message object
                 Request requestobj = new Request();
-                requestobj.ID = request.id;
+                requestobj.ID = request.ID;
+                requestobj.UserID = UserID;
                 triggerrequset.request = requestobj;
+                
                 //adding backend to queue message
                 UpdateTriggerBackend backendobj = new UpdateTriggerBackend();
                 backendobj.BackendID = request.BackendID;
@@ -366,12 +368,12 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
         /// method add or update request synch
         /// </summary>
         /// <param name="request"></param>
-        public void AddUpdateRequestSynch(RequestEntity request)
+        public void AddUpdateRequestSynch(RequestEntity request, string userid)
         {
             try
             {
                 SynchDAL synchDAL = new SynchDAL(); 
-                RequestSynchEntity requestsynch= synchDAL.GetRequestSynch(CoreConstants.AzureTables.RequestSynchPK, request.id);
+                RequestSynchEntity requestsynch= synchDAL.GetRequestSynch(CoreConstants.AzureTables.RequestSynchPK, request.ID);
                 if (requestsynch != null)
                 {
                     //last synch frequency
@@ -383,8 +385,10 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
                 {
                     RequestSynchEntity newrequestsynch = new RequestSynchEntity();
                     newrequestsynch.PartitionKey = CoreConstants.AzureTables.RequestSynchPK;
-                    newrequestsynch.RowKey = request.id;
+                    newrequestsynch.RowKey = request.ID;
                     newrequestsynch.LastChange = DateTime.Now;
+                    newrequestsynch.BackendID = request.BackendID;
+                    newrequestsynch.UserID = userid;
                     //calling data access layer method                
                     synchDAL.AddUpdateRequestSynch(newrequestsynch);
                 }                
@@ -396,6 +400,67 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
             catch (Exception exception)
             {
                 LoggerHelper.WriteToLog(exception + " - Error in BL while adding request synch  : "
+                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new BusinessLogicException();
+            }
+        }
+
+        /// <summary>
+        /// method to get approvals per userbackend
+        /// </summary>
+        /// <param name="userID">takes userid as input</param>
+        /// <param name="backendID">takes backendid as input</param>
+        /// <returns>returns Approvals associated to userbackend</returns>
+        public List<ApprovalEntity> GetUserBackendApprovals(string userID, string backendID, string approvalstatus)
+        {
+            try
+            {
+                //if requeststatus is null, get approvals with defaultstatus inprogress.
+                if (string.IsNullOrEmpty(approvalstatus))
+                {
+                    approvalstatus = CoreConstants.AzureTables.Waiting;
+                }
+                SynchDAL synchDAL = new SynchDAL();
+                //calling data access layer method                
+                return synchDAL.GetUserBackendApprovals(userID, backendID, approvalstatus);
+            }
+            catch (DataAccessException DALexception)
+            {
+                throw DALexception;
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error in BL while getting approvals per userbackend : "
+                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new BusinessLogicException();
+            }
+        }
+
+        /// <summary>
+        /// method to get all approvals of user
+        /// </summary>
+        /// <param name="userID">takes userid as input</param>
+        /// <returns>reurns list of requests for user</returns>
+        public List<ApprovalEntity> GetUserApprovalsForCount(string userID, string approvalstatus)
+        {
+            try
+            {
+                //if requeststatus is null, get requests with defaultstatus inprogress.
+                if (string.IsNullOrEmpty(approvalstatus))
+                {
+                    approvalstatus = CoreConstants.AzureTables.Waiting;
+                }
+                SynchDAL synchDAL = new SynchDAL();
+                //calling data access layer method                
+                return synchDAL.GetUserApprovalsForCount(userID, approvalstatus);
+            }
+            catch (DataAccessException DALexception)
+            {
+                throw DALexception;
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error in BL while getting all approvals count per user  : "
                        + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new BusinessLogicException();
             }

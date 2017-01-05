@@ -17,6 +17,7 @@ namespace adidas.clb.MobileApproval.Models
     {        
         public string _type { get; set; }
         public string BackendID { get; set; }
+        public string BackendName { get; set; }
         public int AgentPullingFrequency { get; set; }
         public int DefaultUpdateFrequency { get; set; }
         public int AverageRequestSize { get; set; }

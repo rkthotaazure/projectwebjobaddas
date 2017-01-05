@@ -37,9 +37,9 @@ namespace adidas.clb.MobileApproval.Controllers
                     Synch synch = new Synch();
                     List<string> userbackends = query.parameters.filters.backends;
                     //get userbackends associated to user
-                    List<UserBackendEntity> allUserBackends = synch.GetUserBackendsList(userID,userbackends);
+                    List<UserBackendEntity> allUserBackends = synch.GetUserBackendsList(userID, userbackends);
                     //get requests associated to user
-                    List<RequestEntity> requestslist = synch.GetUserRequests(userID,query.parameters.filters.reqStatus);
+                    List<RequestEntity> requestslist = synch.GetUserRequests(userID, query.parameters.filters.reqStatus);
                     Boolean requestsunfulfilled = false;
                     Boolean requestsfulfilled = false;
                     List<UserBackendDTO> userbackendlist = new List<UserBackendDTO>();
@@ -53,7 +53,7 @@ namespace adidas.clb.MobileApproval.Controllers
                             UserBackendDTO userbackenddto = DataProvider.ResponseObjectMapper<UserBackendDTO, UserBackendEntity>(userbackend);
                             Backend backenddto = DataProvider.ResponseObjectMapper<Backend, UserBackendEntity>(userbackend);
                             userbackenddto.backend = backenddto;
-                            List<ApprovalRequestDTO> approvalrequestlist = new List<ApprovalRequestDTO>();                            
+                            List<ApprovalRequestDTO> approvalrequestlist = new List<ApprovalRequestDTO>();
                             //check if backend updated
                             if (Rules.IsBackendUpdated(userbackend))
                             {
@@ -76,7 +76,7 @@ namespace adidas.clb.MobileApproval.Controllers
                                                 approvalrequest.request = requestdto;
                                                 //code here to populate extended depth
                                                 //code here to update request synch time stamp
-                                                synch.AddUpdateRequestSynch(request);
+                                                synch.AddUpdateRequestSynch(request, query.userId);
                                                 requestsfulfilled = true;
                                             }
                                         }
@@ -89,7 +89,7 @@ namespace adidas.clb.MobileApproval.Controllers
                                             }
                                             else
                                             {
-                                                synch.TriggerRequestUpdate(request);
+                                                synch.TriggerRequestUpdate(request, query.userId);
                                                 approvalrequest.retryAfter = Convert.ToInt32(Rules.RequestRetryTime(userbackend));
                                             }
                                             requestsunfulfilled = true;
@@ -113,17 +113,17 @@ namespace adidas.clb.MobileApproval.Controllers
                             }
                             else
                             {
-                                SynchDTO synchdto=new SynchDTO();
+                                SynchDTO synchdto = new SynchDTO();
                                 //check if backend update is in progress in service layer then send the latency in response
                                 if (Rules.IsBackendUpdateInProgress(userbackend))
                                 {
                                     synchdto.retryAfter = userbackend.ExpectedLatency;
-                                    userbackenddto.synch = synchdto;                                    
+                                    userbackenddto.synch = synchdto;
                                 }
                                 else
                                 {
                                     //if update is not in progress, trigger it
-                                    synch.TriggerUserBackendUpdate(userbackend);                                    
+                                    synch.TriggerUserBackendUpdate(userbackend);
                                     synchdto.retryAfter = Convert.ToInt32(Rules.BackendRetryTime(userbackend));
                                     userbackenddto.synch = synchdto;
                                 }
@@ -173,7 +173,7 @@ namespace adidas.clb.MobileApproval.Controllers
                     //get userbackend associated to user with backendid
                     UserBackendEntity userbackend = synch.GetUserBackend(userID, usrBackendID);
                     //get requests associated to userbackend
-                    List<RequestEntity> requestslist = synch.GetUserBackendRequests(userID, usrBackendID,query.parameters.filters.reqStatus);
+                    List<RequestEntity> requestslist = synch.GetUserBackendRequests(userID, usrBackendID, query.parameters.filters.reqStatus);
                     //use mmapper to convert userbackend entity to userbackend data transfer object
                     UserBackendDTO userbackenddto = DataProvider.ResponseObjectMapper<UserBackendDTO, UserBackendEntity>(userbackend);
                     Backend backenddto = DataProvider.ResponseObjectMapper<Backend, UserBackendEntity>(userbackend);
@@ -202,7 +202,7 @@ namespace adidas.clb.MobileApproval.Controllers
                                         approvalrequest.request = requestdto;
                                         //code to populate extended depth
                                         //code to update request synch timestamp
-                                        synch.AddUpdateRequestSynch(request);
+                                        synch.AddUpdateRequestSynch(request, query.userId);
                                         requestsfulfilled = true;
                                     }
                                 }
@@ -215,7 +215,7 @@ namespace adidas.clb.MobileApproval.Controllers
                                     }
                                     else
                                     {
-                                        synch.TriggerRequestUpdate(request);
+                                        synch.TriggerRequestUpdate(request, query.userId);
                                         approvalrequest.retryAfter = Convert.ToInt32(Rules.RequestRetryTime(userbackend));
                                     }
                                     requestsunfulfilled = true;
@@ -297,7 +297,7 @@ namespace adidas.clb.MobileApproval.Controllers
                 {
                     Synch synch = new Synch();
                     //get requests with requestid
-                    RequestEntity requestentity = synch.GetRequest(query.userId,apprReqID);
+                    RequestEntity requestentity = synch.GetRequest(query.userId, apprReqID);
                     //get fileds associated to request
                     List<FieldDTO> fields = synch.GetFields(apprReqID);
                     ApprovalRequestDTO approvalrequest = new ApprovalRequestDTO();
@@ -311,17 +311,17 @@ namespace adidas.clb.MobileApproval.Controllers
                         {
                             RequestDTO requestdto = DataProvider.ResponseObjectMapper<RequestDTO, RequestEntity>(requestentity);
                             //fill requester details to request dto
-                            if (!string.IsNullOrEmpty(requestentity.Requestername))
+                            if (!string.IsNullOrEmpty(requestentity.RequesterName))
                             {
                                 Requester requesterdetails = new Requester();
-                                requesterdetails.userID = requestentity.Requesterid;
-                                requesterdetails.name = requestentity.Requestername;
-                                requestdto.requester = requesterdetails;
+                                requesterdetails.UserID = requestentity.RequesterID;
+                                requesterdetails.Name = requestentity.RequesterName;
+                                requestdto.Requester = requesterdetails;
                             }
                             //add fields to request
                             Fields fielddto = new Fields();
-                            fielddto.overview = fields;
-                            requestdto.fields = fielddto;
+                            fielddto.Overview = fields;
+                            requestdto.Fields = fielddto;
                             approvalrequest.request = requestdto;
                             //if extended depth is request level
                             if (Rules.ExtendedDepth(userbackend, query.client.device.maxSynchReplySize))
@@ -333,7 +333,7 @@ namespace adidas.clb.MobileApproval.Controllers
                                 //code to clear extended depth flags
                             }
                             //code update request synch timestamp
-                            synch.AddUpdateRequestSynch(requestentity);
+                            synch.AddUpdateRequestSynch(requestentity, query.userId);
                         }
                     }
                     else
@@ -346,7 +346,7 @@ namespace adidas.clb.MobileApproval.Controllers
                         else
                         {
                             //if update is not in progress, trigger it
-                            synch.TriggerRequestUpdate(requestentity);
+                            synch.TriggerRequestUpdate(requestentity, query.userId);
                             approvalrequest.retryAfter = Convert.ToInt32(Rules.RequestRetryTime(userbackend));
                         }
                         //code to clear extended depth flags
@@ -394,7 +394,7 @@ namespace adidas.clb.MobileApproval.Controllers
                     Synch synch = new Synch();
                     SynchResponseDTO<ApproverDTO> SynchResponse = new SynchResponseDTO<ApproverDTO>();
                     //get requests with requestid
-                    RequestEntity requestentity = synch.GetRequest(query.userId,apprReqID);
+                    RequestEntity requestentity = synch.GetRequest(query.userId, apprReqID);
                     //get userbackend
                     UserBackendEntity userbackend = synch.GetUserBackend(query.userId, requestentity.BackendID);
                     //get approvers associated to request
@@ -409,7 +409,7 @@ namespace adidas.clb.MobileApproval.Controllers
                             SynchResponse.query = query;
                             SynchResponse.result = approvers;
                             //code update request synch timestamp
-                            synch.AddUpdateRequestSynch(requestentity);
+                            synch.AddUpdateRequestSynch(requestentity, query.userId);
                         }
                     }
                     else
@@ -422,7 +422,7 @@ namespace adidas.clb.MobileApproval.Controllers
                         else
                         {
                             //if update is not in progress, trigger it
-                            synch.TriggerRequestUpdate(requestentity);
+                            synch.TriggerRequestUpdate(requestentity, query.userId);
                             retrytime = Rules.RequestRetryTime(userbackend);
                         }
                     }
@@ -454,14 +454,14 @@ namespace adidas.clb.MobileApproval.Controllers
         /// </summary>
         /// <returns>Returns pdf with request details</returns>        
         [Route("api/synch/requests/{apprReqID}/details")]
-        public HttpResponseMessage PostRequestDetails(SynchRequestDTO query,string apprReqID)
+        public HttpResponseMessage PostRequestDetails(SynchRequestDTO query, string apprReqID)
         {
             try
             {
                 Synch synch = new Synch();
                 //get requests with requestid
                 RequestEntity requestentity = synch.GetRequest(query.userId, apprReqID);
-                return Request.CreateResponse(HttpStatusCode.OK, requestentity.PDFUri);                
+                return Request.CreateResponse(HttpStatusCode.OK, requestentity.PDFUri);
             }
             catch (DataAccessException dalexception)
             {
@@ -474,6 +474,147 @@ namespace adidas.clb.MobileApproval.Controllers
             catch (Exception exception)
             {
                 LoggerHelper.WriteToLog(exception + " - exception in controller action while retrieving request details as pdf : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
+            }
+        }
+
+        /// <summary>
+        /// action method to get list of approvals from one of the backends associated to a user
+        /// </summary>
+        /// <returns>Returns list of approvals for userbackend</returns>        
+        [Route("api/synch/users/{userID}/backends/{usrBackendID}/approvals")]
+        public HttpResponseMessage PostUserBackendApprovals(SynchRequestDTO query, string userID, string usrBackendID)
+        {
+            try
+            {
+                //check null for input query
+                if (query != null)
+                {
+                    Synch synch = new Synch();
+                    //get userbackend associated to user with backendid
+                    UserBackendEntity userbackend = synch.GetUserBackend(userID, usrBackendID);
+                    //get approvals associated to userbackend
+                    List<ApprovalEntity> approvalslist = synch.GetUserBackendApprovals(userID, usrBackendID, query.parameters.filters.apprStatus);
+                    //use mmapper to convert userbackend entity to userbackend data transfer object
+                    UserBackendDTO userbackenddto = DataProvider.ResponseObjectMapper<UserBackendDTO, UserBackendEntity>(userbackend);
+                    Backend backenddto = DataProvider.ResponseObjectMapper<Backend, UserBackendEntity>(userbackend);
+                    userbackenddto.backend = backenddto;
+                    List<ApprovalRequestDTO> approvalrequestlist = new List<ApprovalRequestDTO>();
+                    //check if backend updated
+                    if (Rules.IsBackendUpdated(userbackend))
+                    {
+                        //if extended depth is userbackend level
+                        if (Rules.ExtendedDepthperBackend(userbackend, query.client.device.maxSynchReplySize))
+                        {
+                            //loop through each approval in the userbackend
+                            foreach (ApprovalEntity approval in approvalslist)
+                            {
+                                ApprovalRequestDTO approvalrequest = new ApprovalRequestDTO();
+                                ApprovalDTO approvaldto = new ApprovalDTO();
+                                approvaldto = DataProvider.ResponseObjectMapper<ApprovalDTO, ApprovalEntity>(approval);
+                                approvalrequest.approval = approvaldto;
+                                //add approval request to list which will be added to corresponding backend
+                                approvalrequestlist.Add(approvalrequest);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        SynchDTO synchdto = new SynchDTO();
+                        //check if backend update is in progress in service layer then send the latency in response
+                        if (Rules.IsBackendUpdateInProgress(userbackend))
+                        {
+                            synchdto.retryAfter = userbackend.ExpectedLatency;
+                            userbackenddto.synch = synchdto;
+                        }
+                        else
+                        {
+                            //if update is not in progress, trigger it
+                            synch.TriggerUserBackendUpdate(userbackend);
+                            synchdto.retryAfter = Convert.ToInt32(Rules.BackendRetryTime(userbackend));
+                            userbackenddto.synch = synchdto;
+                        }
+                    }
+                    //add requests list to user backend
+                    userbackenddto.requests = approvalrequestlist;
+                    List<UserBackendDTO> userbackendlist = new List<UserBackendDTO>();
+                    //add userbackend to userbackend list to add to response
+                    userbackendlist.Add(userbackenddto);
+                    SynchResponseDTO<UserBackendDTO> response = new SynchResponseDTO<UserBackendDTO>();
+                    response.result = userbackendlist;
+                    return Request.CreateResponse(HttpStatusCode.OK, response);
+                }
+                else
+                {
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.SynchResponseError<UserBackendDTO>("400", "input query is not sent to get requests for user associated backend", ""));
+                }
+            }
+            catch (DataAccessException dalexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", dalexception.Message, dalexception.Message));
+            }
+            catch (BusinessLogicException blexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", blexception.Message, blexception.Message));
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - exception in controller action while retrieving approvals per userbackend : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
+            }
+        }
+
+
+        /// <summary>
+        /// action method to get backends associated to user, each one indicating the count of current open requests
+        /// </summary>
+        /// <returns>Returns list of backends</returns>        
+        [Route("api/synch/users/{userID}/approvalscount")]
+        public HttpResponseMessage PostApprovalsCount(SynchRequestDTO query, string userID)
+        {
+            try
+            {
+                //check null for input query
+                if (query != null)
+                {
+                    Synch synch = new Synch();
+                    List<string> userbackends = query.parameters.filters.backends;
+                    //get approvals associated to user absed on approval status
+                    List<ApprovalEntity> approvalslist = synch.GetUserApprovalsForCount(userID, query.parameters.filters.apprStatus);
+                    List<ApprovalsCountDTO> approvalcountlist = new List<ApprovalsCountDTO>();
+                    //loop all backends to ad count to response
+                    foreach (string userbackend in userbackends)
+                    {
+                        List<ApprovalEntity> userbackendapprovalslist = approvalslist.Where(x => x.BackendID == userbackend).ToList();
+                        ApprovalsCountDTO approvalcountdto = new ApprovalsCountDTO();
+                        approvalcountdto.BackendID = userbackend;
+                        approvalcountdto.Status = query.parameters.filters.apprStatus;
+                        approvalcountdto.Count = userbackendapprovalslist.Count;
+                        approvalcountlist.Add(approvalcountdto);
+                    }
+
+                    SynchResponseDTO<ApprovalsCountDTO> response = new SynchResponseDTO<ApprovalsCountDTO>();
+                    response.result = approvalcountlist;
+                    return Request.CreateResponse(HttpStatusCode.OK, response);
+                }
+                else
+                {
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.SynchResponseError<UserBackendDTO>("400", "input query is not sent to get Approval Count for userbackends", ""));
+                }
+            }
+            catch (DataAccessException dalexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", dalexception.Message, dalexception.Message));
+            }
+            catch (BusinessLogicException blexception)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", blexception.Message, blexception.Message));
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - exception in controller action while retrieving approval count associated user backends : "
                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
             }

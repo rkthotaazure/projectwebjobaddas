@@ -21,6 +21,8 @@ namespace adidas.clb.MobileApproval.Models
             this.PartitionKey = partitionkey;
             this.RowKey = rowkey;
         }
+        public string BackendID { get; set; }
+        public string UserID { get; set; }
         public Boolean Updatetriggered { get; set; }
         public int Expectedlatency { get; set; }
         public Boolean Lastupdate { get; set; }

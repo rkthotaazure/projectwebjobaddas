@@ -38,25 +38,29 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Approval
                 //ApprovalResponse objApprovalResponse = null;  
                 string acknowledgement = "OK";
                 string backendID = string.Empty;
+                string domain = string.Empty;
                 //reading ApprovalQuery object properties and assign the values to below variables.
                 string userID = objApprQry.UserID;
-                string requestID = objApprQry.ApprovalRequesID;
+                string requestID = objApprQry.ApprovalRequestID;
                 string status = objApprQry.ApprovalDecision.Status;
                 string comment = objApprQry.ApprovalDecision.Comment;
                 DateTime decisionDate = objApprQry.ApprovalDecision.DecisionDate;
                 //get approvalrequest object from RequestTransactions azure table based on partitionkey and rowkey(requestID)
-                ApprovalEntity apprReqEntity = DataProvider.Retrieveentity<ApprovalEntity>(CoreConstants.AzureTables.RequestTransactions, string.Concat(CoreConstants.AzureTables.ApproverPK, userID), requestID);
+                ApprovalEntity apprReqEntity = DataProvider.Retrieveentity<ApprovalEntity>(CoreConstants.AzureTables.RequestTransactions, string.Concat(CoreConstants.AzureTables.ApprovalPK, userID), requestID);
                 if (apprReqEntity != null)
                 {
                     backendID = apprReqEntity.BackendID;
+                    domain = apprReqEntity.Domain;
                     //update status,decisiondate,comment column values in approvalrequest object
-                    apprReqEntity.status = status;
+                    apprReqEntity.Status = status;
                     apprReqEntity.DecisionDate = decisionDate;
                     apprReqEntity.Comment = comment;
                     apprReqEntity.BackendConfirmed = false;
                     //call dataprovider method to update entity to azure table
                     DataProvider.UpdateEntity<ApprovalEntity>(CoreConstants.AzureTables.RequestTransactions, apprReqEntity);
                     //call backend requestApproval/ api
+                    objApprQry.Domain = domain;
+                    objApprQry.BackendID = backendID;
                     var result = apiController.UpdateApprovalRequest(objApprQry, backendID, requestID);
                     if (string.IsNullOrEmpty(result.ToString()))
                     {

@@ -16,7 +16,7 @@ namespace adidas.clb.MobileApproval.Models
     public class ApprovalRequestDTO
     {
         public string _type { get; set; }
-        public string serviceLayerReqID { get; set; }
+        public string ServiceLayerReqID { get; set; }
         public string BackendID { get; set; }
         public ApprovalDTO approval { get; set; }
         public RequestDTO request { get; set; }

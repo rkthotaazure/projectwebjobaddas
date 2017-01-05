@@ -48,11 +48,13 @@ namespace adidas.clb.MobileApproval.Utility
             public const string RequestSynchPK = "RequestSynch";
             public const string RequestsPK = "Requests_";
             public const string ApproverPK = "Approver_";
+            public const string ApprovalPK = "Approval_";
             public const string FieldPK = "Field_";
             public const string BackendId = "BackendID";
             public const string UnderScore = "_";
-            public const string Status = "status";
+            public const string Status = "Status";
             public const string InProgress = "In-Progress";
+            public const string Waiting = "Waiting";
 
         }
         //Azure Queue constants

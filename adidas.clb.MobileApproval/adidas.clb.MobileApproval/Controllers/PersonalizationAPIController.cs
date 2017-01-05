@@ -19,7 +19,7 @@ namespace adidas.clb.MobileApproval.Controllers
     /// <summary>
     /// The controller class which implements action methods for personalization
     /// </summary> 
-    //[Authorize]
+   //[Authorize]
     public class PersonalizationAPIController : ApiController
     {
         /// <summary>
