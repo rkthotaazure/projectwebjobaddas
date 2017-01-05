@@ -36,15 +36,18 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 //generating request entity from input request obj by adding partitionkey and rowkey
-                RequsetEntity requestentity = DataProvider.ResponseObjectMapper<RequsetEntity, Request>(backendrequest.requset);
+                RequsetEntity requestentity = DataProvider.ResponseObjectMapper<RequsetEntity, Request>(backendrequest.RequestsList);
                 requestentity.PartitionKey = string.Concat(CoreConstants.AzureTables.RequestsPK, UserID);
-                requestentity.RowKey = backendrequest.requset.id;
+                requestentity.RowKey = backendrequest.RequestsList.ID;
                 //adding service layer requestid to entity                
-                requestentity.serviceLayerReqID = backendrequest.serviceLayerReqID;
+                requestentity.ServiceLayerReqID = backendrequest.ServiceLayerReqID;
                 requestentity.BackendID = backendId;
-                //add requester details to request entity
-                requestentity.Requesterid = backendrequest.requset.requester.userID;
-                requestentity.Requestername = backendrequest.requset.requester.name;
+                //add requester deatils to request entity
+                if (backendrequest.RequestsList.Requester != null)
+                {
+                    requestentity.RequesterID = backendrequest.RequestsList.Requester.UserID;
+                    requestentity.RequesterName = backendrequest.RequestsList.Requester.Name;
+                }
                 //calling DAL method to add request entity
                 RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
                 requestupdatedal.AddUpdateRequest(requestentity);
@@ -65,7 +68,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
         /// BL method to add approval entity into azure table
         /// </summary>
         /// <param name="request">takes request as input</param>
-        public void AddUpdateApproval(Request request, string UserID, string backendId)
+        public void AddUpdateApproval(List<Approvers> approverslist, string requestid, string UserID, string backendId)
         {
             //Get Caller Method name
             string callerMethodName = string.Empty;
@@ -73,12 +76,19 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                //generating approval entity from input request obj by adding partitionkey and rowkey
+                //get the current approver from list of approvers
+                Approvers approver = approverslist.Find(x => x.User.UserID == UserID);
+                //generating approval entity from input approver,request obj by adding partitionkey and rowkey
                 ApprovalEntity approvalentity = new ApprovalEntity();
                 approvalentity.PartitionKey = string.Concat(CoreConstants.AzureTables.ApprovalPK, UserID);
-                approvalentity.RowKey = request.id;
-                approvalentity.RequestId = request.id;
-                approvalentity.status = CoreConstants.AzureTables.Waiting;
+                approvalentity.RowKey = requestid;
+                approvalentity.RequestId = requestid;
+                string status = approver.Status;
+                if (string.IsNullOrEmpty(status))
+                {
+                    status=CoreConstants.AzureTables.Waiting;
+                }                
+                approvalentity.Status = status;
                 approvalentity.BackendID = backendId;
                 RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
                 //calling DAL method to add request entity
@@ -113,8 +123,11 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                 foreach (Approvers approver in approvers)
                 {
                     ApproverEntity approverentity = DataProvider.ResponseObjectMapper<ApproverEntity, Approvers>(approver);
+                    //add approver userID and userName to entity
+                    approverentity.UserID = approver.User.UserID;
+                    approverentity.UserName = approver.User.UserName;
                     approverentity.PartitionKey = string.Concat(CoreConstants.AzureTables.ApproverPK, requsetid);
-                    approverentity.RowKey = string.Concat(requsetid, CoreConstants.AzureTables.UnderScore, approver.order);
+                    approverentity.RowKey = string.Concat(requsetid, CoreConstants.AzureTables.UnderScore, approver.Order);
                     approversListEntity.Add(approverentity);
                 }
                 RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
@@ -155,15 +168,15 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                 {
                     FieldEntity fieldentity = DataProvider.ResponseObjectMapper<FieldEntity, Field>(field);
                     fieldentity.PartitionKey = string.Concat(CoreConstants.AzureTables.FieldPK, requestid);
-                    fieldentity.RowKey = string.Concat(requestid, field.name);
+                    fieldentity.RowKey = string.Concat(requestid, CoreConstants.AzureTables.UnderScore, field.Name);
                     listfiledsentity.Add(fieldentity);
                 }
                 //generating fields list entities by adding partitionkey and rowkey
                 foreach (Field field in overviewFields)
                 {
                     FieldEntity fieldentity = DataProvider.ResponseObjectMapper<FieldEntity, Field>(field);
-                    fieldentity.PartitionKey = CoreConstants.AzureTables.FieldPK;
-                    fieldentity.RowKey = string.Concat(requestid, field.name);
+                    fieldentity.PartitionKey = string.Concat(CoreConstants.AzureTables.FieldPK, requestid);
+                    fieldentity.RowKey = string.Concat(requestid, CoreConstants.AzureTables.UnderScore, field.Name);
                     listfiledsentity.Add(fieldentity);
                 }
                 RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
@@ -269,19 +282,23 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                 userbackend.OpenRequests = requestupdatedal.GetOpenRequestsCount(userId, BackendId);
                 userbackend.OpenApprovals = requestupdatedal.GetOpenApprovalsCount(userId, BackendId);
                 userbackend.UrgentApprovals = requestupdatedal.GetUrgentApprovalsCount(userId, BackendId);
-                //updating average, last request sizes for user backend
-                userbackend.AverageRequestSize = GetAverage(userbackend.AverageRequestSize, userbackend.TotalRequestsCount, Totalrequestssize, requestscount);
-                userbackend.AverageAllRequestsSize = GetAverage(userbackend.AverageAllRequestsSize, userbackend.TotalBatchRequestsCount, Totalrequestssize, requestscount);
-                userbackend.LastRequestSize = Convert.ToInt32(Totalrequestssize / requestscount);
-                userbackend.LastAllRequestsSize = Totalrequestssize;
-                //updating average, last request latencies for user backend
-                userbackend.AverageRequestLatency = GetAverage(userbackend.AverageRequestLatency, userbackend.TotalRequestsCount, TotalRequestlatency, requestscount);
-                userbackend.AverageAllRequestsLatency = GetAverage(userbackend.AverageAllRequestsLatency, userbackend.TotalBatchRequestsCount, TotalRequestlatency, requestscount);
-                userbackend.LastRequestLatency = Convert.ToInt32(TotalRequestlatency / requestscount);
-                userbackend.LastAllRequestsLatency = TotalRequestlatency;
-                //updaing total requests per userbackend and total request batches/messages per userbackend
-                userbackend.TotalRequestsCount = userbackend.TotalRequestsCount + requestscount;
-                userbackend.TotalBatchRequestsCount = userbackend.TotalBatchRequestsCount + 1;
+                //if request count more than one.
+                if (requestscount > 0)
+                {
+                    //updating average, last request sizes for user backend 
+                    userbackend.AverageRequestSize = GetAverage(userbackend.AverageRequestSize, userbackend.TotalRequestsCount, Totalrequestssize, requestscount);
+                    userbackend.AverageAllRequestsSize = GetAverage(userbackend.AverageAllRequestsSize, userbackend.TotalBatchRequestsCount, Totalrequestssize, requestscount);
+                    userbackend.LastRequestSize = Convert.ToInt32(Totalrequestssize / requestscount);
+                    userbackend.LastAllRequestsSize = Totalrequestssize;
+                    //updating average, last request latencies for user backend
+                    userbackend.AverageRequestLatency = GetAverage(userbackend.AverageRequestLatency, userbackend.TotalRequestsCount, TotalRequestlatency, requestscount);
+                    userbackend.AverageAllRequestsLatency = GetAverage(userbackend.AverageAllRequestsLatency, userbackend.TotalBatchRequestsCount, TotalRequestlatency, requestscount);
+                    userbackend.LastRequestLatency = Convert.ToInt32(TotalRequestlatency / requestscount);
+                    userbackend.LastAllRequestsLatency = TotalRequestlatency;
+                    //updaing total requests per userbackend and total request batches/messages per userbackend
+                    userbackend.TotalRequestsCount = userbackend.TotalRequestsCount + requestscount;
+                    userbackend.TotalBatchRequestsCount = userbackend.TotalBatchRequestsCount + 1;
+                }
                 userbackend.LastUpdate = DateTime.Now;
                 userbackend.UpdateTriggered = false;
                 //calling DAL method to update userbackend
@@ -331,17 +348,21 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                 RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
                 //calling dal method to get backend entity to be updated
                 BackendEntity backend = requestupdatedal.GetBackend(BackendId);
-                //updating average, last request sizes for backend
-                backend.AverageRequestSize = GetAverage(backend.AverageRequestSize, backend.TotalRequestsCount, Totalrequestssize, requestscount);
-                backend.LastRequestSize = Convert.ToInt32(Totalrequestssize / requestscount);
-                //updating average, last request latencies for user backend
-                backend.AverageRequestLatency = GetAverage(backend.AverageRequestLatency, backend.TotalRequestsCount, TotalRequestlatency, requestscount);
-                backend.AverageAllRequestsLatency = GetAverage(backend.AverageAllRequestsLatency, backend.TotalBatchRequestsCount, TotalRequestlatency, requestscount);
-                backend.LastRequestLatency = Convert.ToInt32(TotalRequestlatency / requestscount);
-                backend.LastAllRequestsLatency = TotalRequestlatency;
-                //updaing total requests per userbackend and total request batches/messages per userbackend
-                backend.TotalRequestsCount = backend.TotalRequestsCount + requestscount;
-                backend.TotalBatchRequestsCount = backend.TotalBatchRequestsCount + 1;
+                //if request count more than one.
+                if (requestscount > 0)
+                {
+                    //updating average, last request sizes for backend
+                    backend.AverageRequestSize = GetAverage(backend.AverageRequestSize, backend.TotalRequestsCount, Totalrequestssize, requestscount);
+                    backend.LastRequestSize = Convert.ToInt32(Totalrequestssize / requestscount);
+                    //updating average, last request latencies for backend
+                    backend.AverageRequestLatency = GetAverage(backend.AverageRequestLatency, backend.TotalRequestsCount, TotalRequestlatency, requestscount);
+                    backend.AverageAllRequestsLatency = GetAverage(backend.AverageAllRequestsLatency, backend.TotalBatchRequestsCount, TotalRequestlatency, requestscount);
+                    backend.LastRequestLatency = Convert.ToInt32(TotalRequestlatency / requestscount);
+                    backend.LastAllRequestsLatency = TotalRequestlatency;
+                    //updaing total requests per userbackend and total request batches/messages per userbackend
+                    backend.TotalRequestsCount = backend.TotalRequestsCount + requestscount;
+                    backend.TotalBatchRequestsCount = backend.TotalBatchRequestsCount + 1;
+                }
                 //calling DAL method to update backend entity
                 requestupdatedal.UpdateBackend(backend);
             }

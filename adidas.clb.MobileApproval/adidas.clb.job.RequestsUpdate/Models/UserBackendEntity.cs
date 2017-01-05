@@ -28,6 +28,7 @@ namespace adidas.clb.job.RequestsUpdate.Models
 
         public string UserID { get; set; }
         public string BackendID { get; set; }
+        public string BackendName { get; set; }
         public Int32 OpenApprovals { get; set; }
         public Int32 TotalRequestsCount { get; set; }
         public Int32 TotalBatchRequestsCount { get; set; }

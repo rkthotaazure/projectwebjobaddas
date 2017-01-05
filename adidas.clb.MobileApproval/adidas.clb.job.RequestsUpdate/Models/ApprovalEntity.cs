@@ -25,13 +25,13 @@ namespace adidas.clb.job.RequestsUpdate.Models
         public ApprovalEntity() { }
         public string RequestId { get; set; }
         public string BackendID { get; set; }
-        public string status { get; set; }        
+        public string Status { get; set; }
         private DateTime? dueDate = null;
         public DateTime DueDate
         {
             get
             {
-                return this.dueDate.HasValue ? this.dueDate.Value : DateTime.Now;
+                return this.dueDate.HasValue ? this.dueDate.Value== default(DateTime) ? DateTime.Now : this.dueDate.Value : DateTime.Now;
             }
 
             set { this.dueDate = value; }
@@ -41,7 +41,7 @@ namespace adidas.clb.job.RequestsUpdate.Models
         {
             get
             {
-                return this.decisionDate.HasValue ? this.decisionDate.Value : DateTime.Now;
+                return this.decisionDate.HasValue ? this.decisionDate.Value == default(DateTime) ? DateTime.Now : this.decisionDate.Value : DateTime.Now;
             }
 
             set { this.decisionDate = value; }
@@ -49,5 +49,5 @@ namespace adidas.clb.job.RequestsUpdate.Models
         public Boolean BackendConfirmed { get; set; }
         public int Missingconfirmations { get; set; }
         public Boolean Backendoverwritten { get; set; }
-    }   
+    }
 }

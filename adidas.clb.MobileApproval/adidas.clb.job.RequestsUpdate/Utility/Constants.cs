@@ -50,21 +50,11 @@ namespace adidas.clb.job.RequestsUpdate.Utility
             public const string UserDeviceConfiguration = "UserDeviceConfiguration";
             public const string PartitionKey = "PartitionKey";
             public const string BackendId = "BackendID";
-            public const string Status = "status";
-            public const string DueDate = "dueDate";            
+            public const string Status = "Status";
+            public const string DueDate = "DueDate";            
             public const string InProgress = "In-Progress";
             public const string Waiting = "Waiting";
         }
-
-        // Azure blob Constants
-        public struct AzureBlob
-        {
-            public const string BlobRequsetPDF = "requestpdf";
-            public const string PDFContentType = "application/pdf";
-            public const string AzureTempBlobStorageAccountName = "AzureTempBlobStorageAccountName";
-            public const string AzureTempBlobStorageAccountKey = "AzureTempBlobStorageAccountKey";
-            public const string RequestPDF = "RequestPDF";
-            public const string RequestPDFExtension = ".pdf";
-        }
+        
     }
 }

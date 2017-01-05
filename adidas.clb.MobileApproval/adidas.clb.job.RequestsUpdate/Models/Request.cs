@@ -16,53 +16,60 @@ namespace adidas.clb.job.RequestsUpdate.Models
     [Serializable]
     public class Request
     {
-        public string id { get; set; }
-        public string title { get; set; }
-        public DateTime created { get; set; }
-        public string status { get; set; }
+        public string ID { get; set; }
+        public string Title { get; set; }
+        public string UserID { get; set; }
+        public DateTime Created { get; set; }
+        public string Status { get; set; }
         public int Latency { get; set; }
-        public Requester requester { get; set; }
-        public Fields fields { get; set; }
-        public List<Approvers> approvers { get; set; }
+        public Requester Requester { get; set; }
+        public Fields Fields { get; set; }
+        public List<Approvers> Approvers { get; set; }
+
     }
 
     [Serializable]
     public class Requester
     {
-        public string userID { get; set; }
-        public string name { get; set; }
+        public string UserID { get; set; }
+        public string Name { get; set; }
+
     }
 
     [Serializable]
     public class Fields
     {
-        public List<Field> overview { get; set; }
-        public List<Field> genericInfo { get; set; }
+        public List<Field> Overview { get; set; }
+        public List<Field> GenericInfo { get; set; }
+
     }
 
     [Serializable]
     public class Field
     {
-        public string name { get; set; }
-        public string value { get; set; }
-        public string group { get; set; }
+        public string Name { get; set; }
+        public string Value { get; set; }
+        public string Group { get; set; }
+
     }
 
     [Serializable]
     public class Approvers
     {
-        public int order { get; set; }
-        public BackendUser user { get; set; }
-        public DateTime created { get; set; }
-        public string status { get; set; }
-        public DateTime dueDate { get; set; }
-        public DateTime creatdecisionDate { get; set; }
+        public int Order { get; set; }
+        public BackendUser User { get; set; }
+        public Nullable<DateTime> Created { get; set; }
+        public string Status { get; set; }
+        public Nullable<DateTime> DueDate { get; set; }
+        public Nullable<DateTime> DecisionDate { get; set; }
+
     }
 
     [Serializable]
     public class BackendUser
     {
-        public string userID { get; set; }
-        public string userName { get; set; }
+        public string UserID { get; set; }
+        public string UserName { get; set; }
+
     }
 }
