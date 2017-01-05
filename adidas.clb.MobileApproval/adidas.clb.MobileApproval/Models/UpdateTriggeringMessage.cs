@@ -72,6 +72,7 @@ namespace adidas.clb.MobileApproval.Models
         public UpdateTriggerBackend Backend { get; set; }
         public string ID { get; set; }
         public string Title { get; set; }
+        public string UserID { get; set; }
         public Request()
         {
             _type = "request";

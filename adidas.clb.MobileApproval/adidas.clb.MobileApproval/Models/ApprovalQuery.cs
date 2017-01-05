@@ -10,10 +10,12 @@ namespace adidas.clb.MobileApproval.Models
         public string _type { get; set; }
         //Mandatory Field
         [Required]
-        public string ApprovalRequesID { get; set; }
+        public string ApprovalRequestID { get; set; }
         //Mandatory Field
         [Required]
         public string UserID { get; set; }
+        public string BackendID { get; set; }
+        public string Domain { get; set; }
         //Mandatory Field
         [Required]
         public Decision ApprovalDecision { get; set; }

@@ -284,6 +284,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Service References\Application Insights\ConnectedService.json" />
+    <None Include="Properties\PublishProfiles\alivemobilewebservice - FTP %282%29.pubxml" />
+    <None Include="Properties\PublishProfiles\alivemobilewebservice - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\mobileapproval - FTP %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\mobileapproval - FTP %283%29.pubxml" />
     <None Include="Properties\PublishProfiles\mobileapproval - FTP.pubxml" />

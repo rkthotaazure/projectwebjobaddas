@@ -30,6 +30,7 @@ namespace adidas.clb.MobileApproval.Models
     {
         public string _type { get; set; }
         public string BackendID { get; set; }
+        public string BackendName { get; set; }
         public Int32 OpenApprovals { get; set; }
         public Int32 DefaultUpdateFrequency { get; set; }
         public bool UpdateTriggered { get; set; }

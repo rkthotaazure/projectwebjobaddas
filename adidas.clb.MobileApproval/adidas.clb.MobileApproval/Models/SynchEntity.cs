@@ -20,7 +20,7 @@ namespace adidas.clb.MobileApproval.Models
         {
             this.PartitionKey = partitionkey;
             this.RowKey = rowkey;
-        }
+        }        
         public int avgSynchFreq { get; set; }
         public int lastSynchFreq { get; set; }
         public int bestSynchFreq { get; set; }

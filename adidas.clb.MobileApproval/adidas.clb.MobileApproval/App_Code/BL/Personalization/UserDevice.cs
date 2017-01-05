@@ -54,7 +54,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
                 UserDeviceDAL userdevicedal = new UserDeviceDAL();
                 //get all user devices to remove
                 List<UserDeviceEntity> alluserdevices = userdevicedal.GetUserAllDevices(UserID);
-                if (alluserdevices != null)
+                if (alluserdevices != null && alluserdevices.Count>0)
                 {
                     //calling data access layer method to remove
                     userdevicedal.RemoveDevices(alluserdevices);
@@ -86,7 +86,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
                 List<UserDeviceEntity> alluserdevices = userdevicedal.GetUserAllDevices(UserID);
                 List<UserDeviceDTO> userdevicesdtolist = new List<UserDeviceDTO>();
                 //check for null
-                if (alluserdevices != null)
+                if (alluserdevices != null && alluserdevices.Count > 0)
                 {
                     //converting userdevice entity to userdevice dto
                     foreach (UserDeviceEntity userdeviceentity in alluserdevices)

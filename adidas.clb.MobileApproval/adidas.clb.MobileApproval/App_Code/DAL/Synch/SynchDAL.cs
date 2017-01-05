@@ -267,5 +267,72 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
                 throw new DataAccessException();
             }
         }
+
+        /// <summary>
+        /// method to get approvals per userbackend
+        /// </summary>
+        /// <param name="UserID">takes userid as input</param>
+        /// <param name="backendID">takes backendid as input</param>
+        /// /// <param name="approvalstatus">takes approvalstatus as input</param>
+        /// <returns>returns list of approvals associated userbackend</returns>
+        public List<ApprovalEntity> GetUserBackendApprovals(string UserID, string backendID, string approvalstatus)
+        {
+            try
+            {
+                string partitionkeyfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.ApprovalPK, UserID));
+                string backendfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.BackendId, QueryComparisons.Equal, backendID);
+                //combine partionkey filter with backend filter 
+                string combinefiletr = TableQuery.CombineFilters(partitionkeyfilter, TableOperators.And, backendfilter);
+                //request status filter
+                string statusfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.Status, QueryComparisons.Equal, approvalstatus);
+                //final filter to get requests based on partitionkey, backendid, request status
+                string finalfilter = TableQuery.CombineFilters(combinefiletr, TableOperators.And, statusfilter);
+                //generate query to get all user associated requests
+                TableQuery<ApprovalEntity> query = new TableQuery<ApprovalEntity>().Where(finalfilter);
+                //call dataprovider method to get entities from azure table
+                List<ApprovalEntity> allapprovals = DataProvider.GetEntitiesList<ApprovalEntity>(CoreConstants.AzureTables.RequestTransactions, query);
+                return allapprovals;
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error while retrieving approvals per userbackend from RequestTransactions azure table in DAL : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new DataAccessException();
+            }
+        }
+
+        /// <summary>
+        /// method to get all requests per user
+        /// </summary>
+        /// <param name="UserID">takes userid as input</param>
+        /// <returns>returns list of requests associated to user</returns>
+        public List<ApprovalEntity> GetUserApprovalsForCount(string UserID, string approvalstatus)
+        {
+            try
+            {
+                //partionkey filter
+                string partitionkeyfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.ApprovalPK, UserID));
+                //request status filter
+                string statusfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.Status, QueryComparisons.Equal, approvalstatus);
+                //generate query to get all requests per user based on filter conditions
+                //selecting only few columnas as we are just caliculating count of open requests
+                TableQuery<ApprovalEntity> query = new TableQuery<ApprovalEntity>()
+                {
+                    SelectColumns = new List<string>()
+                    {
+                        CoreConstants.AzureTables.PartitionKey, CoreConstants.AzureTables.BackendId
+                    }
+                }.Where(TableQuery.CombineFilters(partitionkeyfilter, TableOperators.And, statusfilter));                
+                //call dataprovider method to get entities from azure table
+                List<ApprovalEntity> allapprovals = DataProvider.GetEntitiesList<ApprovalEntity>(CoreConstants.AzureTables.RequestTransactions, query);
+                return allapprovals;
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error while retrieving approvals count per user from RequestTransactions azure table in DAL : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new DataAccessException();
+            }
+        }
     }
 }

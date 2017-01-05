@@ -15,8 +15,9 @@ namespace adidas.clb.MobileApproval.Models
         }
         public ApprovalEntity() { }
         public string RequestId { get; set; }
-        public string BackendID { get; set; }
-        public string status { get; set; }
+        public string BackendID { get; set; }        
+        public string Domain { get; set; }
+        public string Status { get; set; }
         private DateTime? dueDate = null;
         public DateTime DueDate
         {
@@ -46,8 +47,9 @@ namespace adidas.clb.MobileApproval.Models
     public class ApprovalDTO
     {
         public string RequestId { get; set; }
-        public string BackendID { get; set; }
-        public string status { get; set; }
+        public string BackendID { get; set; }        
+        public string Domain { get; set; }
+        public string Status { get; set; }
         private DateTime? dueDate = null;
         public DateTime DueDate
         {
@@ -72,5 +74,12 @@ namespace adidas.clb.MobileApproval.Models
         public int Missingconfirmations { get; set; }
         public Boolean Backendoverwritten { get; set; }
         public string Comment { get; set; }
+    }
+
+    public class ApprovalsCountDTO
+    {        
+        public string BackendID { get; set; }
+        public string Status { get; set; }
+        public int Count { get; set; }        
     }
 }

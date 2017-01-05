@@ -23,9 +23,9 @@ namespace adidas.clb.MobileApproval.Models
         }
         public FieldEntity() { }
 
-        public string name { get; set; }
-        public string value { get; set; }
-        public string group { get; set; }
+        public string Name { get; set; }
+        public string Value { get; set; }
+        public string Group { get; set; }
     }
 
     /// <summary>
@@ -34,8 +34,8 @@ namespace adidas.clb.MobileApproval.Models
     public class FieldDTO 
     {        
         public FieldDTO() { }
-        public string name { get; set; }
-        public string value { get; set; }
-        public string group { get; set; }
+        public string Name { get; set; }
+        public string Value { get; set; }
+        public string Group { get; set; }
     }
 }
