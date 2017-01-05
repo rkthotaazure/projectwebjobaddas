@@ -18,7 +18,7 @@ namespace adidas.clb.job.RequestsUpdate.Models
         public string _type { get; set; }
         public string UserId { get; set; }
         public string BackendID { get; set; }
-        public List<BackendRequest> requests { get; set; }
+        public List<BackendRequest> Requests { get; set; }
         public RequestsUpdateData() { _type = "requestsUpdateData"; }
     }
     /// <summary>
@@ -28,8 +28,8 @@ namespace adidas.clb.job.RequestsUpdate.Models
     public class BackendRequest
     {
         public string _type { get; set; }
-        public string serviceLayerReqID { get; set; }
-        public Request requset { get; set; }        
+        public string ServiceLayerReqID { get; set; }
+        public Request RequestsList { get; set; }
         public BackendRequest() { _type = "backendRequest"; }
     }
 }

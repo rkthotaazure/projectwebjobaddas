@@ -25,7 +25,8 @@ namespace adidas.clb.job.RequestsUpdate.Models
         public BackendEntity() { }
 
         public string BackendID { get; set; }
-        public int AgentPullingFrequency { get; set; }
+        public string BackendName { get; set; }
+    public int AgentPullingFrequency { get; set; }
         public int DefaultUpdateFrequency { get; set; }
         public int AverageRequestSize { get; set; }
         public int LastRequestSize { get; set; }

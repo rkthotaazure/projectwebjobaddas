@@ -33,37 +33,40 @@ namespace adidas.clb.job.RequestsUpdate
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 //deserialize Queue message to Requests 
                 RequestsUpdateData requestsdata = JsonConvert.DeserializeObject<RequestsUpdateData>(message);
-                List<BackendRequest> backendrequestslist = requestsdata.requests;
+                List<BackendRequest> backendrequestslist = requestsdata.Requests;
                 RequestUpdateBL requsetupdatebl = new RequestUpdateBL();
                 int TotalRequestsize = 0;
                 int TotalRequestlatency = 0;
                 int requestcount = backendrequestslist.Count;
                 //check if requests were available
-                if (backendrequestslist != null)
-                {                
-                    //looping through each request to add requests , approvers and fields for each requet
+                if (backendrequestslist != null && backendrequestslist.Count>0)
+                {
+                    //looping through each backendrequest to add requests , approvers and fields for each requet
                     foreach (BackendRequest backendrequest in backendrequestslist)
                     {
                         //split main backendrequest object into individual entities
-                        List<Approvers> approvers = backendrequest.requset.approvers;
-                        List<Field> genericInfoFields = backendrequest.requset.fields.genericInfo;
-                        List<Field> overviewFields = backendrequest.requset.fields.overview;
-                        Request request = backendrequest.requset;                        
-                        //calling BL methods to add request , approval, approvers and fields                        
-                        requsetupdatebl.AddUpdateRequest(backendrequest, requestsdata.UserId, requestsdata.BackendID);                        
-                        requsetupdatebl.AddUpdateApproval(request, requestsdata.UserId, requestsdata.BackendID);                        
-                        requsetupdatebl.AddUpdateApprovers(approvers, request.id);                        
-                        requsetupdatebl.AddUpdateFields(genericInfoFields, overviewFields, request.id);                        
-                        //caliculating request size                        
-                        int requestsize=requsetupdatebl.CalculateRequestSize(backendrequest);                       
-                        //caliculating total of size for all requests
-                        TotalRequestsize = TotalRequestsize+requestsize;
-                        //caliculating total of latency for all requests
-                        TotalRequestlatency = TotalRequestlatency + request.Latency;                   
-                      }                    
-                }                
+                        List<Approvers> approvers = backendrequest.RequestsList.Approvers;
+                        List<Field> genericInfoFields = backendrequest.RequestsList.Fields.GenericInfo;
+                        List<Field> overviewFields = backendrequest.RequestsList.Fields.Overview;
+                        Request request = backendrequest.RequestsList;
+                        //calling BL methods to add request , approval, approvers and fields
+                        if(!string.IsNullOrEmpty(request.UserID))
+                        {
+                            requsetupdatebl.AddUpdateRequest(backendrequest, request.UserID, requestsdata.BackendID);
+                            requsetupdatebl.AddUpdateApproval(approvers, request.ID, backendrequest.RequestsList.UserID, requestsdata.BackendID);
+                            requsetupdatebl.AddUpdateApprovers(approvers, request.ID);
+                            requsetupdatebl.AddUpdateFields(genericInfoFields, overviewFields, request.ID);
+                            //caliculating request size                        
+                            int requestsize = requsetupdatebl.CalculateRequestSize(backendrequest);
+                            //caliculating total of size for all requests
+                            TotalRequestsize = TotalRequestsize + requestsize;
+                            //caliculating total of latency for all requests
+                            TotalRequestlatency = TotalRequestlatency + request.Latency;
+                        }            
+                    }
+                }
                 //calling BL methods to update average sizes and latencies for userbackend and backend     
-                requsetupdatebl.UpdateUserBackend(requestsdata.UserId,requestsdata.BackendID,TotalRequestsize, TotalRequestlatency,requestcount);
+                requsetupdatebl.UpdateUserBackend(backendrequestslist.First().RequestsList.UserID, requestsdata.BackendID, TotalRequestsize, TotalRequestlatency, requestcount);
                 requsetupdatebl.UpdateBackend(requestsdata.BackendID, TotalRequestsize, TotalRequestlatency, requestcount);
 
             }
@@ -97,10 +100,10 @@ namespace adidas.clb.job.RequestsUpdate
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 //deserialize Queue message to get PDF uri 
                 RequestPDF requestPDFdata = JsonConvert.DeserializeObject<RequestPDF>(message);
-                RequestUpdateBL requestupdatebl = new RequestUpdateBL();                                
+                RequestUpdateBL requestupdatebl = new RequestUpdateBL();
                 Uri PDFuri = new Uri(requestPDFdata.PDFUri);
                 //updating request entity with pdf uri
-                requestupdatebl.AddPDFUriToRequest(PDFuri, requestPDFdata.UserId,requestPDFdata.RequestID);
+                requestupdatebl.AddPDFUriToRequest(PDFuri, requestPDFdata.UserId, requestPDFdata.RequestID);
             }
             catch (DataAccessException dalexception)
             {

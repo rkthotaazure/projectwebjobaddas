@@ -23,17 +23,26 @@ namespace adidas.clb.job.RequestsUpdate.Models
             this.RowKey = RequestApprovalId;
         }
         public ApproverEntity() { }
-        public int order { get; set; }
-        public string userID { get; set; }
-        public string userName { get; set; }
-        public DateTime created { get; set; }
-        public string status { get; set; }
+        public int Order { get; set; }
+        public string UserID { get; set; }
+        public string UserName { get; set; }
+        private DateTime? created = null;
+
+        public DateTime Created {
+            get
+            {
+                return this.created.HasValue ? this.created.Value == default(DateTime) ? DateTime.Now : this.created.Value : DateTime.Now;
+            }
+
+            set { this.created = value; }
+        }
+        public string Status { get; set; }
         private DateTime? dueDate = null;
         public DateTime DueDate
         {
             get
             {
-                return this.dueDate.HasValue ? this.dueDate.Value : DateTime.Now;
+                return this.dueDate.HasValue ? this.dueDate.Value == default(DateTime) ? DateTime.Now : this.dueDate.Value : DateTime.Now;
             }
 
             set { this.dueDate = value; }
@@ -43,7 +52,7 @@ namespace adidas.clb.job.RequestsUpdate.Models
         {
             get
             {
-                return this.decisionDate.HasValue ? this.decisionDate.Value : DateTime.Now;
+                return this.decisionDate.HasValue ? this.decisionDate.Value == default(DateTime) ? DateTime.Now : this.decisionDate.Value : DateTime.Now;
             }
 
             set { this.decisionDate = value; }

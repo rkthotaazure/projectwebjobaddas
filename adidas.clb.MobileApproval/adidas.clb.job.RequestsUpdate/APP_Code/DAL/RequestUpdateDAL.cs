@@ -113,7 +113,10 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
                 //call dataprovider method to get entities from azure table
                 List<ApproverEntity> existingapprovers = DataProvider.GetEntitiesList<ApproverEntity>(CoreConstants.AzureTables.ReferenceData, query);
                 //call dataprovider method to remove entities from azure table
-                DataProvider.RemoveEntities(CoreConstants.AzureTables.RequestTransactions, existingapprovers);
+                if(existingapprovers != null && existingapprovers.Count>0)
+                {
+                    DataProvider.RemoveEntities(CoreConstants.AzureTables.RequestTransactions, existingapprovers);
+                }                
             }
             catch (Exception exception)
             {
@@ -157,9 +160,12 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
                 //generate query to retrive existing fileds 
                 TableQuery<FieldEntity> query = new TableQuery<FieldEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.FieldPK, requestid)));
                 //call dataprovider method to get entities from azure table
-                List<FieldEntity> existingapprovers = DataProvider.GetEntitiesList<FieldEntity>(CoreConstants.AzureTables.ReferenceData, query);
+                List<FieldEntity> existingfields = DataProvider.GetEntitiesList<FieldEntity>(CoreConstants.AzureTables.ReferenceData, query);
                 //call dataprovider method to remove entities from azure table
-                DataProvider.RemoveEntities(CoreConstants.AzureTables.RequestTransactions, existingapprovers);
+                if (existingfields != null && existingfields.Count > 0)
+                {
+                    DataProvider.RemoveEntities(CoreConstants.AzureTables.RequestTransactions, existingfields);
+                }                
             }
             catch (Exception exception)
             {

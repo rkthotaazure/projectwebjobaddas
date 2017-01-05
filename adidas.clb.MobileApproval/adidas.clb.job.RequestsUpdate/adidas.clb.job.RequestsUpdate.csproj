@@ -137,7 +137,9 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\PublishProfiles\mobileapproval.pubxml" />
     <None Include="Properties\webjob-publish-settings.json" />
   </ItemGroup>
