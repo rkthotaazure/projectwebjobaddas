@@ -5,7 +5,6 @@
 //-----------------------------------------------------------
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Web;
 using adidas.clb.MobileApproval.Exceptions;
 using adidas.clb.MobileApproval.Models;
@@ -328,7 +327,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
                 if(backendsynch!=null)
                 {
                     //last synch frequency
-                    backendsynch.lastSynchFreq = (backendsynch.LastSynch - DateTime.Now).Days;
+                    backendsynch.lastSynchFreq = (backendsynch.LastSynch.Value - DateTime.Now).Days;
                     //update best synch frequency
                     if(backendsynch.lastSynchFreq<backendsynch.bestSynchFreq)
                     {

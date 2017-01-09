@@ -52,7 +52,14 @@ namespace adidas.clb.MobileApproval.Utility
         /// <returns>returns whether backend updated or not</returns>
         public static Boolean IsBackendUpdated(UserBackendEntity userbackend)
         {
-            return (!userbackend.UpdateTriggered) && (userbackend.DefaultUpdateFrequency > 0) && (userbackend.LastUpdate.AddMinutes(userbackend.DefaultUpdateFrequency) > DateTime.Now);            
+            if(userbackend.LastUpdate!=null)
+            {
+                return (!userbackend.UpdateTriggered) && (userbackend.DefaultUpdateFrequency > 0) && (userbackend.LastUpdate.Value.AddMinutes(userbackend.DefaultUpdateFrequency) > DateTime.Now);
+            }
+            else
+            {
+                return (!userbackend.UpdateTriggered) && (userbackend.DefaultUpdateFrequency > 0);
+            }            
         }
 
         /// <summary>
@@ -83,7 +90,14 @@ namespace adidas.clb.MobileApproval.Utility
         /// <returns>returns whether request updated or not</returns>
         public static Boolean IsRequestUpdated(RequestEntity request, int userbackendupdatefrequency)
         {
-            return (!request.UpdateTriggered) && (request.LastUpdate.AddMinutes(userbackendupdatefrequency) > DateTime.Now);
+            if(request.LastUpdate!=null)
+            {
+                return (!request.UpdateTriggered) && (request.LastUpdate.Value.AddMinutes(userbackendupdatefrequency) > DateTime.Now);
+            }
+            else
+            {
+                return (!request.UpdateTriggered);
+            }
         }
 
         /// <summary>

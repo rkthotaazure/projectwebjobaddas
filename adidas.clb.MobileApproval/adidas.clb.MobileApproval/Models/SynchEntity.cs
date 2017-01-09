@@ -28,11 +28,11 @@ namespace adidas.clb.MobileApproval.Models
         public int totalReqCount { get; set; }
         public int urgentReqCount { get; set; }
         private DateTime? lastSynch = null;
-        public DateTime LastSynch
+        public DateTime? LastSynch
         {
             get
             {
-                return this.lastSynch.HasValue ? this.lastSynch.Value : DateTime.Now;
+                return this.lastSynch.HasValue ? this.lastSynch.Value : (DateTime?)null;
             }
 
             set { this.lastSynch = value; }

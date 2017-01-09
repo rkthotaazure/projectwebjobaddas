@@ -28,11 +28,11 @@ namespace adidas.clb.MobileApproval.Models
         public Boolean Lastupdate { get; set; }
         private DateTime? lastchange = null;
 
-        public DateTime LastChange
+        public DateTime? LastChange
         {
             get
             {
-                return this.lastchange.HasValue ? this.lastchange.Value : DateTime.Now;
+                return this.lastchange.HasValue ? this.lastchange.Value : (DateTime?)null;
             }
 
             set { this.lastchange = value; }
