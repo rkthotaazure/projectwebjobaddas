@@ -19,21 +19,21 @@ namespace adidas.clb.MobileApproval.Models
         public string Domain { get; set; }
         public string Status { get; set; }
         private DateTime? dueDate = null;
-        public DateTime DueDate
+        public DateTime? DueDate
         {
             get
             {
-                return this.dueDate.HasValue ? this.dueDate.Value : DateTime.Now;
+                return this.dueDate.HasValue ? this.dueDate.Value : (DateTime?)null;
             }
 
             set { this.dueDate = value; }
         }
         private DateTime? decisionDate = null;
-        public DateTime DecisionDate
+        public DateTime? DecisionDate
         {
             get
             {
-                return this.decisionDate.HasValue ? this.decisionDate.Value : DateTime.Now;
+                return this.decisionDate.HasValue ? this.decisionDate.Value : (DateTime?)null;
             }
 
             set { this.decisionDate = value; }
@@ -51,21 +51,21 @@ namespace adidas.clb.MobileApproval.Models
         public string Domain { get; set; }
         public string Status { get; set; }
         private DateTime? dueDate = null;
-        public DateTime DueDate
+        public DateTime? DueDate
         {
             get
             {
-                return this.dueDate.HasValue ? this.dueDate.Value : DateTime.Now;
+                return this.dueDate.HasValue ? this.dueDate.Value : (DateTime?)null;
             }
 
             set { this.dueDate = value; }
         }
         private DateTime? decisionDate = null;
-        public DateTime DecisionDate
+        public DateTime? DecisionDate
         {
             get
             {
-                return this.decisionDate.HasValue ? this.decisionDate.Value : DateTime.Now;
+                return this.decisionDate.HasValue ? this.decisionDate.Value : (DateTime?)null;
             }
 
             set { this.decisionDate = value; }

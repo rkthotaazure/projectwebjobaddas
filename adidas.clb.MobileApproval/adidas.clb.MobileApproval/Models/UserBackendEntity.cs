@@ -34,11 +34,11 @@ namespace adidas.clb.MobileApproval.Models
         public bool UpdateTriggered { get; set; }
         public Int32 ExpectedLatency { get; set; }
         private DateTime? lastUpdate = null;
-        public DateTime LastUpdate
+        public DateTime? LastUpdate
         {
             get
             {
-                return this.lastUpdate.HasValue ? this.lastUpdate.Value : DateTime.Now;
+                return this.lastUpdate.HasValue ? this.lastUpdate.Value : (DateTime?)null;
             }
 
             set { this.lastUpdate = value; }
@@ -54,11 +54,11 @@ namespace adidas.clb.MobileApproval.Models
         public Int32 AverageRequestLatency { get; set; }
         public Int32 LastRequestLatency { get; set; }
         private DateTime? expectedUpdate = null;
-        public DateTime ExpectedUpdate
+        public DateTime? ExpectedUpdate
         {
             get
             {
-                return this.expectedUpdate.HasValue ? this.expectedUpdate.Value : DateTime.Now;
+                return this.expectedUpdate.HasValue ? this.expectedUpdate.Value : (DateTime?)null;
             }
 
             set { this.expectedUpdate = value; }

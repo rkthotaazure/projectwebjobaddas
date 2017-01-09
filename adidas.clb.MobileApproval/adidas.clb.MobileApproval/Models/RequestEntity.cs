@@ -34,11 +34,11 @@ namespace adidas.clb.MobileApproval.Models
         public int Missingconfirmationslimit { get; set; }
         public string PDFUri { get; set; }
         private DateTime? lastUpdate = null;
-        public DateTime LastUpdate
+        public DateTime? LastUpdate
         {
             get
             {
-                return this.lastUpdate.HasValue ? this.lastUpdate.Value : DateTime.Now;
+                return this.lastUpdate.HasValue ? this.lastUpdate.Value : (DateTime?)null;
             }
 
             set { this.lastUpdate = value; }
