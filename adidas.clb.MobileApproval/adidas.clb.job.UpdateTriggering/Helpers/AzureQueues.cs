@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Configuration;
 using Microsoft.WindowsAzure;
@@ -16,6 +17,9 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
     {
         //Application insights interface reference for logging the error details into Application Insight azure service.
         static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
+        //getting Max Retry count,MaxThreadSleepInMilliSeconds from web.config
+        public static int maxThreadSleepInMilliSeconds = Convert.ToInt32(ConfigurationManager.AppSettings["MaxThreadSleepInMilliSeconds"]);
+        public static int maxRetryCount = Convert.ToInt32(ConfigurationManager.AppSettings["MaxRetryCount"]);
         /// <summary>
         /// This method creates the queue client
         /// </summary>
@@ -24,19 +28,49 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
         {
             string callerMethodName = string.Empty;
             try
-            {
-                //Get Caller Method name from CallerInformation class
-                callerMethodName = CallerInformation.TrackCallerMethodName();
-                // Parse the connection string and return a reference to the storage account
-                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(ConfigurationManager.AppSettings["UpdateTriggerAzureQueues"]);
-                // Create the queue client.
-                CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
+            {       
+                int RetryAttemptCount = 0;
+                bool IsSuccessful = false;
+                CloudQueueClient queueClient=null;
+                do
+                {
+                    try
+                    {
+                        //Get Caller Method name from CallerInformation class
+                        callerMethodName = CallerInformation.TrackCallerMethodName();
+                        // Parse the connection string and return a reference to the storage account
+                        CloudStorageAccount storageAccount = CloudStorageAccount.Parse(ConfigurationManager.AppSettings["UpdateTriggerAzureQueues"]);
+                        // Create the queue client.
+                        queueClient = storageAccount.CreateCloudQueueClient();                       
+                        IsSuccessful = true;
+                       
+                    }
+                    catch (StorageException storageException)
+                    {
+                        //Increasing RetryAttemptCount variable
+                        RetryAttemptCount = RetryAttemptCount + 1;
+                        //Checking retry call count is eual to max retry count or not
+                        if (RetryAttemptCount == maxRetryCount)
+                        {
+                            InsightLogger.Exception("Error in AzureQueues:: " + callerMethodName + " method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, callerMethodName);
+                            throw new DataAccessException(storageException.Message, storageException.InnerException);
+                        }
+                        else
+                        {
+                            InsightLogger.Exception("Error in AzureQueues:: " + callerMethodName + " method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, callerMethodName);
+                            //Putting the thread into some milliseconds sleep  and again call the same method call.
+                            Thread.Sleep(maxThreadSleepInMilliSeconds);
+                        }
+                    }
+                } while (!IsSuccessful);
                 return queueClient;
+
             }
-            catch (Exception exception)
+
+            catch (Exception innerexception)
             {
-                InsightLogger.Exception(exception.Message, exception, callerMethodName);
-                throw new DataAccessException(exception.Message, exception.InnerException);
+                InsightLogger.Exception(innerexception.Message, innerexception, "Retrieveentity");
+                throw new DataAccessException(innerexception.Message, innerexception.InnerException);
             }
 
         }
@@ -50,16 +84,47 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
             string callerMethodName = string.Empty;
             try
             {
-                //Get Caller Method name from CallerInformation class
-                callerMethodName = CallerInformation.TrackCallerMethodName();
-                //read queue name from app.config :: AppSettings
-                return queuePath.GetQueueReference(ConfigurationManager.AppSettings["UpdateTriggerInputQueue"]);
+                int RetryAttemptCount = 0;
+                bool IsSuccessful = false;
+                CloudQueue queue= null;                
+                do
+                {
+                    try
+                    {
+                        //Get Caller Method name from CallerInformation class
+                        callerMethodName = CallerInformation.TrackCallerMethodName();
+                        //read queue name from app.config :: AppSettings and return queue
+                        queue=queuePath.GetQueueReference(ConfigurationManager.AppSettings["UpdateTriggerInputQueue"]);
+                        IsSuccessful = true;
+
+                    }
+                    catch (StorageException storageException)
+                    {
+                        //Increasing RetryAttemptCount variable
+                        RetryAttemptCount = RetryAttemptCount + 1;
+                        //Checking retry call count is eual to max retry count or not
+                        if (RetryAttemptCount == maxRetryCount)
+                        {
+                            InsightLogger.Exception("Error in AzureQueues:: " + callerMethodName + " method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, callerMethodName);
+                            throw new DataAccessException(storageException.Message, storageException.InnerException);
+                        }
+                        else
+                        {
+                            InsightLogger.Exception("Error in AzureQueues:: " + callerMethodName + " method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, callerMethodName);
+                            //Putting the thread into some milliseconds sleep  and again call the same method call.
+                            Thread.Sleep(maxThreadSleepInMilliSeconds);
+                        }
+                    }
+                } while (!IsSuccessful);
+                return queue;
+
             }
-            catch (Exception exception)
+
+            catch (Exception innerexception)
             {
-                InsightLogger.Exception(exception.Message, exception, callerMethodName);
-                throw new DataAccessException(exception.Message, exception.InnerException);
-            }
+                InsightLogger.Exception(innerexception.Message, innerexception, "Retrieveentity");
+                throw new DataAccessException(innerexception.Message, innerexception.InnerException);
+            }           
         }
         /// <summary>
         /// This method Retrieves a reference to a Request PDF Queue.
