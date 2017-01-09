@@ -27,6 +27,7 @@ namespace adidas.clb.job.UpdateTriggering.Models
 
         public string UserID { get; set; }
         public string BackendID { get; set; }
+        public string BackendName { get; set; }
         public int OpenApprovals { get; set; }
         public int DefaultUpdateFrequency { get; set; }
         public bool UpdateTriggered { get; set; }
@@ -43,5 +44,8 @@ namespace adidas.clb.job.UpdateTriggering.Models
         public int AverageRequestLatency { get; set; }
         public int LastRequestLatency { get; set; }
         public DateTime ExpectedUpdate { get; set; }
+        public Int32 TotalRequestsCount { get; set; }
+        public Int32 TotalBatchRequestsCount { get; set; }
+
     }
 }

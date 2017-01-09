@@ -52,7 +52,7 @@ namespace adidas.clb.job.UpdateTriggering
 
         }
         /// <summary>
-        /// Dynamically send the queue names from app.config file to queue trigger method
+        /// Dynamically defines a %name% variables i.e write a queue names from app.config file to queue trigger method
         /// </summary>
         public class MyResolver : INameResolver
         {
@@ -61,19 +61,11 @@ namespace adidas.clb.job.UpdateTriggering
                 try
                 {
                     string queueName = string.Empty;
-                    switch (name)
+                    //if updatetriggering queue method has triggered then send ut queue name to method call
+                    if (name == CoreConstants.AzureQueues.UTQueue)
                     {
-                        //if updatetriggering queue method has triggered then send ut queue name to method call
-                        case CoreConstants.AzureQueues.UTQueue:
-                            queueName = Convert.ToString(ConfigurationManager.AppSettings["UpdateTriggerInputQueue"]);
-                            break;
-                        //if generate pdf queue method has triggered then send generate pdf queue name to method call
-                        case CoreConstants.AzureQueues.PDFQueue:
-                            queueName = Convert.ToString(ConfigurationManager.AppSettings["GeneratePDFQueue"]);
-                            break;
-                        default:
-                            break;
-                    }
+                        queueName = Convert.ToString(ConfigurationManager.AppSettings["UpdateTriggerInputQueue"]);
+                    }                    
                     return queueName;
                 }
                 catch (Exception exception)
