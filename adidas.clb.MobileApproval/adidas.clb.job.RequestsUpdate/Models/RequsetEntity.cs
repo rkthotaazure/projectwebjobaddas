@@ -41,6 +41,17 @@ namespace adidas.clb.job.RequestsUpdate.Models
         public int Averagerequestlatency { get; set; }
         public int Lastrequestlatency { get; set; }
         public int Missingconfirmationslimit { get; set; }
+        private DateTime? lastUpdate = null;
+        public DateTime LastUpdate
+        {
+            get
+            {
+                return this.lastUpdate.HasValue ? this.lastUpdate.Value : DateTime.Now;
+            }
+
+            set { this.lastUpdate = value; }
+        }
+        public bool UpdateTriggered { get; set; }
         public string PDFUri { get; set; }
     }
 }

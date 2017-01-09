@@ -28,31 +28,31 @@ namespace adidas.clb.job.RequestsUpdate.Models
         public string UserName { get; set; }
         private DateTime? created = null;
 
-        public DateTime Created {
+        public DateTime? Created {
             get
             {
-                return this.created.HasValue ? this.created.Value == default(DateTime) ? DateTime.Now : this.created.Value : DateTime.Now;
+                return this.created.HasValue ? this.created.Value == default(DateTime) ? (DateTime?)null : this.created.Value : (DateTime?)null;
             }
 
             set { this.created = value; }
         }
         public string Status { get; set; }
         private DateTime? dueDate = null;
-        public DateTime DueDate
+        public DateTime? DueDate
         {
             get
             {
-                return this.dueDate.HasValue ? this.dueDate.Value == default(DateTime) ? DateTime.Now : this.dueDate.Value : DateTime.Now;
+                return this.dueDate.HasValue ? this.dueDate.Value == default(DateTime) ? (DateTime?)null : this.dueDate.Value : (DateTime?)null;
             }
 
             set { this.dueDate = value; }
         }
         private DateTime? decisionDate = null;
-        public DateTime DecisionDate
+        public DateTime? DecisionDate
         {
             get
             {
-                return this.decisionDate.HasValue ? this.decisionDate.Value == default(DateTime) ? DateTime.Now : this.decisionDate.Value : DateTime.Now;
+                return this.decisionDate.HasValue ? this.decisionDate.Value == default(DateTime) ? (DateTime?)null : this.decisionDate.Value : (DateTime?)null;
             }
 
             set { this.decisionDate = value; }

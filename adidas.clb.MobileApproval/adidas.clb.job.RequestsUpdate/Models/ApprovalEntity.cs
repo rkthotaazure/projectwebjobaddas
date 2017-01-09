@@ -27,21 +27,21 @@ namespace adidas.clb.job.RequestsUpdate.Models
         public string BackendID { get; set; }
         public string Status { get; set; }
         private DateTime? dueDate = null;
-        public DateTime DueDate
+        public DateTime? DueDate
         {
             get
             {
-                return this.dueDate.HasValue ? this.dueDate.Value== default(DateTime) ? DateTime.Now : this.dueDate.Value : DateTime.Now;
+                return this.dueDate.HasValue ? this.dueDate.Value== default(DateTime) ? (DateTime?)null : this.dueDate.Value : (DateTime?)null;
             }
 
             set { this.dueDate = value; }
         }
         private DateTime? decisionDate = null;
-        public DateTime DecisionDate
+        public DateTime? DecisionDate
         {
             get
             {
-                return this.decisionDate.HasValue ? this.decisionDate.Value == default(DateTime) ? DateTime.Now : this.decisionDate.Value : DateTime.Now;
+                return this.decisionDate.HasValue ? this.decisionDate.Value == default(DateTime) ? (DateTime?)null : this.decisionDate.Value : (DateTime?)null;
             }
 
             set { this.decisionDate = value; }
