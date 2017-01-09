@@ -19,6 +19,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
@@ -733,7 +734,8 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 InsightLogger.TrackStartEvent(callerMethodName);
                 string Pdfpath = string.Empty;
-                string functionsPath = Path.Combine(Environment.CurrentDirectory, "PDFFiles");
+                string executableLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                string functionsPath = Path.Combine(executableLocation, "PDFFiles");
                 if (!Directory.Exists(functionsPath))
                 {
                     Directory.CreateDirectory(functionsPath);
