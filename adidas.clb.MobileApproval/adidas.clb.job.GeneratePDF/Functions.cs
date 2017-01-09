@@ -16,6 +16,7 @@ namespace adidas.clb.job.GeneratePDF
 {
     public class Functions
     {
+        //Application insights interface reference for logging the error details into Application Insight azure service.
         static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
         // This function will get triggered/executed when a new message is written 
         // on an Azure Queue called queue.

@@ -7,16 +7,22 @@ using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using adidas.clb.job.GeneratePDF.Exceptions;
 using adidas.clb.job.GeneratePDF.Utility;
+using adidas.clb.job.GeneratePDF.Helpers;
 namespace adidas.clb.job.GeneratePDF
 {
     // To learn more about Microsoft Azure WebJobs SDK, please see http://go.microsoft.com/fwlink/?LinkID=320976
     class Program
     {
+        //Application insights interface reference for logging the error details into Application Insight azure service.
         static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
         // Please set the following connection strings in app.config for this WebJob to run:
         // AzureWebJobsDashboard and AzureWebJobsStorage
         static void Main()
         {
+            //Download Azcopy.exe from blobcontainer for uploading pdf files into blob container
+            AzCopyConfig.LoadAzCopyConfigFromBlob();
+            //Download Logo from imagescontainer for PDF Files
+            AzCopyConfig.LoadImageFromBlob();
             JobHostConfiguration config = new JobHostConfiguration();
             // Add Triggers and Binders for Timer Trigger.             
             config.NameResolver = new MyResolver();
@@ -26,7 +32,7 @@ namespace adidas.clb.job.GeneratePDF
         }
 
         /// <summary>
-        /// Dynamically send the queue names from app.config file to queue trigger method
+        /// Dynamically defines a %name% variables i.e write a queue names from app.config file to queue trigger method
         /// </summary>
         public class MyResolver : INameResolver
         {
@@ -35,15 +41,11 @@ namespace adidas.clb.job.GeneratePDF
                 try
                 {
                     string queueName = string.Empty;
-                    switch (name)
+                    //if generate pdf queue method has triggered then send generate pdf queue name to method call
+                    if (name == CoreConstants.AzureQueues.PDFQueue)
                     {
-                        //if generate pdf queue method has triggered then send generate pdf queue name to method call
-                        case CoreConstants.AzureQueues.PDFQueue:
-                            queueName = Convert.ToString(ConfigurationManager.AppSettings["GeneratePDFQueue"]);
-                            break;
-                        default:
-                            break;
-                    }
+                        queueName = Convert.ToString(ConfigurationManager.AppSettings["GeneratePDFQueue"]);
+                    }                   
                     return queueName;
                 }
                 catch (Exception exception)
