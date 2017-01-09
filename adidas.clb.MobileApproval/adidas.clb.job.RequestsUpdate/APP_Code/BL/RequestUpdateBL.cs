@@ -42,6 +42,8 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                 //adding service layer requestid to entity                
                 requestentity.ServiceLayerReqID = backendrequest.ServiceLayerReqID;
                 requestentity.BackendID = backendId;
+                requestentity.UpdateTriggered = false;
+                requestentity.LastUpdate = DateTime.Now;
                 //add requester deatils to request entity
                 if (backendrequest.RequestsList.Requester != null)
                 {

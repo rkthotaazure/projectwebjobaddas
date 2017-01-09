@@ -65,10 +65,12 @@ namespace adidas.clb.job.RequestsUpdate
                         }            
                     }
                 }
-                //calling BL methods to update average sizes and latencies for userbackend and backend     
-                requsetupdatebl.UpdateUserBackend(backendrequestslist.First().RequestsList.UserID, requestsdata.BackendID, TotalRequestsize, TotalRequestlatency, requestcount);
-                requsetupdatebl.UpdateBackend(requestsdata.BackendID, TotalRequestsize, TotalRequestlatency, requestcount);
-
+                //calling BL methods to update average sizes and latencies for userbackend and backend
+                if(!string.IsNullOrEmpty(requestsdata.UserId))
+                {
+                    requsetupdatebl.UpdateUserBackend(requestsdata.UserId, requestsdata.BackendID, TotalRequestsize, TotalRequestlatency, requestcount);
+                    requsetupdatebl.UpdateBackend(requestsdata.BackendID, TotalRequestsize, TotalRequestlatency, requestcount);
+                }                                   
             }
             catch (DataAccessException dalexception)
             {
