@@ -22,7 +22,7 @@ app.controller('HomeController', function ($scope, $http, $location) {
 });
 
 //AngularJS controller to load backend details and post submitted data to Home Controller
-app.controller('CreateUserController', function ($scope, $http, $location) {
+app.controller('CreateUserController', function ($scope, $http, $location, ShareData) {
     // Bind the backend deatils in CreateNewUser on page load
     $scope.init = function () {
         //Getting backends from Personalization API 
@@ -96,6 +96,9 @@ app.controller('CreateUserController', function ($scope, $http, $location) {
         angular.forEach($scope.devices, function (deviceitems) {
             userdevices.push({ device: deviceitems });
         });
+        //Storing in ShareData factory and retrive where ever we need details
+        ShareData.userDevices = userdevices;
+        ShareData.userBackends = userbackends;
       //Create the request object
         var request = {
             FirstName: $scope.FirstName,
@@ -113,7 +116,7 @@ app.controller('CreateUserController', function ($scope, $http, $location) {
                 'Content-Type': 'application/json'
             }
         }
-        
+        console.log(request);
         //post Submited data to HomeController CreateNew action and redirect to Approval Landing page
         $http.post("/Home/CreateNew", (request), config)
             .success(function (data, status, headers, config) {
@@ -223,8 +226,7 @@ app.controller('UpdateUserController', function ($scope, $http, $location, Share
             headers: {
                 'Content-Type': 'application/json'
             }
-        }
-        console.log(request);
+        }        
         //Post request variable to update user method
         $http.post("/Home/UpdateUser", JSON.stringify(request), config)
             .success(function (data, status, headers, config) {
@@ -265,8 +267,7 @@ app.controller('UpdateUserController', function ($scope, $http, $location, Share
             headers: {
                 'Content-Type': 'application/json'
             }
-        }
-        console.log(request);
+        }        
         //Post request variable to update user method
         $http.post("/Home/UpdateUser", JSON.stringify(request), config)
             .success(function (data, status, headers, config) {
@@ -313,7 +314,7 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
         angular.forEach(userbackends, function (BackendItems) {
             $scope.userBackendid.push(BackendItems.backend.BackendID);
             $scope.userBackendName.push(BackendItems.backend.BackendName);
-        });
+        });        
         //$scope.forceUpdate = 'false';
         $scope.update = function () {
             $scope.forceUpdate='true';
