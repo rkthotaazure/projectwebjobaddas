@@ -35,6 +35,13 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
 
         //Application insights interface reference for logging the error details into Application Insight azure service.
         static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
+        //getting Max Retry count,MaxThreadSleepInMilliSeconds from web.config
+        public static int maxThreadSleepInMilliSeconds = Convert.ToInt32(ConfigurationManager.AppSettings["MaxThreadSleepInMilliSeconds"]);
+        public static int maxRetryCount = Convert.ToInt32(ConfigurationManager.AppSettings["MaxRetryCount"]);
+        public static string azureTableReference = ConfigurationManager.AppSettings["AzureTables.ReferenceData"];
+        public static string azureTableUserDeviceConfiguration = ConfigurationManager.AppSettings["AzureTables.UserDeviceConfiguration"];
+        //RequestTransactions
+        public static string azureTableRequestTransactions = ConfigurationManager.AppSettings["AzureTables.RequestTransactions"];
         //decalre UpdateTriggeringRules calss object 
         private UpdateTriggeringRules utRule;
         public UserBackendDAL()
@@ -196,6 +203,8 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
+                int RetryAttemptCount = 0;
+                bool IsSuccessful = false;
                 // Create the queue client.
                 CloudQueueClient cqdocClient = AzureQueues.GetQueueClient();
                 // Retrieve a reference to a queue.
@@ -203,14 +212,39 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 // Async enqueue the message
                 AsyncCallback callBack = new AsyncCallback(AddMessageComplete);
                 int documentCount = 0;
-
+                //add each message from list
                 foreach (string entry in content)
                 {
                     string dMessage = string.Empty;
                     dMessage = entry;
                     CloudQueueMessage message = new CloudQueueMessage(dMessage);
-                    queuedoc.BeginAddMessage(message, callBack, null);
-                    documentCount++;
+                    do
+                    {
+                        try
+                        {
+                            queuedoc.BeginAddMessage(message, callBack, null);
+                            documentCount++;
+                            IsSuccessful = true;
+                        }
+                        catch (StorageException storageException)
+                        {
+                            //Increasing RetryAttemptCount variable
+                            RetryAttemptCount = RetryAttemptCount + 1;
+                            //Checking retry call count is eual to max retry count or not
+                            if (RetryAttemptCount == maxRetryCount)
+                            {
+                                InsightLogger.Exception("Error in UpdateTriggering:: " + callerMethodName + " method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, callerMethodName);
+                                throw new DataAccessException(storageException.Message, storageException.InnerException);
+                            }
+                            else
+                            {
+                                InsightLogger.Exception("Error in UpdateTriggering:: " + callerMethodName + " method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, callerMethodName);
+                                //Putting the thread into some milliseconds sleep  and again call the same method call.
+                                Thread.Sleep(maxThreadSleepInMilliSeconds);
+                            }
+                        }
+                    } while (!IsSuccessful);
+
                 }
 
             }
@@ -292,10 +326,8 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                //get's azure table instance
-                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(ConfigurationManager.AppSettings["AzureTables.ReferenceData"]);
-                TableQuery<BackendEntity> query = new TableQuery<BackendEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, CoreConstants.AzureTables.Backend));
-                List<BackendEntity> allBackends = UserDeviceConfigurationTable.ExecuteQuery(query).ToList();
+                //get's azure table instance                
+                List<BackendEntity> allBackends = DataProvider.RetrieveEntities<BackendEntity>(azureTableReference, CoreConstants.AzureTables.Backend);
                 return allBackends;
             }
             catch (Exception exception)
@@ -316,14 +348,8 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                //get's azure table instance
-                CloudTable tblReferenceData = DataProvider.GetAzureTableInstance(ConfigurationManager.AppSettings["AzureTables.ReferenceData"]);
-                // Create a retrieve operation that takes a UserBackend entity.
-                TableOperation retrieveOperation = TableOperation.Retrieve<BackendEntity>(CoreConstants.AzureTables.Backend, backendID);
-                // Execute the operation.
-                TableResult retrievedResult = tblReferenceData.Execute(retrieveOperation);
-                // Assign the result to a UserBackendEntity object.
-                BackendEntity backendEntity = (BackendEntity)retrievedResult.Result;
+                //// Call Retrive Entity method and Assign the result to a UserBackendEntity object.                
+                BackendEntity backendEntity = DataProvider.RetrieveEntity<BackendEntity>(azureTableReference, CoreConstants.AzureTables.Backend, backendID);
                 return backendEntity;
             }
             catch (Exception exception)
@@ -490,13 +516,8 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 //getting Userbackend partitionkey (UB_UserName)
                 string userBackendID = CoreConstants.AzureTables.UserBackendPK + userName;
-                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(ConfigurationManager.AppSettings["AzureTables.UserDeviceConfiguration"]);
-                // Create a retrieve operation that takes a UserBackend entity.
-                TableOperation retrieveOperation = TableOperation.Retrieve<UserBackendEntity>(userBackendID, backendID);
-                // Execute the operation.
-                TableResult retrievedResult = UserDeviceConfigurationTable.Execute(retrieveOperation);
                 // Assign the result to a UserBackendEntity object.
-                UserBackendEntity updateEntity = (UserBackendEntity)retrievedResult.Result;
+                UserBackendEntity updateEntity = DataProvider.RetrieveEntity<UserBackendEntity>(azureTableUserDeviceConfiguration, userBackendID, backendID);
                 if (updateEntity != null)
                 {
                     //get backend details from service layer by backendid
@@ -507,10 +528,9 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                         updateEntity.ExpectedUpdate = utRule.GetUserBackendExpectedUpdate(backendDetails.AverageAllRequestsLatency, backendDetails.LastAllRequestsLatency);
                         //update userbackend UpdateTriggered
                         updateEntity.UpdateTriggered = true;
-                        // Create the Replace TableOperation.
-                        TableOperation updateOperation = TableOperation.Replace(updateEntity);
-                        // Execute the operation.
-                        UserDeviceConfigurationTable.Execute(updateOperation);
+                        // Execute the Replace TableOperation.
+                        DataProvider.UpdateEntity<UserBackendEntity>(azureTableUserDeviceConfiguration, updateEntity);
+
                     }
                 }
             }
@@ -536,31 +556,23 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                //get request details based on serviceLayerRequestID        
-                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(ConfigurationManager.AppSettings["AzureTables.UserDeviceConfiguration"]);
-                TableQuery<RequestSynchEntity> tquery = new TableQuery<RequestSynchEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.RowKey, QueryComparisons.Equal, serviceLayerRequestID));
-                List<RequestSynchEntity> lstUserBackend = UserDeviceConfigurationTable.ExecuteQuery(tquery).ToList();
-                if (lstUserBackend != null)
+                //get request sync details based on serviceLayerRequestID                 
+                RequestSynchEntity reqSyncEntity = DataProvider.RetrieveEntity<RequestSynchEntity>(azureTableRequestTransactions, CoreConstants.AzureTables.RequestSynchPK, serviceLayerRequestID);
+                if (reqSyncEntity != null)
                 {
-                    // Assign the result to a RequestSynchEntity object.
-                    RequestSynchEntity updateEntity = lstUserBackend.FirstOrDefault();
-                    if (updateEntity != null)
+                    //get backend details
+                    BackendEntity backendDetails = GetBackendDetailsByBackendID(backendID);
+                    if (backendDetails != null)
                     {
-                        //get backend details
-                        BackendEntity backendDetails = GetBackendDetailsByBackendID(backendID);
-                        if (backendDetails != null)
-                        {
-                            // update request ExpectedUpdate value by using update triggering rule :: R4
-                            updateEntity.ExpectedUpdate = utRule.GetRequestExpectedUpdate(backendDetails.AverageRequestLatency, backendDetails.LastRequestLatency);
-                            //update request UpdateTriggered
-                            updateEntity.UpdateTriggered = true;
-                            // Create the Replace TableOperation.
-                            TableOperation updateOperation = TableOperation.Replace(updateEntity);
-                            // Execute the operation.
-                            UserDeviceConfigurationTable.Execute(updateOperation);
-                        }
+                        // update request ExpectedUpdate value by using update triggering rule :: R4
+                        reqSyncEntity.ExpectedUpdate = utRule.GetRequestExpectedUpdate(backendDetails.AverageRequestLatency, backendDetails.LastRequestLatency);
+                        //update request UpdateTriggered
+                        reqSyncEntity.UpdateTriggered = true;
+                        // Execute the update operation.
+                        DataProvider.UpdateEntity(azureTableRequestTransactions, reqSyncEntity);
                     }
                 }
+
 
             }
             catch (BusinessLogicException dalexception)
@@ -744,7 +756,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 Request objRequest = new Request()
                 {
                     ID = objrequestSynch.RowKey,
-                    UserID= objrequestSynch.UserID,
+                    UserID = objrequestSynch.UserID,
                     Backend = objBackend
                 };
                 //create object and assign values to properties for RequestUpdateMsg class 
@@ -879,17 +891,17 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     string serviceLayerRequestID = string.Empty;
                     string requestBackendID = string.Empty;
                     //get distinct backends from RequestUpdateMsg list
-                    var bakcends = lstRequests.Select(o => o.request.Backend.BackendID).Distinct();                                      
-                    
+                    var bakcends = lstRequests.Select(o => o.request.Backend.BackendID).Distinct();
+
                     //foreach backend id
                     foreach (string backendID in bakcends.ToList())
                     {
                         //getting list of RequestUpdateMsg's by same backend
                         var lstRequestsByBackend = (from requests in lstRequests
-                                     where requests.request.Backend.BackendID.Equals(backendID)
-                                     select requests);
+                                                    where requests.request.Backend.BackendID.Equals(backendID)
+                                                    select requests);
                         if (lstRequestsByBackend != null)
-                        {                            
+                        {
                             //Prepare RequestsUpdateQuery message
                             RequestsUpdateQuery objReqQuery = new RequestsUpdateQuery()
                             {
@@ -918,7 +930,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             lstRequestsByBackend = null;
                             requestsUpdateQuery = string.Empty;
                         }
-                        
+
                     }
 
                 }

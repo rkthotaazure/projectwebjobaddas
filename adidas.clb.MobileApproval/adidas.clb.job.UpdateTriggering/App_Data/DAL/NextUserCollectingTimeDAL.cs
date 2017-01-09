@@ -27,6 +27,10 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
     {
         //Application insights interface reference for logging the error details into Application Insight azure service.
         static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
+        public static string azureTableReference = ConfigurationManager.AppSettings["AzureTables.ReferenceData"];
+        public static string azureTableUserDeviceConfiguration = ConfigurationManager.AppSettings["AzureTables.UserDeviceConfiguration"];
+        //RequestTransactions
+        public static string azureTableRequestTransactions = ConfigurationManager.AppSettings["AzureTables.RequestTransactions"];
         private UserBackendDAL objdal;
         private UpdateTriggeringRules utRules;
         public NextUserCollectingTimeDAL()
@@ -45,11 +49,11 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 //get's azure table instance
-                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(ConfigurationManager.AppSettings["AzureTables.UserDeviceConfiguration"]);
+                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(azureTableUserDeviceConfiguration);
                 //Get all backends          
-                List<BackendEntity> lstbackends = objdal.GetBackends();
+                List<BackendEntity> lstbackends = objdal.GetBackends();             
                 //for each backend get minimum update frequency for all the userbackend's associated
-                foreach (BackendEntity backend in lstbackends)
+                Parallel.ForEach<BackendEntity>(lstbackends, backend=>                
                 {
                     string backendID = backend.RowKey;
                     //Get all the userbackends associated with the backend
@@ -60,9 +64,10 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     //Get next collecting hours based on update Triggering Rule :: R1
                     // int nextCollectingHours = utRules.GetNextUserCollectingHours(minUpdateFrequency);
                     int nextCollectingHours = minUpdateFrequency / 2;
-                     //update backend next collecting time in refernecedata table
-                     InsertorUpdateBackendNextCollectingTime(backendID, nextCollectingHours, backend.AverageAllRequestsLatency, backend.LastAllRequestsLatency);
-                }
+                    //update backend next collecting time in refernecedata table
+                    this.InsertorUpdateBackendNextCollectingTime(backendID, nextCollectingHours, backend.AverageAllRequestsLatency, backend.LastAllRequestsLatency);
+                    this.objdal.CollectUsersNeedUpdateByBackend(backendID);
+                });
 
 
             }
@@ -92,9 +97,9 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
             try
             {
                 //Get Caller Method name from CallerInformation class
-                callerMethodName = CallerInformation.TrackCallerMethodName();                
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 // Create a retrieve operation that takes a NextUserCollectingTime Entity.
-                NextUserCollectingTimeEntity ObjNextCollectingTime = DataProvider.Retrieveentity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, CoreConstants.AzureTables.UpdateTriggerNextCollectingTime, backendID);
+                NextUserCollectingTimeEntity ObjNextCollectingTime = DataProvider.RetrieveEntity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, CoreConstants.AzureTables.UpdateTriggerNextCollectingTime, backendID);
                 if (ObjNextCollectingTime != null)
                 {
                     //update the existing entity
@@ -155,7 +160,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 // Create a retrieve operation that takes a NextUserCollectingTime Entity.
-                NextUserCollectingTimeEntity ObjUpdateNextCollectingTime = DataProvider.Retrieveentity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, CoreConstants.AzureTables.UpdateTriggerNextCollectingTime, backendID);
+                NextUserCollectingTimeEntity ObjUpdateNextCollectingTime = DataProvider.RetrieveEntity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, CoreConstants.AzureTables.UpdateTriggerNextCollectingTime, backendID);
                 if (ObjUpdateNextCollectingTime != null)
                 {
                     //update the existing entity                   
@@ -163,9 +168,9 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     //update  lastCollectingTime  with previous NextCollectingTime
                     ObjUpdateNextCollectingTime.RegularUpdateLastCollectingTime = LastCollectingTime;
                     //update  NextCollectingTime value based on new MinimumUpdateFrequency,last collecting Time
-                    ObjUpdateNextCollectingTime.RegularUpdateNextCollectingTime = nextCollectingTime;                   
+                    ObjUpdateNextCollectingTime.RegularUpdateNextCollectingTime = nextCollectingTime;
                     // Execute update operation.
-                    DataProvider.UpdateEntity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, ObjUpdateNextCollectingTime);                   
+                    DataProvider.UpdateEntity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, ObjUpdateNextCollectingTime);
                 }
             }
             catch (DataAccessException dalexception)
@@ -193,7 +198,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 // Create a retrieve operation that takes a NextUserCollectingTime Entity.
-                NextUserCollectingTimeEntity ObjMissedUpdateNextCollectingTime = DataProvider.Retrieveentity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, CoreConstants.AzureTables.UpdateTriggerNextCollectingTime, backendID);
+                NextUserCollectingTimeEntity ObjMissedUpdateNextCollectingTime = DataProvider.RetrieveEntity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, CoreConstants.AzureTables.UpdateTriggerNextCollectingTime, backendID);
                 if (ObjMissedUpdateNextCollectingTime != null)
                 {
                     //get backend details by backendid from userconfiguration
@@ -236,9 +241,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(ConfigurationManager.AppSettings["AzureTables.ReferenceData"]);
-                TableQuery<NextUserCollectingTimeEntity> query = new TableQuery<NextUserCollectingTimeEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, CoreConstants.AzureTables.UpdateTriggerNextCollectingTime));
-                List<NextUserCollectingTimeEntity> allBackends = UserDeviceConfigurationTable.ExecuteQuery(query).ToList();
+                List<NextUserCollectingTimeEntity> allBackends = DataProvider.RetrieveEntities<NextUserCollectingTimeEntity>(azureTableReference,CoreConstants.AzureTables.UpdateTriggerNextCollectingTime);
                 return allBackends;
             }
             catch (DataAccessException dalexception)
@@ -252,6 +255,6 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
             }
         }
 
-        
+
     }
 }
