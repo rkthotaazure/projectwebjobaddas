@@ -26,6 +26,7 @@ namespace adidas.clb.MobileApprovalUI.Models.JSONHelper
     public class BackendJsonResult
     {
        public string BackendID { get; set; }
+        public string BackendName { get; set; }
         public int MissingConfirmationsLimit { get; set; }
 
     }

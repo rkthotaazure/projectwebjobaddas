@@ -131,6 +131,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                             BackendObj.backend = new BackendDTO();
                             //Get Backend id
                             BackendObj.backend.BackendID = backendid.BackendID;
+                            BackendObj.backend.BackendName = backendid.BackendName;
                             //Adding the Model object to the list
                             backends.Add(BackendObj);
                         }
