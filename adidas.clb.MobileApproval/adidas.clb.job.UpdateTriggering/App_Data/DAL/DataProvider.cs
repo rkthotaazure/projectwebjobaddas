@@ -13,7 +13,9 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Threading;
 using System.Web;
+using System.Threading.Tasks;
 namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
 {
     /// The class that contains the methods realted to connecting azure table storage.
@@ -46,9 +48,9 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 InsightLogger.Exception(exception.Message, exception, callerMethodName);
                 throw new DataAccessException(exception.Message, exception.InnerException);
             }
-           
+
         }
-        
+
         /// <summary>
         /// Method wich used to map properties of two objects
         /// </summary>
@@ -58,7 +60,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         /// <returns></returns>
         public static T1 ResponseObjectMapper<T1, T2>(T2 inputModel)
         {
-            var entity = Activator.CreateInstance<T1>();            
+            var entity = Activator.CreateInstance<T1>();
             var properties = inputModel.GetType().GetProperties();
             foreach (var entry in properties)
             {
@@ -79,11 +81,56 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         /// <returns></returns>
         public static T Retrieveentity<T>(string tablename, string partitionkey, string rowkey) where T : ITableEntity, new()
         {
-            //get's azure table instance
-            CloudTable ReferenceDataTable = GetAzureTableInstance(tablename);
-            TableOperation RetrieveUser = TableOperation.Retrieve<T>(partitionkey, rowkey);
-            TableResult RetrievedResultUser = ReferenceDataTable.Execute(RetrieveUser);
-            return (T)RetrievedResultUser.Result;
+            try
+            {
+                TableResult RetrievedResultUser = null;
+                //Max Retry call from web.config
+                int maxRetryCount = Convert.ToInt32(ConfigurationManager.AppSettings["MaxRetryCount"]);
+                int RetryAttemptCount = 0;
+                bool IsSuccessful = false;
+                do
+                {
+                    try
+                    {
+                        //get's azure table instance
+                        CloudTable ReferenceDataTable = GetAzureTableInstance(tablename);
+                        TableOperation RetrieveUser = TableOperation.Retrieve<T>(partitionkey, rowkey);
+                        RetrievedResultUser = ReferenceDataTable.Execute(RetrieveUser);
+                        IsSuccessful = true;
+                        return (T)RetrievedResultUser.Result;
+
+
+                    }
+                    catch (StorageException storageException)
+                    {
+                        //Increasing RetryAttemptCount variable
+                        RetryAttemptCount = RetryAttemptCount + 1;
+                        //Checking retry call count is eual to max retry count or not
+                        if (RetryAttemptCount == maxRetryCount)
+                        {
+                            InsightLogger.Exception("Error in DataProvider:: Retrieveentity() method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, "Retrieveentity");
+                            IsSuccessful = true;
+                            throw new DataAccessException(storageException.Message, storageException.InnerException);
+
+                        }
+                        else
+                        {
+                            InsightLogger.Exception("Error in DataProvider:: Retrieveentity() method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, "Retrieveentity");
+                            //Putting the thread into some milliseconds sleep  and again call the same method call.
+                            Thread.Sleep(Convert.ToInt32(ConfigurationManager.AppSettings["MaxThreadSleepInMilliSeconds"]));
+                        }
+                    }
+                } while (!IsSuccessful);
+                return (T)RetrievedResultUser.Result;
+
+            }
+
+            catch (Exception innerexception)
+            {
+                InsightLogger.Exception(innerexception.Message, innerexception, "Retrieveentity");
+                throw new DataAccessException(innerexception.Message, innerexception.InnerException);
+            }
+
         }
         /// <summary>
         /// This method updates the azure table entity
@@ -93,10 +140,55 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         /// <param name="entity"></param>
         public static void UpdateEntity<T>(string tablename, T entity) where T : ITableEntity, new()
         {
-            CloudTable ReferenceDataTable = GetAzureTableInstance(tablename);
-            entity.ETag = "*";
-            TableOperation updateOperation = TableOperation.Replace(entity);
-            ReferenceDataTable.Execute(updateOperation);
+            try
+            {
+
+                //Max Retry call from web.config
+                int maxRetryCount = Convert.ToInt32(ConfigurationManager.AppSettings["MaxRetryCount"]);
+                int RetryAttemptCount = 0;
+                bool IsSuccessful = false;
+                do
+                {
+                    try
+                    {
+                        CloudTable ReferenceDataTable = GetAzureTableInstance(tablename);
+                        entity.ETag = "*";
+                        TableOperation updateOperation = TableOperation.Replace(entity);
+                        ReferenceDataTable.Execute(updateOperation);
+
+
+                    }
+                    catch (StorageException storageException)
+                    {
+                        //Increasing RetryAttemptCount variable
+                        RetryAttemptCount = RetryAttemptCount + 1;
+                        //Checking retry call count is eual to max retry count or not
+                        if (RetryAttemptCount == maxRetryCount)
+                        {
+                            InsightLogger.Exception("Error in DataProvider:: UpdateEntity() method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, "UpdateEntity");
+                            IsSuccessful = true;
+                            throw new DataAccessException(storageException.Message, storageException.InnerException);
+
+                        }
+                        else
+                        {
+                            InsightLogger.Exception("Error in DataProvider:: UpdateEntity() method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, "UpdateEntity");
+                            //Putting the thread into some milliseconds sleep  and again call the same method call.
+                            Thread.Sleep(Convert.ToInt32(ConfigurationManager.AppSettings["MaxThreadSleepInMilliSeconds"]));
+                        }
+                    }
+                } while (!IsSuccessful);
+
+
+            }
+
+            catch (Exception innerexception)
+            {
+                InsightLogger.Exception(innerexception.Message, innerexception, "UpdateEntity");
+                throw new DataAccessException(innerexception.Message, innerexception.InnerException);
+            }
+
+
         }
         /// <summary>
         /// This method Inserts thenew entity in azure table
@@ -106,10 +198,55 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         /// <param name="entity"></param>
         public static void InsertEntity<T>(string tablename, T entity) where T : ITableEntity, new()
         {
-            CloudTable ReferenceDataTable = GetAzureTableInstance(tablename);
-            //entity.ETag = "*";
-            TableOperation InsertOperation = TableOperation.Insert(entity);
-            ReferenceDataTable.Execute(InsertOperation);
+
+            try
+            {
+
+                //Max Retry call from web.config
+                int maxRetryCount = Convert.ToInt32(ConfigurationManager.AppSettings["MaxRetryCount"]);
+                int RetryAttemptCount = 0;
+                bool IsSuccessful = false;
+                do
+                {
+                    try
+                    {
+                        CloudTable ReferenceDataTable = GetAzureTableInstance(tablename);
+                        TableOperation InsertOperation = TableOperation.Insert(entity);
+                        ReferenceDataTable.Execute(InsertOperation);
+
+
+                    }
+                    catch (StorageException storageException)
+                    {
+                        //Increasing RetryAttemptCount variable
+                        RetryAttemptCount = RetryAttemptCount + 1;
+                        //Checking retry call count is eual to max retry count or not
+                        if (RetryAttemptCount == maxRetryCount)
+                        {
+                            InsightLogger.Exception("Error in DataProvider:: InsertEntity() method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, "InsertEntity");
+                            IsSuccessful = true;
+                            throw new DataAccessException(storageException.Message, storageException.InnerException);
+
+                        }
+                        else
+                        {
+                            InsightLogger.Exception("Error in DataProvider:: InsertEntity() method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, "InsertEntity");
+                            //Putting the thread into some milliseconds sleep  and again call the same method call.
+                            Thread.Sleep(Convert.ToInt32(ConfigurationManager.AppSettings["MaxThreadSleepInMilliSeconds"]));
+                        }
+                    }
+                } while (!IsSuccessful);
+
+
+            }
+
+            catch (Exception innerexception)
+            {
+                InsightLogger.Exception(innerexception.Message, innerexception, "InsertEntity");
+                throw new DataAccessException(innerexception.Message, innerexception.InnerException);
+            }
+
+
         }
 
     }
