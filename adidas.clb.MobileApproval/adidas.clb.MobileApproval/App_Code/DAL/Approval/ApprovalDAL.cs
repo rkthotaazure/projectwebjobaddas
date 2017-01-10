@@ -36,7 +36,7 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Approval
             try
             {
                 //ApprovalResponse objApprovalResponse = null;  
-                string acknowledgement = "OK";
+                string acknowledgement=string.Empty;
                 string backendID = string.Empty;
                 string domain = string.Empty;
                 //reading ApprovalQuery object properties and assign the values to below variables.

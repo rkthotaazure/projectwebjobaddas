@@ -40,20 +40,30 @@ namespace adidas.clb.MobileApproval.Helpers
                     using (HttpClient client = new HttpClient())
                     {
                         //POST: Submits the approval or rejection for one specific request
-
-                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                        HttpResponseMessage responseMessage = await client.PutAsJsonAsync(backendApiEndpoint, apprReqDetails);
+                        var request = new HttpRequestMessage(HttpMethod.Post, backendApiEndpoint);
+                        request.Content = new StringContent(JsonConvert.SerializeObject(apprReqDetails), Encoding.UTF8, "application/json");
+                        var resultset = client.SendAsync(request).Result;                        
                         //if response message returns success code then return the successcode message
-                        if (responseMessage.IsSuccessStatusCode)
+                        if (resultset.IsSuccessStatusCode)
                         {
-                            result = responseMessage.ReasonPhrase.ToString(); 
+                            string response = resultset.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                            if (!string.IsNullOrEmpty(response))
+                            {
+                                //request update acknowledgement
+                                RequestsUpdateAck Objacknowledgement = JsonConvert.DeserializeObject<RequestsUpdateAck>(response);
+                                //if request update acknowledgement error object is null means backend api successfully called
+                                if (Objacknowledgement.Error == null)
+                                {
+                                    result = "OK";
+                                }                               
+                            }
                         }
                         else
                         {
                             result = "Error occurred while saving data";
                         }
                     }
-                    return result="OK";
+                    return result;
                 }
                 else
                 {
