@@ -55,5 +55,44 @@ namespace adidas.clb.MobileApproval.Models
             _type = "approvalResponse";
         }
     }
+    public class RequestsUpdateAck
+    {
+        public string _type { get; set; }
+        public RequestsUpdateQuery Query { set; get; }
+        public Error Error { get; set; }
+        public RequestsUpdateAck()
+        {
+            _type = "requestsUpdateAck";
+        }
+    }
 
+    public class RequestsUpdateQuery
+    {
+        public string _type { get; set; }
+        public BackendUser User { get; set; }
+        public IEnumerable<RequestUpdateMsg> Requests { get; set; }
+        public bool VIP { get; set; }
+        public bool GetPDFs { get; set; }
+        public Nullable<DateTime> ChangeAfter { get; set; }
+        public string BackendID { get; set; }
+        public RequestsUpdateQuery()
+        {
+            _type = "requestsUpdateQuery";
+        }
+    }
+    public class Error
+    {
+        public string _type { get; set; }
+        public string code { get; set; }
+        public string shorttext { get; set; }
+        public string longtext { get; set; }
+        public Error() { _type = "error"; }
+        public Error(string code, string shorttext, string longtext)
+        {
+            this.code = code;
+            this.shorttext = shorttext;
+            this.longtext = longtext;
+            this._type = "error";
+        }
+    }
 }
