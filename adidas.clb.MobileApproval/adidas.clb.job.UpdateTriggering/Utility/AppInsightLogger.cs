@@ -21,8 +21,12 @@ namespace adidas.clb.job.UpdateTriggering.Utility
         private TelemetryClient client = new TelemetryClient();
         //Read instrumentationkey from app.config
         private static string InstrumentationKey = ConfigurationManager.AppSettings["APPINSIGHTS_INSTRUMENTATIONKEY"];
-        //Read trace value from app.config
-        bool IsTraceEnabled = Convert.ToBoolean(ConfigurationManager.AppSettings["AppInsightTrace"]);
+        //Read IsTraceEnabledForExceptions value from app.config
+        bool IsTraceEnabledForExceptions = Convert.ToBoolean(ConfigurationManager.AppSettings["AppInsightTraceForExceptions"]);
+        //Read IsTraceEnabledForEvents value from app.config
+        bool IsTraceEnabledForEvents = Convert.ToBoolean(ConfigurationManager.AppSettings["AppInsightTraceForCustomEvents"]);
+        //Read IsTraceEnabledForMetrics value from app.config
+        bool IsTraceEnabledForMetrics = Convert.ToBoolean(ConfigurationManager.AppSettings["AppInsightTraceForMetrics"]);
         private AppInsightLogger() { }
         //cosntrut the values
         public static AppInsightLogger Instance
@@ -38,7 +42,7 @@ namespace adidas.clb.job.UpdateTriggering.Utility
         /// <param name="message"></param>
         public void TrackEvent(string message)
         {
-            if (IsTraceEnabled)
+            if (IsTraceEnabledForEvents)
             {
                 //assign Instrumentation Key to TelemetryClient object            
                 client.InstrumentationKey = InstrumentationKey;                
@@ -49,7 +53,7 @@ namespace adidas.clb.job.UpdateTriggering.Utility
         }
         public void TrackStartEvent(string methodname)
         {
-            if (IsTraceEnabled)
+            if (IsTraceEnabledForEvents)
             {
                 //assign Instrumentation Key to TelemetryClient object            
                 client.InstrumentationKey = InstrumentationKey;
@@ -62,7 +66,7 @@ namespace adidas.clb.job.UpdateTriggering.Utility
         }
         public void TrackEndEvent(string methodname)
         {
-            if (IsTraceEnabled)
+            if (IsTraceEnabledForEvents)
             {
                 //assign Instrumentation Key to TelemetryClient object            
                 client.InstrumentationKey = InstrumentationKey;
@@ -80,7 +84,7 @@ namespace adidas.clb.job.UpdateTriggering.Utility
         /// <param name="duration"></param>
         public void TrackMetric(string message, long duration)
         {
-            if (IsTraceEnabled)
+            if (IsTraceEnabledForMetrics)
             {
                 //assign Instrumentation Key to TelemetryClient object 
                 client.InstrumentationKey = InstrumentationKey;
@@ -97,7 +101,7 @@ namespace adidas.clb.job.UpdateTriggering.Utility
         /// <param name="EventID"></param>
         public void Exception(string message, Exception exception, string EventID)
         {
-            if (IsTraceEnabled)
+            if (IsTraceEnabledForExceptions)
             {
                 //assign Instrumentation Key to TelemetryClient object 
                 client.InstrumentationKey = InstrumentationKey;
