@@ -34,6 +34,7 @@ namespace adidas.clb.MobileApproval.Helpers
             {
                 //get API endpoint and format it in agents/{backendID}/requestApproval/{reqID}
                 string backendApiEndpoint = UrlSettings.GetBackendAgentRequestApprovalAPI(backendID, apprReqID);
+                string approvalquery = JsonConvert.SerializeObject(apprReqDetails);
                 //checking backend endpoint null or empty
                 if (!string.IsNullOrEmpty(backendApiEndpoint))
                 {
@@ -41,7 +42,7 @@ namespace adidas.clb.MobileApproval.Helpers
                     {
                         //POST: Submits the approval or rejection for one specific request
                         var request = new HttpRequestMessage(HttpMethod.Post, backendApiEndpoint);
-                        request.Content = new StringContent(JsonConvert.SerializeObject(apprReqDetails), Encoding.UTF8, "application/json");
+                        request.Content = new StringContent(approvalquery, Encoding.UTF8, "application/json");
                         var resultset = client.SendAsync(request).Result;                        
                         //if response message returns success code then return the successcode message
                         if (resultset.IsSuccessStatusCode)
