@@ -27,8 +27,7 @@ namespace adidas.clb.MobileApproval.Controllers
         {
             try
             {
-                string response = null;
-                bool IsUpdated = false;
+                string response = null;               
                 //Checking ApprovalQuery object is valid or not
                 if (ModelState.IsValid)
                 {
