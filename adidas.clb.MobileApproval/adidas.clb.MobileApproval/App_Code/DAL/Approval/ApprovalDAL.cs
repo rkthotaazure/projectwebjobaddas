@@ -19,6 +19,8 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Approval
     /// </summary>
     public class ApprovalDAL
     {
+        //Application insights interface reference for logging the error details into Application Insight azure service.
+        static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
         //create APIController varaible
         private APIController apiController;
         public ApprovalDAL()
@@ -31,15 +33,18 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Approval
         /// </summary>
         /// <param name="objApprQry"></param>
         /// <returns></returns>
-        public string UpdateApprovalObjectStatus(ApprovalQuery objApprQry)
+        public void UpdateApprovalObjectStatus(ApprovalQuery objApprQry)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //ApprovalResponse objApprovalResponse = null;  
                 string acknowledgement=string.Empty;
                 string backendID = string.Empty;
                 string domain = string.Empty;
-                //reading ApprovalQuery object properties and assign the values to below variables.
+                //reading ApprovalQuery request object properties and assign the values to below variables.
                 string userID = objApprQry.UserID;
                 string requestID = objApprQry.ApprovalRequestID;
                 string status = objApprQry.ApprovalDecision.Status;
@@ -55,56 +60,32 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Approval
                     apprReqEntity.Status = status;
                     apprReqEntity.DecisionDate = decisionDate;
                     apprReqEntity.Comment = comment;
+                    //updating the backend confirmed flag set to false
                     apprReqEntity.BackendConfirmed = false;
                     //call dataprovider method to update entity to azure table
                     DataProvider.UpdateEntity<ApprovalEntity>(CoreConstants.AzureTables.RequestTransactions, apprReqEntity);
-                    //call backend requestApproval/ api
+                    //get domain,backendid details from service layer
                     objApprQry.Domain = domain;
                     objApprQry.BackendID = backendID;
+                    //call backend requestApproval/ api
                     var result = apiController.UpdateApprovalRequest(objApprQry, backendID, requestID);
                     if (string.IsNullOrEmpty(result.ToString()))
-                    {
-                        //Insert response into requestupdate queue
-                        //AddRequestUpdateDetailsToQueue(JsonConvert.SerializeObject(result));
+                    {                    
                         acknowledgement = result.ToString();
                     }
-
-
-
                 }
-                return acknowledgement;
+                //return acknowledgement;
             }
-            catch (ServiceLayerException serException)
-            {
-                throw serException;
-            }
+            //catch (ServiceLayerException serException)
+            //{
+            //    throw serException;
+            //}
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while updating the approval object staus in RequestTransactions azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
-                throw new DataAccessException("Error while updating the approval object staus in ApprovalDAL :: UpdateApprovalObjectStatus() method,Error Message : " + exception.Message, exception.InnerException);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //throw new DataAccessException("Error while updating the approval object staus in ApprovalDAL :: UpdateApprovalObjectStatus() method,Error Message : " + exception.Message, exception.InnerException);
             }
         }
-        private void AddRequestUpdateDetailsToQueue(string requestUpdateDetails)
-        {
-            try
-            {
-                // Create the queue client.
-                CloudQueueClient cqdocClient = AzureQueues.GetQueueClient();
-                // Retrieve a reference to a queue.
-                CloudQueue queuedoc = AzureQueues.GetRequestUpdateQueue(cqdocClient);
-                // Async enqueue the message                           
-                CloudQueueMessage message = new CloudQueueMessage(requestUpdateDetails);
-                queuedoc.AddMessage(message);
-            }
-            catch (Exception exception)
-            {
-                LoggerHelper.WriteToLog(exception + "Error while adding pdf url details to queue in :: AddPdfUrlDetailsToQueue() "
-                  + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
-
-                throw new BusinessLogicException(exception.Message, exception.InnerException);
-
-            }
-        }
+       
     }
 }

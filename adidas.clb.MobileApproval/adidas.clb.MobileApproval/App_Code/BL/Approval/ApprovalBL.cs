@@ -10,29 +10,31 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Approval
 {
     public class ApprovalBL
     {
+        //Application insights interface reference for logging the error details into Application Insight azure service.
+        static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
         private ApprovalDAL objApprovalDAL;
         public ApprovalBL()
         {
             objApprovalDAL = new ApprovalDAL();
         }
-        public string UpdateApprovalObject(ApprovalQuery objApprQry)
+        public void UpdateApprovalObject(ApprovalQuery objApprQry)
         {
+            string callerMethodName = string.Empty;
             try
             {
-                string objApprRes = null;
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //calling data access layer method  for updating the approval status details              
-                objApprRes = objApprovalDAL.UpdateApprovalObjectStatus(objApprQry);
-                return objApprRes;
+                objApprovalDAL.UpdateApprovalObjectStatus(objApprQry);
             }
-            catch (DataAccessException DALexception)
-            {
-                throw DALexception;
-            }
+            //catch (DataAccessException DALexception)
+            //{
+            //    throw DALexception;
+            //}
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while updating ApprovalEntity details in BL.Approval::UpdateApprovalObject() "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
-                throw new BusinessLogicException("Error in BL while updating ApprovalEntity details in BL.Approval::UpdateApprovalObject()" + exception.Message, exception.InnerException);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //throw new BusinessLogicException("Error in BL while updating ApprovalEntity details in BL.Approval::UpdateApprovalObject()" + exception.Message, exception.InnerException);
             }
         }
     }
