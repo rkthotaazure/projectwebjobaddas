@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
@@ -135,7 +136,8 @@ namespace adidas.clb.job.GeneratePDF.Helpers
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 string aZCopy = string.Empty;
-                string functionsPath = Path.Combine(Environment.CurrentDirectory, "PDFFiles");
+                string executableLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                string functionsPath = Path.Combine(executableLocation, "PDFFiles");
                 if (!Directory.Exists(functionsPath))
                 {
                     Directory.CreateDirectory(functionsPath);
@@ -167,7 +169,8 @@ namespace adidas.clb.job.GeneratePDF.Helpers
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 string imagepath = string.Empty;
-                string functionsPath = Path.Combine(Environment.CurrentDirectory, "PDFFiles");
+                string executableLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                string functionsPath = Path.Combine(executableLocation, "PDFFiles");
                 if (!Directory.Exists(functionsPath))
                 {
                     Directory.CreateDirectory(functionsPath);
