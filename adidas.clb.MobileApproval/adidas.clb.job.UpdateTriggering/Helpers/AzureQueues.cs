@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Configuration;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.RetryPolicies;
 using Microsoft.WindowsAzure.Storage.Table;
 using Microsoft.WindowsAzure.Storage.Queue;
 using adidas.clb.job.UpdateTriggering.Exceptions;
@@ -28,45 +29,22 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
         {
             string callerMethodName = string.Empty;
             try
-            {       
-                int RetryAttemptCount = 0;
-                bool IsSuccessful = false;
-                CloudQueueClient queueClient=null;
-                do
+            {      
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                // Parse the connection string and return a reference to the storage account
+                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(ConfigurationManager.AppSettings["UpdateTriggerAzureQueues"]);
+               
+                // Create the queue client.
+                CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
+                // set retry for the connection for transient failures
+                queueClient.DefaultRequestOptions = new QueueRequestOptions
                 {
-                    try
-                    {
-                        //Get Caller Method name from CallerInformation class
-                        callerMethodName = CallerInformation.TrackCallerMethodName();
-                        // Parse the connection string and return a reference to the storage account
-                        CloudStorageAccount storageAccount = CloudStorageAccount.Parse(ConfigurationManager.AppSettings["UpdateTriggerAzureQueues"]);
-                        // Create the queue client.
-                        queueClient = storageAccount.CreateCloudQueueClient();                       
-                        IsSuccessful = true;
-                       
-                    }
-                    catch (StorageException storageException)
-                    {
-                        //Increasing RetryAttemptCount variable
-                        RetryAttemptCount = RetryAttemptCount + 1;
-                        //Checking retry call count is eual to max retry count or not
-                        if (RetryAttemptCount == maxRetryCount)
-                        {
-                            InsightLogger.Exception("Error in AzureQueues:: " + callerMethodName + " method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, callerMethodName);
-                            throw new DataAccessException(storageException.Message, storageException.InnerException);
-                        }
-                        else
-                        {
-                            InsightLogger.Exception("Error in AzureQueues:: " + callerMethodName + " method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, callerMethodName);
-                            //Putting the thread into some milliseconds sleep  and again call the same method call.
-                            Thread.Sleep(maxThreadSleepInMilliSeconds);
-                        }
-                    }
-                } while (!IsSuccessful);
+                    RetryPolicy = new LinearRetry(TimeSpan.FromSeconds(5), 3)
+                };
                 return queueClient;
 
             }
-
             catch (Exception innerexception)
             {
                 InsightLogger.Exception(innerexception.Message, innerexception, "Retrieveentity");
@@ -84,38 +62,10 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
             string callerMethodName = string.Empty;
             try
             {
-                int RetryAttemptCount = 0;
-                bool IsSuccessful = false;
-                CloudQueue queue= null;                
-                do
-                {
-                    try
-                    {
-                        //Get Caller Method name from CallerInformation class
-                        callerMethodName = CallerInformation.TrackCallerMethodName();
-                        //read queue name from app.config :: AppSettings and return queue
-                        queue=queuePath.GetQueueReference(ConfigurationManager.AppSettings["UpdateTriggerInputQueue"]);
-                        IsSuccessful = true;
-
-                    }
-                    catch (StorageException storageException)
-                    {
-                        //Increasing RetryAttemptCount variable
-                        RetryAttemptCount = RetryAttemptCount + 1;
-                        //Checking retry call count is eual to max retry count or not
-                        if (RetryAttemptCount == maxRetryCount)
-                        {
-                            InsightLogger.Exception("Error in AzureQueues:: " + callerMethodName + " method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, callerMethodName);
-                            throw new DataAccessException(storageException.Message, storageException.InnerException);
-                        }
-                        else
-                        {
-                            InsightLogger.Exception("Error in AzureQueues:: " + callerMethodName + " method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, callerMethodName);
-                            //Putting the thread into some milliseconds sleep  and again call the same method call.
-                            Thread.Sleep(maxThreadSleepInMilliSeconds);
-                        }
-                    }
-                } while (!IsSuccessful);
+               
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                //read queue name from app.config :: AppSettings and return queue
+                CloudQueue queue = queuePath.GetQueueReference(ConfigurationManager.AppSettings["UpdateTriggerInputQueue"]);                
                 return queue;
 
             }

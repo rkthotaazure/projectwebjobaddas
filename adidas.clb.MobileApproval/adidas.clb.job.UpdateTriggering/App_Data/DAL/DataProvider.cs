@@ -8,6 +8,7 @@ using adidas.clb.job.UpdateTriggering.Exceptions;
 using adidas.clb.job.UpdateTriggering.Utility;
 using Microsoft.Azure;
 using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.RetryPolicies;
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Generic;
@@ -36,42 +37,20 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
             string callerMethodName = string.Empty;
             try
             {
-                CloudTable table = null;
-                //Max Retry call from web.config               
-                int RetryAttemptCount = 0;
-                bool IsSuccessful = false;
-                do
+                
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                // Retrieve the storage account from the connection string.
+                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(ConfigurationManager.AppSettings["GenericMobileStorageConnectionString"]);
+                // Create the table client.
+                CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
+                // set retry for the connection for transient failures
+                tableClient.DefaultRequestOptions = new TableRequestOptions
                 {
-                    try
-                    {
-                        //Get Caller Method name from CallerInformation class
-                        callerMethodName = CallerInformation.TrackCallerMethodName();
-                        // Retrieve the storage account from the connection string.
-                        CloudStorageAccount storageAccount = CloudStorageAccount.Parse(ConfigurationManager.AppSettings["GenericMobileStorageConnectionString"]);
-                        // Create the table client.
-                        CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-                        // Create the CloudTable object that represents the table.
-                        table = tableClient.GetTableReference(TableName);
-                        IsSuccessful = true;
-                    }
-                    catch (StorageException storageException)
-                    {
-                        //Increasing RetryAttemptCount variable
-                        RetryAttemptCount = RetryAttemptCount + 1;
-                        //Checking retry call count is eual to max retry count or not
-                        if (RetryAttemptCount == maxRetryCount)
-                        {
-                            InsightLogger.Exception("Error in DataProvider:: Retrieveentity() method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, "Retrieveentity");
-                            throw new DataAccessException(storageException.Message, storageException.InnerException);
-                        }
-                        else
-                        {
-                            InsightLogger.Exception("Error in DataProvider:: Retrieveentity() method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, "Retrieveentity");
-                            //Putting the thread into some milliseconds sleep  and again call the same method call.
-                            Thread.Sleep(Convert.ToInt32(ConfigurationManager.AppSettings["MaxThreadSleepInMilliSeconds"]));
-                        }
-                    }
-                } while (!IsSuccessful);
+                    RetryPolicy = new LinearRetry(TimeSpan.FromSeconds(5), 3)
+                };
+                // Create the CloudTable object that represents the table.
+                CloudTable table = tableClient.GetTableReference(TableName);               
                 return table;
 
             }
