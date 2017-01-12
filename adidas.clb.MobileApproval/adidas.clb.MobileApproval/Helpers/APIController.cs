@@ -20,7 +20,8 @@ namespace adidas.clb.MobileApproval.Helpers
     /// </summary>
     public class APIController
     {
-
+        //Application insights interface reference for logging the error details into Application Insight azure service.
+        static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
 
         /// <summary>
         /// This method will update the status of backend request with the help of backend agent requestApproval API
@@ -29,11 +30,14 @@ namespace adidas.clb.MobileApproval.Helpers
         /// <param name="backendID"></param>
         /// <param name="apprReqID"></param>
         /// <returns></returns>
-        public async Task<string> UpdateApprovalRequest(ApprovalQuery apprReqDetails, string backendID, string apprReqID)
+        public string UpdateApprovalRequest(ApprovalQuery apprReqDetails, string backendID, string apprReqID)
         {
             string result = string.Empty;
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //get API endpoint and format it in agents/{backendID}/requestApproval/{reqID}
                 string backendApiEndpoint = UrlSettings.GetBackendAgentRequestApprovalAPI(backendID, apprReqID);
                 string approvalquery = JsonConvert.SerializeObject(apprReqDetails);
@@ -59,6 +63,7 @@ namespace adidas.clb.MobileApproval.Helpers
                                 //if response message returns success code then return the successcode message
                                 if (resultset.IsSuccessStatusCode)
                                 {
+                                    string resMessage = resultset.ReasonPhrase;
                                     string response = resultset.Content.ReadAsStringAsync().GetAwaiter().GetResult();
                                     if (!string.IsNullOrEmpty(response))
                                     {
@@ -67,13 +72,13 @@ namespace adidas.clb.MobileApproval.Helpers
                                         //if request update acknowledgement error object is null means backend api successfully called
                                         if (Objacknowledgement.Error == null)
                                         {
-                                            result = "OK";
+                                            result = resMessage;
                                         }
                                     }
                                 }
                                 else
                                 {
-                                    result = "Error occurred while saving data";
+                                    result = "Error occurred while invoking the backend Agent Request approval API.";
                                 }
                                 IsSuccessful = true;
                             }
@@ -84,12 +89,13 @@ namespace adidas.clb.MobileApproval.Helpers
                                 //Checking retry call count is eual to max retry count or not
                                 if (RetryAttemptCount == maxRetryCount)
                                 {
-                                    LoggerHelper.WriteToLog(serviceException + " - exception while Call baceknd agent request approval API in  ApprovalAPIController::Retry attempt count: [" + RetryAttemptCount + "]" + serviceException.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                                    InsightLogger.TrackEvent(callerMethodName + " - exception while Call baceknd agent request approval API in  ApprovalAPIController::Retry attempt count: [" + RetryAttemptCount + "]");
                                     throw new ServiceLayerException(serviceException.Message, serviceException.InnerException);
                                 }
                                 else
                                 {
-                                    LoggerHelper.WriteToLog(serviceException + " - exception while Call baceknd agent request approval API in  ApprovalAPIController::Retry attempt count: [" + RetryAttemptCount + "]" + serviceException.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                                    InsightLogger.Exception(serviceException.Message, serviceException, callerMethodName);
+                                    InsightLogger.TrackEvent(callerMethodName + " - exception while Call baceknd agent request approval API in  ApprovalAPIController::Retry attempt count: [" + RetryAttemptCount + "]");
                                     //Putting the thread into some milliseconds sleep  and again call the same method call.
                                     Thread.Sleep(maxThreadSleepInMilliSeconds);
                                 }
@@ -102,15 +108,14 @@ namespace adidas.clb.MobileApproval.Helpers
                 else
                 {
                     //Write the trace in db that no url exists
-                    LoggerHelper.WriteToLog("baceknd agent request approval API is null", CoreConstants.Priority.High, CoreConstants.Category.Error);
+                    InsightLogger.TrackEvent(callerMethodName + " Error Details : baceknd agent request approval API is null");                    
                     return null;
                 }
             }
             catch (Exception exception)
             {
                 // logging an error if in case some exception occurs
-                LoggerHelper.WriteToLog(exception + " - exception while Call baceknd agent request approval API in  ApprovalAPIController: Post Method()"
-                     + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
                 throw new ServiceLayerException(exception.Message, exception.InnerException);
             }
 

@@ -12,6 +12,8 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web.Http;
 using log4net;
 using adidas.clb.MobileApproval.App_Code.BL.Approval;
@@ -19,31 +21,35 @@ using adidas.clb.MobileApproval.App_Code.BL.Approval;
 namespace adidas.clb.MobileApproval.Controllers
 {
     //[Authorize]
+    
     public class ApprovalAPIController : ApiController
     {
+        //Application insights interface reference for logging the error details into Application Insight azure service.
+        static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
+
         // POST: api/ApprovalAPI
         [Route("api/approval/requests/{apprReqID}")]
         public HttpResponseMessage Post(ApprovalQuery ObjApprovalQuery)
         {
+            string callerMethodName = string.Empty;
             try
             {
-                string response = null;               
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //Checking ApprovalQuery object is valid or not
                 if (ModelState.IsValid)
                 {
-                    ApprovalBL objappr = new ApprovalBL();
-                    //updating the service layer approval object
-                    response = objappr.UpdateApprovalObject(ObjApprovalQuery);
-                    if (!string.IsNullOrEmpty(response))
+                    //Asynchronously Updates the status of the approval object , set the backend confirmed flag to false and invoke the backend request approval api
+                    //Fire And Forget Method implementaion
+                    Task.Factory.StartNew(() => 
                     {
-                        //return Response message success status code 
-                        return Request.CreateResponse(HttpStatusCode.OK);
-                    }
-                    else
-                    {
-                        //return error message
-                        return Request.CreateResponse(HttpStatusCode.OK, DataProvider.ApprovalResponseError<ApprovalResponse>("400", "Response return error", ""));
-                    }
+                        ApprovalBL objappr = new ApprovalBL();
+                        objappr.UpdateApprovalObject(ObjApprovalQuery);
+
+                    });
+                    //return Response message success status code 
+                    return Request.CreateResponse(HttpStatusCode.OK);                 
+                   
                 }
                 else
                 {
@@ -62,8 +68,7 @@ namespace adidas.clb.MobileApproval.Controllers
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - exception while updating the service layer approval object in ApprovalAPIController: Post Method()"
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);                
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
             }
         }
