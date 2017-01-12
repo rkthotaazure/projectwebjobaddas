@@ -36,8 +36,8 @@ namespace adidas.clb.MobileApproval.Controllers
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                //Checking ApprovalQuery object is valid or not
-                if (ModelState.IsValid)
+                //Checking ApprovalQuery object is valid or not(User and decision status are the mandatory input data required)
+                if (!string.IsNullOrEmpty(ObjApprovalQuery.UserID) && !string.IsNullOrEmpty(ObjApprovalQuery.ApprovalDecision.Status))
                 {
                     //Asynchronously Updates the status of the approval object , set the backend confirmed flag to false and invoke the backend request approval api
                     //Fire And Forget Method implementaion
