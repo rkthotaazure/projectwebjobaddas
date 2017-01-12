@@ -272,8 +272,11 @@
     <Compile Include="Models\UserDeviceEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
+    <Compile Include="Utility\AppInsightLogger.cs" />
+    <Compile Include="Utility\CallerInformation.cs" />
     <Compile Include="Utility\DataProvider.cs" />
     <Compile Include="Utility\Constants.cs" />
+    <Compile Include="Utility\IAppInsight.cs" />
     <Compile Include="Utility\LoggerHelper.cs" />
     <Compile Include="Utility\Rules.cs" />
   </ItemGroup>
