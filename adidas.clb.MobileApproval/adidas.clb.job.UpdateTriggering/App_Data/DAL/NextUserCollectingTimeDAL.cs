@@ -66,7 +66,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     int nextCollectingHours = minUpdateFrequency / 2;
                     //update backend next collecting time in refernecedata table
                     this.InsertorUpdateBackendNextCollectingTime(backendID, nextCollectingHours, backend.AverageAllRequestsLatency, backend.LastAllRequestsLatency);
-                    this.objdal.CollectUsersNeedUpdateByBackend(backendID);
+                  // this.objdal.CollectUsersNeedUpdateByBackend(backendID);
                 });
 
 
