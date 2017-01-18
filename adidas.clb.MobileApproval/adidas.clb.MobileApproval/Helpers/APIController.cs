@@ -30,7 +30,7 @@ namespace adidas.clb.MobileApproval.Helpers
         /// <param name="backendID"></param>
         /// <param name="apprReqID"></param>
         /// <returns></returns>
-        public string UpdateApprovalRequest(ApprovalQuery apprReqDetails, string backendID, string apprReqID)
+        public async Task<string> UpdateApprovalRequest(ApprovalQuery apprReqDetails, string backendID, string apprReqID)
         {
             string result = string.Empty;
             string callerMethodName = string.Empty;
@@ -41,6 +41,7 @@ namespace adidas.clb.MobileApproval.Helpers
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 //get API endpoint and format it in agents/{backendID}/requestApproval/{reqID}
                 string backendApiEndpoint = UrlSettings.GetBackendAgentRequestApprovalAPI(backendID, apprReqID);
+                string apiURL = string.Format(ConfigurationManager.AppSettings["BackendAgentRequestApprovalAPIRouteMethod"].ToString(), backendID, apprReqID);
                 string approvalquery = JsonConvert.SerializeObject(apprReqDetails);
                 InsightLogger.TrackEvent("adidas.clb.MobileApproval:: Approval API :: invoke the backend API for submit the approval or rejection for given request :: Baceknd API:" + backendApiEndpoint + " Approval Request Message:" + approvalquery);
                 //Max Retry call from web.config
@@ -59,29 +60,36 @@ namespace adidas.clb.MobileApproval.Helpers
                             try
                             {
                                 //POST: Submits the approval or rejection for one specific request
-                                var request = new HttpRequestMessage(HttpMethod.Post, backendApiEndpoint);
-                                request.Content = new StringContent(approvalquery, Encoding.UTF8, "application/json");
-                                var resultset = client.SendAsync(request).Result;
+                                client.BaseAddress = new Uri(ConfigurationManager.AppSettings["BackendAPIURL"]);
+                                client.DefaultRequestHeaders.Accept.Clear();
+                                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                                StringContent content = new StringContent(approvalquery, Encoding.UTF8, "application/json");                               
+                                HttpResponseMessage response = await client.PostAsync(apiURL, content);
+
+                                //var request = new HttpRequestMessage(HttpMethod.Post, backendApiEndpoint);
+                                //StringContent content = new StringContent(approvalquery, Encoding.UTF8, "application/json");
+                                //request.Content = new StringContent(approvalquery, Encoding.UTF8, "application/json");
+                                //var resultset = client.PostAsync(request).Result;
                                 //if response message returns success code then return the successcode message
-                                if (resultset.IsSuccessStatusCode)
-                                {
-                                    string resMessage = resultset.ReasonPhrase;
-                                    string response = resultset.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                                    if (!string.IsNullOrEmpty(response))
-                                    {
-                                        //request update acknowledgement
-                                        RequestsUpdateAck Objacknowledgement = JsonConvert.DeserializeObject<RequestsUpdateAck>(response);
-                                        //if request update acknowledgement error object is null means backend api successfully called
-                                        if (Objacknowledgement.Error == null)
-                                        {
-                                            result = resMessage;
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    result = "Error occurred while invoking the backend Agent Request approval API.";
-                                }
+                                //if (resultset.IsSuccessStatusCode)
+                                //{
+                                //    string resMessage = resultset.ReasonPhrase;
+                                //    string response = resultset.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                                //    if (!string.IsNullOrEmpty(response))
+                                //    {
+                                //        //request update acknowledgement
+                                //        RequestsUpdateAck Objacknowledgement = JsonConvert.DeserializeObject<RequestsUpdateAck>(response);
+                                //        //if request update acknowledgement error object is null means backend api successfully called
+                                //        if (Objacknowledgement.Error == null)
+                                //        {
+                                //            result = resMessage;
+                                //        }
+                                //    }
+                                //}
+                                //else
+                                //{
+                                //    result = "Error occurred while invoking the backend Agent Request approval API.";
+                                //}
                                 IsSuccessful = true;
                             }
                             catch (Exception serviceException)
