@@ -29,7 +29,7 @@ namespace adidas.clb.MobileApproval.Controllers
 
         // POST: api/ApprovalAPI
         [Route("api/approval/requests/{apprReqID}")]
-        public HttpResponseMessage Post([FromBody]ApprovalQuery ObjApprovalQuery)
+        public HttpResponseMessage PostApproval(ApprovalQuery ObjApprovalQuery)
         {
             string callerMethodName = string.Empty;
             try
