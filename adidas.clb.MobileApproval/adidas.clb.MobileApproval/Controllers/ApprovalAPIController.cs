@@ -29,13 +29,14 @@ namespace adidas.clb.MobileApproval.Controllers
 
         // POST: api/ApprovalAPI
         [Route("api/approval/requests/{apprReqID}")]
-        public HttpResponseMessage Post(ApprovalQuery ObjApprovalQuery)
+        public HttpResponseMessage Post([FromBody]ApprovalQuery ObjApprovalQuery)
         {
             string callerMethodName = string.Empty;
             try
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: Approval API :: POST: Updates the status of a user approval request method execution has been started.");
                 //Checking ApprovalQuery object is valid or not(User and decision status are the mandatory input data required)
                 if (!string.IsNullOrEmpty(ObjApprovalQuery.UserID) && !string.IsNullOrEmpty(ObjApprovalQuery.ApprovalDecision.Status))
                 {
@@ -47,6 +48,7 @@ namespace adidas.clb.MobileApproval.Controllers
                         objappr.UpdateApprovalObject(ObjApprovalQuery);
 
                     });
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: Approval API :: POST: Updates the status of a user approval request method execution has been Completed.");
                     //return Response message success status code 
                     return Request.CreateResponse(HttpStatusCode.OK);                 
                    

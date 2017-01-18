@@ -36,11 +36,13 @@ namespace adidas.clb.MobileApproval.Helpers
             string callerMethodName = string.Empty;
             try
             {
+                
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 //get API endpoint and format it in agents/{backendID}/requestApproval/{reqID}
                 string backendApiEndpoint = UrlSettings.GetBackendAgentRequestApprovalAPI(backendID, apprReqID);
                 string approvalquery = JsonConvert.SerializeObject(apprReqDetails);
+                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: Approval API :: invoke the backend API for submit the approval or rejection for given request :: Baceknd API:" + backendApiEndpoint + " Approval Request Message:" + approvalquery);
                 //Max Retry call from web.config
                 int maxRetryCount = Convert.ToInt32(ConfigurationManager.AppSettings["MaxRetryCount"]);
                 int maxThreadSleepInMilliSeconds = Convert.ToInt32(ConfigurationManager.AppSettings["MaxThreadSleepInMilliSeconds"]);
