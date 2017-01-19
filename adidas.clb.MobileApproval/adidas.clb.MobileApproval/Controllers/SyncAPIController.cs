@@ -422,7 +422,8 @@ namespace adidas.clb.MobileApproval.Controllers
                         else
                         {
                             //if update is not in progress, trigger it
-                            synch.TriggerRequestUpdate(requestentity, query.userId);
+                            //commented updatetriggering to remove duplicate triggering as get requestdeatils, get approvers end points calling at same time from client.
+                            //synch.TriggerRequestUpdate(requestentity, query.userId);
                             retrytime = Rules.RequestRetryTime(userbackend);
                         }
                     }
