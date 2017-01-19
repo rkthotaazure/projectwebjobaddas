@@ -22,6 +22,8 @@ namespace adidas.clb.MobileApproval.Controllers
     //[Authorize]   
     public class SyncAPIController : ApiController
     {
+        //Application insights interface reference for logging the error details into Application Insight azure service.
+        static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
         /// <summary>
         /// action method to get backends associated to user, each one indicating the count of current open requests
         /// </summary>
@@ -29,8 +31,12 @@ namespace adidas.clb.MobileApproval.Controllers
         [Route("api/synch/users/{userID}/backends")]
         public HttpResponseMessage PostBackends(SynchRequestDTO query, string userID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: SyncAPIController ::" + callerMethodName + " method execution has been started.");
                 //check null for input query
                 if (query != null)
                 {
@@ -134,25 +140,30 @@ namespace adidas.clb.MobileApproval.Controllers
                     }
                     SynchResponseDTO<UserBackendDTO> response = new SynchResponseDTO<UserBackendDTO>();
                     response.result = userbackendlist;
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: SyncAPIController ::" + callerMethodName + " method execution has been Completed.");
                     return Request.CreateResponse(HttpStatusCode.OK, response);
                 }
                 else
                 {
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: SyncAPIController ::" + callerMethodName + " method execution has been Completed.");
                     return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.SynchResponseError<UserBackendDTO>("400", "input query is not sent to get user associated backends", ""));
                 }
             }
             catch (DataAccessException dalexception)
             {
+                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", dalexception.Message, dalexception.Message));
             }
             catch (BusinessLogicException blexception)
             {
+                InsightLogger.Exception(blexception.Message, blexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", blexception.Message, blexception.Message));
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - exception in controller action while retrieving associated user backends : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - exception in controller action while retrieving associated user backends : "
+                //      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
             }
         }
@@ -164,8 +175,12 @@ namespace adidas.clb.MobileApproval.Controllers
         [Route("api/synch/users/{userID}/backends/{usrBackendID}/requests")]
         public HttpResponseMessage PostUserBackendRequests(SynchRequestDTO query, string userID, string usrBackendID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: SyncAPIController ::" + callerMethodName + " method execution has been started.");
                 //check null for input query
                 if (query != null)
                 {
@@ -260,25 +275,30 @@ namespace adidas.clb.MobileApproval.Controllers
                     userbackendlist.Add(userbackenddto);
                     SynchResponseDTO<UserBackendDTO> response = new SynchResponseDTO<UserBackendDTO>();
                     response.result = userbackendlist;
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: SyncAPIController ::" + callerMethodName + " method execution has been Completed.");
                     return Request.CreateResponse(HttpStatusCode.OK, response);
                 }
                 else
                 {
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: SyncAPIController ::" + callerMethodName + " method execution has been Completed.");
                     return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.SynchResponseError<UserBackendDTO>("400", "input query is not sent to get requests for user associated backend", ""));
                 }
             }
             catch (DataAccessException dalexception)
             {
+                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", dalexception.Message, dalexception.Message));
             }
             catch (BusinessLogicException blexception)
             {
+                InsightLogger.Exception(blexception.Message, blexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", blexception.Message, blexception.Message));
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - exception in controller action while retrieving requests per userbackend : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - exception in controller action while retrieving requests per userbackend : "
+                //      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
             }
         }
@@ -290,8 +310,12 @@ namespace adidas.clb.MobileApproval.Controllers
         [Route("api/synch/requests/{apprReqID}")]
         public HttpResponseMessage PostRequest(SynchRequestDTO query, string apprReqID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: SyncAPIController ::" + callerMethodName + " method execution has been started.");
                 //check null for input query
                 if (query != null)
                 {
@@ -356,25 +380,30 @@ namespace adidas.clb.MobileApproval.Controllers
                     approvalrequestlist.Add(approvalrequest);
                     SynchResponseDTO<ApprovalRequestDTO> response = new SynchResponseDTO<ApprovalRequestDTO>();
                     response.result = approvalrequestlist;
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: SyncAPIController ::" + callerMethodName + " method execution has been Completed.");
                     return Request.CreateResponse(HttpStatusCode.OK, response);
                 }
                 else
                 {
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: SyncAPIController ::" + callerMethodName + " method execution has been Completed.");
                     return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.SynchResponseError<UserBackendDTO>("400", "input query is not sent to get request", ""));
                 }
             }
             catch (DataAccessException dalexception)
             {
+                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", dalexception.Message, dalexception.Message));
             }
             catch (BusinessLogicException blexception)
             {
+                InsightLogger.Exception(blexception.Message, blexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", blexception.Message, blexception.Message));
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - exception in controller action while retrieving request with requsetID: "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - exception in controller action while retrieving request with requsetID: "
+                //      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
             }
         }
@@ -386,8 +415,12 @@ namespace adidas.clb.MobileApproval.Controllers
         [Route("api/synch/requests/{apprReqID}/approvers")]
         public HttpResponseMessage PostApprovers(SynchRequestDTO query, string apprReqID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: SyncAPIController ::" + callerMethodName + " method execution has been started.");
                 //check null for input query
                 if (query != null)
                 {
@@ -427,25 +460,30 @@ namespace adidas.clb.MobileApproval.Controllers
                             retrytime = Rules.RequestRetryTime(userbackend);
                         }
                     }
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: SyncAPIController ::" + callerMethodName + " method execution has been Completed.");
                     return Request.CreateResponse(HttpStatusCode.OK, SynchResponse);
                 }
                 else
                 {
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: SyncAPIController ::" + callerMethodName + " method execution has been Completed.");
                     return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.SynchResponseError<UserBackendDTO>("400", "input query is not sent to get approvers for request", ""));
                 }
             }
             catch (DataAccessException dalexception)
             {
+                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", dalexception.Message, dalexception.Message));
             }
             catch (BusinessLogicException blexception)
             {
+                InsightLogger.Exception(blexception.Message, blexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", blexception.Message, blexception.Message));
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - exception in controller action while retrieving approvers per request : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - exception in controller action while retrieving approvers per request : "
+                //      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
             }
         }
@@ -457,25 +495,33 @@ namespace adidas.clb.MobileApproval.Controllers
         [Route("api/synch/requests/{apprReqID}/details")]
         public HttpResponseMessage PostRequestDetails(SynchRequestDTO query, string apprReqID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: SyncAPIController ::" + callerMethodName + " method execution has been started.");
                 Synch synch = new Synch();
                 //get requests with requestid
                 RequestEntity requestentity = synch.GetRequest(query.userId, apprReqID);
+                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: SyncAPIController ::" + callerMethodName + " method execution has been Completed.");
                 return Request.CreateResponse(HttpStatusCode.OK, requestentity.PDFUri);
             }
             catch (DataAccessException dalexception)
             {
+                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", dalexception.Message, dalexception.Message));
             }
             catch (BusinessLogicException blexception)
             {
+                InsightLogger.Exception(blexception.Message, blexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", blexception.Message, blexception.Message));
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - exception in controller action while retrieving request details as pdf : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - exception in controller action while retrieving request details as pdf : "
+                //      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
             }
         }
@@ -487,8 +533,12 @@ namespace adidas.clb.MobileApproval.Controllers
         [Route("api/synch/users/{userID}/backends/{usrBackendID}/approvals")]
         public HttpResponseMessage PostUserBackendApprovals(SynchRequestDTO query, string userID, string usrBackendID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: SyncAPIController ::" + callerMethodName + " method execution has been started.");
                 //check null for input query
                 if (query != null)
                 {
@@ -544,25 +594,30 @@ namespace adidas.clb.MobileApproval.Controllers
                     userbackendlist.Add(userbackenddto);
                     SynchResponseDTO<UserBackendDTO> response = new SynchResponseDTO<UserBackendDTO>();
                     response.result = userbackendlist;
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: SyncAPIController ::" + callerMethodName + " method execution has been Completed.");
                     return Request.CreateResponse(HttpStatusCode.OK, response);
                 }
                 else
                 {
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: SyncAPIController ::" + callerMethodName + " method execution has been Completed.");
                     return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.SynchResponseError<UserBackendDTO>("400", "input query is not sent to get requests for user associated backend", ""));
                 }
             }
             catch (DataAccessException dalexception)
             {
+                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", dalexception.Message, dalexception.Message));
             }
             catch (BusinessLogicException blexception)
             {
+                InsightLogger.Exception(blexception.Message, blexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", blexception.Message, blexception.Message));
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - exception in controller action while retrieving approvals per userbackend : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - exception in controller action while retrieving approvals per userbackend : "
+                //      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
             }
         }
@@ -575,8 +630,12 @@ namespace adidas.clb.MobileApproval.Controllers
         [Route("api/synch/users/{userID}/approvalscount")]
         public HttpResponseMessage PostApprovalsCount(SynchRequestDTO query, string userID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: SyncAPIController ::" + callerMethodName + " method execution has been started.");
                 //check null for input query
                 if (query != null)
                 {
@@ -598,25 +657,30 @@ namespace adidas.clb.MobileApproval.Controllers
 
                     SynchResponseDTO<ApprovalsCountDTO> response = new SynchResponseDTO<ApprovalsCountDTO>();
                     response.result = approvalcountlist;
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: SyncAPIController ::" + callerMethodName + " method execution has been Completed.");
                     return Request.CreateResponse(HttpStatusCode.OK, response);
                 }
                 else
                 {
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: SyncAPIController ::" + callerMethodName + " method execution has been Completed.");
                     return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.SynchResponseError<UserBackendDTO>("400", "input query is not sent to get Approval Count for userbackends", ""));
                 }
             }
             catch (DataAccessException dalexception)
             {
+                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", dalexception.Message, dalexception.Message));
             }
             catch (BusinessLogicException blexception)
             {
+                InsightLogger.Exception(blexception.Message, blexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", blexception.Message, blexception.Message));
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - exception in controller action while retrieving approval count associated user backends : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - exception in controller action while retrieving approval count associated user backends : "
+                //      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
             }
         }

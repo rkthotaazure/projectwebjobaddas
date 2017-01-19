@@ -26,7 +26,11 @@ namespace adidas.clb.MobileApproval.Controllers
     {
         //Application insights interface reference for logging the error details into Application Insight azure service.
         static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
-
+        /// <summary>
+        /// This method updates the approval object in service layer and invoke the backend agent
+        /// </summary>
+        /// <param name="ObjApprovalQuery"></param>
+        /// <returns></returns>
         // POST: api/ApprovalAPI
         [Route("api/approval/requests/{apprReqID}")]
         public HttpResponseMessage PostApproval(ApprovalQuery ObjApprovalQuery)
@@ -55,6 +59,8 @@ namespace adidas.clb.MobileApproval.Controllers
                 }
                 else
                 {
+                    InsightLogger.TrackEvent("Approval Query is Invalid.");
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: Approval API :: POST: Updates the status of a user approval request method execution has been Completed.");
                     //if model is not valid which means it doesn't contains mandatory fields return error message
                     return Request.CreateResponse(HttpStatusCode.OK, DataProvider.ApprovalResponseError<ApprovalResponse>("400", "Approval Query is Invalid", ""));
                 }

@@ -22,6 +22,8 @@ namespace adidas.clb.MobileApproval.Controllers
    //[Authorize]
     public class PersonalizationAPIController : ApiController
     {
+        //Application insights interface reference for logging the error details into Application Insight azure service.
+        static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
         /// <summary>
         /// action method to get all backends
         /// </summary>
@@ -29,10 +31,15 @@ namespace adidas.clb.MobileApproval.Controllers
         [Route("api/personalizationapi/backends")]
         public HttpResponseMessage GetBackends()
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been started.");
                 UserBackend userBackend = new UserBackend();
                 PersonalizationResponseListDTO<BackendDTO> allBackends = userBackend.GetBackends();
+                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Cpmpleted.");
                 //if backends exists return result other wise return status code as NotFound
                 if (allBackends.result != null)
                 {
@@ -45,16 +52,19 @@ namespace adidas.clb.MobileApproval.Controllers
             }
             catch (DataAccessException dalexception)
             {
+                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", dalexception.Message, dalexception.Message));
             }
             catch (BusinessLogicException blexception)
             {
+                InsightLogger.Exception(blexception.Message, blexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", blexception.Message, blexception.Message));
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - exception in controller action while retrieving all backends : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - exception in controller action while retrieving all backends : "
+                //      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
             }
         }
@@ -67,8 +77,12 @@ namespace adidas.clb.MobileApproval.Controllers
         [Route("api/personalizationapi/users/{userID}")]
         public HttpResponseMessage PutUsers(PersonalizationRequsetDTO personalizationrequset)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been started.");
                 //BL object instances created
                 Personalization personalization = new Personalization();
                 UserBackend userbackend = new UserBackend();
@@ -151,25 +165,30 @@ namespace adidas.clb.MobileApproval.Controllers
                     var ResponseUser = new PersonalizationResponseDTO<UserDTO>();
                     ResponseUser.result = updateduser;
                     ResponseUser.query = personalizationrequset;
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Completed.");
                     return Request.CreateResponse(HttpStatusCode.OK, ResponseUser);
                 }
                 else
                 {
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Completed.");
                     return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "Error in updating user", ""));
                 }
             }
             catch (DataAccessException dalexception)
             {
+                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDTO>("400", dalexception.Message, dalexception.Message));
             }
             catch (BusinessLogicException blexception)
             {
+                InsightLogger.Exception(blexception.Message, blexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDTO>("400", blexception.Message, blexception.Message));
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - exception in controller action while inserting/updating user : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+               //LoggerHelper.WriteToLog(exception + " - exception in controller action while inserting/updating user : "
+               //       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDTO>("400", exception.Message, exception.StackTrace));
             }
         }
@@ -182,13 +201,18 @@ namespace adidas.clb.MobileApproval.Controllers
         [Route("api/personalizationapi/users/{userID}")]
         public HttpResponseMessage GetUsers(string userID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been started.");
                 //check if userid is null
                 if (!string.IsNullOrEmpty(userID))
                 {
                     Personalization personalization = new Personalization();
                     UserDTO user = personalization.GetUser(userID);
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Completed.");
                     //if user exists returns response otherwise not found
                     if (user != null)
                     {
@@ -197,27 +221,31 @@ namespace adidas.clb.MobileApproval.Controllers
                         return Request.CreateResponse(HttpStatusCode.OK, ResponseUsers);
                     }
                     else
-                    {
+                    {                        
                         return Request.CreateResponse(HttpStatusCode.OK, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "user does not exist", ""));
                     }
                 }
-                else
+                else                   
                 {
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Completed.");
                     return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "user does not exist", ""));
                 }
             }
             catch (DataAccessException dalexception)
             {
+                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDTO>("400", dalexception.Message, dalexception.Message));
             }
             catch (BusinessLogicException blexception)
             {
+                InsightLogger.Exception(blexception.Message, blexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDTO>("400", blexception.Message, blexception.Message));
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - exception in controller action while retreiving user : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - exception in controller action while retreiving user : "
+                //      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDTO>("400", exception.Message, exception.StackTrace));
             }
         }
@@ -230,13 +258,18 @@ namespace adidas.clb.MobileApproval.Controllers
         [Route("api/personalizationapi/users/{userID}")]
         public HttpResponseMessage DeleteUsers(string userID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been started.");
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //check if userid is null
                 if (!string.IsNullOrEmpty(userID))
                 {
                     Personalization personalization = new Personalization();
                     UserEntity deleteUserEntity = personalization.DeleteUser(userID);
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Completed.");
                     //if user deleted returns ok otherwise not found
                     if (deleteUserEntity != null)
                     {
@@ -249,21 +282,25 @@ namespace adidas.clb.MobileApproval.Controllers
                 }
                 else
                 {
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Completed.");
                     return Request.CreateResponse(HttpStatusCode.BadRequest);
                 }
             }
             catch (DataAccessException dalexception)
             {
+                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDTO>("400", dalexception.Message, dalexception.Message));
             }
             catch (BusinessLogicException blexception)
             {
+                InsightLogger.Exception(blexception.Message, blexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDTO>("400", blexception.Message, blexception.Message));
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - exception in controller action while deleting user : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - exception in controller action while deleting user : "
+                //      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDTO>("400", exception.Message, exception.StackTrace));
             }
 
@@ -277,13 +314,20 @@ namespace adidas.clb.MobileApproval.Controllers
         [Route("api/personalizationapi/users/{userID}/devices")]
         public HttpResponseMessage GetUserAllDevices(string userID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Started.");
+
                 //check if userid is null
                 if (!string.IsNullOrEmpty(userID))
                 {
                     UserDevice userdevices = new UserDevice();
                     IEnumerable<UserDeviceDTO> alluserdevices = userdevices.GetUserAllDevices(userID);
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Completed.");
+
                     //if user as devices associated returns response otherwise not found
                     if (alluserdevices != null)
                     {
@@ -300,21 +344,26 @@ namespace adidas.clb.MobileApproval.Controllers
                 }
                 else
                 {
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Completed.");
+
                     return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "user does not have associated devices", ""));
                 }
             }
             catch (DataAccessException dalexception)
             {
+                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", dalexception.Message, dalexception.Message));
             }
             catch (BusinessLogicException blexception)
             {
+                InsightLogger.Exception(blexception.Message, blexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", blexception.Message, blexception.Message));
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - exception in controller action while retreiving all userdevcies for user : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - exception in controller action while retreiving all userdevcies for user : "
+                //      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", exception.Message, exception.StackTrace));
             }
         }
@@ -327,8 +376,12 @@ namespace adidas.clb.MobileApproval.Controllers
         [Route("api/personalizationapi/users/{userID}/devices")]
         public HttpResponseMessage PostDevices(PersonalizationRequsetDTO personalizationrequset)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been started.");
 
                 UserDevice userdevice = new UserDevice();
                 //if user devcies provided in requset
@@ -337,25 +390,31 @@ namespace adidas.clb.MobileApproval.Controllers
                     IEnumerable<UserDeviceDTO> userdevicesdto = personalizationrequset.userdevices;              
                     IEnumerable<UserDeviceEntity> userprovideddevices = userdevice.UserDeviceEntityGenerator(userdevicesdto);                  
                     userdevice.AddDevices(userprovideddevices.ToList());
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Completed.");
                     return Request.CreateResponse(HttpStatusCode.OK);
                 }
                 else
                 {
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Completed.");
+
                     return Request.CreateResponse(HttpStatusCode.BadRequest);
                 }
             }
             catch (DataAccessException dalexception)
             {
+                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", dalexception.Message, dalexception.Message));
             }
             catch (BusinessLogicException blexception)
             {
+                InsightLogger.Exception(blexception.Message, blexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", blexception.Message, blexception.Message));
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - exception in controller action while inserting userdevcie : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - exception in controller action while inserting userdevcie : "
+                //      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", exception.Message, exception.StackTrace));
             }
         }
@@ -369,14 +428,21 @@ namespace adidas.clb.MobileApproval.Controllers
         [Route("api/personalizationapi/users/{userID}/devices/{userDeviceID}")]
         public HttpResponseMessage GetUserDevice(string userID, string userDeviceID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Started.");
+
                 //checks userid and userdeviceis for null
                 if (!(string.IsNullOrEmpty(userID) || string.IsNullOrEmpty(userDeviceID)))
                 {
                     UserDevice userdevice = new UserDevice();
                     PersonalizationResponseDTO<UserDeviceDTO> ResponseUserDevice = userdevice.GetUserDevice(userID, userDeviceID);
                     //if user has associated device return response otherwise not found
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Completed.");
+
                     if (ResponseUserDevice.result != null)
                     {
                         return Request.CreateResponse(HttpStatusCode.OK, ResponseUserDevice);
@@ -389,21 +455,25 @@ namespace adidas.clb.MobileApproval.Controllers
                 }
                 else
                 {
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Completed.");
                     return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", "userid or deviceid can't be empty or null ", ""));
                 }
             }
             catch (DataAccessException dalexception)
             {
+                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", dalexception.Message, dalexception.Message));
             }
             catch (BusinessLogicException blexception)
             {
+                InsightLogger.Exception(blexception.Message, blexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", blexception.Message, blexception.Message));
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - exception in controller action while retreving single userdevcie with deviceID : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                //LoggerHelper.WriteToLog(exception + " - exception in controller action while retreving single userdevcie with deviceID : "
+                //      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", exception.Message, exception.StackTrace));
             }
         }
@@ -417,14 +487,19 @@ namespace adidas.clb.MobileApproval.Controllers
         [Route("api/personalizationapi/users/{userID}/devices/{userDeviceID}")]
         public HttpResponseMessage DeleteUserDevice(string userID, string userDeviceID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Started.");
                 //checks userid and userdeviceis for null
                 if (!(string.IsNullOrEmpty(userID) || string.IsNullOrEmpty(userDeviceID)))
                 {
                     UserDevice userdevice = new UserDevice();
                     UserDeviceEntity deleteUserDeviceEntity = userdevice.DeleteUserDevice(userID, userDeviceID);
                     //if user has associated device deleted return ok otherwise not found
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Completed.");
                     if (deleteUserDeviceEntity != null)
                     {
                         return Request.CreateResponse(HttpStatusCode.OK);
@@ -437,21 +512,25 @@ namespace adidas.clb.MobileApproval.Controllers
                 }
                 else
                 {
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Completed.");
                     return Request.CreateResponse(HttpStatusCode.BadRequest);
                 }
             }
             catch (DataAccessException dalexception)
             {
+                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", dalexception.Message, dalexception.Message));
             }
             catch (BusinessLogicException blexception)
             {
+                InsightLogger.Exception(blexception.Message, blexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", blexception.Message, blexception.Message));
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - exception in controller action while deleting single userdevcie with deviceID : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                //LoggerHelper.WriteToLog(exception + " - exception in controller action while deleting single userdevcie with deviceID : "
+                //      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", exception.Message, exception.StackTrace));
             }
         }
@@ -464,14 +543,20 @@ namespace adidas.clb.MobileApproval.Controllers
         [Route("api/personalizationapi/users/{userID}/backends")]
         public HttpResponseMessage GetUserAllBackends(string userID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Started.");
                 //check userid for null
                 if (!string.IsNullOrEmpty(userID))
                 {
                     UserBackend userdevices = new UserBackend();
                     IEnumerable<UserBackendDTO> alluserbackends = userdevices.GetUserAllBackends(userID);
                     //if user has associated backends return response else not found
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Completed.");
+
                     if (alluserbackends != null)
                     {
                         //converting userbackendsentity to Responsedto
@@ -483,25 +568,28 @@ namespace adidas.clb.MobileApproval.Controllers
                     {
                         return Request.CreateResponse(HttpStatusCode.OK, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "user does not have associated backends", ""));
                     }
-
                 }
                 else
                 {
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Completed.");
                     return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "user does not exists", ""));
                 }
             }
             catch (DataAccessException dalexception)
             {
+                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", dalexception.Message, dalexception.Message));
             }
             catch (BusinessLogicException blexception)
             {
+                InsightLogger.Exception(blexception.Message, blexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", blexception.Message, blexception.Message));
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - exception in controller action while retreiving all userbackends : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - exception in controller action while retreiving all userbackends : "
+                //      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
             }
         }
@@ -514,8 +602,13 @@ namespace adidas.clb.MobileApproval.Controllers
         [Route("api/personalizationapi/users/{userID}/backends")]
         public HttpResponseMessage PostBackends(PersonalizationRequsetDTO personalizationrequset)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Started.");
+
                 //check request for userbackend deatils
                 if (personalizationrequset.userbackends != null)
                 {
@@ -524,25 +617,31 @@ namespace adidas.clb.MobileApproval.Controllers
                     IEnumerable<UserBackendDTO> userbackendsdto = personalizationrequset.userbackends;
                     IEnumerable<UserBackendEntity> userprovidedbackends = userbackend.UserBackendEntityGenerator(userbackendsdto);
                     userbackend.AddBackends(userprovidedbackends.ToList());
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Completed.");
+
                     return Request.CreateResponse(HttpStatusCode.OK);
                 }
                 else
                 {
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Completed.");
                     return Request.CreateResponse(HttpStatusCode.BadRequest);
                 }
             }
             catch (DataAccessException dalexception)
             {
+                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", dalexception.Message, dalexception.Message));
             }
             catch (BusinessLogicException blexception)
             {
+                InsightLogger.Exception(blexception.Message, blexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", blexception.Message, blexception.Message));
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - exception in controller action while inserting single userbackend : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - exception in controller action while inserting single userbackend : "
+                //      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
             }
         }
@@ -556,13 +655,19 @@ namespace adidas.clb.MobileApproval.Controllers
         [Route("api/personalizationapi/users/{userID}/backends/{userBackendID}")]
         public HttpResponseMessage GetUserBackend(string userID, string userBackendID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Started.");
                 //check userid and userbackendid for null
                 if (!(string.IsNullOrEmpty(userID) || string.IsNullOrEmpty(userBackendID)))
                 {
                     UserBackend userbackend = new UserBackend();
                     PersonalizationResponseDTO<UserBackendDTO> ResponseUserBackend = userbackend.GetUserBackend(userID, userBackendID);
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Completed.");
+
                     //if user backend avialable return response else not found
                     if (ResponseUserBackend.result != null)
                     {
@@ -573,21 +678,26 @@ namespace adidas.clb.MobileApproval.Controllers
                 }
                 else
                 {
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Completed.");
+
                     return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "userid or associated deviceid empty or null", ""));
                 }
             }
             catch (DataAccessException dalexception)
             {
+                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", dalexception.Message, dalexception.Message));
             }
             catch (BusinessLogicException blexception)
             {
+                InsightLogger.Exception(blexception.Message, blexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", blexception.Message, blexception.Message));
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - exception in controller action while retreving single userbackend : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - exception in controller action while retreving single userbackend : "
+                //      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
             }
         }
@@ -601,13 +711,19 @@ namespace adidas.clb.MobileApproval.Controllers
         [Route("api/personalizationapi/users/{userID}/backends/{userBackendID}")]
         public HttpResponseMessage DeleteUserBackend(string userID, string userBackendID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Started.");
                 //check userid and userbackendid for null
                 if (!(string.IsNullOrEmpty(userID) || string.IsNullOrEmpty(userBackendID)))
                 {
                     UserBackend userbackend = new UserBackend();
                     UserBackendEntity deleteUserBackendEntity = userbackend.DeleteUserBackend(userID, userBackendID);
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Completed.");
+
                     // if user deleted return ok otherwise not found
                     if (deleteUserBackendEntity != null)
                     {
@@ -621,21 +737,25 @@ namespace adidas.clb.MobileApproval.Controllers
                 }
                 else
                 {
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::" + callerMethodName + " method execution has been Completed.");
                     return Request.CreateResponse(HttpStatusCode.BadRequest);
                 }
             }
             catch (DataAccessException dalexception)
             {
+                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", dalexception.Message, dalexception.Message));
             }
             catch (BusinessLogicException blexception)
             {
+                InsightLogger.Exception(blexception.Message, blexception, callerMethodName);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", blexception.Message, blexception.Message));
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - exception in controller action while inserting single userbackend : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - exception in controller action while inserting single userbackend : "
+                //      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
             }
 
