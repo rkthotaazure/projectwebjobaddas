@@ -40,6 +40,8 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         public static int maxRetryCount = Convert.ToInt32(ConfigurationManager.AppSettings["MaxRetryCount"]);
         public static string azureTableReference = ConfigurationManager.AppSettings["AzureTables.ReferenceData"];
         public static string azureTableUserDeviceConfiguration = ConfigurationManager.AppSettings["AzureTables.UserDeviceConfiguration"];
+        //read GetPDFs app setting value from configuration
+        public static bool IsGeneratePdfs = Convert.ToBoolean(ConfigurationManager.AppSettings["GetPDFs"]);
         //RequestTransactions
         public static string azureTableRequestTransactions = ConfigurationManager.AppSettings["AzureTables.RequestTransactions"];
         //decalre UpdateTriggeringRules calss object 
@@ -300,7 +302,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     Users = lstuserUpdateMsg,
                     Requests = null,
                     VIP = false,
-                    GetPDFs = false,
+                    GetPDFs = IsGeneratePdfs,
                     ChangeAfter = objuserBackend.LastUpdate
 
                 };
@@ -775,7 +777,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     Users = null,
                     Requests = lstRequestUpdateMsg,
                     VIP = false,
-                    GetPDFs = false
+                    GetPDFs = IsGeneratePdfs
 
                 };
                 //Serialize UpdateTriggeringMsg Object into json string
