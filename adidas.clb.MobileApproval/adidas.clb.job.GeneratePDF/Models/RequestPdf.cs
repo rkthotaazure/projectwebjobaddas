@@ -11,6 +11,7 @@ namespace adidas.clb.job.GeneratePDF.Models
         public string _type { get; set; }
         public string RequestID { get; set; }
         public string BackendID { get; set; }
+        public string UserID { get; set; }
         public RequestPdf()
         {
             _type = "requestPdf";
@@ -23,4 +24,13 @@ namespace adidas.clb.job.GeneratePDF.Models
         public string RequestID { get; set; }
         public RequestPDFAddress() { _type = "requestPDFAddress"; }
     }
+    public class RequestPDF
+    {
+        public string _type { get; set; }
+        public string PDFUri { get; set; }
+        public string UserId { get; set; }
+        public string RequestID { get; set; }
+        public RequestPDF() { _type = "requestPDFAddress"; }
+    }
+
 }

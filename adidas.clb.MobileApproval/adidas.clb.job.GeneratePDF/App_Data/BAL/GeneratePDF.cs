@@ -45,7 +45,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
         /// This method Generates PDf file for store based on requestID
         /// </summary>
         /// <param name="requestID"></param>
-        public void GeneratePDFForStoreApproval(string requestID)
+        public void GeneratePDFForStoreApproval(string requestID,string userID)
         {
             string callerMethodName = string.Empty;
             try
@@ -701,7 +701,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
                     // Always close open filehandles explicity
                     fs.Close();
                     //upload file into azure blob container
-                    if (this.executeazCopyExe(PdfBucketPath, requestID, pdfFileName))
+                    if (this.executeazCopyExe(PdfBucketPath, requestID,userID, pdfFileName))
                     {
                         //if file upload successsfully into blob container then delete the directory and files 
                         this.clearfiles(PdfBucketPath);
@@ -853,7 +853,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
         /// <param name="requestID"></param>
         /// <param name="reqPdfFileName"></param>
         /// <returns></returns>
-        public bool executeazCopyExe(string pdfFilePath, string requestID,string reqPdfFileName)
+        public bool executeazCopyExe(string pdfFilePath, string requestID,string userID,string reqPdfFileName)
         {
             string callerMethodName = string.Empty;
             try
@@ -909,10 +909,11 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
                     isFileUpload = true;
                     string pdfblobUrl = blobUrl + @"/" + reqPdfFileName + ".pdf";
                     //adding pdfurl details to RequestPDF object
-                    RequestPDFAddress objRequestPDFAddress = new RequestPDFAddress()
+                    RequestPDF objRequestPDFAddress = new RequestPDF()
                     {
                         RequestID = requestID,
-                        PDF_URL = pdfblobUrl
+                        PDFUri = pdfblobUrl,
+                        UserId= userID
                     };
                     //convert RequestPDF object into json string
                     string requestPdfUrlDetails = JsonConvert.SerializeObject(objRequestPDFAddress);
@@ -999,7 +1000,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
         /// This method Generates PDf file for CAR based on requestID
         /// </summary>
         /// <param name="requestID"></param>
-        public void GeneratePDFForCARApproval(string requestID)
+        public void GeneratePDFForCARApproval(string requestID,string userID)
         {
             string callerMethodName = string.Empty;
             try
@@ -1661,7 +1662,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
                     fs.Close();
 
                     //upload file into azure blob container
-                    if (this.executeazCopyExe(PdfBucketPath, requestID, pdfFileName))
+                    if (this.executeazCopyExe(PdfBucketPath, requestID, userID, pdfFileName))
                     {
                         //if file upload successsfully into blob container then delete the directory and files 
                         this.clearfiles(PdfBucketPath);
