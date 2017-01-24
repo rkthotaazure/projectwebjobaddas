@@ -45,18 +45,19 @@ namespace adidas.clb.job.GeneratePDF
                         //get Request Pdf details from queue message
                         string backendID = objRequestPdf.BackendID;
                         string requestID = objRequestPdf.RequestID;
+                        string userID = objRequestPdf.UserID;
                         //check backendID
                         switch (backendID.ToLower())
                         {
                             case CoreConstants.Backends.BPMOnline:
                                 //create pdf file from store backend                                 
                                 GeneratePDFFile objGenPdf = new GeneratePDFFile();
-                                objGenPdf.GeneratePDFForStoreApproval(requestID);
+                                objGenPdf.GeneratePDFForStoreApproval(requestID, userID);
                                 break;
                             case CoreConstants.Backends.CAR:
                                 //create pdf file from store backend
                                 GeneratePDFFile objGenPdfCAR = new GeneratePDFFile();
-                                objGenPdfCAR.GeneratePDFForCARApproval(requestID);
+                                objGenPdfCAR.GeneratePDFForCARApproval(requestID, userID);
                                 break;
                             default:
                                 break;
