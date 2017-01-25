@@ -35,8 +35,8 @@ namespace adidas.clb.job.GeneratePDF
                 InsightLogger.TrackStartEvent(callerMethodName);
                 if (!string.IsNullOrEmpty(message))
                 {
-                    log.WriteLine("UpdateTriggering :: Process Generate Pdf Message :: start()" + message);
-                    InsightLogger.TrackEvent("UpdateTriggering :: Process Generate Pdf Queue Message :" + message);
+                    log.WriteLine("adidas.clb.job.GeneratePDF :: Process Generate Pdf Message :: start()" + message);
+                    InsightLogger.TrackEvent("adidas.clb.job.GeneratePDF :: Process Generate Pdf Queue Message :" + message);
                     //Deserialize input queue message into RequestPdf object
                     RequestPdf objRequestPdf = JsonConvert.DeserializeObject<RequestPdf>(message);
 
@@ -64,7 +64,7 @@ namespace adidas.clb.job.GeneratePDF
                         }
                         //get RequestUpdateMsg list from UpdateTriggeringMsg
 
-                        log.WriteLine("UpdateTriggering :: Processing Generate Pdf message :: End()" + message);
+                        log.WriteLine("adidas.clb.job.GeneratePDF :: Processing Generate Pdf message :: End()" + message);
                         InsightLogger.TrackEndEvent(callerMethodName);
                     }
                 }
