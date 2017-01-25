@@ -85,6 +85,7 @@
   <ItemGroup>
     <Compile Include="App_Data\BAL\GeneratePDF.cs" />
     <Compile Include="App_Data\DAL\DataProvider.cs" />
+    <Compile Include="App_Data\DAL\FieldsMapping.cs" />
     <Compile Include="App_Data\DAL\GetCarPDFDetailsDAL.cs" />
     <Compile Include="App_Data\DAL\GetStorePDFDetailsDAL.cs" />
     <Compile Include="App_Data\DAL\SQLDataProvider.cs" />

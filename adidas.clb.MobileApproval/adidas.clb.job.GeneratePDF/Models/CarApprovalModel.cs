@@ -23,8 +23,8 @@ namespace adidas.clb.job.GeneratePDF.Models
     {
         public string Name { get; set; }
         public string Description { get; set; }
-        public int Requestor { get; set; }
-        public int Controller { get; set; }
+        public Nullable<int> Requestor { get; set; }
+        public Nullable<int> Controller { get; set; }
         public Nullable<DateTime> DateofRequest { get; set; }
         public string BrandDescription { get; set; }
         public string CountryDescription { get; set; }
@@ -33,28 +33,28 @@ namespace adidas.clb.job.GeneratePDF.Models
         public Nullable<DateTime> EstimatedStartDate { get; set; }
         public Nullable<DateTime> EstimatedCompletionDate { get; set; }
         public bool Budgeted { get; set; }
-        public decimal Capex { get; set; }
-        public decimal CapexLocal { get; set; }
-        public int LocalCurency { get; set; }
-        public decimal SpenttodateEUR { get; set; }
-        public decimal CAPEXThisRequest { get; set; }
+        public Nullable<decimal> Capex { get; set; }
+        public Nullable<decimal> CapexLocal { get; set; }
+        public Nullable<int> LocalCurency { get; set; }
+        public Nullable<decimal> SpenttodateEUR { get; set; }
+        public Nullable<decimal> CAPEXThisRequest { get; set; }
         public string AssetNo { get; set; }
         public string CostCenterInternalOrder { get; set; }
-        public int IMSNumber { get; set; }
+        public Nullable<int> IMSNumber { get; set; }
         public string CAPEXCodeGrape { get; set; }
         public bool FinanceLease { get; set; }
         public bool ContractualObligation { get; set; }
         public bool PurchaseOption { get; set; }
         public bool GlobalRealEstate { get; set; }
-        public int NoOfYears { get; set; }
+        public Nullable<int> NoOfYears { get; set; }
 
     }
     class CarCapexMatrix
     {
         public string CapexMatricDescription { get; set; }
-        public decimal Y1 { get; set; }
-        public decimal Y2 { get; set; }
-        public decimal Y3 { get; set; }
-        public decimal TotalSum { get; set; }
+        public Nullable<decimal> Y1 { get; set; }
+        public Nullable<decimal> Y2 { get; set; }
+        public Nullable<decimal> Y3 { get; set; }
+        public Nullable<decimal> TotalSum { get; set; }
     }
 }

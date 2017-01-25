@@ -33,7 +33,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.DAL
         /// </summary>
         /// <param name="requestID"></param>
         /// <returns></returns>
-        public StoreApprovalModel GetPDFDetailsFromStore(string requestID)
+        public StoreApprovalModel GetPDFDetailsFromStore(string requestID,string backendID)
         {
             string callerMethodName = string.Empty;
             try
@@ -58,57 +58,68 @@ namespace adidas.clb.job.GeneratePDF.App_Data.DAL
                 //stored procedure returns two result sets
                 if (dsPdfDetails != null && dsPdfDetails.Tables.Count > 0)
                 {
+                    FieldsMapping objFieldsMap = new FieldsMapping();
+                    //call FieldsMapping.GetFiledsMappingJsonString() method which will return  RequestFieldsMappingJson,ApproverFieldsMappingJson 
+                    MappingTypes ObjMaps = objFieldsMap.GetFiledsMappingJsonString(backendID);
                     //getting StoreApprovalBasicInfo details from dataset table 1
                     if (dsPdfDetails.Tables[0] != null && dsPdfDetails.Tables[0].Rows.Count > 0)
                     {
-                        DataRow row = dsPdfDetails.Tables[0].Rows[0];
+                        DataRow row = dsPdfDetails.Tables[0].Rows[0];                       
+                       
+                        //Call FieldsMapping.MapDtFieldstoBackendRequest() method, which returns Mapping request details to RequestDetailsMapping class object
+                        StoreApprovalBasicInfo objReqDetails = objFieldsMap.MapDtFieldstoBackendRequest<StoreApprovalBasicInfo>(row, ObjMaps.RequestFieldsMappingJson);
                         objSAbasicInfo = new StoreApprovalBasicInfo()
                         {
-                            DisplayBPMID = (!row.IsNull("DisplayBPMID")) ? Convert.ToString(row["DisplayBPMID"]) : string.Empty,
-                            RequestName = (!row.IsNull("RequestName")) ? Convert.ToString(row["RequestName"]) : string.Empty,
-                            MarketName = (!row.IsNull("MarketName")) ? Convert.ToString(row["MarketName"]) : string.Empty,
-                            ProjectName = (!row.IsNull("ProjectName")) ? Convert.ToString(row["ProjectName"]) : string.Empty,
-                            BrandName = (!row.IsNull("BrandName")) ? Convert.ToString(row["BrandName"]) : string.Empty,
-                            SecurityDeposit = (!row.IsNull("SecurityDeposit") && !string.IsNullOrEmpty(Convert.ToString(row["SecurityDeposit"]))) ? Convert.ToDecimal(row["SecurityDeposit"]) : 0,
-                            TotalInvestment = (!row.IsNull("TotalInvestment") && !string.IsNullOrEmpty(Convert.ToString(row["TotalInvestment"]))) ? Convert.ToDecimal(row["TotalInvestment"]) : 0,
-                            KeyMoney = (!row.IsNull("KeyMoney") && !string.IsNullOrEmpty(Convert.ToString(row["KeyMoney"]))) ? Convert.ToDecimal(row["KeyMoney"]) : 0,
-                            Brand = (!row.IsNull("Brand") && !string.IsNullOrEmpty(Convert.ToString(row["Brand"]))) ? Convert.ToDecimal(row["Brand"]) : 0,
-                            CaseID = (!row.IsNull("CaseID") && !string.IsNullOrEmpty(Convert.ToString(row["CaseID"]))) ? Convert.ToInt32(row["CaseID"]) : 0,
-                            StoreTypeName = (!row.IsNull("StoreTypeName")) ? Convert.ToString(row["StoreTypeName"]) : string.Empty,
-                            NetSellingSpace = (!row.IsNull("NetSellingSpace") && !string.IsNullOrEmpty(Convert.ToString(row["NetSellingSpace"]))) ? Convert.ToInt32(row["NetSellingSpace"]) : 0,
-                            OpeningDate = (!row.IsNull("OpeningDate") && !string.IsNullOrEmpty(Convert.ToString(row["OpeningDate"]))) ? Convert.ToDateTime(row["OpeningDate"]) : (DateTime?)null,
-                            LeaseEndDate = (!row.IsNull("LeaseEndDate") && !string.IsNullOrEmpty(Convert.ToString(row["LeaseEndDate"]))) ? Convert.ToDateTime(row["LeaseEndDate"]) : (DateTime?)null,
-                            LeasingPeriodDec = (!row.IsNull("LeasingPeriodDec") && !string.IsNullOrEmpty(Convert.ToString(row["LeasingPeriodDec"]))) ? Convert.ToDecimal(row["LeasingPeriodDec"]) : 0,
-                            CancelPeriod = (!row.IsNull("CancelPeriod") && !string.IsNullOrEmpty(Convert.ToString(row["CancelPeriod"]))) ? Convert.ToInt32(row["CancelPeriod"]) : 0,
-                            LeaseBreakOption = (!row.IsNull("LeaseBreakOption") && !string.IsNullOrEmpty(Convert.ToString(row["LeaseBreakOption"]))) ? Convert.ToInt32(row["LeaseBreakOption"]) : 0,
-                            CapexSpendYear = (!row.IsNull("CapexSpendYear") && !string.IsNullOrEmpty(Convert.ToString(row["CapexSpendYear"]))) ? Convert.ToInt32(row["CapexSpendYear"]) : 0,
-                            GrossLeasedArea = (!row.IsNull("GrossLeasedArea") && !string.IsNullOrEmpty(Convert.ToString(row["GrossLeasedArea"]))) ? Convert.ToInt32(row["GrossLeasedArea"]) : 0
+                            DisplayBPMID = (!string.IsNullOrEmpty(objReqDetails.DisplayBPMID)) ? objReqDetails.DisplayBPMID : string.Empty,
+                            RequestName = (!string.IsNullOrEmpty(objReqDetails.RequestName)) ? objReqDetails.RequestName : string.Empty,
+                            MarketName = (!string.IsNullOrEmpty(objReqDetails.MarketName)) ? objReqDetails.MarketName : string.Empty,
+                            ProjectName = (!string.IsNullOrEmpty(objReqDetails.ProjectName)) ? objReqDetails.ProjectName : string.Empty,
+                            BrandName = (!string.IsNullOrEmpty(objReqDetails.BrandName)) ? objReqDetails.BrandName : string.Empty,
+                            SecurityDeposit = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.SecurityDeposit))) ? objReqDetails.SecurityDeposit : 0,
+                            TotalInvestment = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.TotalInvestment))) ? objReqDetails.TotalInvestment : 0,
+                            KeyMoney = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.KeyMoney))) ? objReqDetails.KeyMoney : 0,
+                            Brand = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.Brand))) ? Convert.ToDecimal(objReqDetails.Brand) : 0,
+                            CaseID = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.CaseID))) ? Convert.ToInt32(objReqDetails.CaseID) : 0,
+                            StoreTypeName = (!string.IsNullOrEmpty(objReqDetails.StoreTypeName)) ? objReqDetails.StoreTypeName : string.Empty,
+                            NetSellingSpace = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.NetSellingSpace))) ? Convert.ToInt32(objReqDetails.NetSellingSpace) : 0,
+                            OpeningDate = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.OpeningDate))) ? Convert.ToDateTime(objReqDetails.OpeningDate) : (DateTime?)null,
+                            LeaseEndDate = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.LeaseEndDate))) ? Convert.ToDateTime(objReqDetails.LeaseEndDate) : (DateTime?)null,
+                            LeasingPeriodDec = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.LeasingPeriodDec))) ? Convert.ToDecimal(objReqDetails.LeasingPeriodDec) : 0,
+                            CancelPeriod = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.CancelPeriod))) ? Convert.ToInt32(objReqDetails.CancelPeriod) : 0,
+                            LeaseBreakOption = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.LeaseBreakOption))) ? Convert.ToInt32(objReqDetails.LeaseBreakOption) : 0,
+                            CapexSpendYear = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.CapexSpendYear))) ? Convert.ToInt32(objReqDetails.CapexSpendYear) : 0,
+                            GrossLeasedArea = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.GrossLeasedArea))) ? Convert.ToInt32(objReqDetails.GrossLeasedArea) : 0
                         };
 
                     }
-                    //getting StoreExecutiveSummary details from dataset table 2
+                   //getting StoreExecutiveSummary details from dataset table 2
+
                     List<StoreExecutiveSummary> lstSASummary = null;
                     if (dsPdfDetails.Tables[1] != null && dsPdfDetails.Tables[1].Rows.Count > 0)
                     {
-                        lstSASummary = dsPdfDetails.Tables[1].AsEnumerable().Select(row =>
-                                                            new StoreExecutiveSummary
-                                                            {
-                                                                LineID = row.Field<string>("LineID"),
-                                                                Description = row.Field<string>("Description"),
-                                                                Y0 = row.Field<string>("Y0"),
-                                                                Y0Val = row.Field<string>("Y0Val"),
-                                                                Y1 = row.Field<string>("Y1"),
-                                                                Y1Val = row.Field<string>("Y1Val"),
-                                                                Y2 = row.Field<string>("Y2"),
-                                                                Y2Val = row.Field<string>("Y2Val"),
-                                                                Y3 = row.Field<string>("Y3"),
-                                                                Y3Val = row.Field<string>("Y3Val"),
-                                                                Y4 = row.Field<string>("Y4"),
-                                                                Y4Val = row.Field<string>("Y4Val"),
-                                                                Y5 = row.Field<string>("Y5"),
-                                                                Y5Val = row.Field<string>("Y5Val"),
-                                                                GRSVal = row.Field<string>("GRSVal"),
-                                                            }).ToList();
+                        //call FieldsMapping.MapApproverFieldstoBackendRequest() method, which returns list of approver details after Mapping into ApproverFeildsMapping class object
+                        lstSASummary = objFieldsMap.MapApproverFieldstoBackendRequest<StoreExecutiveSummary>(dsPdfDetails.Tables[1], ObjMaps.MatrixFieldsMappingJson);
+
+
+                        //lstSASummary = dsPdfDetails.Tables[1].AsEnumerable().Select(row =>
+                        //                                    new StoreExecutiveSummary
+                        //                                    {
+                        //                                        LineID = row.Field<string>("LineID"),
+                        //                                        Description = row.Field<string>("Description"),
+                        //                                        Y0 = row.Field<string>("Y0"),
+                        //                                        Y0Val = row.Field<string>("Y0Val"),
+                        //                                        Y1 = row.Field<string>("Y1"),
+                        //                                        Y1Val = row.Field<string>("Y1Val"),
+                        //                                        Y2 = row.Field<string>("Y2"),
+                        //                                        Y2Val = row.Field<string>("Y2Val"),
+                        //                                        Y3 = row.Field<string>("Y3"),
+                        //                                        Y3Val = row.Field<string>("Y3Val"),
+                        //                                        Y4 = row.Field<string>("Y4"),
+                        //                                        Y4Val = row.Field<string>("Y4Val"),
+                        //                                        Y5 = row.Field<string>("Y5"),
+                        //                                        Y5Val = row.Field<string>("Y5Val"),
+                        //                                        GRSVal = row.Field<string>("GRSVal"),
+                        //                                    }).ToList();
                     }
                     //getting store pdf details into StoreApprovalModel class
                     ObjSA = new StoreApprovalModel()

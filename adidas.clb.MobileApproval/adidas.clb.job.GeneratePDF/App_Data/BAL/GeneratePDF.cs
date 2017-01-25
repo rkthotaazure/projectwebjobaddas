@@ -45,7 +45,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
         /// This method Generates PDf file for store based on requestID
         /// </summary>
         /// <param name="requestID"></param>
-        public void GeneratePDFForStoreApproval(string requestID,string userID)
+        public void GeneratePDFForStoreApproval(string requestID,string userID, string backendID)
         {
             string callerMethodName = string.Empty;
             try
@@ -59,7 +59,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
                 int pdfCellSummaryFontSize = Convert.ToInt32(ConfigurationManager.AppSettings["PDFSummarryCellFontSize"]);
                 //Call the stored procedure for gettting the  pdf details from Store backend
                 //clone the result set into StoreApprovalModel class
-                StoreApprovalModel objStoreDetails = objstorePDF.GetPDFDetailsFromStore(requestID);
+                StoreApprovalModel objStoreDetails = objstorePDF.GetPDFDetailsFromStore(requestID, backendID);
                 StoreApprovalBasicInfo objstorebasicInfo = null; 
                 List<StoreExecutiveSummary> lststoresummary = null;
                 //checking StoreApprovalModel has null or not
@@ -1000,7 +1000,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
         /// This method Generates PDf file for CAR based on requestID
         /// </summary>
         /// <param name="requestID"></param>
-        public void GeneratePDFForCARApproval(string requestID,string userID)
+        public void GeneratePDFForCARApproval(string requestID,string userID,string backendID)
         {
             string callerMethodName = string.Empty;
             try
@@ -1014,7 +1014,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
                 int pdfCellSummaryFontSize = Convert.ToInt32(ConfigurationManager.AppSettings["PDFSummarryCellFontSize"]);
                 //Call the stored procedure for gettting the  pdf details from Store backend
                 //clone the result set into CarApprovalModel class
-                CarApprovalModel objCarDetails = objCARPDF.GetPDFDetailsFromCAR(requestID);
+                CarApprovalModel objCarDetails = objCARPDF.GetPDFDetailsFromCAR(requestID, backendID);
                 CarSummary objCarSummary;
                 List<CarCapexMatrix> lstCarCapex = null;
                 //checking CarApprovalModel result has null or not
