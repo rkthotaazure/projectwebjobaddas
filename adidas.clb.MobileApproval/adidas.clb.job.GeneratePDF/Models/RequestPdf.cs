@@ -32,5 +32,10 @@ namespace adidas.clb.job.GeneratePDF.Models
         public string RequestID { get; set; }
         public RequestPDF() { _type = "requestPDFAddress"; }
     }
+    public class MappingTypes
+    {
+        public string RequestFieldsMappingJson { get; set; }
+        public string MatrixFieldsMappingJson { get; set; }
+    }
 
 }

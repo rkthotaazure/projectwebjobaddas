@@ -33,7 +33,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.DAL
         /// </summary>
         /// <param name="requestID"></param>
         /// <returns></returns>
-        public CarApprovalModel GetPDFDetailsFromCAR(string requestID)
+        public CarApprovalModel GetPDFDetailsFromCAR(string requestID,string backendID)
         {
 
             string callerMethodName = string.Empty;
@@ -59,38 +59,43 @@ namespace adidas.clb.job.GeneratePDF.App_Data.DAL
                 //stored procedure returns two result sets
                 if (dsPdfDetails != null && dsPdfDetails.Tables.Count > 0)
                 {
+                    FieldsMapping objFieldsMap = new FieldsMapping();
+                    //call FieldsMapping.GetFiledsMappingJsonString() method which will return  RequestFieldsMappingJson,ApproverFieldsMappingJson 
+                    MappingTypes ObjMaps = objFieldsMap.GetFiledsMappingJsonString(backendID);
                     //getting CARApprovalBasicInfo details from dataset table 1
                     if (dsPdfDetails.Tables[0] != null && dsPdfDetails.Tables[0].Rows.Count > 0)
                     {
                         DataRow row = dsPdfDetails.Tables[0].Rows[0];
+                        //Call FieldsMapping.MapDtFieldstoBackendRequest() method, which returns Mapping request details to RequestDetailsMapping class object
+                        CarSummary objReqDetails = objFieldsMap.MapDtFieldstoBackendRequest<CarSummary>(row, ObjMaps.RequestFieldsMappingJson);
                         objCarbasicInfo = new CarSummary()
                         {
-                            Name = (!row.IsNull("Name")) ? Convert.ToString(row["Name"]) : string.Empty,
-                            Description = (!row.IsNull("Description")) ? Convert.ToString(row["Description"]) : string.Empty,
-                            Controller = (!row.IsNull("Controller") && !string.IsNullOrEmpty(Convert.ToString(row["Controller"]))) ? Convert.ToInt32(row["Controller"]) : 0,
-                            Requestor = (!row.IsNull("Requestor") && !string.IsNullOrEmpty(Convert.ToString(row["Requestor"]))) ? Convert.ToInt32(row["Requestor"]) : 0,
-                            DateofRequest= (!row.IsNull("DateofRequest") && !string.IsNullOrEmpty(Convert.ToString(row["DateofRequest"]))) ? Convert.ToDateTime(row["DateofRequest"]) : (DateTime?)null,
-                            BrandDescription = (!row.IsNull("BrandDescription")) ? Convert.ToString(row["BrandDescription"]) : string.Empty,
-                            CountryDescription = (!row.IsNull("CountryDescription")) ? Convert.ToString(row["CountryDescription"]) : string.Empty,
-                            MarketDescription = (!row.IsNull("MarketDescription")) ? Convert.ToString(row["MarketDescription"]) : string.Empty,
-                            InvestmentTypeDescription = (!row.IsNull("InvestmentTypeDescription")) ? Convert.ToString(row["InvestmentTypeDescription"]) : string.Empty,
-                            EstimatedStartDate = (!row.IsNull("EstimatedStartDate") && !string.IsNullOrEmpty(Convert.ToString(row["EstimatedStartDate"]))) ? Convert.ToDateTime(row["EstimatedStartDate"]) : (DateTime?)null,
-                            EstimatedCompletionDate = (!row.IsNull("EstimatedCompletionDate") && !string.IsNullOrEmpty(Convert.ToString(row["EstimatedCompletionDate"]))) ? Convert.ToDateTime(row["EstimatedCompletionDate"]) : (DateTime?)null,
-                            Budgeted= (!row.IsNull("Budgeted") && !string.IsNullOrEmpty(Convert.ToString(row["Budgeted"]))) ? Convert.ToBoolean(Convert.ToInt32(row["Budgeted"])) : false,
-                            Capex = (!row.IsNull("Capex") && !string.IsNullOrEmpty(Convert.ToString(row["Capex"]))) ? Convert.ToDecimal(row["Capex"]) : 0,
-                            CapexLocal = (!row.IsNull("CapexLocal") && !string.IsNullOrEmpty(Convert.ToString(row["CapexLocal"]))) ? Convert.ToDecimal(row["CapexLocal"]) : 0,
-                            SpenttodateEUR = (!row.IsNull("SpenttodateEUR") && !string.IsNullOrEmpty(Convert.ToString(row["SpenttodateEUR"]))) ? Convert.ToDecimal(row["SpenttodateEUR"]) : 0,
-                            CAPEXThisRequest = (!row.IsNull("CAPEXthisrequest") && !string.IsNullOrEmpty(Convert.ToString(row["CAPEXthisrequest"]))) ? Convert.ToDecimal(row["CAPEXthisrequest"]) : 0,
-                            LocalCurency = (!row.IsNull("LocalCurency") && !string.IsNullOrEmpty(Convert.ToString(row["LocalCurency"]))) ? Convert.ToInt32(row["LocalCurency"]) : 0,
-                            AssetNo = (!row.IsNull("AssetNo")) ? Convert.ToString(row["AssetNo"]) : string.Empty,
-                            CostCenterInternalOrder = (!row.IsNull("CostCenterInternalOrder")) ? Convert.ToString(row["CostCenterInternalOrder"]) : string.Empty,
-                            IMSNumber = (!row.IsNull("IMSNumber") && !string.IsNullOrEmpty(Convert.ToString(row["IMSNumber"]))) ? Convert.ToInt32(row["IMSNumber"]) : 0,
-                            CAPEXCodeGrape = (!row.IsNull("CAPEXCodeGrape")) ? Convert.ToString(row["CAPEXCodeGrape"]) : string.Empty,
-                            FinanceLease = (!row.IsNull("FinanceLease") && !string.IsNullOrEmpty(Convert.ToString(row["FinanceLease"]))) ? Convert.ToBoolean(Convert.ToInt32(row["FinanceLease"])) : false,
-                            ContractualObligation = (!row.IsNull("ContractualObligation") && !string.IsNullOrEmpty(Convert.ToString(row["ContractualObligation"]))) ? Convert.ToBoolean(Convert.ToInt32(row["ContractualObligation"])) : false,
-                            PurchaseOption = (!row.IsNull("PurchaseOption") && !string.IsNullOrEmpty(Convert.ToString(row["PurchaseOption"]))) ? Convert.ToBoolean(Convert.ToInt32(row["PurchaseOption"])) : false,
-                            GlobalRealEstate = (!row.IsNull("Budgeted") && !string.IsNullOrEmpty(Convert.ToString(row["GlobalRealEstate"]))) ? Convert.ToBoolean(Convert.ToInt32(row["GlobalRealEstate"])) : false,
-                            NoOfYears = (!row.IsNull("NoOfYears") && !string.IsNullOrEmpty(Convert.ToString(row["NoOfYears"]))) ? Convert.ToInt32(row["NoOfYears"]) : 0,
+                            Name = (!string.IsNullOrEmpty(objReqDetails.Name)) ? objReqDetails.Name : string.Empty,
+                            Description = (!string.IsNullOrEmpty(objReqDetails.Description)) ? objReqDetails.Description : string.Empty,
+                            Controller = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.Controller))) ? Convert.ToInt32(objReqDetails.Controller) : 0,
+                            Requestor = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.Requestor))) ? Convert.ToInt32(objReqDetails.Requestor) : 0,
+                            DateofRequest= (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.DateofRequest))) ? Convert.ToDateTime(objReqDetails.DateofRequest) : (DateTime?)null,
+                            BrandDescription = (!string.IsNullOrEmpty(objReqDetails.BrandDescription)) ? objReqDetails.BrandDescription : string.Empty,
+                            CountryDescription = (!string.IsNullOrEmpty(objReqDetails.CountryDescription)) ? objReqDetails.CountryDescription : string.Empty,
+                            MarketDescription = (!string.IsNullOrEmpty(objReqDetails.MarketDescription)) ? objReqDetails.MarketDescription : string.Empty,
+                            InvestmentTypeDescription = (!string.IsNullOrEmpty(objReqDetails.InvestmentTypeDescription)) ? objReqDetails.InvestmentTypeDescription : string.Empty,
+                            EstimatedStartDate = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.EstimatedStartDate))) ? Convert.ToDateTime(objReqDetails.EstimatedStartDate) : (DateTime?)null,
+                            EstimatedCompletionDate = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.EstimatedCompletionDate))) ? Convert.ToDateTime(objReqDetails.EstimatedCompletionDate) : (DateTime?)null,
+                            Budgeted= (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.Budgeted))) ? Convert.ToBoolean(Convert.ToInt32(objReqDetails.Budgeted)) : false,
+                            Capex = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.Capex))) ? Convert.ToDecimal(objReqDetails.Capex) : 0,
+                            CapexLocal = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.CapexLocal))) ? Convert.ToDecimal(objReqDetails.CapexLocal) : 0,
+                            SpenttodateEUR = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.SpenttodateEUR))) ? Convert.ToDecimal(objReqDetails.SpenttodateEUR) : 0,
+                            CAPEXThisRequest = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.CAPEXThisRequest))) ? Convert.ToDecimal(objReqDetails.CAPEXThisRequest) : 0,
+                            LocalCurency = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.LocalCurency))) ? Convert.ToInt32(objReqDetails.LocalCurency) : 0,
+                            AssetNo = (!string.IsNullOrEmpty(objReqDetails.AssetNo)) ? Convert.ToString(objReqDetails.AssetNo) : string.Empty,
+                            CostCenterInternalOrder = (!string.IsNullOrEmpty(objReqDetails.CostCenterInternalOrder)) ? Convert.ToString(objReqDetails.CostCenterInternalOrder) : string.Empty,
+                            IMSNumber = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.IMSNumber))) ? Convert.ToInt32(objReqDetails.IMSNumber) : 0,
+                            CAPEXCodeGrape = (!string.IsNullOrEmpty(objReqDetails.CAPEXCodeGrape))?objReqDetails.CAPEXCodeGrape : string.Empty,
+                            FinanceLease = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.FinanceLease))) ? Convert.ToBoolean(Convert.ToInt32(objReqDetails.FinanceLease)) : false,
+                            ContractualObligation = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.ContractualObligation))) ? Convert.ToBoolean(Convert.ToInt32(objReqDetails.ContractualObligation)) : false,
+                            PurchaseOption = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.PurchaseOption))) ? Convert.ToBoolean(Convert.ToInt32(objReqDetails.PurchaseOption)) : false,
+                            GlobalRealEstate = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.GlobalRealEstate))) ? Convert.ToBoolean(Convert.ToInt32(objReqDetails.GlobalRealEstate)) : false,
+                            NoOfYears = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.NoOfYears))) ? Convert.ToInt32(objReqDetails.NoOfYears) : 0,
 
 
                         };
@@ -101,15 +106,18 @@ namespace adidas.clb.job.GeneratePDF.App_Data.DAL
                     List<CarCapexMatrix> lstCarCapexmatrix = null;
                     if (dsPdfDetails.Tables[1] != null && dsPdfDetails.Tables[1].Rows.Count > 0)
                     {
-                        lstCarCapexmatrix = dsPdfDetails.Tables[1].AsEnumerable().Select(row =>
-                                                            new CarCapexMatrix
-                                                            {
-                                                                CapexMatricDescription = row.Field<string>("Description"),                                                               
-                                                                Y1 = row.Field<decimal>("Y1"),                                                               
-                                                                Y2 = row.Field<decimal>("Y2"),                                                               
-                                                                Y3 = row.Field<decimal>("Y3"),
-                                                                TotalSum = row.Field<decimal>("TotalSum")                                                             
-                                                            }).ToList();
+                        //call FieldsMapping.MapApproverFieldstoBackendRequest() method, which returns list of approver details after Mapping into ApproverFeildsMapping class object
+                        lstCarCapexmatrix = objFieldsMap.MapApproverFieldstoBackendRequest<CarCapexMatrix>(dsPdfDetails.Tables[1], ObjMaps.MatrixFieldsMappingJson);
+
+                        //lstCarCapexmatrix = dsPdfDetails.Tables[1].AsEnumerable().Select(row =>
+                        //                                    new CarCapexMatrix
+                        //                                    {
+                        //                                        CapexMatricDescription = row.Field<string>("Description"),                                                               
+                        //                                        Y1 = row.Field<decimal>("Y1"),                                                               
+                        //                                        Y2 = row.Field<decimal>("Y2"),                                                               
+                        //                                        Y3 = row.Field<decimal>("Y3"),
+                        //                                        TotalSum = row.Field<decimal>("TotalSum")                                                             
+                        //                                    }).ToList();
                     }
                     //clone CAR pdf details into CarApprovalModel class
                     ObjSA = new CarApprovalModel()

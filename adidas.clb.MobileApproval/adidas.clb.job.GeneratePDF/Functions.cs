@@ -52,12 +52,12 @@ namespace adidas.clb.job.GeneratePDF
                             case CoreConstants.Backends.BPMOnline:
                                 //create pdf file from store backend                                 
                                 GeneratePDFFile objGenPdf = new GeneratePDFFile();
-                                objGenPdf.GeneratePDFForStoreApproval(requestID, userID);
+                                objGenPdf.GeneratePDFForStoreApproval(requestID, userID, backendID);
                                 break;
                             case CoreConstants.Backends.CAR:
                                 //create pdf file from store backend
                                 GeneratePDFFile objGenPdfCAR = new GeneratePDFFile();
-                                objGenPdfCAR.GeneratePDFForCARApproval(requestID, userID);
+                                objGenPdfCAR.GeneratePDFForCARApproval(requestID, userID, backendID);
                                 break;
                             default:
                                 break;

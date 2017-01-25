@@ -27,20 +27,20 @@ namespace adidas.clb.job.GeneratePDF.Models
         public string MarketName { get; set; }
         public string ProjectName { get; set; }
         public string BrandName { get; set; }
-        public decimal SecurityDeposit { get; set; }
-        public decimal TotalInvestment { get; set; }
-        public decimal KeyMoney { get; set; }
-        public decimal Brand { get; set; }
-        public int CaseID { get; set; }
+        public Nullable<decimal> SecurityDeposit { get; set; }
+        public Nullable<decimal> TotalInvestment { get; set; }
+        public Nullable<decimal> KeyMoney { get; set; }
+        public Nullable<decimal> Brand { get; set; }
+        public Nullable<int> CaseID { get; set; }
         public string StoreTypeName { get; set; }
-        public int NetSellingSpace { get; set; }
+        public Nullable<int> NetSellingSpace { get; set; }
         public Nullable<DateTime> OpeningDate { get; set; }
         public Nullable<DateTime> LeaseEndDate { get; set; }
-        public decimal LeasingPeriodDec { get; set; }
-        public int CancelPeriod { get; set; }
-        public int LeaseBreakOption { get; set; }
-        public int CapexSpendYear { get; set; }
-        public int GrossLeasedArea { get; set; }
+        public Nullable<decimal> LeasingPeriodDec { get; set; }
+        public Nullable<int> CancelPeriod { get; set; }
+        public Nullable<int> LeaseBreakOption { get; set; }
+        public Nullable<int> CapexSpendYear { get; set; }
+        public Nullable<int> GrossLeasedArea { get; set; }
     }
     class StoreExecutiveSummary
     {
