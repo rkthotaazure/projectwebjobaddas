@@ -32,7 +32,7 @@ namespace adidas.clb.job.GeneratePDF.Models
         public string InvestmentTypeDescription { get; set; }
         public Nullable<DateTime> EstimatedStartDate { get; set; }
         public Nullable<DateTime> EstimatedCompletionDate { get; set; }
-        public bool Budgeted { get; set; }
+        public Nullable<bool> Budgeted { get; set; }
         public Nullable<decimal> Capex { get; set; }
         public Nullable<decimal> CapexLocal { get; set; }
         public Nullable<int> LocalCurency { get; set; }
@@ -42,10 +42,10 @@ namespace adidas.clb.job.GeneratePDF.Models
         public string CostCenterInternalOrder { get; set; }
         public Nullable<int> IMSNumber { get; set; }
         public string CAPEXCodeGrape { get; set; }
-        public bool FinanceLease { get; set; }
-        public bool ContractualObligation { get; set; }
-        public bool PurchaseOption { get; set; }
-        public bool GlobalRealEstate { get; set; }
+        public Nullable<bool> FinanceLease { get; set; }
+        public Nullable<bool> ContractualObligation { get; set; }
+        public Nullable<bool> PurchaseOption { get; set; }
+        public Nullable<bool> GlobalRealEstate { get; set; }
         public Nullable<int> NoOfYears { get; set; }
 
     }
