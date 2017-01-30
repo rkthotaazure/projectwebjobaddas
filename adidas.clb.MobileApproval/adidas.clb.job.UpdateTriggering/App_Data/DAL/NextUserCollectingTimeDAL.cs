@@ -31,6 +31,10 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         public static string azureTableUserDeviceConfiguration = ConfigurationManager.AppSettings["AzureTables.UserDeviceConfiguration"];
         //RequestTransactions
         public static string azureTableRequestTransactions = ConfigurationManager.AppSettings["AzureTables.RequestTransactions"];
+        //get NextCollectingTime Dividend from config
+        public static int nextCollectingTimeDividend = Convert.ToInt32(ConfigurationManager.AppSettings["NextCollectingTimeDividend"]);
+        //get default MinUpdateFrequency from config
+        public static int defaultMinUpdateFrequency = Convert.ToInt32(ConfigurationManager.AppSettings["DefaultMinUpdateFrequency"]);
         private UserBackendDAL objdal;
         private UpdateTriggeringRules utRules;
         public NextUserCollectingTimeDAL()
@@ -55,17 +59,25 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 //for each backend get minimum update frequency for all the userbackend's associated
                 Parallel.ForEach<BackendEntity>(lstbackends, backend=>                
                 {
-                    string backendID = backend.RowKey;
+                    string backendID = backend.RowKey;                    
                     //Get all the userbackends associated with the backend
                     TableQuery<UserBackendEntity> tquery = new TableQuery<UserBackendEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.RowKey, QueryComparisons.Equal, backend.RowKey));
                     List<UserBackendEntity> allUserBackends = UserDeviceConfigurationTable.ExecuteQuery(tquery).ToList();
                     //get minimum update frequency from User Backend list
                     int minUpdateFrequency = allUserBackends.Min(r => r.DefaultUpdateFrequency);
-                    //Get next collecting hours based on update Triggering Rule :: R1
-                    // int nextCollectingHours = utRules.GetNextUserCollectingHours(minUpdateFrequency);
-                    int nextCollectingHours = minUpdateFrequency / 2;
+                    InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Collecting the minimum Default Update Frequency of all the userbackends for the backend :" + backendID + " , Response :: Minimum Update Frquency :" + minUpdateFrequency );
+                    //Get next collecting hours based on update Triggering Rule :: R1                    
+                    int nextCollectingTimeInMinutes;
+                    if (minUpdateFrequency < defaultMinUpdateFrequency)
+                    {
+                        nextCollectingTimeInMinutes = defaultMinUpdateFrequency;
+                    }
+                    else
+                    {
+                        nextCollectingTimeInMinutes = minUpdateFrequency / nextCollectingTimeDividend;
+                    }
                     //update backend next collecting time in refernecedata table
-                    this.InsertorUpdateBackendNextCollectingTime(backendID, nextCollectingHours, backend.AverageAllRequestsLatency, backend.LastAllRequestsLatency);
+                    this.InsertorUpdateBackendNextCollectingTime(backendID, nextCollectingTimeInMinutes, backend.AverageAllRequestsLatency, backend.LastAllRequestsLatency);
                   // this.objdal.CollectUsersNeedUpdateByBackend(backendID);
                 });
 

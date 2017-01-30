@@ -26,7 +26,7 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
         /// <param name="backendID"></param>
         /// <param name="UpdateTriggeringMessage"></param>
         /// <returns></returns>
-        public string CallBackendAgent(string backendID, string UpdateTriggeringMessage)
+        public void CallBackendAgent(string backendID, string UpdateTriggeringMessage)
         {
             string callerMethodName = string.Empty;
             try
@@ -40,7 +40,7 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
                    
                     //get API endpoint and format
                     string backendApiEndpoint = UrlSettings.GetBackendAgentRequestApprovalAPI(backendID);
-                    InsightLogger.TrackEvent("Invoking backend agent API through UpdateTriggering module :: Start ::  \n API Endpont : " + backendApiEndpoint + " \n UpdateTriggeringMessage: " + UpdateTriggeringMessage);
+                    InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Pass user message to agent (Invoking backend agent API) :: \n Response ::  \n API Endpont : " + backendApiEndpoint + " \n RequestUpdateMessage: " + UpdateTriggeringMessage);
                     //Post Triggers the pulling of updated requests data from a the given backend / given requests
                     //Max Retry call from web.config
                     int maxRetryCount = Convert.ToInt32(ConfigurationManager.AppSettings["MaxRetryCount"]);
@@ -67,10 +67,12 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
                                     if (Objacknowledgement.Error == null)
                                     {
                                         acknowledgement = "Backend API has been invoked successfully. ";
+                                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Pass user message to agent (Invoking backend agent API) , Response :: Success");
+
                                     }
                                     else
                                     {
-                                        InsightLogger.TrackEvent("Backend API has thrown an error :: ErrorMessage=" + Objacknowledgement.Error.longtext);
+                                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Pass user message to agent (Invoking backend agent API) , Response :: Backend API has thrown an error :: ErrorMessage=" + Objacknowledgement.Error.longtext);
                                     }
                                 }
 
@@ -95,11 +97,10 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
                             }
                         }
 
-                    } while (!IsSuccessful);
+                    } while (!IsSuccessful);                   
                    
-                    InsightLogger.TrackEvent("Invoking backend agent API through UpdateTriggering module :: End");
                 }
-                return acknowledgement;
+                //return acknowledgement;
             }
             catch (Exception exception)
             {

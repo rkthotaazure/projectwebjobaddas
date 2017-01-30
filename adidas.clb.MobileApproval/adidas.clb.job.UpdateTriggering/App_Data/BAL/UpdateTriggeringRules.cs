@@ -84,12 +84,12 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                 DateTime expectedUpdateTime;
                 //Now + Max(Backend.AverageAllRequestsLatency;Backend.LastALLRequestLatency)*1.2
                 expectedUpdateTime = DateTime.UtcNow.AddSeconds((Math.Max(BackendAverageALLRequestLatency, Convert.ToDouble(BackendLastALLRequestLatency)) * Convert.ToDouble(System.Configuration.ConfigurationManager.AppSettings["ConstantFraction"])));
+                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R3) ,  Response : Expected Update Time ::" + Convert.ToString(expectedUpdateTime));
                 return expectedUpdateTime;
             }
             catch (Exception exception)
             {
                 InsightLogger.Exception(exception.Message, exception, callerMethodName);
-
                 throw new BusinessLogicException(exception.Message, exception.InnerException);
             }
         }
