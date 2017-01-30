@@ -60,6 +60,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
             string callerMethodName = string.Empty;
             try
             {
+                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: collecting the users needs to update for the backend [" + BackendID + "]");
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 var cts = new CancellationTokenSource();
@@ -165,9 +166,15 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             //checking is user backend needs update or not with the help of Updatetriggering rule R2
                             if (userBackend.LastUpdate != null && utRule.IsuserBackendNeedsUpdate(userBackend.UpdateTriggered, userBackend.LastUpdate, userBackend.DefaultUpdateFrequency))
                             {
+                                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Is Userbackend [ " + userBackend.BackendName + " ] needs update based on UT Rule R2 , Response :: true");
                                 //clone values to UpdateTriggeringMsg class
                                 msgFormat.Add(ConvertUserUpdateMsgToUpdateTriggeringMsg(userBackend, BackendID));
 
+
+                            }
+                            else
+                            {
+                                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Is Userbackend [ " + userBackend.BackendName + " ] needs update based on UT Rule R2 , Response :: false");
                             }
 
 
@@ -227,6 +234,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             queuedoc.BeginAddMessage(message, callBack, null);
                             documentCount++;
                             IsSuccessful = true;
+                            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Put update triggering message in queue ,UpdateTriggering Message :: " + message + " , \n Response :: Success");
                         }
                         catch (StorageException storageException)
                         {
@@ -235,12 +243,12 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             //Checking retry call count is eual to max retry count or not
                             if (RetryAttemptCount == maxRetryCount)
                             {
-                                InsightLogger.Exception("Error in UpdateTriggering:: " + callerMethodName + " method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, callerMethodName);
+                                InsightLogger.Exception("Error in adidas.clb.job.UpdateTriggering web job :: " + callerMethodName + " method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, callerMethodName);
                                 throw new DataAccessException(storageException.Message, storageException.InnerException);
                             }
                             else
                             {
-                                InsightLogger.Exception("Error in UpdateTriggering:: " + callerMethodName + " method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, callerMethodName);
+                                InsightLogger.Exception("Error in adidas.clb.job.UpdateTriggering web job :: " + callerMethodName + " method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, callerMethodName);
                                 //Putting the thread into some milliseconds sleep  and again call the same method call.
                                 Thread.Sleep(maxThreadSleepInMilliSeconds);
                             }
@@ -308,6 +316,8 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 };
                 //Serialize UpdateTriggeringMsg Object into json string
                 updatetriggeringmsg = JsonConvert.SerializeObject(ObjUTMsg);
+                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Prepare update triggering message , Response :: message:" + updatetriggeringmsg);
+
                 return updatetriggeringmsg;
             }
             catch (Exception exception)
@@ -376,6 +386,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: get the users needs to collecting the missed updates for the backend [" + BackendID + "]  , Response :: success");
                 var cts = new CancellationTokenSource();
                 //get's azure table instance
                 CloudTable UserMissedDeviceConfigurationTable = DataProvider.GetAzureTableInstance(ConfigurationManager.AppSettings["AzureTables.UserDeviceConfiguration"]);
@@ -479,8 +490,13 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             //checking is user backend update missing or not with the help of Updatetriggering rule R6
                             if (utRule.IsUserUpdateMissing(muserBackend.UpdateTriggered, muserBackend.ExpectedUpdate))
                             {
+                                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Is Userbackend [ " + muserBackend.BackendName + " ] missed updates based on UT Rule R6 , Response :: true");
                                 //put the json message of UpdateTriggeringMsg class format into update triggering input queue.
                                 msgFormat.Add(ConvertUserUpdateMsgToUpdateTriggeringMsg(muserBackend, mBackendID));
+                            }
+                            else
+                            {
+                                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Is Userbackend [ " + muserBackend.BackendName + " ] missed updates based on UT Rule R6 , Response :: false");
                             }
                         }
                         //add list of messages into update triggering input queue
@@ -532,8 +548,16 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                         updateEntity.UpdateTriggered = true;
                         // Execute the Replace TableOperation.
                         DataProvider.UpdateEntity<UserBackendEntity>(azureTableUserDeviceConfiguration, updateEntity);
-
+                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R3) for the userbackend : " + userName + " ,  Response : Success");
                     }
+                    else
+                    {
+                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R3) for the userbackend : " + userName + " ,  Response : Failed");
+                    }
+                }
+                else
+                {
+                    InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R3) for the userbackend : " + userName + " ,  Response : Failed");
                 }
             }
             catch (BusinessLogicException dalexception)
@@ -598,6 +622,8 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: collecting the requests which missed updates for the backend [" + backendID + "] ");
+
                 var ctsRequests = new CancellationTokenSource();
                 //get's azure table instance
                 CloudTable RequestsMissedDeviceConfigurationTable = DataProvider.GetAzureTableInstance(ConfigurationManager.AppSettings["AzureTables.RequestTransactions"]);
@@ -708,8 +734,13 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             //checking is request  update missing or not with the help of Updatetriggering rule R6
                             if (utRule.IsRequestUpdateMissing(requestDetails.UpdateTriggered, requestDetails.ExpectedUpdate))
                             {
+                                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Is Request [ " + requestDetails.RowKey + " ] needs update based on UT Rule R6 , Response :: true");
                                 //put the json message of UpdateTriggeringMsg class format into update triggering input queue.
                                 rmsgFormat.Add(ConvertRequestUpdateMsgToUpdateTriggeringMsg(requestDetails, rBackendID));
+                            }
+                            else
+                            {
+                                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Is Request [ " + requestDetails.RowKey + " ] needs update based on UT Rule R6 , Response :: false");
                             }
                         }
                         //add list of messages into update triggering input queue
@@ -817,6 +848,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                         //getting list of backends in each user
                         lstbackends = users.Backends.ToList();
                         userID = users.UserID;
+                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: For each provided user in Update triggering message, Response :: User:" + userID);
                         //creating Backend agent request query i.e RequestsUpdateQuery format
                         BackendUser objUser = new BackendUser()
                         {
@@ -824,10 +856,10 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             UserName = users.UserName
                         };
 
-
                         foreach (Backend backend in lstbackends)
                         {
                             //Creating request update query which is input for backend agent requestupdateretrival api
+                            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: For each backend in user, Response :: Backend: backend.BackendID ,User ::" + userID);
                             RequestsUpdateQuery objReqQuery = new RequestsUpdateQuery()
                             {
                                 User = objUser,
@@ -839,18 +871,21 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             };
                             //convert RequestsUpdateQuery object into json string
                             backendUserQuery = JsonConvert.SerializeObject(objReqQuery);
-                            InsightLogger.TrackEvent("RequestsUpdateQuery Message:" + backendUserQuery);
+                            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Prepare agent user message, Response :: message:" + backendUserQuery);
                             acknowledgment = string.Empty;
                             //initalize object for api service provider for callingt the web api
                             APIServiceProvider ObjserviceProvider = new APIServiceProvider();
                             //call backend agent api with backendID and input queue message and getting the acknowledgment from API
-                            acknowledgment = ObjserviceProvider.CallBackendAgent(backend.BackendID, backendUserQuery);
-                            //if acknowledgment is not null or not empty then update the userbackend expected updatetime
-                            if (!string.IsNullOrEmpty(acknowledgment))
+                            Task.Factory.StartNew(() =>
                             {
-                                //update ExpectedUpdateTime  with the help of update trigger Rule :: R3
-                                this.UpdateUserBackendExpectedUpdateTime(backend.BackendID, userID);
-                            }
+                                ObjserviceProvider.CallBackendAgent(backend.BackendID, backendUserQuery);
+                            });
+                            //if acknowledgment is not null or not empty then update the userbackend expected updatetime
+                            //if (!string.IsNullOrEmpty(acknowledgment))
+                            //{
+                            //update ExpectedUpdateTime  with the help of update trigger Rule :: R3
+                            this.UpdateUserBackendExpectedUpdateTime(backend.BackendID, userID);
+                            //}
 
                         }
                         //clear the RequestsUpdateQuery message
@@ -916,18 +951,23 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             };
                             //convert RequestsUpdateQuery object into json string
                             requestsUpdateQuery = JsonConvert.SerializeObject(objReqQuery);
-                            InsightLogger.TrackEvent("RequestsUpdateQuery Message:" + requestsUpdateQuery);
+                            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering :: Invoke Backend Agent with RequestsUpdateQuery Message:" + requestsUpdateQuery);
                             acknowledgment = string.Empty;
                             //initalize object for api service provider for callingt the web api
                             APIServiceProvider ObjserviceProvider = new APIServiceProvider();
                             //call backend agent api with backendID and input queue message and getting the acknowledgment from API
-                            acknowledgment = ObjserviceProvider.CallBackendAgent(backendID, requestsUpdateQuery);
-                            //if acknowledgment is not null or not empty then update the userbackend expected updatetime
-                            if (!string.IsNullOrEmpty(acknowledgment))
+                            //acknowledgment = 
+                            Task.Factory.StartNew(() =>
                             {
-                                //update ExpectedUpdateTime  with the help of update trigger Rule :: R3
-                                this.UpdateRequestExpectedUpdateTime(backendID, serviceLayerRequestID);
-                            }
+                                ObjserviceProvider.CallBackendAgent(backendID, requestsUpdateQuery);
+                            });
+
+                            //if acknowledgment is not null or not empty then update the userbackend expected updatetime
+                            //if (!string.IsNullOrEmpty(acknowledgment))
+                            //{
+                            //update ExpectedUpdateTime  with the help of update trigger Rule :: R3
+                            this.UpdateRequestExpectedUpdateTime(backendID, serviceLayerRequestID);
+                            //}
                             //clearing RequestUpdateMsg list
                             lstRequestsByBackend = null;
                             requestsUpdateQuery = string.Empty;
