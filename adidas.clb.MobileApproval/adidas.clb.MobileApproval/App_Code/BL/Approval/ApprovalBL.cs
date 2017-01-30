@@ -17,6 +17,10 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Approval
         {
             objApprovalDAL = new ApprovalDAL();
         }
+        /// <summary>
+        /// This method updates the approval object in azure layer
+        /// </summary>
+        /// <param name="objApprQry"></param>
         public void UpdateApprovalObject(ApprovalQuery objApprQry)
         {
             string callerMethodName = string.Empty;
