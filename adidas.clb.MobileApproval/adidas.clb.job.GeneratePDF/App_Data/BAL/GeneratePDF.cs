@@ -701,13 +701,20 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
                     // Always close open filehandles explicity
                     fs.Close();
                     //upload file into azure blob container
-                    if (this.executeazCopyExe(PdfBucketPath, requestID,userID, pdfFileName))
+                    if (this.executeazCopyExe(PdfBucketPath, requestID, userID, pdfFileName))
                     {
                         //if file upload successsfully into blob container then delete the directory and files 
+                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Upload PDf file into azure blob, Response :: Success. \n  Request Details are: RequestID " + requestID + " FileName : " + pdfFileName);
+
                         this.clearfiles(PdfBucketPath);
                     }
+                    else
+                    {
+                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Upload PDf file into azure blob, Response :: Error. \n  Request Details are: RequestID " + requestID + " FileName : " + pdfFileName);
+
+                    }
                 }
-                InsightLogger.TrackEndEvent(callerMethodName);
+               // InsightLogger.TrackEndEvent(callerMethodName);
 
             }
             catch (DataAccessException dalexception)
@@ -732,7 +739,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackStartEvent(callerMethodName);
+               // InsightLogger.TrackStartEvent(callerMethodName);
                 string Pdfpath = string.Empty;
                 string executableLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 string functionsPath = Path.Combine(executableLocation, "PDFFiles");
@@ -754,7 +761,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
                 }
                 //create directory with requestID name
                 Directory.CreateDirectory(Pdfpath);              
-                InsightLogger.TrackEndEvent(callerMethodName);
+               // InsightLogger.TrackEndEvent(callerMethodName);
                 return Pdfpath;
             }
             catch (Exception exception)
@@ -860,7 +867,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackStartEvent(callerMethodName);
+               // InsightLogger.TrackStartEvent(callerMethodName);
                 //get azure blob container url from app.config file
                 string blobUrl = ConfigurationManager.AppSettings["BlobUrl"];
                 //get azure storage account key from app.config file
@@ -919,7 +926,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
                     string requestPdfUrlDetails = JsonConvert.SerializeObject(objRequestPDFAddress);
                     //insert pdf blob url details into queue
                     this.AddPdfUrlDetailsToQueue(requestPdfUrlDetails);
-                    InsightLogger.TrackEndEvent(callerMethodName);
+                   // InsightLogger.TrackEndEvent(callerMethodName);
                     return isFileUpload;
                 }
 
@@ -947,7 +954,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackStartEvent(callerMethodName);
+              //  InsightLogger.TrackStartEvent(callerMethodName);
                 //delete directory and it's files from given path
                 System.IO.DirectoryInfo Pdfdir = new System.IO.DirectoryInfo(pdfPath);
                 if (Pdfdir.Exists)
@@ -958,7 +965,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
                     }
                     System.IO.Directory.Delete(pdfPath, true);
                 }
-                InsightLogger.TrackEndEvent(callerMethodName);
+               // InsightLogger.TrackEndEvent(callerMethodName);
 
             }
             catch (Exception exception)
@@ -979,7 +986,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackStartEvent(callerMethodName);
+                //InsightLogger.TrackStartEvent(callerMethodName);
                 // Create the queue client.
                 CloudQueueClient cqdocClient = AzureQueues.GetQueueClient();
                 // Retrieve a reference to a queue.
@@ -987,7 +994,8 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
                 // Async enqueue the message                           
                 CloudQueueMessage message = new CloudQueueMessage(pdfDetails);
                 queuedoc.AddMessage(message);
-                InsightLogger.TrackEndEvent(callerMethodName);
+                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action ::Put request pdf url message details into requestpdfinputuri queue, Response :: True. \n  Pdf URi details: true " + message);
+                //InsightLogger.TrackEndEvent(callerMethodName);
             }
             catch (Exception exception)
             {
@@ -1665,7 +1673,13 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
                     if (this.executeazCopyExe(PdfBucketPath, requestID, userID, pdfFileName))
                     {
                         //if file upload successsfully into blob container then delete the directory and files 
+                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Upload PDf file into azure blob, Response :: Success. \n  Request Details are: RequestID " + requestID + " FileName : " + pdfFileName);
                         this.clearfiles(PdfBucketPath);
+                    }
+                    else
+                    {
+                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Upload PDf file into azure blob, Response :: Error. \n  Request Details are: RequestID " + requestID + " FileName : " + pdfFileName);
+
                     }
                 }
                 InsightLogger.TrackEndEvent(callerMethodName);
