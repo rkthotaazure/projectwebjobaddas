@@ -64,15 +64,22 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Approval
                     apprReqEntity.BackendConfirmed = false;
                     //call dataprovider method to update entity to azure table
                     DataProvider.UpdateEntity<ApprovalEntity>(CoreConstants.AzureTables.RequestTransactions, apprReqEntity);
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: ApprovalAPIController :: Endpoint : api/approval/requests/{ " + requestID + "} , Action :: Update Approval object data in Azure table, Response :: Success ,Details are ApprovalRequestID=" + requestID + " Approver:" + userID + " status:" + status);
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: ApprovalAPIController :: Endpoint : api/approval/requests/{ " + requestID + "} , Action :: Cleared Backend-Confirmed flag(set Backend-Confirmed value to false), Response :: Success ,Details are ApprovalRequestID=" + requestID + " Approver:" + userID + " status:" + status);
                     //get domain,backendid details from service layer
                     objApprQry.Domain = domain;
                     objApprQry.BackendID = backendID;
                     //call backend requestApproval/ api
                     var result = apiController.UpdateApprovalRequest(objApprQry, backendID, requestID);
-                    if (string.IsNullOrEmpty(result.ToString()))
-                    {                    
-                        acknowledgement = result.ToString();
-                    }
+                    //if (string.IsNullOrEmpty(result.ToString()))
+                    //{                    
+                    //    acknowledgement = result.ToString();
+                    //}
+                }
+                else
+                {
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: ApprovalAPIController :: Endpoint : api/approval/requests/{ " + requestID + "} , Action :: Update Approval object data in Azure table, Response :: Error ,Details are ApprovalRequestID=" + requestID + " Approver:" + userID + " status:" + status);
+
                 }
                 //return acknowledgement;
             }
