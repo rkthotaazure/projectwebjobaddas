@@ -50,15 +50,15 @@ namespace adidas.clb.MobileApproval.Utility
         /// </summary>
         /// <param name="userbackend">takes user backend as input</param>
         /// <returns>returns whether backend updated or not</returns>
-        public static Boolean IsBackendUpdated(UserBackendEntity userbackend)
+        public static Boolean IsBackendUpdated(UserBackendEntity userbackend, SynchRequestDTO query)
         {
             if(userbackend.LastUpdate!=null)
             {
-                return (!userbackend.UpdateTriggered) && (userbackend.DefaultUpdateFrequency > 0) && (userbackend.LastUpdate.Value.AddMinutes(userbackend.DefaultUpdateFrequency) > DateTime.Now);
+                return (!userbackend.UpdateTriggered) && (userbackend.DefaultUpdateFrequency > 0) && (!query.parameters.forceUpdate) && (userbackend.LastUpdate.Value.AddMinutes(userbackend.DefaultUpdateFrequency) > DateTime.Now);
             }
             else
             {
-                return (!userbackend.UpdateTriggered) && (userbackend.DefaultUpdateFrequency > 0);
+                return (!userbackend.UpdateTriggered) && (userbackend.DefaultUpdateFrequency > 0) && (!query.parameters.forceUpdate);
             }            
         }
 

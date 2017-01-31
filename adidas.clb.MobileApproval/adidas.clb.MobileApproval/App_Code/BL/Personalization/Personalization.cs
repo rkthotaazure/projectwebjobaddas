@@ -5,6 +5,7 @@
 //-----------------------------------------------------------
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Web;
 using adidas.clb.MobileApproval.Exceptions;
 using adidas.clb.MobileApproval.Models;
@@ -122,6 +123,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
                 List<UserUpdateMsg> usermsglist = new List<UserUpdateMsg>();
                 usermsglist.Add(usermsg);
                 updateTriggerMessage.Users = usermsglist;
+                updateTriggerMessage.GetPDFs = Convert.ToBoolean(ConfigurationManager.AppSettings[CoreConstants.Config.GetPDFs]);
                 //calling data access layer method to add message to queue
                 PersonalizationDAL personalizationdal = new PersonalizationDAL();
                 personalizationdal.AddUpdateTriggerMessageToQueue(updateTriggerMessage);

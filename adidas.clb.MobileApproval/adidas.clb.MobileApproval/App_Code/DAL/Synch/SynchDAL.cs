@@ -98,7 +98,27 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
                 throw new DataAccessException();
             }
         }
-        
+
+        /// <summary>
+        /// method to get SAS PDFUri
+        /// </summary>
+        /// <param name="PDFUri">takes PDFUri as input</param>
+        /// <returns>returns SAS PDFUri</returns>
+        public Uri GetSASPdfUri(string PDFUri)
+        {
+            try
+            {               
+                //call dataprovider method to get sas blob uri                
+                return DataProvider.GetBlobSASUri(PDFUri);
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error while retrieving shared access service pdf uri in DAL : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new DataAccessException();
+            }
+        }
+
         /// <summary>
         /// method to get approvers per request
         /// </summary>
