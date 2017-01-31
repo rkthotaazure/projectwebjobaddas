@@ -245,7 +245,32 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
                 throw new BusinessLogicException();
             }
         }
-        
+
+        /// <summary>
+        /// method to get shared access service pdf uri with id
+        /// </summary>
+        /// <param name="pdfuri">takes pdfuri as input</param>
+        /// <returns>returns sas pdf uri</returns>
+        public Uri GetSASPdfUri(string pdfuri)
+        {
+            try
+            {
+                SynchDAL synchDAL = new SynchDAL();
+                //calling data access layer method                
+                return synchDAL.GetSASPdfUri(pdfuri);
+            }
+            catch (DataAccessException DALexception)
+            {
+                throw DALexception;
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error in BL while getting shared access service pdf uri : "
+                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new BusinessLogicException();
+            }
+        }
+
         /// <summary>
         /// method to get approvers list per request
         /// </summary>

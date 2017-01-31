@@ -12,6 +12,7 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.RetryPolicies;
 using Microsoft.WindowsAzure.Storage.Table;
 using Microsoft.WindowsAzure.Storage.Queue;
+using Microsoft.WindowsAzure.Storage.Blob;
 using adidas.clb.MobileApproval.Models;
 
 namespace adidas.clb.MobileApproval.Utility
@@ -424,6 +425,37 @@ namespace adidas.clb.MobileApproval.Utility
             catch (Exception exception)
             {
                 LoggerHelper.WriteToLog(exception + " - exception in dataprovider while instantiating approval response error object:- "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new Exception();
+            }
+        }
+
+        /// <summary>
+        /// method to get azure table storage object instance
+        /// </summary>
+        /// <param name="TableName">takes tablename as input</param>
+        /// <returns>Azure Table Instance</returns>        
+        public static Uri GetBlobSASUri(string BlobUri)
+        {
+            try
+            {
+                // Retrieve the storage account from the connection string.
+                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
+                CloudConfigurationManager.GetSetting(CoreConstants.AzureTables.AzureStorageConnectionString));
+
+                var readPolicy = new SharedAccessBlobPolicy()
+                {
+                    Permissions = SharedAccessBlobPermissions.Read,
+                    SharedAccessExpiryTime = DateTime.UtcNow + TimeSpan.FromMinutes(5)
+                };              
+                CloudBlockBlob blob = new CloudBlockBlob(new Uri(BlobUri), storageAccount.Credentials);
+                Uri saspdfuri = new Uri(blob.Uri.AbsoluteUri + blob.GetSharedAccessSignature(readPolicy));
+                
+                return saspdfuri;
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - exception in dataprovider while getting SAS Uri for Blob :- "
                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new Exception();
             }

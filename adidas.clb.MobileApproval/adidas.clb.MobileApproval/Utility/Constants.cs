@@ -30,6 +30,8 @@ namespace adidas.clb.MobileApproval.Utility
         public struct Config
         {
             public const string UpdateFrequency = "UpdateFrequency";
+            public const string MaxSynchReplySize = "MaxSynchReplySize";
+            public const string GetPDFs = "GetPDFs";
         }
         //Azure Table constants
         public struct AzureTables
