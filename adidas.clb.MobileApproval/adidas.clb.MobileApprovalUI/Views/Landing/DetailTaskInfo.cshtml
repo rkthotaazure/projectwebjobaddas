@@ -1,8 +1,24 @@
 ﻿<form name="DetailTask" role="form">
-    <div id="mobile-home" class="page-width" ng-controller="ApprovalDetailstaskController" ng-init="init()">
+    <div id="mobile-home" class="page-width detail-task" ng-controller="ApprovalDetailstaskController" ng-init="init()">
+        <div id="overlay" ng-show="showloader">
+        </div>
+        <div id="spinner" ng-show="showloader">
+            <div class="double-bounce1"></div>
+            <div class="double-bounce2"></div>
+        </div>
         <div class="align-text-top" ng-click="redirect()">
-            <span class="glyphicon glyphicon-triangle-left"></span>
-              Back</div> <br />
+            <span class="glyphicon glyphicon-arrow-left"></span>
+            Approvals List
+        </div> <br />
+        <div class="alert alert-info" ng-show="showretry">
+            <p>Please try after sometime. Request is being synched.</p>
+        </div>
+        <div class="alert alert-info" ng-show="nopdfmessage">
+            <p>PDF is not available for this Request.</p>
+        </div>        
+        <div class="alert alert-success" ng-show="tasksuccess">
+            <p>Request updated successfully!</p>
+        </div>
         <div class="mobile-button row" ng-show="hideButton">
             <div class="col-xs-6 text-align-center first-col">
                 <div ng-click="requestStatus('Rejected',id)">
@@ -23,7 +39,7 @@
             </div>
             <div class="row">
                 <div class="col-xs-7">
-                    <label for="Albert" class="control-label">Request#:</label><br/>
+                    <label for="Albert" class="control-label">Request#:</label><br />
                     {{id}}
                 </div>
                 <div class="col-xs-5">
@@ -54,21 +70,21 @@
             </div>
             <div class="table-responsive">
                 <table class="table table-inverse" id="tab_logic_Backend">
-                        <tr ng-repeat="field in fields" ng-class-odd="'odd'" ng-class-even="'even'">
-                            <td>
-                                <div class="input-group">
-                                    <b>{{field.Name}}</b>
-                                </div>
-                            </td>
-                            <td>:</td>
-                            <td>
-                                <div class="input-group">
-                                    {{field.Value}}
-                                </div>
-                            </td>
-                        </tr>
+                    <tr ng-repeat="field in fields" ng-class-odd="'odd'" ng-class-even="'even'">
+                        <td>
+                            <div class="input-group">
+                                <b>{{field.Name}}</b>
+                            </div>
+                        </td>
+                        <td>:</td>
+                        <td>
+                            <div class="input-group">
+                                {{field.Value}}
+                            </div>
+                        </td>
+                    </tr>
                 </table>
-            </div>
+            </div>           
         </div>
         <div class="backends">
             <div class="title-section row">
@@ -88,19 +104,23 @@
                     <tbody>
                         <tr ng-repeat="approver in approvers">
                             <td>
-                                 <label class="approver-lable">{{approver.UserName}}</label>
+                                <label class="approver-lable">{{approver.UserName}}</label>
                             </td>
                             <td>
-                               <label class="approver-lable">{{approver.Status}}</label>
-                                
+                                <label class="approver-lable">{{approver.Status}}</label>
+
                             </td>
                             <td>
-                               <label class="approver-lable">{{approver.DueDate | dateFilter | date: "yyyy/MM/dd"}}</label>
+                                <label class="approver-lable">{{approver.DueDate | dateFilter | date: "yyyy/MM/dd"}}</label>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
+        
+            <div style="text-align: center;">
+                <button type="button" style="" class="btn btn-primary btn-pdf" data-toggle="tooltip" title="Download PDF" data-placement="top"><span style="" ng-click="openpdf()">Download PDF</span></button>                
+            </div>
     </div>
-    </form>
+</form>

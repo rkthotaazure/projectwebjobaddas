@@ -28,6 +28,14 @@ namespace adidas.clb.MobileApprovalUI.Controllers
 
         // return CreateNewUser view 
         string userid = SettingsHelper.UserId;
+        public static string Userid()
+        {
+            UserProfileController userProfileObj = new UserProfileController();
+            var user = userProfileObj.Index();            
+            return "radoadmin";
+        }
+        
+        
         public ActionResult CreateUser()
         {
             return View();

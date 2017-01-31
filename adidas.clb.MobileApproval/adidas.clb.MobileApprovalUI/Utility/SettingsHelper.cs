@@ -152,6 +152,10 @@ namespace adidas.clb.MobileApprovalUI.Utility
         {
             get { return ConfigurationManager.AppSettings["SyncAPIUApprovers"]; }
         }
+        public static string SyncAPIPDF
+        {
+            get { return ConfigurationManager.AppSettings["SyncAPIPDF"]; }
+        }        
         public static string ApprovalAPIReqID
         {
             get { return ConfigurationManager.AppSettings["ApprovalAPIReqID"]; }

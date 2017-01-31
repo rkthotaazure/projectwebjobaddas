@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using System.Web;
 using Newtonsoft;
 using Newtonsoft.Json;
+using Microsoft.Azure.ActiveDirectory.GraphClient;
 
 namespace adidas.clb.MobileApprovalUI.Utility
 {
@@ -38,7 +39,7 @@ namespace adidas.clb.MobileApprovalUI.Utility
             string result = string.Empty;
             try
             {
-                UserProfileController userProfileObj = new UserProfileController();
+                UserProfileController userProfileObj = new UserProfileController();                
                 //create object of client request
                 using (HttpClient client = new HttpClient())
                 {
@@ -71,7 +72,7 @@ namespace adidas.clb.MobileApprovalUI.Utility
                 {
                     client.DefaultRequestHeaders.Add("Accept", "application/json;odata=verbose");
                     client.DefaultRequestHeaders.Add("ContentType", "application/json;odata=verbose");
-                    //client.DefaultRequestHeaders.Add("Authorization", "Bearer " + await userProfileObj.GetTokenForApplication());
+                   //client.DefaultRequestHeaders.Add("Authorization", "Bearer " + await userProfileObj.GetTokenForApplication());
                     HttpResponseMessage responseMessage = await client.PutAsJsonAsync(endpointUri, data);
                     if ((HttpStatusCode.OK).ToString().Equals(responseMessage.ReasonPhrase))
                     {

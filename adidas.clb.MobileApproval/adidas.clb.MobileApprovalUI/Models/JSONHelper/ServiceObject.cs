@@ -88,7 +88,7 @@ namespace adidas.clb.MobileApprovalUI.Models.JSONHelper
 
         [JsonProperty(PropertyName = "request")]
         public Request requestDetails { get; set; }
-
+        public int retryAfter { get; set; }
     }
     public class Request
     {
@@ -113,26 +113,8 @@ namespace adidas.clb.MobileApprovalUI.Models.JSONHelper
         public string RequestId { get; set; }
         public string BackendID { get; set; }
         public string Status { get; set; }
-        private DateTime? dueDate = null;
-        public DateTime DueDate
-        {
-            get
-            {
-                return this.dueDate.HasValue ? this.dueDate.Value : DateTime.Now;
-            }
-
-            set { this.dueDate = value; }
-        }
-        private DateTime? decisionDate = null;
-        public DateTime DecisionDate
-        {
-            get
-            {
-                return this.decisionDate.HasValue ? this.decisionDate.Value : DateTime.Now;
-            }
-
-            set { this.decisionDate = value; }
-        }
+        public DateTime? DueDate { get; set; }
+        public DateTime? DecisionDate { get; set; }        
         public Boolean BackendConfirmed { get; set; }
         public int Missingconfirmations { get; set; }
         public Boolean Backendoverwritten { get; set; }
@@ -154,10 +136,10 @@ namespace adidas.clb.MobileApprovalUI.Models.JSONHelper
         public int Order { get; set; }
         public string UserID { get; set; }
         public string UserName { get; set; }
-        public DateTime Created { get; set; }
+        public DateTime? Created { get; set; }
         public string Status { get; set; }
-        public DateTime DueDate { get; set; }
-        public DateTime DecisionDate { get; set; }
+        public DateTime? DueDate { get; set; }
+        public DateTime? DecisionDate { get; set; }
     }
 
     public class UserDeviceJsonData

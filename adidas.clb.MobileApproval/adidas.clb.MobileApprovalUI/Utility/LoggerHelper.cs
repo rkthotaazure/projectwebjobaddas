@@ -11,7 +11,7 @@ namespace adidas.clb.MobileApprovalUI.Utility
     /// </summary>
     public class LoggerHelper
     {
-        private static readonly ILog log = LogManager.GetLogger("AzureUITableAppender");
+        private static readonly ILog log = LogManager.GetLogger("AdoNetAppender");
 
         /// <summary>
         /// WriteToLog method to handle logs by log4Net based on priority and category

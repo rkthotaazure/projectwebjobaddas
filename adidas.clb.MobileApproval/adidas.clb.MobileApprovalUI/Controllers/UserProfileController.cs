@@ -13,6 +13,7 @@ using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OpenIdConnect;
 using adidas.clb.MobileApprovalUI.Models;
 using adidas.clb.MobileApprovalUI.Utility;
+using Newtonsoft.Json;
 
 namespace adidas.clb.MobileApprovalUI.Controllers
 {
@@ -23,7 +24,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
         private string clientId = ConfigurationManager.AppSettings["ida:ClientId"];
         private string appKey = ConfigurationManager.AppSettings["ida:ClientSecret"];
         private string aadInstance = ConfigurationManager.AppSettings["ida:AADInstance"];
-        private string graphResourceID = ConfigurationManager.AppSettings["ResourceID"];
+        private string graphResourceID = "https://graph.windows.net";
       
 
         // GET: UserProfile
@@ -44,7 +45,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                     .Where(u => u.ObjectId.Equals(userObjectID))
                     .ExecuteAsync();
                 IUser user = result.CurrentPage.ToList().First();
-
+                
                 return View(user);
             }
             catch (AdalException)
@@ -59,6 +60,38 @@ namespace adidas.clb.MobileApprovalUI.Controllers
             }
         }
 
+        // GET: UserProfile
+        public async Task<ActionResult> LogedinUser()
+        {
+            string tenantID = ClaimsPrincipal.Current.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid").Value;
+            string userObjectID = ClaimsPrincipal.Current.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier").Value;
+            try
+            {
+                Uri servicePointUri = new Uri(graphResourceID);
+                Uri serviceRoot = new Uri(servicePointUri, tenantID);
+                ActiveDirectoryClient activeDirectoryClient = new ActiveDirectoryClient(serviceRoot,
+                      async () => await GetTokenForApplication());
+
+                // use the token for querying the graph to get the user details
+
+                var result = await activeDirectoryClient.Users
+                    .Where(u => u.ObjectId.Equals(userObjectID))
+                    .ExecuteAsync();
+                IUser user = result.CurrentPage.ToList().First(); 
+                            
+                return Json(user, JsonRequestBehavior.AllowGet); ;
+            }
+            catch (AdalException)
+            {
+                // Return to error page.
+                return View("Error");
+            }
+            // if the above failed, the user needs to explicitly re-authenticate for the app to obtain the required token
+            catch (Exception)
+            {
+                return View("Relogin");
+            }
+        }
         public void RefreshSession()
         {
             HttpContext.GetOwinContext().Authentication.Challenge(

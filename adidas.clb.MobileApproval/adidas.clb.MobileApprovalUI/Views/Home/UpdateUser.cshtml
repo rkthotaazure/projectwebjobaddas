@@ -1,5 +1,16 @@
 ﻿<form name="UpdateUser" role="form">
     <div id="mobile-home" class="page-width" ng-controller="UpdateUserController" ng-init="init()">
+        <div id="overlay" ng-show="showloader">
+        </div>
+        <div id="spinner" ng-show="showloader">
+            <div class="double-bounce1"></div>
+            <div class="double-bounce2"></div>
+        </div>
+        @*<div class="centerallign glyphicon glyphicon-refresh gly-spin" ng-show="showloader">
+        </div>*@
+        <div class="alert alert-success" ng-show="tasksuccess">
+            <p>User Updated Successfully.</p>
+        </div>
         <div class="mobile-button row">
             <div class="col-xs-6 text-align-center first-col">
                 @*<h4 style="color:green" class="text-align-center">{{msg}}</h4>*@
@@ -21,33 +32,33 @@
                     <div class="title-text">User Information</div>
                 </div>
                 <div class="row">
-                    <div class="col-xs-7 required">
+                    <div class="col-xs-6 required">
                         <label for="Albert" class="control-label">First Name</label>
                         <input type="text" class="form-control" id="FirstName" name="FirstName" ng-model="FirstName" ng-required="true">
 
                     </div>
-                    <div class="col-xs-5 required">
+                    <div class="col-xs-6 required">
                         <label for="Shine" class="control-label">Last Name</label>
                         <input type="text" class="form-control" id="LastName" name="LastName" ng-model="LastName" ng-required="true">
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-xs-7 required">
+                    <div class="col-xs-6 required">
                         <label for="Albert" class="control-label">Full Name</label>
                         <input type="text" class="form-control" id="FullName" name="Fullname" ng-model="Fullname" ng-required="true" />
 
                     </div>
-                    <div class="col-xs-5 required">
+                    <div class="col-xs-6 required">
                         <label for="Albert" class="control-label">Email</label>
                         <input type="text" class="form-control" id="Email" name="Email" ng-model="Email" ng-required="true">
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-xs-7 required">
+                    <div class="col-xs-6 required">
                         <label for="Shine" class="control-label">Device Name</label>
                         <input type="text" class="form-control" id="DeviceName" name="DeviceName" ng-model="DeviceName" ng-required="true">
                     </div>
-                    <div class="col-xs-5 required">
+                    <div class="col-xs-6 required">
                         <label for="Shine" class="control-label">Device OS</label>
                         <input type="text" class="form-control" id="DeviceOS" name="DeviceOS" ng-model="DeviceOS" ng-required="true" />
                     </div>
@@ -61,7 +72,7 @@
                     <div class="title-text">
                         My Backends
                         <div class="add">
-                            <div ng-click="addNewBackend()"><span class="glyphicon glyphicon-plus"></span></div>
+                            <div ng-click="addNewBackend()"><span class="glyphicon glyphicon-plus backend-plus"></span></div>
                         </div>
                     </div>
                 </div>
@@ -93,7 +104,7 @@
                                 </td>
                                 <td>
                                     <div class="input-group">
-                                        <div ng-click="removeBackend(backend)"><span class="glyphicon glyphicon-remove"></span></div>
+                                        <div ng-click="removeBackend(backend)"><span class="glyphicon glyphicon-remove backend-remove"></span></div>
                                     </div>
                                 </td>
                             </tr>
@@ -109,7 +120,7 @@
                     <div class="title-text">
                         My Devices
                         <div class="add">
-                            <div ng-click="addNewdevices()"><span class="glyphicon glyphicon-plus"></span></div>
+                            <div ng-click="addNewdevices()"><span class="glyphicon glyphicon-plus device-plus"></span></div>
                         </div>
                     </div>
                 </div>
@@ -131,7 +142,7 @@
                                     <input class="form-control text-box single-line" id="DeviceBrand" name="DeviceBrand" ng-model="device.DeviceBrand" type="text" />
                                 </td>
                                 <td>
-                                    <div ng-click="removedevices(device)"><span class="glyphicon glyphicon-remove"></span></div>
+                                    <div ng-click="removedevices(device)"><span class="glyphicon glyphicon-remove device-remove"></span></div>
                                 </td>
                             </tr>
                         </tbody>

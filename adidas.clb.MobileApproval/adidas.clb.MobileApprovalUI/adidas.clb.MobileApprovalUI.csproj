@@ -273,6 +273,8 @@
     <Content Include="Images\background1.jpg" />
     <Content Include="Images\background2.jpg" />
     <Content Include="Images\background3.jpg" />
+    <Content Include="Images\business.jpg" />
+    <Content Include="Images\Mobile.jpg" />
     <Content Include="Images\remove.png" />
     <Content Include="Images\newyork.jpg" />
     <Content Include="Images\paris.jpg" />
@@ -345,7 +347,9 @@
     <None Include="Properties\PublishProfiles\genericmobiledev - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\genericmobiledev - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\genericmobiledev - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\mobileapprovalclient - FTP %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\mobileapprovalclient - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\mobileapprovalclient - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\mobileapprovalclient - Web Deploy.pubxml" />
     <None Include="Scripts\app\js\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\app\js\jquery-1.10.2.js" />
