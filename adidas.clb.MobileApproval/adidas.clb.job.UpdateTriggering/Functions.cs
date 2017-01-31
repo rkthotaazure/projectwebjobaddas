@@ -47,9 +47,9 @@ namespace adidas.clb.job.UpdateTriggering
                 //checking update triggering queue message null or empty
                 if (!string.IsNullOrEmpty(message))
                 {
-                    log.WriteLine("adidas.clb.job.UpdateTriggering web job :: Processing update triggering queue message :: start()" + message);
+                    //log.WriteLine("adidas.clb.job.UpdateTriggering web job :: Processing update triggering queue message :: start()" + message);
                     //write message into application insights
-                    InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Processing update triggering queue message :: " + message);
+                    InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Processing update triggering queue message : Start(), \n Response :: Message:" + message + " ,TimeStamp : " + DateTime.UtcNow);
                     //Deserializ input queue message into UpdateTriggeringMsg object
                     UpdateTriggeringMsg objUTMsg = JsonConvert.DeserializeObject<UpdateTriggeringMsg>(message);
                     //checking UpdateTriggeringMsg is null or not
@@ -90,9 +90,9 @@ namespace adidas.clb.job.UpdateTriggering
                             //Communicates a request for cancellation
                             ctsut.Cancel();
                         }
-                        log.WriteLine("adidas.clb.job.UpdateTriggering web job :: Processing update triggering queue message :: End()" + message);
+                        //log.WriteLine("adidas.clb.job.UpdateTriggering web job :: Processing update triggering queue message :: End()" + message);
                         //write message into application insights
-                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Processing update triggering queue message End() UT Message:: " + message);
+                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Processing update triggering queue message : End(), \n Response :: Message:" + message + " ,TimeStamp : " + DateTime.UtcNow);
                     }
                     else
                     {

@@ -40,7 +40,7 @@ namespace adidas.clb.MobileApproval.Controllers
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: ApprovalAPIController :: Endpoint : api/approval/requests/{apprReqID} , Action :: POST: Updates the status of a user approval request method execution has been started.");
+                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: ApprovalAPIController :: Endpoint : api/approval/requests/{apprReqID} , Action :: POST: Updates the status of a user approval request method execution has been started, TimeStamp :: " + DateTime.UtcNow);
                 //Checking ApprovalQuery object is valid or not(User and decision status are the mandatory input data required)
                 if (!string.IsNullOrEmpty(ObjApprovalQuery.UserID) && !string.IsNullOrEmpty(ObjApprovalQuery.ApprovalDecision.Status))
                 {
@@ -53,7 +53,7 @@ namespace adidas.clb.MobileApproval.Controllers
                         objappr.UpdateApprovalObject(ObjApprovalQuery);
 
                     });
-                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: ApprovalAPIController :: Endpoint : api/approval/requests/{apprReqID} , Action :: return Acknowledgement message, Response :: true");
+                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: ApprovalAPIController :: Endpoint : api/approval/requests/{apprReqID} , Action :: return Acknowledgement message, Response :: true ,TimeStamp :: " + DateTime.UtcNow);
                     //return Response message success status code 
                     return Request.CreateResponse(HttpStatusCode.OK);
 

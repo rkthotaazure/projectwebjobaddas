@@ -36,7 +36,7 @@ namespace adidas.clb.job.GeneratePDF
                 if (!string.IsNullOrEmpty(message))
                 {
                    // log.WriteLine("adidas.clb.job.GeneratePDF web job , Action :: Process Generate Pdf Message , Response :: message" + message);
-                    InsightLogger.TrackEvent("adidas.clb.job.GeneratePDF web job, Action :: Process Generate Pdf Message , Response :: message" + message);
+                    InsightLogger.TrackEvent("adidas.clb.job.GeneratePDF web job, Action :: Process Generate Pdf Message :: Start() , Response :: message" + message + "\n TimeStamp " + DateTime.UtcNow);
                     //Deserialize input queue message into RequestPdf object
                     RequestPdf objRequestPdf = JsonConvert.DeserializeObject<RequestPdf>(message);
                     if (objRequestPdf != null)
@@ -64,7 +64,8 @@ namespace adidas.clb.job.GeneratePDF
                         //get RequestUpdateMsg list from UpdateTriggeringMsg
 
                         //log.WriteLine("adidas.clb.job.GeneratePDF :: Processing Generate Pdf message :: End()" + message);
-                       // InsightLogger.TrackEndEvent(callerMethodName);
+                        InsightLogger.TrackEvent("adidas.clb.job.GeneratePDF web job, Action :: Process Generate Pdf Message :: End() , Response :: message" + message + "\n TimeStamp " + DateTime.UtcNow);
+
                     }
                 }
             }
