@@ -45,7 +45,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         /// <summary>
         /// Update next collecting time for each backend
         /// </summary>
-        public void UpdateNextCollectingTime()
+        public void UpdateNextCollectingTime(bool IsFirstTime)
         {
             string callerMethodName = string.Empty;
             try
@@ -77,7 +77,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                         nextCollectingTimeInMinutes = minUpdateFrequency / nextCollectingTimeDividend;
                     }
                     //update backend next collecting time in refernecedata table
-                    this.InsertorUpdateBackendNextCollectingTime(backendID, nextCollectingTimeInMinutes, backend.AverageAllRequestsLatency, backend.LastAllRequestsLatency);
+                    this.InsertorUpdateBackendNextCollectingTime(backendID, nextCollectingTimeInMinutes, backend.AverageAllRequestsLatency, backend.LastAllRequestsLatency,IsFirstTime);
                   // this.objdal.CollectUsersNeedUpdateByBackend(backendID);
                 });
 
@@ -103,7 +103,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         /// </summary>
         /// <param name="backend"></param>
         /// <param name="minimumUpdateFrequency"></param>
-        public void InsertorUpdateBackendNextCollectingTime(string backendID, int minimumUpdateFrequency, int avgAllRequestsLatency, int lastAllRequestsLatency)
+        public void InsertorUpdateBackendNextCollectingTime(string backendID, int minimumUpdateFrequency, int avgAllRequestsLatency, int lastAllRequestsLatency,bool isFirstTimePull)
         {
             string callerMethodName = string.Empty;
             try
@@ -115,12 +115,27 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 if (ObjNextCollectingTime != null)
                 {
                     //update the existing entity
-                    DateTime lastCollectingTime = ObjNextCollectingTime.RegularUpdateLastCollectingTime;
-                    DateTime nextCollectingTime = ObjNextCollectingTime.RegularUpdateNextCollectingTime;
-                    DateTime MissedUpdateLastCollectingTime = ObjNextCollectingTime.MissingUpdateLastCollectingTime;
-                    DateTime MissedUpdateNextCollectingTime = ObjNextCollectingTime.MissingUpdateNextCollectingTime;
+
+                    //if web job has stopped and start again after some time 
+                    //In this scenario we have to set last collecting time for both regular and missed updates to current time
+                    DateTime lastCollectingTime = DateTime.UtcNow;
+                    DateTime MissedUpdateLastCollectingTime = DateTime.UtcNow;
+                    //else get the last collecting time for both regular and missed updates from azure table
+                    if (!isFirstTimePull)
+                    {
+                        lastCollectingTime = ObjNextCollectingTime.RegularUpdateLastCollectingTime;
+                        MissedUpdateLastCollectingTime = ObjNextCollectingTime.MissingUpdateLastCollectingTime;
+                    }
+                    
+                    //DateTime nextCollectingTime = ObjNextCollectingTime.RegularUpdateNextCollectingTime;                    
+                   // DateTime MissedUpdateNextCollectingTime = ObjNextCollectingTime.MissingUpdateNextCollectingTime;
+
+
                     //update  MinimumUpdateFrequency
                     ObjNextCollectingTime.MinimumUpdateFrequency = minimumUpdateFrequency;
+                    //assign last collecting time for both regular and missed updates to azure table properties
+                    ObjNextCollectingTime.RegularUpdateLastCollectingTime = lastCollectingTime;
+                    ObjNextCollectingTime.MissingUpdateLastCollectingTime = MissedUpdateLastCollectingTime;
                     //update  NextCollectingTime value based on new MinimumUpdateFrequency,last collecting Time
                     ObjNextCollectingTime.RegularUpdateNextCollectingTime = lastCollectingTime.AddMinutes(minimumUpdateFrequency);
                     //update Missing Update NextCollectingTime based on updatetriggering Rule R5

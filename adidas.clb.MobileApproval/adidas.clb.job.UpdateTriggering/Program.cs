@@ -88,9 +88,10 @@ namespace adidas.clb.job.UpdateTriggering
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 ////Create object for NextUserCollectingTime class
+                bool IsFirstTime = true;
                 NextUserCollectingTimeDAL objdal = new NextUserCollectingTimeDAL();
                 //call the UpdateNextCollectingTime method which will update the Next Collecting Time of the each backend
-                objdal.UpdateNextCollectingTime();
+                objdal.UpdateNextCollectingTime(IsFirstTime);
             }
             catch (DataAccessException dalexception)
             {               

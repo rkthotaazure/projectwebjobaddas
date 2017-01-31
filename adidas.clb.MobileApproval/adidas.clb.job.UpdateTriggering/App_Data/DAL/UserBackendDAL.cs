@@ -548,16 +548,16 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                         updateEntity.UpdateTriggered = true;
                         // Execute the Replace TableOperation.
                         DataProvider.UpdateEntity<UserBackendEntity>(azureTableUserDeviceConfiguration, updateEntity);
-                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R3) for the userbackend : " + userName + " ,  Response : Success");
+                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R3) for the userbackend : " + userName + " ,  Response : Success");
                     }
                     else
                     {
-                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R3) for the userbackend : " + userName + " ,  Response : Failed");
+                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R3) for the userbackend : " + userName + " ,  Response : Failed");
                     }
                 }
                 else
                 {
-                    InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R3) for the userbackend : " + userName + " ,  Response : Failed");
+                    InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R3) for the userbackend : " + userName + " ,  Response : Failed");
                 }
             }
             catch (BusinessLogicException dalexception)
@@ -596,7 +596,19 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                         reqSyncEntity.UpdateTriggered = true;
                         // Execute the update operation.
                         DataProvider.UpdateEntity(azureTableRequestTransactions, reqSyncEntity);
+                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R4) for the requestID : " + serviceLayerRequestID + " ,  Response : Success");
+
                     }
+                    else
+                    {
+                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R4) for the requestID : " + serviceLayerRequestID + " ,  Response : Failed");
+
+                    }
+                }
+                else
+                {
+                    InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R4) for the requestID : " + serviceLayerRequestID + " ,  Response : Failed");
+
                 }
 
 
@@ -848,7 +860,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                         //getting list of backends in each user
                         lstbackends = users.Backends.ToList();
                         userID = users.UserID;
-                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: For each provided user in Update triggering message, Response :: User:" + userID);
+                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: For each provided user in Update triggering message, Response :: User:" + userID);
                         //creating Backend agent request query i.e RequestsUpdateQuery format
                         BackendUser objUser = new BackendUser()
                         {
@@ -859,7 +871,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                         foreach (Backend backend in lstbackends)
                         {
                             //Creating request update query which is input for backend agent requestupdateretrival api
-                            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: For each backend in user, Response :: Backend: backend.BackendID ,User ::" + userID);
+                            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: For each backend in user, Response :: Backend: " + backend.BackendID + " ,User ::" + userID);
                             RequestsUpdateQuery objReqQuery = new RequestsUpdateQuery()
                             {
                                 User = objUser,
@@ -871,7 +883,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             };
                             //convert RequestsUpdateQuery object into json string
                             backendUserQuery = JsonConvert.SerializeObject(objReqQuery);
-                            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Prepare agent user message, Response :: message:" + backendUserQuery);
+                            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Prepare agent user message, Response :: message:" + backendUserQuery);
                             acknowledgment = string.Empty;
                             //initalize object for api service provider for callingt the web api
                             APIServiceProvider ObjserviceProvider = new APIServiceProvider();
@@ -933,6 +945,8 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     //foreach backend id
                     foreach (string backendID in bakcends.ToList())
                     {
+                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: For each backend in request List, Response :: Backend ID: " + backendID );
+
                         //getting list of RequestUpdateMsg's by same backend
                         var lstRequestsByBackend = (from requests in lstRequests
                                                     where requests.request.Backend.BackendID.Equals(backendID)
@@ -951,7 +965,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             };
                             //convert RequestsUpdateQuery object into json string
                             requestsUpdateQuery = JsonConvert.SerializeObject(objReqQuery);
-                            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering :: Invoke Backend Agent with RequestsUpdateQuery Message:" + requestsUpdateQuery);
+                            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Prepare agent requests update message, Response :: message:" + requestsUpdateQuery);
                             acknowledgment = string.Empty;
                             //initalize object for api service provider for callingt the web api
                             APIServiceProvider ObjserviceProvider = new APIServiceProvider();
