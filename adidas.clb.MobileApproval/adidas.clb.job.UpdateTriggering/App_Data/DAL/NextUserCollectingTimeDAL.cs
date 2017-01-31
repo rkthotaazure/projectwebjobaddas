@@ -120,8 +120,9 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     //In this scenario we have to set last collecting time for both regular and missed updates to current time
                     DateTime lastCollectingTime = DateTime.UtcNow;
                     DateTime MissedUpdateLastCollectingTime = DateTime.UtcNow;
+                    int oldminUpdateFrequency = ObjNextCollectingTime.MinimumUpdateFrequency;
                     //else get the last collecting time for both regular and missed updates from azure table
-                    if (!isFirstTimePull)
+                    if (!isFirstTimePull && (minimumUpdateFrequency == oldminUpdateFrequency))
                     {
                         lastCollectingTime = ObjNextCollectingTime.RegularUpdateLastCollectingTime;
                         MissedUpdateLastCollectingTime = ObjNextCollectingTime.MissingUpdateLastCollectingTime;
