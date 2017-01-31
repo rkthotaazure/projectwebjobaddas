@@ -51,6 +51,56 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
         }
 
         /// <summary>
+        /// method to get existing request
+        /// </summary>
+        /// <param name="partitionkey">takes partionkey as input</param>
+        /// <param name="rowkey">takes row key as input</param>
+        /// <returns>returns request entity</returns>
+        public RequsetEntity GetRequest(string partitionkey,string rowkey)
+        {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
+            try
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                //call dataprovider method to insert entity into azure table
+                return DataProvider.Retrieveentity<RequsetEntity>(CoreConstants.AzureTables.RequestTransactions, partitionkey, rowkey);
+            }
+            catch (Exception exception)
+            {
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error while retrieving request from requestTransactions azure table in DAL", exception, callerMethodName);
+                throw new DataAccessException();
+            }
+        }
+
+        /// <summary>
+        /// method to get Approval entity
+        /// </summary>
+        /// <param name="partitionkey">takes partitionkey for approval entity as input</param>
+        /// <param name="rowkey">takes row key for approval entity as input</param>
+        /// <returns>returns approval entity</returns>
+        public ApprovalEntity GetApproval(string partitionkey, string rowkey)
+        {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
+            try
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                //call dataprovider method to insert entity into azure table
+                return DataProvider.Retrieveentity<ApprovalEntity>(CoreConstants.AzureTables.RequestTransactions, partitionkey,rowkey);
+            }
+            catch (Exception exception)
+            {
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error while getting approval from requestTransactions azure table in DAL ", exception, callerMethodName);
+                throw new DataAccessException();
+            }
+        }
+
+        /// <summary>
         /// method to add/upadte Request entity to azure table
         /// </summary>
         /// <param name="approval">takes approval entity as input</param>
@@ -111,7 +161,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
                 //generate query to retrive approvers 
                 TableQuery<ApproverEntity> query = new TableQuery<ApproverEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.ApproverPK,requestid)));
                 //call dataprovider method to get entities from azure table
-                List<ApproverEntity> existingapprovers = DataProvider.GetEntitiesList<ApproverEntity>(CoreConstants.AzureTables.ReferenceData, query);
+                List<ApproverEntity> existingapprovers = DataProvider.GetEntitiesList<ApproverEntity>(CoreConstants.AzureTables.RequestTransactions, query);
                 //call dataprovider method to remove entities from azure table
                 if(existingapprovers != null && existingapprovers.Count>0)
                 {
@@ -160,7 +210,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
                 //generate query to retrive existing fileds 
                 TableQuery<FieldEntity> query = new TableQuery<FieldEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.FieldPK, requestid)));
                 //call dataprovider method to get entities from azure table
-                List<FieldEntity> existingfields = DataProvider.GetEntitiesList<FieldEntity>(CoreConstants.AzureTables.ReferenceData, query);
+                List<FieldEntity> existingfields = DataProvider.GetEntitiesList<FieldEntity>(CoreConstants.AzureTables.RequestTransactions, query);
                 //call dataprovider method to remove entities from azure table
                 if (existingfields != null && existingfields.Count > 0)
                 {

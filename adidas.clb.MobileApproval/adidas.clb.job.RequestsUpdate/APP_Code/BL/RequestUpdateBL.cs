@@ -35,24 +35,40 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                //generating request entity from input request obj by adding partitionkey and rowkey
-                RequsetEntity requestentity = DataProvider.ResponseObjectMapper<RequsetEntity, Request>(backendrequest.RequestsList);
-                requestentity.PartitionKey = string.Concat(CoreConstants.AzureTables.RequestsPK, UserID);
-                requestentity.RowKey = backendrequest.RequestsList.ID;
-                //adding service layer requestid to entity                
-                requestentity.ServiceLayerReqID = backendrequest.ServiceLayerReqID;
-                requestentity.BackendID = backendId;
-                requestentity.UpdateTriggered = false;
-                requestentity.LastUpdate = DateTime.Now;
-                //add requester deatils to request entity
-                if (backendrequest.RequestsList.Requester != null)
-                {
-                    requestentity.RequesterID = backendrequest.RequestsList.Requester.UserID;
-                    requestentity.RequesterName = backendrequest.RequestsList.Requester.Name;
-                }
-                //calling DAL method to add request entity
                 RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
-                requestupdatedal.AddUpdateRequest(requestentity);
+                //get the request to update
+                RequsetEntity existingrequest = requestupdatedal.GetRequest(string.Concat(CoreConstants.AzureTables.RequestsPK, UserID), backendrequest.RequestsList.ID);
+                //if request exists update otherwise craete new request
+                if(existingrequest!=null)
+                {
+                    existingrequest.Created = backendrequest.RequestsList.Created;
+                    existingrequest.LastUpdate = DateTime.Now;
+                    existingrequest.Status = backendrequest.RequestsList.Status;
+                    existingrequest.Title = backendrequest.RequestsList.Title;
+                    existingrequest.UpdateTriggered = false;
+                    //calling DAL method to update request entity
+                    requestupdatedal.AddUpdateRequest(existingrequest);
+                }
+                else
+                {
+                    //generating request entity from input request obj by adding partitionkey and rowkey
+                    RequsetEntity requestentity = DataProvider.ResponseObjectMapper<RequsetEntity, Request>(backendrequest.RequestsList);
+                    requestentity.PartitionKey = string.Concat(CoreConstants.AzureTables.RequestsPK, UserID);
+                    requestentity.RowKey = backendrequest.RequestsList.ID;
+                    //adding service layer requestid to entity                
+                    requestentity.ServiceLayerReqID = backendrequest.ServiceLayerReqID;
+                    requestentity.BackendID = backendId;
+                    requestentity.UpdateTriggered = false;
+                    requestentity.LastUpdate = DateTime.Now;
+                    //add requester deatils to request entity
+                    if (backendrequest.RequestsList.Requester != null)
+                    {
+                        requestentity.RequesterID = backendrequest.RequestsList.Requester.UserID;
+                        requestentity.RequesterName = backendrequest.RequestsList.Requester.Name;
+                    }
+                    //calling DAL method to add request entity
+                    requestupdatedal.AddUpdateRequest(requestentity);
+                }                
             }
             catch (DataAccessException DALexception)
             {
@@ -70,7 +86,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
         /// BL method to add approval entity into azure table
         /// </summary>
         /// <param name="request">takes request as input</param>
-        public void AddUpdateApproval(List<Approvers> approverslist, string requestid, string UserID, string backendId)
+        public void AddUpdateApproval(List<Approvers> approverslist, string requestid, string UserID, string backendId, int missingconfirmationlimit)
         {
             //Get Caller Method name
             string callerMethodName = string.Empty;
@@ -78,23 +94,56 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                //get the current approver from list of approvers
-                Approvers approver = approverslist.Find(x => x.User.UserID == UserID);
-                //generating approval entity from input approver,request obj by adding partitionkey and rowkey
-                ApprovalEntity approvalentity = new ApprovalEntity();
-                approvalentity.PartitionKey = string.Concat(CoreConstants.AzureTables.ApprovalPK, UserID);
-                approvalentity.RowKey = requestid;
-                approvalentity.RequestId = requestid;
-                string status = approver.Status;
-                if (string.IsNullOrEmpty(status))
-                {
-                    status=CoreConstants.AzureTables.Waiting;
-                }                
-                approvalentity.Status = status;
-                approvalentity.BackendID = backendId;
                 RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
-                //calling DAL method to add request entity
-                requestupdatedal.AddUpdateApproval(approvalentity);
+                string partitionkey = string.Concat(CoreConstants.AzureTables.ApprovalPK, UserID);
+                //get approval from service layer
+                ApprovalEntity ServiceLayerApproval = requestupdatedal.GetApproval(partitionkey, requestid);
+                //get the current approver from list of approvers got from backend
+                Approvers approver = approverslist.Find(x => x.User.UserID == UserID);
+                //check if approval exists or not
+                if (ServiceLayerApproval != null)
+                {
+                    //check for Status Confirmation and update approval flags
+                    if (ServiceLayerApproval.Status == approver.Status)
+                    {
+                        ServiceLayerApproval.Backendoverwritten = false;
+                        ServiceLayerApproval.BackendConfirmed = true;
+                        ServiceLayerApproval.Missingconfirmations = 0;
+                    }
+                    else
+                    {
+                        ServiceLayerApproval.Missingconfirmations = ServiceLayerApproval.Missingconfirmations + 1;
+                        ServiceLayerApproval.Backendoverwritten = false;
+                        ServiceLayerApproval.BackendConfirmed = true;
+                        //check for Missing confirmation limit
+                        if (ServiceLayerApproval.Missingconfirmations > missingconfirmationlimit)
+                        {
+                            ServiceLayerApproval.Backendoverwritten = true;
+                            ServiceLayerApproval.BackendConfirmed = true;
+                            ServiceLayerApproval.Missingconfirmations = 0;
+                            ServiceLayerApproval.Status = approver.Status;
+                        }
+                    }
+                    //calling DAL method to add request entity
+                    requestupdatedal.AddUpdateApproval(ServiceLayerApproval);
+                }
+                else
+                {
+                    //generating approval entity from input approver,request obj by adding partitionkey and rowkey
+                    ApprovalEntity approvalentity = new ApprovalEntity();
+                    approvalentity.PartitionKey = partitionkey;
+                    approvalentity.RowKey = requestid;
+                    approvalentity.RequestId = requestid;
+                    string status = approver.Status;
+                    if (string.IsNullOrEmpty(status))
+                    {
+                        status = CoreConstants.AzureTables.Waiting;
+                    }
+                    approvalentity.Status = status;
+                    approvalentity.BackendID = backendId;
+                    //calling DAL method to add request entity
+                    requestupdatedal.AddUpdateApproval(approvalentity);
+                }
             }
             catch (DataAccessException DALexception)
             {
@@ -333,13 +382,26 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
         }
 
         /// <summary>
+        /// method to get backend entity
+        /// </summary>
+        /// <param name="backendid">takes backend id as input</param>
+        /// <returns>returns backend entity</returns>
+        public BackendEntity Getbackend(string backendid)
+        {
+            RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
+            //calling dal method to get backend entity to be updated
+            BackendEntity backend = requestupdatedal.GetBackend(backendid);
+            return backend;
+        }
+
+        /// <summary>
         /// method to caliculate average sizes and latencies to update in userbackend
         /// </summary>
         /// <param name="BackendId">takes backendid as input</param>
         /// <param name="Totalrequestssize">takes totalrequestsize as input</param>
         /// <param name="TotalRequestlatency">takes total request latency as input</param>
         /// <param name="requestscount">takes request count as input</param>
-        public void UpdateBackend(string BackendId, int Totalrequestssize, int TotalRequestlatency, int requestscount)
+        public void UpdateBackend(BackendEntity backend, int Totalrequestssize, int TotalRequestlatency, int requestscount)
         {
             //Get Caller Method name
             string callerMethodName = string.Empty;
@@ -347,9 +409,6 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
-                //calling dal method to get backend entity to be updated
-                BackendEntity backend = requestupdatedal.GetBackend(BackendId);
                 //if request count more than one.
                 if (requestscount > 0)
                 {
@@ -366,6 +425,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                     backend.TotalBatchRequestsCount = backend.TotalBatchRequestsCount + 1;
                 }
                 //calling DAL method to update backend entity
+                RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
                 requestupdatedal.UpdateBackend(backend);
             }
             catch (DataAccessException DALexception)

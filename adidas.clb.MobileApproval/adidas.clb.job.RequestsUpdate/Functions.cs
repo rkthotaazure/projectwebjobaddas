@@ -31,10 +31,13 @@ namespace adidas.clb.job.RequestsUpdate
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("adidas.clb.job.RequestUpdate :: method : request update queue trigger, action:Reading queue message, response:succuess");
                 //deserialize Queue message to Requests 
                 RequestsUpdateData requestsdata = JsonConvert.DeserializeObject<RequestsUpdateData>(message);
                 List<BackendRequest> backendrequestslist = requestsdata.Requests;
                 RequestUpdateBL requsetupdatebl = new RequestUpdateBL();
+                //get backend to get missingconfirmationlimit for backend and also to update flags
+                BackendEntity backend = requsetupdatebl.Getbackend(requestsdata.BackendID);
                 int TotalRequestsize = 0;
                 int TotalRequestlatency = 0;
                 int requestcount = backendrequestslist.Count;
@@ -42,6 +45,7 @@ namespace adidas.clb.job.RequestsUpdate
                 if (backendrequestslist != null && backendrequestslist.Count>0)
                 {
                     //looping through each backendrequest to add requests , approvers and fields for each requet
+                    InsightLogger.TrackEvent("adidas.clb.job.RequestUpdate :: method : request update queue trigger, action:looping all requests");
                     foreach (BackendRequest backendrequest in backendrequestslist)
                     {
                         //split main backendrequest object into individual entities
@@ -52,10 +56,14 @@ namespace adidas.clb.job.RequestsUpdate
                         //calling BL methods to add request , approval, approvers and fields
                         if(!string.IsNullOrEmpty(request.UserID))
                         {
+                            InsightLogger.TrackEvent("adidas.clb.job.RequestUpdate :: method : request update queue trigger, action:clearing request waiting flag, response:success");
                             requsetupdatebl.AddUpdateRequest(backendrequest, request.UserID, requestsdata.BackendID);
-                            requsetupdatebl.AddUpdateApproval(approvers, request.ID, backendrequest.RequestsList.UserID, requestsdata.BackendID);
-                            requsetupdatebl.AddUpdateApprovers(approvers, request.ID);
+                            InsightLogger.TrackEvent("adidas.clb.job.RequestUpdate :: method : request update queue trigger, action:clearing request waiting falg, response:success");
+                            requsetupdatebl.AddUpdateApproval(approvers, request.ID, backendrequest.RequestsList.UserID, requestsdata.BackendID,backend.MissingConfirmationsLimit);
+                            InsightLogger.TrackEvent("adidas.clb.job.RequestUpdate :: method : request update queue trigger, action:clearing request waiting falg, response:success"); InsightLogger.TrackEvent("adidas.clb.job.RequestUpdate :: method : request update queue trigger, action:update/remove/create approval object, response:success");
+                            requsetupdatebl.AddUpdateApprovers(approvers, request.ID);                            
                             requsetupdatebl.AddUpdateFields(genericInfoFields, overviewFields, request.ID);
+                            InsightLogger.TrackEvent("adidas.clb.job.RequestUpdate :: method : request update queue trigger, action:clearing request waiting falg, response:success"); InsightLogger.TrackEvent("adidas.clb.job.RequestUpdate :: method : request update queue trigger, action:update backend tracking variables, response:success");
                             //caliculating request size                        
                             int requestsize = requsetupdatebl.CalculateRequestSize(backendrequest);
                             //caliculating total of size for all requests
@@ -65,12 +73,17 @@ namespace adidas.clb.job.RequestsUpdate
                         }            
                     }
                 }
+                InsightLogger.TrackEvent("adidas.clb.job.RequestUpdate :: method : request update queue trigger, action:looping all requests end");
                 //calling BL methods to update average sizes and latencies for userbackend and backend
-                if(!string.IsNullOrEmpty(requestsdata.UserId))
+                if (!string.IsNullOrEmpty(requestsdata.UserId))
                 {
+                    InsightLogger.TrackEvent("adidas.clb.job.RequestUpdate :: method : request update queue trigger, action:check user or request, response:user");
                     requsetupdatebl.UpdateUserBackend(requestsdata.UserId, requestsdata.BackendID, TotalRequestsize, TotalRequestlatency, requestcount);
-                    requsetupdatebl.UpdateBackend(requestsdata.BackendID, TotalRequestsize, TotalRequestlatency, requestcount);
-                }                                   
+                    InsightLogger.TrackEvent("adidas.clb.job.RequestUpdate :: method : request update queue trigger, action:update userbackend tracking variables, response:success");
+                }
+                InsightLogger.TrackEvent("adidas.clb.job.RequestUpdate :: method : request update queue trigger, action:update backend tracking variables, response:success");
+                requsetupdatebl.UpdateBackend(backend, TotalRequestsize, TotalRequestlatency, requestcount);
+                InsightLogger.TrackEvent("adidas.clb.job.RequestUpdate :: method : request update queue trigger, action:end of the method");
             }
             catch (DataAccessException dalexception)
             {
@@ -100,12 +113,15 @@ namespace adidas.clb.job.RequestsUpdate
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("adidas.clb.job.RequestUpdate :: method : requestpdfuri queue trigger, action:reading queue message, response:success");
                 //deserialize Queue message to get PDF uri 
                 RequestPDF requestPDFdata = JsonConvert.DeserializeObject<RequestPDF>(message);
                 RequestUpdateBL requestupdatebl = new RequestUpdateBL();
                 Uri PDFuri = new Uri(requestPDFdata.PDFUri);
+                InsightLogger.TrackEvent("adidas.clb.job.RequestUpdate :: method : requestpdfuri queue trigger, action:getting pdfuri from message, response:success");
                 //updating request entity with pdf uri
                 requestupdatebl.AddPDFUriToRequest(PDFuri, requestPDFdata.UserId, requestPDFdata.RequestID);
+                InsightLogger.TrackEvent("adidas.clb.job.RequestUpdate :: method : requestpdfuri queue trigger, action:updating request object with pdf uri, response:success");
             }
             catch (DataAccessException dalexception)
             {
