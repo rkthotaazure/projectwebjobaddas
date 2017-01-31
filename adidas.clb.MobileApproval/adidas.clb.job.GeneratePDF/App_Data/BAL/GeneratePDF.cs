@@ -52,7 +52,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackStartEvent(callerMethodName);
+                //InsightLogger.TrackStartEvent(callerMethodName);
                 //read Font name,size,heading summary font dvalues from app.config
                 string pdfCellFontName = ConfigurationManager.AppSettings["PDFCellFontName"];
                 int pdfCellFontSize = Convert.ToInt32(ConfigurationManager.AppSettings["PDFCellFontSize"]);
@@ -704,13 +704,13 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
                     if (this.executeazCopyExe(PdfBucketPath, requestID, userID, pdfFileName))
                     {
                         //if file upload successsfully into blob container then delete the directory and files 
-                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Upload PDf file into azure blob, Response :: Success. \n  Request Details are: RequestID " + requestID + " FileName : " + pdfFileName);
+                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Upload PDf file into azure blob, Response :: Success. \n  Request Details are: RequestID " + requestID + " FileName : " + pdfFileName + ".pdf");
 
                         this.clearfiles(PdfBucketPath);
                     }
                     else
                     {
-                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Upload PDf file into azure blob, Response :: Error. \n  Request Details are: RequestID " + requestID + " FileName : " + pdfFileName);
+                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Upload PDf file into azure blob, Response :: Error. \n  Request Details are: RequestID " + requestID + " FileName : " + pdfFileName + ".pdf");
 
                     }
                 }
@@ -1015,7 +1015,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackStartEvent(callerMethodName);
+               // InsightLogger.TrackStartEvent(callerMethodName);
                 //read Font name,size,heading summary font dvalues from app.config
                 string pdfCellFontName = ConfigurationManager.AppSettings["PDFCellFontName"];
                 int pdfCellFontSize = Convert.ToInt32(ConfigurationManager.AppSettings["PDFCellFontSize"]);
@@ -1673,16 +1673,16 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
                     if (this.executeazCopyExe(PdfBucketPath, requestID, userID, pdfFileName))
                     {
                         //if file upload successsfully into blob container then delete the directory and files 
-                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Upload PDf file into azure blob, Response :: Success. \n  Request Details are: RequestID " + requestID + " FileName : " + pdfFileName);
+                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Upload PDf file into azure blob, Response :: Success. \n  Request Details are: RequestID " + requestID + " FileName : " + pdfFileName + ".pdf");
                         this.clearfiles(PdfBucketPath);
                     }
                     else
                     {
-                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Upload PDf file into azure blob, Response :: Error. \n  Request Details are: RequestID " + requestID + " FileName : " + pdfFileName);
+                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Upload PDf file into azure blob, Response :: Error. \n  Request Details are: RequestID " + requestID + " FileName : " + pdfFileName + ".pdf");
 
                     }
                 }
-                InsightLogger.TrackEndEvent(callerMethodName);
+                //InsightLogger.TrackEndEvent(callerMethodName);
             }
             catch (DataAccessException dalexception)
             {

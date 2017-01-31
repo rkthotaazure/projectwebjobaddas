@@ -32,7 +32,7 @@ namespace adidas.clb.job.GeneratePDF
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackStartEvent(callerMethodName);
+               // InsightLogger.TrackStartEvent(callerMethodName);
                 if (!string.IsNullOrEmpty(message))
                 {
                    // log.WriteLine("adidas.clb.job.GeneratePDF web job , Action :: Process Generate Pdf Message , Response :: message" + message);

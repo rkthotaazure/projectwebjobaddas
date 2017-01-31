@@ -54,7 +54,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 bool IsNeedsUpdate = false;
                 //Update triggering Rules (R2) :: UserNeedsUpdate=(NOT UserBackend.UpdateTriggered AND (UserBackend.lastUpdate + UserBackend.UpdateFrequency >Now))
-                if ((!UserBackendUpdateTriggered) && (UserBackendLastUpdate.AddSeconds(ConvertDaysToSeconds(UserBackendUpdateFrequency)) > DateTime.UtcNow))
+                if ((!UserBackendUpdateTriggered) && (UserBackendLastUpdate.AddSeconds(ConvertMinutesToSeconds(UserBackendUpdateFrequency)) > DateTime.UtcNow))
                 {
                     IsNeedsUpdate = true;
                 }
@@ -84,7 +84,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                 DateTime expectedUpdateTime;
                 //Now + Max(Backend.AverageAllRequestsLatency;Backend.LastALLRequestLatency)*1.2
                 expectedUpdateTime = DateTime.UtcNow.AddSeconds((Math.Max(BackendAverageALLRequestLatency, Convert.ToDouble(BackendLastALLRequestLatency)) * Convert.ToDouble(System.Configuration.ConfigurationManager.AppSettings["ConstantFraction"])));
-                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R3) ,  Response : Expected Update Time ::" + Convert.ToString(expectedUpdateTime));
+                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Compute and set Expected Updated Timestamp for Userbackend(UT Rule :: R3) ,  Response : Expected Update Time ::" + Convert.ToString(expectedUpdateTime));
                 return expectedUpdateTime;
             }
             catch (Exception exception)
@@ -109,6 +109,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                 DateTime requestExpectedUpdateTime;
                 //Now + Max(Backend.AverageRequestsLatency;Backend.LastRequestLatency)*1.2
                 requestExpectedUpdateTime = DateTime.UtcNow.AddSeconds((Math.Max(BackendAverageRequestLatency, Convert.ToDouble(BackendLastRequestLatency)) * Convert.ToDouble(System.Configuration.ConfigurationManager.AppSettings["ConstantFraction"])));
+                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Compute and set Expected Updated Timestamp for Request(UT Rule :: R4) ,  Response : Expected Update Time ::" + Convert.ToString(requestExpectedUpdateTime));
                 return requestExpectedUpdateTime;
             }
             catch (Exception exception)
@@ -227,6 +228,10 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
         public static double ConvertDaysToSeconds(double days)
         {
             return TimeSpan.FromDays(days).TotalSeconds;
+        }
+        public static double ConvertMinutesToSeconds(double minutes)
+        {
+            return TimeSpan.FromMinutes(minutes).TotalSeconds;
         }
 
     }
