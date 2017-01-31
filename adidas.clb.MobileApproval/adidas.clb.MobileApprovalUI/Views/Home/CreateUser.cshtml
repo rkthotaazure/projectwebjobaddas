@@ -1,5 +1,14 @@
 ﻿<form name="CreateUser" role="form">
     <div id="mobile-home" class="page-width" ng-controller="CreateUserController" ng-init="init()">
+        <div id="overlay" ng-show="showloader">
+        </div>
+        <div id="spinner" ng-show="showloader">
+            <div class="double-bounce1"></div>
+            <div class="double-bounce2"></div>
+        </div>
+        <div class="alert alert-success" ng-show="tasksuccess">
+            <p>User Craeted Successfully.</p>
+        </div>
         <div class="mobile-button row">
             <h4 style="color:green" class="text-align-right">{{msg}}</h4>
             @*<div class="col-xs-6 text-align-center first-col">
@@ -56,7 +65,7 @@
                 <div class="title-text">
                     Backends
                     <div class="add">
-                        <div ng-click="addNewBackend()"><span class="glyphicon glyphicon-plus"></span></div>
+                        <div ng-click="addNewBackend()"><span class="glyphicon glyphicon-plus backend-plus"></span></div>
                     </div>
                 </div>
             </div>
@@ -89,7 +98,7 @@
                             </td>
                             <td>
                                 <div class="input-group">
-                                    <div ng-click="removeBackend(backend)"><span class="glyphicon glyphicon-remove"></span></div>
+                                    <div ng-click="removeBackend(backend)"><span class="glyphicon glyphicon-remove backend-remove"></span></div>
                                 </div>
                             </td>
                         </tr>
@@ -103,7 +112,7 @@
                 <div class="title-text">
                     My Devices
                     <div class="add">
-                        <div ng-click="addNewdevices()"><span class="glyphicon glyphicon-plus"></span></div>
+                        <div ng-click="addNewdevices()"><span class="glyphicon glyphicon-plus device-plus"></span></div>
                     </div>
                 </div>
             </div>
@@ -125,7 +134,7 @@
                                 <input class="form-control text-box single-line" id="DeviceBrand" name="DeviceBrand" ng-model="device.DeviceBrand" type="text" />
                             </td>
                             <td>
-                                <div ng-click="removedevices(device)"><span class="glyphicon glyphicon-remove"></span></div>
+                                <div ng-click="removedevices(device)"><span class="glyphicon glyphicon-remove device-remove"></span></div>
                             </td>
                         </tr>
                     </tbody>

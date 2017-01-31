@@ -20,6 +20,7 @@ namespace adidas.clb.MobileApprovalUI.Models
         public DateTime Created { get; set; }
         public string Status { get; set; }
         public int Latency { get; set; }
+        public string PDFUri { get; set; }
         public RequesterDTO Requester { get; set; }
         public List<FieldDTO> Fields { get; set; }
         public List<Approvers> Approvers { get; set; }
@@ -42,10 +43,10 @@ namespace adidas.clb.MobileApprovalUI.Models
         public int Order { get; set; }
         public string UserID { get; set; }
         public string UserName { get; set; }
-        public DateTime Created { get; set; }
+        public DateTime? Created { get; set; }
         public string Status { get; set; }
-        public DateTime DueDate { get; set; }
-        public DateTime DecisionDate { get; set; }
+        public DateTime? DueDate { get; set; }
+        public DateTime? DecisionDate { get; set; }
     }
    
     public class FieldDTO

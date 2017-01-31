@@ -1,8 +1,20 @@
-﻿<div id="mobile-home" class="page-width" ng-controller="ApprovalDetailsController" ng-init="init()">
+﻿<div id="mobile-home" class="page-width approval-details" ng-controller="ApprovalDetailsController" ng-init="init()">
+    <div id="overlay" ng-show="loading">
+    </div>
+    <div id="spinner" ng-show="loading">
+        <div class="double-bounce1"></div>
+        <div class="double-bounce2"></div>
+    </div>
     <div class="align-text-top" ng-click="redirect()">
-        <span class="glyphicon glyphicon-triangle-left"></span>
+        <span class="glyphicon glyphicon-arrow-left"></span>
         Approval Dashboard
     </div><br />
+    <div class="alert alert-info" ng-show="ShowwaitingMessage">
+        <p>Please try after sometime. Your requests are being synched.</p>
+    </div>
+    <div class="alert alert-success" ng-show="tasksuccess">
+        <p>Request {{taskrequestid}} updated successfully!</p> 
+    </div>
     <div class="backends">
         <div class="title-section row">
             <div class="title-text">
@@ -19,9 +31,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-class-odd="'odd'" ng-class-even="'even'" ng-show="loading">
+                    @*<tr ng-class-odd="'odd'" ng-class-even="'even'" ng-show="loading">
                         <td></td><td align="center" class="glyphicon glyphicon-refresh gly-spin"></td><td></td>
-                    </tr>
+                    </tr>*@
                     <tr ng-repeat="approvaltask in approvalTasks | filter:paginate" ng-class-odd="'odd'" ng-class-even="'even'">
                         <td>
                             <div class="input-group" ng-click="showDetails(approvaltask.RequestId)">
@@ -34,6 +46,11 @@
                             </div>
                         </td>
                         <td>
+                            @*<div class="input-group align-middle" style="position:relative;z-index:1000;" ng-show="CurrentTask(approvaltask.RequestId)">
+                                <div class="glyphicon glyphicon-refresh gly-spin">
+                                    
+                                </div>
+                            </div>*@
                             <div class="input-group" ng-show="hideButton">
                                 <div><button type="button" class="btn btn-primary" data-toggle="tooltip" title="Approve" data-placement="top"><span class="glyphicon glyphicon-ok" ng-click="requestStatus('Approved',approvaltask.RequestId)"></span></button>
                                 <button type="button" class="btn btn-primary" data-toggle="tooltip" title="Reject" data-placement="top"><span class="glyphicon glyphicon-remove" ng-click="requestStatus('Rejected',approvaltask.RequestId)"></span></button></div>
