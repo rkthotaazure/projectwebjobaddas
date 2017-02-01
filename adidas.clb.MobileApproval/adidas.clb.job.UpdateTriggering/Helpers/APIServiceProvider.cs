@@ -26,7 +26,7 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
         /// <param name="backendID"></param>
         /// <param name="UpdateTriggeringMessage"></param>
         /// <returns></returns>
-        public void CallBackendAgent(string backendID, string UpdateTriggeringMessage)
+        public void CallBackendAgent(string backendID, string UpdateTriggeringMessage,string messagecategory)
         {
             string callerMethodName = string.Empty;
             try
@@ -34,13 +34,12 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 string acknowledgement = string.Empty;
-                RequestsUpdateAck Objacknowledgement = null;
+               // RequestsUpdateAck Objacknowledgement = null;
                 using (HttpClient client = new HttpClient())
                 {
                    
                     //get API endpoint and format
                     string backendApiEndpoint = UrlSettings.GetBackendAgentRequestApprovalAPI(backendID);
-                    InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Pass user message to agent (Invoking backend agent API) :: \n Response ::  \n API Endpont : " + backendApiEndpoint + " \n RequestUpdateMessage: " + UpdateTriggeringMessage);
                     //Post Triggers the pulling of updated requests data from a the given backend / given requests
                     //Max Retry call from web.config
                     int maxRetryCount = Convert.ToInt32(ConfigurationManager.AppSettings["MaxRetryCount"]);
@@ -54,10 +53,12 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
                         {
                             var request = new HttpRequestMessage(HttpMethod.Post, backendApiEndpoint);
                             request.Content = new StringContent(UpdateTriggeringMessage, Encoding.UTF8, "application/json");
-                            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Pass user message to agent (Invoking backend agent API) , Response :: Success");
+                           // InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Pass user message to agent (Invoking backend agent API) , Response :: Success");
                             var result = client.SendAsync(request).Result;
+                            InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Pass " + messagecategory + " message to agent (Invoking backend agent API) :: \n Response :: Success \n API Endpont : " + backendApiEndpoint + " \n RequestUpdateMessage: " + UpdateTriggeringMessage);
+
                             //if the api call returns successcode then return the result into string
-                            
+
                             //if (result.IsSuccessStatusCode)
                             //{
                             //    string response = result.Content.ReadAsStringAsync().GetAwaiter().GetResult();
@@ -69,12 +70,12 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
                             //        if (Objacknowledgement.Error == null)
                             //        {
                             //            acknowledgement = "Backend API has been invoked successfully. ";
-                            //            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Pass user message to agent (Invoking backend agent API) , Response :: Success");
+                            //            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: updatetriggerinputqueue, Action :: Pass user message to agent (Invoking backend agent API) , Response :: Success");
 
                             //        }
                             //        else
                             //        {
-                            //            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Pass user message to agent (Invoking backend agent API) , Response :: Backend API has thrown an error :: ErrorMessage=" + Objacknowledgement.Error.longtext);
+                            //            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: updatetriggerinputqueue, Action :: Pass user message to agent (Invoking backend agent API) , Response :: Backend API has thrown an error :: ErrorMessage=" + Objacknowledgement.Error.longtext);
                             //        }
                             //    }
 

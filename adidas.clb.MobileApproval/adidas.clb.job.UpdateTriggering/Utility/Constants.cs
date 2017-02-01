@@ -27,6 +27,8 @@ namespace adidas.clb.job.UpdateTriggering.Utility
             public const string General = "General";
             public const string Trace = "Trace";
             public const string Error = "Error";
+            public const string User = "User";
+            public const string Request = "Request";
         }
 
         #region "Exception and Error Constants"

@@ -148,7 +148,7 @@ namespace adidas.clb.job.GeneratePDF.Helpers
                     Directory.CreateDirectory(aZCopy);
                 }
                 //write aZCopy directory path into application insights
-                InsightLogger.TrackEvent("AzCopy.exe File Path" + aZCopy);
+             //   InsightLogger.TrackEvent("AzCopy.exe File Path" + aZCopy);
                 return aZCopy;
             }
             catch (Exception exception)
@@ -181,7 +181,7 @@ namespace adidas.clb.job.GeneratePDF.Helpers
                     Directory.CreateDirectory(imagepath);
                 }
                 //write aZCopy directory path into application insights
-                InsightLogger.TrackEvent("AzCopy.exe File Path" + imagepath);
+               // InsightLogger.TrackEvent("AzCopy.exe File Path" + imagepath);
                 return imagepath;
             }
             catch (Exception exception)
