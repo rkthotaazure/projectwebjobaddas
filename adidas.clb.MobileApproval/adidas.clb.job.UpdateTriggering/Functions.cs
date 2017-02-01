@@ -49,7 +49,7 @@ namespace adidas.clb.job.UpdateTriggering
                 {
                     //log.WriteLine("adidas.clb.job.UpdateTriggering web job :: Processing update triggering queue message :: start()" + message);
                     //write message into application insights
-                    InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Processing update triggering queue message : Start(), \n Response :: Message:" + message + " ,TimeStamp : " + DateTime.Now);
+                    InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Processing update triggering queue message : Start(), \n Response :: Message:" + message );
                     //Deserializ input queue message into UpdateTriggeringMsg object
                     UpdateTriggeringMsg objUTMsg = JsonConvert.DeserializeObject<UpdateTriggeringMsg>(message);
                     //checking UpdateTriggeringMsg is null or not
@@ -61,7 +61,7 @@ namespace adidas.clb.job.UpdateTriggering
                         if (objUTMsg.Users != null)
                         {
                             lstUsers = objUTMsg.Users.ToList();
-                            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Users Provided ?(Is message contains Usersbackend update), Response :: true ");
+                            InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Users Provided ?, Response :: true ");
                         }
 
                         //get RequestUpdateMsg list from UpdateTriggeringMsg
@@ -70,7 +70,7 @@ namespace adidas.clb.job.UpdateTriggering
                         if (objUTMsg.Requests != null)
                         {
                             lstRequests = objUTMsg.Requests.ToList();
-                            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Requests Provided?(Is message contains Requests update), Response :: true ");
+                            InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Requests Provided?, Response :: true ");
                         }
                         //Declare a CancellationToken object, which indicates whether cancellation is requested
                         var ctsut = new CancellationTokenSource();
@@ -92,11 +92,11 @@ namespace adidas.clb.job.UpdateTriggering
                         }
                         //log.WriteLine("adidas.clb.job.UpdateTriggering web job :: Processing update triggering queue message :: End()" + message);
                         //write message into application insights
-                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Processing update triggering queue message : End(), \n Response :: Message:" + message + " ,TimeStamp : " + DateTime.Now);
+                        InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Processing update triggering queue message : End()" );
                     }
                     else
                     {
-                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: update triggering message is null");
+                        InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: update triggering message is null");
                     }
                 }
             }
@@ -122,20 +122,18 @@ namespace adidas.clb.job.UpdateTriggering
         /// This method triggered based on given time interval(i.e MyDailyScheduleForUpdateNextCollectingTime)
         /// it is scheduled by every hour
         /// </summary>
-        public static void UpdateNextCollectingTimeForAllBackends([TimerTrigger(typeof(MyDailyScheduleForUpdateNextCollectingTime))] TimerInfo timerInfo, TextWriter log)
+        public static void ForEachBackendSetNextCollectingTime([TimerTrigger(typeof(MyDailyScheduleForUpdateNextCollectingTime))] TimerInfo timerInfo, TextWriter log)
         {
             string callerMethodName = string.Empty;
             try
             {
                 //Get Caller Method name from CallerInformation class                
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                bool IsFirstTime = false;
-                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Update the next collecting time for all the backends :: Start(), \n TimeStamp : " + DateTime.Now);
+                bool IsFirstTime = false;                
                 ////Create object for NextUserCollectingTime class
                 NextUserCollectingTimeDAL objdal = new NextUserCollectingTimeDAL();
                 //call the UpdateNextCollectingTime method which will update the Next Collecting Time of the each backend
-                objdal.UpdateNextCollectingTime(IsFirstTime);
-                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Update the next collecting time for all the backends :: End(), \n TimeStamp : " + DateTime.Now);
+                objdal.UpdateNextCollectingTime(IsFirstTime);                
                 // InsightLogger.TrackEndEvent(callerMethodName);
             }
             catch (DataAccessException dalexception)
@@ -159,42 +157,42 @@ namespace adidas.clb.job.UpdateTriggering
         /// This method will verifies whether the userbackends needs update or not based on UT RUle ,if it requires update then it will update the userbackend
         /// if any user needs update then  keep the messages into update trigger input queue in UpdateTriggerMsg Format.
         /// </summary>
-        public static void RegularChecksforBackendNeedsUpdate([TimerTrigger(typeof(MyDailyScheduleForRegularUpdates))] TimerInfo timerInfo, TextWriter log)
+        public static void CollectUsersNeedsUpdate([TimerTrigger(typeof(MyDailyScheduleForRegularUpdates))] TimerInfo timerInfo, TextWriter log)
         {
             string callerMethodName = string.Empty;
             try
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Regular checks for backend needs update :: Start(), \n TimeStamp : " + DateTime.Now);
+                
                 NextUserCollectingTimeDAL objnextcollentingTime = new NextUserCollectingTimeDAL();
                 //get all the userbackends needs to update
                 List<NextUserCollectingTimeEntity> lstbackends = objnextcollentingTime.GetBackendsNeedsUpdate();
                 UserBackendDAL objdal = new UserBackendDAL();
                 //foreach backend  
-                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Verifying the for each backend needs update or not");
-
+                
                 Parallel.ForEach<NextUserCollectingTimeEntity>(lstbackends, backend =>               
                 {
-                    
+                    InsightLogger.TrackEvent("UpdateTriggering web job, Action :: for each backend :: collect users needing update : start(), Response :: Backend Name : " + backend.BackendID);
                     //getting minutes difference between currenttime and Regular Update Next CollectingTime
                     double regularWaitingMinutes = (backend.RegularUpdateNextCollectingTime - DateTime.Now).TotalMinutes;
                     //if minutes difference is with in RegularChecksWaitingTimeInMinutes(>=-5 and <=0) then invoke CollectUsersNeedUpdateByBackend method()
                     if (regularWaitingMinutes >= -(Convert.ToDouble(ConfigurationManager.AppSettings["RegularChecksWaitingTimeInMinutes"])) && regularWaitingMinutes <= 1)
                     {
-                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Is User backend " + backend.BackendID + " needs update based on Next Collecting Time(R1) , Response :: true");
                         //collect the users needing update and keep the messages in update trigger input queue
                         objdal.CollectUsersNeedUpdateByBackend(backend.BackendID);
                         //update the backend entity with new collecting time[i.e LastCollectingTime= NextCollectingTime and NextCollectingTime=NextCollectingTime+(Backend MinimumusersUpdateFrequency)/2 ]
                         objnextcollentingTime.UpdateBackendRegularNextCollectingTime(backend.BackendID, backend.MinimumUpdateFrequency, backend.RegularUpdateNextCollectingTime);
+                        InsightLogger.TrackEvent("UpdateTriggering web job, Action :: for each backend :: collect users needing update : End(), Response :: Success,  Backend Name : " + backend.BackendID);
                     }
                     else
                     {
-                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Is User backend " + backend.BackendID + " needs update based on Next Collecting Time(R1) , Response :: false");
+                        InsightLogger.TrackEvent("UpdateTriggering web job, Action :: for each backend :: collect users needing update : End(), Response :: Condition fails : next collecting time of the backend [ " + backend.BackendID + " ] is greater-than to current time.");
+
                     }
 
                 });
-                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Regular checks for backend needs update :: End(), \n TimeStamp : " + DateTime.Now);
+               
             }
             catch (BusinessLogicException balexception)
             {
@@ -222,7 +220,7 @@ namespace adidas.clb.job.UpdateTriggering
         /// This method will verifies whether any userbackend(s)/Request(s) missed update or not
         /// if any user(s)/Request(s) misses update then keep the messages into update trigger input queue in UpdateTriggerMsg Format. 
         /// </summary>
-        public static void RegularChecksforUserbackendLostsUpdate([TimerTrigger(typeof(MyDailyScheduleForMissingUpdates))] TimerInfo timerInfo, TextWriter log)
+        public static void CollectMissingUpdates([TimerTrigger(typeof(MyDailyScheduleForMissingUpdates))] TimerInfo timerInfo, TextWriter log)
         {
             string callerMethodName = string.Empty;
             try
@@ -234,16 +232,15 @@ namespace adidas.clb.job.UpdateTriggering
                 NextUserCollectingTimeDAL objnextcollectingTime = new NextUserCollectingTimeDAL();
                 //get all the userbackends needs to update
                 List<NextUserCollectingTimeEntity> lstbackends = objnextcollectingTime.GetBackendsNeedsUpdate();
-                UserBackendDAL objUserBackendDAL = new UserBackendDAL();
-                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Verifying the for each backend needs for collecting missed updates or not :: Start() , Timestamp :: " + DateTime.Now);
+                UserBackendDAL objUserBackendDAL = new UserBackendDAL();                
                 Parallel.ForEach<NextUserCollectingTimeEntity>(lstbackends, backend =>
                 {
+                    InsightLogger.TrackEvent("UpdateTriggering web job, Action :: for each backend :: collect missing updates : start() , Response :: Backend Name : " + backend.BackendID);
                     //getting minutes difference between currenttime and Missing Update Next CollectingTime
                     double waitingMinutes = (backend.MissingUpdateNextCollectingTime - DateTime.Now).TotalMinutes;
                     //if minutes difference is with in RegularChecksWaitingTimeInMinutes(>=-8 and <=0) then invoke MissedUpdatesWaitingTimeInMinutes method()
                     if (waitingMinutes >= -(Convert.ToDouble(ConfigurationManager.AppSettings["MissedUpdatesWaitingTimeInMinutes"])) && waitingMinutes <= 0)
                     {
-                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Is User backend " + backend.BackendID + " needs for collecting missed updates of(Users /Requests) based on Next Collecting Time(R5) , Response :: true");
                         Task[] tasksMissedUpdates = new Task[2];
                         //collects the missed update userbackends and convert into update trigger message format and put into UT input queue
                         tasksMissedUpdates[0] = Task.Factory.StartNew(() => objUserBackendDAL.CollectUsersMissedUpdatesByBackend(backend.BackendID));
@@ -252,14 +249,15 @@ namespace adidas.clb.job.UpdateTriggering
                         Task.WaitAll(tasksMissedUpdates);
                         //update the backend entity with new missing update collecting time[i.e MissingUpdateLastCollectingTime= MissingUpdateNextCollectingTime and MissingUpdateNextCollectingTime=Max(]
                         objnextcollectingTime.UpdateMisseduserBackendNextCollectingTime(backend.BackendID, backend.MissingUpdateNextCollectingTime);
+                        InsightLogger.TrackEvent("UpdateTriggering web job, Action :: for each backend :: collect missing updates : End() , Response :: Success, Backend Name : " + backend.BackendID);
                     }
                     else
                     {
-                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Is User backend " + backend.BackendID + " needs for collecting missed updates of(Users /Requests) based on Next Collecting Time(R5) , Response :: false");
+                        InsightLogger.TrackEvent("UpdateTriggering web job, Action :: for each backend :: collect missing updates : End(), Response :: Condition fails : next missing update collecting time of the backend [ " + backend.BackendID + " ] is greater-than to current time.");
 
                     }
                 });
-                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Verifying the for each backend needs for collecting missed updates or not :: End() , Timestamp :: " + DateTime.Now);
+               
             }
             catch (BusinessLogicException balexception)
             {

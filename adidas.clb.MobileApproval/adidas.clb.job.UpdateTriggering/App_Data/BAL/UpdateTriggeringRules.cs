@@ -84,7 +84,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                 DateTime expectedUpdateTime;
                 //Now + Max(Backend.AverageAllRequestsLatency;Backend.LastALLRequestLatency)*1.2
                 expectedUpdateTime = DateTime.Now.AddSeconds((Math.Max(BackendAverageALLRequestLatency, Convert.ToDouble(BackendLastALLRequestLatency)) * Convert.ToDouble(System.Configuration.ConfigurationManager.AppSettings["ConstantFraction"])));
-                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Compute and set Expected Updated Timestamp for Userbackend(UT Rule :: R3) ,  Response : Expected Update Time ::" + Convert.ToString(expectedUpdateTime));
+                InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Compute and set Expected Updated Timestamp for Userbackend(UT Rule :: R3) ,  Response : Expected Update Time ::" + Convert.ToString(expectedUpdateTime));
                 return expectedUpdateTime;
             }
             catch (Exception exception)
@@ -109,7 +109,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                 DateTime requestExpectedUpdateTime;
                 //Now + Max(Backend.AverageRequestsLatency;Backend.LastRequestLatency)*1.2
                 requestExpectedUpdateTime = DateTime.Now.AddSeconds((Math.Max(BackendAverageRequestLatency, Convert.ToDouble(BackendLastRequestLatency)) * Convert.ToDouble(System.Configuration.ConfigurationManager.AppSettings["ConstantFraction"])));
-                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Compute and set Expected Updated Timestamp for Request(UT Rule :: R4) ,  Response : Expected Update Time ::" + Convert.ToString(requestExpectedUpdateTime));
+                InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Compute and set Expected Updated Timestamp for Request(UT Rule :: R4) ,  Response : Expected Update Time ::" + Convert.ToString(requestExpectedUpdateTime));
                 return requestExpectedUpdateTime;
             }
             catch (Exception exception)

@@ -704,13 +704,13 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
                     if (this.executeazCopyExe(PdfBucketPath, requestID, userID, pdfFileName))
                     {
                         //if file upload successsfully into blob container then delete the directory and files 
-                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Upload PDf file into azure blob, Response :: Success. \n  Request Details are: RequestID " + requestID + " FileName : " + pdfFileName + ".pdf");
+                        InsightLogger.TrackEvent("GeneratePDF, Action :: Upload PDf file into azure blob, Response :: Success. \n  Request Details are: RequestID " + requestID + " FileName : " + pdfFileName + ".pdf");
 
                         this.clearfiles(PdfBucketPath);
                     }
                     else
                     {
-                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Upload PDf file into azure blob, Response :: Error. \n  Request Details are: RequestID " + requestID + " FileName : " + pdfFileName + ".pdf");
+                        InsightLogger.TrackEvent("GeneratePDF, Action :: Upload PDf file into azure blob, Response :: Error. \n  Request Details are: RequestID " + requestID + " FileName : " + pdfFileName + ".pdf");
 
                     }
                 }
@@ -994,7 +994,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
                 // Async enqueue the message                           
                 CloudQueueMessage message = new CloudQueueMessage(pdfDetails);
                 queuedoc.AddMessage(message);
-                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action ::Put request pdf url message details into requestpdfinputuri queue, Response :: True. \n  Pdf URi details: true " + message);
+                InsightLogger.TrackEvent("GeneratePDF, Action ::Put request pdf url message details in requestpdfinputuri queue, Response :: True. \n  Pdf URi details: true " + message);
                 //InsightLogger.TrackEndEvent(callerMethodName);
             }
             catch (Exception exception)
@@ -1673,12 +1673,12 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
                     if (this.executeazCopyExe(PdfBucketPath, requestID, userID, pdfFileName))
                     {
                         //if file upload successsfully into blob container then delete the directory and files 
-                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Upload PDf file into azure blob, Response :: Success. \n  Request Details are: RequestID " + requestID + " FileName : " + pdfFileName + ".pdf");
+                        InsightLogger.TrackEvent("GeneratePDF web job : generatepdfqueue, Action :: Upload PDf file into azure blob, Response :: Success. \n  Request Details are: RequestID " + requestID + " FileName : " + pdfFileName + ".pdf");
                         this.clearfiles(PdfBucketPath);
                     }
                     else
                     {
-                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Upload PDf file into azure blob, Response :: Error. \n  Request Details are: RequestID " + requestID + " FileName : " + pdfFileName + ".pdf");
+                        InsightLogger.TrackEvent("GeneratePDF web job : generatepdfqueue, Action :: Upload PDf file into azure blob, Response :: Error. \n  Request Details are: RequestID " + requestID + " FileName : " + pdfFileName + ".pdf");
 
                     }
                 }

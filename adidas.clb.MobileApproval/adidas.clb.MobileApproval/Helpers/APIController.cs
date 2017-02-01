@@ -43,7 +43,7 @@ namespace adidas.clb.MobileApproval.Helpers
                 string backendApiEndpoint = UrlSettings.GetBackendAgentRequestApprovalAPI(backendID, apprReqID);
                 string apiURL = string.Format(ConfigurationManager.AppSettings["BackendAgentRequestApprovalAPIRouteMethod"].ToString(), backendID, apprReqID);
                 string approvalquery = JsonConvert.SerializeObject(apprReqDetails);
-                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: Approval API :: invoke the backend API for submit the approval or rejection for given request :: Baceknd API:" + backendApiEndpoint + " Approval Request Message:" + approvalquery);
+               // InsightLogger.TrackEvent("ApprovalAPIController :: Endpoint : api/approval/requests/{ " + apprReqID + "} , Action : invoke the backend API for submit the approval or rejection for given request :: Baceknd API:" + backendApiEndpoint + " Approval Request Message:" + approvalquery);
                 //Max Retry call from web.config
                 int maxRetryCount = Convert.ToInt32(ConfigurationManager.AppSettings["MaxRetryCount"]);
                 int maxThreadSleepInMilliSeconds = Convert.ToInt32(ConfigurationManager.AppSettings["MaxThreadSleepInMilliSeconds"]);
@@ -65,7 +65,7 @@ namespace adidas.clb.MobileApproval.Helpers
                                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                                 StringContent content = new StringContent(approvalquery, Encoding.UTF8, "application/json");                               
                                 HttpResponseMessage response = await client.PostAsync(apiURL, content);
-                                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: ApprovalAPIController :: Endpoint : api/approval/requests/{apprReqID} , Action :: Notify Backend(invoking the backend agent API for approval), Response :: Success ,Details are Backend Agent API=" + apiURL + " Approval Query Message:" + approvalquery);
+                                InsightLogger.TrackEvent("ApprovalAPIController :: Endpoint : api/approval/requests/{ " + apprReqID + "} , Action :: Notify Backend(invoking the backend agent API for approval), Response :: Success ,Details are Backend Agent API=" + apiURL + " Approval Query Message:" + approvalquery);
 
                                 //var request = new HttpRequestMessage(HttpMethod.Post, backendApiEndpoint);
                                 //StringContent content = new StringContent(approvalquery, Encoding.UTF8, "application/json");
