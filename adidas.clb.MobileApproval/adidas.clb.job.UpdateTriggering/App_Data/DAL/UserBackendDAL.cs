@@ -492,13 +492,13 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             //checking is user backend update missing or not with the help of Updatetriggering rule R6
                             if (utRule.IsUserUpdateMissing(muserBackend.UpdateTriggered, muserBackend.ExpectedUpdate))
                             {
-                                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Is Userbackend [ " + muserBackend.BackendName + " ] missed updates based on UT Rule R6 , Response :: true");
+                                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Is Userbackend [ " + muserBackend.BackendID + " ] missed updates based on UT Rule R6 , Response :: true");
                                 //put the json message of UpdateTriggeringMsg class format into update triggering input queue.
                                 msgFormat.Add(ConvertUserUpdateMsgToUpdateTriggeringMsg(muserBackend, mBackendID));
                             }
                             else
                             {
-                                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Is Userbackend [ " + muserBackend.BackendName + " ] missed updates based on UT Rule R6 , Response :: false");
+                                InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job, Action :: Is Userbackend [ " + muserBackend.BackendID + " ] missed updates based on UT Rule R6 , Response :: false");
                             }
                         }
                         //add list of messages into update triggering input queue
