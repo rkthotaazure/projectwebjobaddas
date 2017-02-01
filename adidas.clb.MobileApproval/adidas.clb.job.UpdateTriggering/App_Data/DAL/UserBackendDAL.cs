@@ -40,8 +40,10 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         public static int maxRetryCount = Convert.ToInt32(ConfigurationManager.AppSettings["MaxRetryCount"]);
         public static string azureTableReference = ConfigurationManager.AppSettings["AzureTables.ReferenceData"];
         public static string azureTableUserDeviceConfiguration = ConfigurationManager.AppSettings["AzureTables.UserDeviceConfiguration"];
-        //read GetPDFs app setting value from configuration
+        //read GetPDFs value from configuration
         public static bool IsGeneratePdfs = Convert.ToBoolean(ConfigurationManager.AppSettings["GetPDFs"]);
+        //read VIP Flag  value from configuration
+        public static bool IsVIPFlag = Convert.ToBoolean(ConfigurationManager.AppSettings["VIPFlag"]);
         //RequestTransactions
         public static string azureTableRequestTransactions = ConfigurationManager.AppSettings["AzureTables.RequestTransactions"];
         //decalre UpdateTriggeringRules calss object 
@@ -309,7 +311,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 {
                     Users = lstuserUpdateMsg,
                     Requests = null,
-                    VIP = false,
+                    VIP = IsVIPFlag,
                     GetPDFs = IsGeneratePdfs,
                     ChangeAfter = objuserBackend.LastUpdate
 
@@ -819,7 +821,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 {
                     Users = null,
                     Requests = lstRequestUpdateMsg,
-                    VIP = false,
+                    VIP = IsVIPFlag,
                     GetPDFs = IsGeneratePdfs
 
                 };
