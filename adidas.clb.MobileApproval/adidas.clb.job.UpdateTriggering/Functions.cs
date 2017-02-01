@@ -187,7 +187,7 @@ namespace adidas.clb.job.UpdateTriggering
                     }
                     else
                     {
-                        InsightLogger.TrackEvent("UpdateTriggering web job, Action :: for each backend :: collect users needing update : End(), Response :: Condition fails : next collecting time of the backend [ " + backend.BackendID + " ] is greater-than to current time.");
+                        InsightLogger.TrackEvent("UpdateTriggering web job, Action :: for each backend :: collect users needing update : End(), Response :: Condition is not met. i.e, next collecting time of the backend [ " + backend.BackendID + " ] is greater-than to current time.");
 
                     }
 
@@ -253,7 +253,7 @@ namespace adidas.clb.job.UpdateTriggering
                     }
                     else
                     {
-                        InsightLogger.TrackEvent("UpdateTriggering web job, Action :: for each backend :: collect missing updates : End(), Response :: Condition fails : next missing update collecting time of the backend [ " + backend.BackendID + " ] is greater-than to current time.");
+                        InsightLogger.TrackEvent("UpdateTriggering web job, Action :: for each backend :: collect missing updates : End(), Response :: Condition is not met. i.e, next missing update collecting time of the backend [ " + backend.BackendID + " ] is greater-than to current time.");
 
                     }
                 });
