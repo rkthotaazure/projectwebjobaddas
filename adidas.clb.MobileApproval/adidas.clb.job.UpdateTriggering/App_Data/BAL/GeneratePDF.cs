@@ -79,7 +79,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                     //Create folder with requestid name in application Environment.CurrentDirectory and read the folder path
                     string PdfBucketPath = GetPDFPath(requestID);
                     //Pdf file name requestid + yyyyMMddHHmmss
-                    string pdfFileName = requestID + DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+                    string pdfFileName = requestID + DateTime.Now.ToString("yyyyMMddHHmmss");
                     //create pdf filewith pdfFileName
                     System.IO.FileStream fs = new FileStream(PdfBucketPath + "\\" + pdfFileName + ".pdf", FileMode.Create);
                     //define pdf design style
@@ -1028,7 +1028,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                     //Create folder with requestid name in application Environment.CurrentDirectory and read the folder path
                     string PdfBucketPath = GetPDFPath(requestID);
                     //Pdf file name requestid + yyyyMMddHHmmss
-                    string pdfFileName = requestID + DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+                    string pdfFileName = requestID + DateTime.Now.ToString("yyyyMMddHHmmss");
                     //create pdf filewith requestid namme and writes the details
                     System.IO.FileStream fs = new FileStream(PdfBucketPath + "\\" + pdfFileName + ".pdf", FileMode.Create);
                     //define pdf design style

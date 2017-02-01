@@ -54,7 +54,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 bool IsNeedsUpdate = false;
                 //Update triggering Rules (R2) :: UserNeedsUpdate=(NOT UserBackend.UpdateTriggered AND (UserBackend.lastUpdate + UserBackend.UpdateFrequency >Now))
-                if ((!UserBackendUpdateTriggered) && (UserBackendLastUpdate.AddSeconds(ConvertMinutesToSeconds(UserBackendUpdateFrequency)) > DateTime.UtcNow))
+                if ((!UserBackendUpdateTriggered) && (UserBackendLastUpdate.AddSeconds(ConvertMinutesToSeconds(UserBackendUpdateFrequency)) > DateTime.Now))
                 {
                     IsNeedsUpdate = true;
                 }
@@ -83,7 +83,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 DateTime expectedUpdateTime;
                 //Now + Max(Backend.AverageAllRequestsLatency;Backend.LastALLRequestLatency)*1.2
-                expectedUpdateTime = DateTime.UtcNow.AddSeconds((Math.Max(BackendAverageALLRequestLatency, Convert.ToDouble(BackendLastALLRequestLatency)) * Convert.ToDouble(System.Configuration.ConfigurationManager.AppSettings["ConstantFraction"])));
+                expectedUpdateTime = DateTime.Now.AddSeconds((Math.Max(BackendAverageALLRequestLatency, Convert.ToDouble(BackendLastALLRequestLatency)) * Convert.ToDouble(System.Configuration.ConfigurationManager.AppSettings["ConstantFraction"])));
                 InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Compute and set Expected Updated Timestamp for Userbackend(UT Rule :: R3) ,  Response : Expected Update Time ::" + Convert.ToString(expectedUpdateTime));
                 return expectedUpdateTime;
             }
@@ -108,7 +108,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 DateTime requestExpectedUpdateTime;
                 //Now + Max(Backend.AverageRequestsLatency;Backend.LastRequestLatency)*1.2
-                requestExpectedUpdateTime = DateTime.UtcNow.AddSeconds((Math.Max(BackendAverageRequestLatency, Convert.ToDouble(BackendLastRequestLatency)) * Convert.ToDouble(System.Configuration.ConfigurationManager.AppSettings["ConstantFraction"])));
+                requestExpectedUpdateTime = DateTime.Now.AddSeconds((Math.Max(BackendAverageRequestLatency, Convert.ToDouble(BackendLastRequestLatency)) * Convert.ToDouble(System.Configuration.ConfigurationManager.AppSettings["ConstantFraction"])));
                 InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Compute and set Expected Updated Timestamp for Request(UT Rule :: R4) ,  Response : Expected Update Time ::" + Convert.ToString(requestExpectedUpdateTime));
                 return requestExpectedUpdateTime;
             }
@@ -161,7 +161,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 bool IsUpdateMissing=false;
                 //Rule R6 :: UserBackend.UpdateTriggered AND (NOW >UserBackend.ExpectedUpdate)
-                if ((UserBackendUpdateTriggered) && (DateTime.UtcNow > UserBackendExpectedUpdate))
+                if ((UserBackendUpdateTriggered) && (DateTime.Now > UserBackendExpectedUpdate))
                 {
                     IsUpdateMissing = true;
                 }
@@ -189,7 +189,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 bool IsUpdateMissing = false;
                 //Rule R6 :: UserBackend.UpdateTriggered AND (NOW >UserBackend.ExpectedUpdate)
-                if ((RequestUpdateTriggered) && (DateTime.UtcNow > RequestExpectedUpdate))
+                if ((RequestUpdateTriggered) && (DateTime.Now > RequestExpectedUpdate))
                 {
                     IsUpdateMissing = true;
                 }

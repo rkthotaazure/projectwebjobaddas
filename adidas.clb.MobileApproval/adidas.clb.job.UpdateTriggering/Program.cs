@@ -34,10 +34,13 @@ namespace adidas.clb.job.UpdateTriggering
             {             
                 
                 JobHostConfiguration config = new JobHostConfiguration();
+                //QueueTrigger function runs singleton on a single instance
+                config.Queues.BatchSize = Convert.ToInt32(ConfigurationManager.AppSettings["QueueBatchSize"]);
                 // Add Triggers and Binders for Timer Trigger.               
                 config.UseTimers();
                 config.NameResolver = new MyResolver();
                 JobHost host = new JobHost(config);
+
                 // This method inserts/updates the next collecting time(Regular/Missed) in Azure ReferenceData Table
                 // This method should not run continuously,it runs only when the web job has started.
                 host.Call(typeof(Program).GetMethod("UpdateNextCollectingTime"));

@@ -54,29 +54,31 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
                         {
                             var request = new HttpRequestMessage(HttpMethod.Post, backendApiEndpoint);
                             request.Content = new StringContent(UpdateTriggeringMessage, Encoding.UTF8, "application/json");
+                            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Pass user message to agent (Invoking backend agent API) , Response :: Success");
                             var result = client.SendAsync(request).Result;
                             //if the api call returns successcode then return the result into string
-                            if (result.IsSuccessStatusCode)
-                            {
-                                string response = result.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                                if (!string.IsNullOrEmpty(response))
-                                {
-                                    //request update acknowledgement
-                                    Objacknowledgement = JsonConvert.DeserializeObject<RequestsUpdateAck>(response);
-                                    //if request update acknowledgement error object is null means backend api successfully called
-                                    if (Objacknowledgement.Error == null)
-                                    {
-                                        acknowledgement = "Backend API has been invoked successfully. ";
-                                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Pass user message to agent (Invoking backend agent API) , Response :: Success");
+                            
+                            //if (result.IsSuccessStatusCode)
+                            //{
+                            //    string response = result.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                            //    if (!string.IsNullOrEmpty(response))
+                            //    {
+                            //        //request update acknowledgement
+                            //        Objacknowledgement = JsonConvert.DeserializeObject<RequestsUpdateAck>(response);
+                            //        //if request update acknowledgement error object is null means backend api successfully called
+                            //        if (Objacknowledgement.Error == null)
+                            //        {
+                            //            acknowledgement = "Backend API has been invoked successfully. ";
+                            //            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Pass user message to agent (Invoking backend agent API) , Response :: Success");
 
-                                    }
-                                    else
-                                    {
-                                        InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Pass user message to agent (Invoking backend agent API) , Response :: Backend API has thrown an error :: ErrorMessage=" + Objacknowledgement.Error.longtext);
-                                    }
-                                }
+                            //        }
+                            //        else
+                            //        {
+                            //            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: ProcessQueueMessage, Action :: Pass user message to agent (Invoking backend agent API) , Response :: Backend API has thrown an error :: ErrorMessage=" + Objacknowledgement.Error.longtext);
+                            //        }
+                            //    }
 
-                            }
+                            //}
                             IsSuccessful = true;
                         }
                         catch (Exception serviceException)

@@ -24,6 +24,8 @@ namespace adidas.clb.job.GeneratePDF
             //Download Logo from imagescontainer for PDF Files
             AzCopyConfig.LoadImageFromBlob();
             JobHostConfiguration config = new JobHostConfiguration();
+            //QueueTrigger function runs singleton on a single instance
+            config.Queues.BatchSize = Convert.ToInt32(ConfigurationManager.AppSettings["QueueBatchSize"]);
             // Add Triggers and Binders for Timer Trigger.             
             config.NameResolver = new MyResolver();
             JobHost host = new JobHost(config);
