@@ -118,8 +118,8 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
 
                     //if web job has stopped and start again after some time 
                     //In this scenario we have to set last collecting time for both regular and missed updates to current time
-                    DateTime lastCollectingTime = DateTime.UtcNow;
-                    DateTime MissedUpdateLastCollectingTime = DateTime.UtcNow;
+                    DateTime lastCollectingTime = DateTime.Now;
+                    DateTime MissedUpdateLastCollectingTime = DateTime.Now;
                     int oldminUpdateFrequency = ObjNextCollectingTime.MinimumUpdateFrequency;
                     //else get the last collecting time for both regular and missed updates from azure table
                     if (!isFirstTimePull && (minimumUpdateFrequency == oldminUpdateFrequency))
@@ -150,7 +150,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     NextUserCollectingTimeEntity nextCollectingTime = new NextUserCollectingTimeEntity(CoreConstants.AzureTables.UpdateTriggerNextCollectingTime, backendID);
                     nextCollectingTime.BackendID = backendID;
                     nextCollectingTime.MinimumUpdateFrequency = minimumUpdateFrequency;
-                    DateTime collectingTime = DateTime.UtcNow;
+                    DateTime collectingTime = DateTime.Now;
                     nextCollectingTime.RegularUpdateLastCollectingTime = collectingTime;
                     nextCollectingTime.RegularUpdateNextCollectingTime = collectingTime.AddMinutes(minimumUpdateFrequency);
                     nextCollectingTime.MissingUpdateLastCollectingTime = collectingTime;
