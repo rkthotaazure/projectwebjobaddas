@@ -46,6 +46,7 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
                     int maxThreadSleepInMilliSeconds = Convert.ToInt32(ConfigurationManager.AppSettings["MaxThreadSleepInMilliSeconds"]);
                     int RetryAttemptCount = 0;
                     bool IsSuccessful = false;
+                    InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Pass " + messagecategory + " message to agent (Invoking backend agent API) :: \n Response :: Success \n API Endpont : " + backendApiEndpoint + " \n RequestUpdateMessage: " + UpdateTriggeringMessage);
                     //Implemented Use of retry / back-off logic
                     do
                     {
@@ -55,8 +56,6 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
                             request.Content = new StringContent(UpdateTriggeringMessage, Encoding.UTF8, "application/json");
                            // InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Pass user message to agent (Invoking backend agent API) , Response :: Success");
                             var result = client.SendAsync(request).Result;
-                            InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Pass " + messagecategory + " message to agent (Invoking backend agent API) :: \n Response :: Success \n API Endpont : " + backendApiEndpoint + " \n RequestUpdateMessage: " + UpdateTriggeringMessage);
-
                             //if the api call returns successcode then return the result into string
 
                             //if (result.IsSuccessStatusCode)
