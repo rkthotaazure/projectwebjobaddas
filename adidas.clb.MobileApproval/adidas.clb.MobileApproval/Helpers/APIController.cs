@@ -52,6 +52,7 @@ namespace adidas.clb.MobileApproval.Helpers
                 //checking backend endpoint null or empty
                 if (!string.IsNullOrEmpty(backendApiEndpoint))
                 {
+                    InsightLogger.TrackEvent("ApprovalAPIController :: Endpoint : api/approval/requests/{ " + apprReqID + "} , Action :: Notify Backend(invoking the backend agent API for approval), Response :: Success ,Details are Backend Agent API=" + apiURL + " Approval Query Message:" + approvalquery);
                     using (HttpClient client = new HttpClient())
                     {
                         //Implemented Use of retry / back-off logic
@@ -65,7 +66,6 @@ namespace adidas.clb.MobileApproval.Helpers
                                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                                 StringContent content = new StringContent(approvalquery, Encoding.UTF8, "application/json");                               
                                 HttpResponseMessage response = await client.PostAsync(apiURL, content);
-                                InsightLogger.TrackEvent("ApprovalAPIController :: Endpoint : api/approval/requests/{ " + apprReqID + "} , Action :: Notify Backend(invoking the backend agent API for approval), Response :: Success ,Details are Backend Agent API=" + apiURL + " Approval Query Message:" + approvalquery);
 
                                 //var request = new HttpRequestMessage(HttpMethod.Post, backendApiEndpoint);
                                 //StringContent content = new StringContent(approvalquery, Encoding.UTF8, "application/json");

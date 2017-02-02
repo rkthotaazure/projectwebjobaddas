@@ -49,7 +49,7 @@ namespace adidas.clb.job.UpdateTriggering
                 {
                     //log.WriteLine("adidas.clb.job.UpdateTriggering web job :: Processing update triggering queue message :: start()" + message);
                     //write message into application insights
-                    InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Processing update triggering queue message : Start(), \n Response :: Message:" + message );
+                    InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Process update triggering queue message : Start(), \n Response :: Message:" + message );
                     //Deserializ input queue message into UpdateTriggeringMsg object
                     UpdateTriggeringMsg objUTMsg = JsonConvert.DeserializeObject<UpdateTriggeringMsg>(message);
                     //checking UpdateTriggeringMsg is null or not
@@ -61,7 +61,7 @@ namespace adidas.clb.job.UpdateTriggering
                         if (objUTMsg.Users != null)
                         {
                             lstUsers = objUTMsg.Users.ToList();
-                            InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Users Provided ?, Response :: true ");
+                            InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Users Provided? , Response :: true ");
                         }
 
                         //get RequestUpdateMsg list from UpdateTriggeringMsg
@@ -70,7 +70,7 @@ namespace adidas.clb.job.UpdateTriggering
                         if (objUTMsg.Requests != null)
                         {
                             lstRequests = objUTMsg.Requests.ToList();
-                            InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Requests Provided?, Response :: true ");
+                            InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Requests Provided? , Response :: true ");
                         }
                         //Declare a CancellationToken object, which indicates whether cancellation is requested
                         var ctsut = new CancellationTokenSource();
@@ -92,7 +92,7 @@ namespace adidas.clb.job.UpdateTriggering
                         }
                         //log.WriteLine("adidas.clb.job.UpdateTriggering web job :: Processing update triggering queue message :: End()" + message);
                         //write message into application insights
-                        InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Processing update triggering queue message : End()" );
+                        InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Process update triggering queue message : End()" );
                     }
                     else
                     {
