@@ -31,29 +31,34 @@ namespace adidas.clb.job.GeneratePDF.App_Data.DAL
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 //Object initialization for C calss
                 MappingTypes Objtype = null;
+                string requestFieldsMappingJson = string.Empty;
+                string matrixFieldsMappingJson = string.Empty;
                 //checking is backend is null or empty
                 if (!string.IsNullOrEmpty(backendID))
                 {
-                    string mappingJson = string.Empty;
+
                     switch (backendID.ToLower())
                     {
                         //based on the backendid reading the corresponding mapping json string from web.config
                         case CoreConstants.Backends.CAR:
-                            mappingJson = ConfigurationManager.AppSettings["Baceknd.CARDBFeildsMapping"].ToString();
+                            requestFieldsMappingJson = Convert.ToString(ConfigurationManager.AppSettings["Backend.CAR.RequestFeildsMapping"]);
+                            matrixFieldsMappingJson = Convert.ToString(ConfigurationManager.AppSettings["Backend.CAR.MatrixFeildsMapping"]);
                             break;
                         case CoreConstants.Backends.BPMOnline:
-                            mappingJson = ConfigurationManager.AppSettings["Baceknd.BPMOnlineDBFeildsMapping"].ToString();
+                            requestFieldsMappingJson = Convert.ToString(ConfigurationManager.AppSettings["Backend.BPMOnline.RequestFeildsMapping"]);
+                            matrixFieldsMappingJson = Convert.ToString(ConfigurationManager.AppSettings["Backend.BPMOnline.MatrixFeildsMapping"]);
                             break;
                         default:
                             break;
                     }
-                    //it contains two Parts with '|' separator .First json string repersents Request Fields Mapping & second json string repersents Approver Fields Mapping
-                    //spliting the json string with '|" separator and writing into array
-                    string[] jsonArr = mappingJson.Split('|');
-                    Objtype = new MappingTypes();
-                    //Again spliting the individual json string  with "=" separator and assigning the 2nd part of the json string  to MappingTypes properties
-                    Objtype.RequestFieldsMappingJson = jsonArr[0].Split('=')[1].ToString();
-                    Objtype.MatrixFieldsMappingJson = jsonArr[1].Split('=')[1].ToString();
+
+                    //Assign values to  MappingTypes class properties
+                    Objtype = new MappingTypes()
+                    {
+                        RequestFieldsMappingJson = requestFieldsMappingJson,
+                        MatrixFieldsMappingJson = matrixFieldsMappingJson
+                    };
+
                 }
                 return Objtype;
             }
@@ -101,11 +106,58 @@ namespace adidas.clb.job.GeneratePDF.App_Data.DAL
                     }
                     //Serialize the dictionary into json string
                     reqJson = JsonConvert.SerializeObject(dicRequestDetails);
-                   
+
                 }
                 //parse the json string into RequestDetailsMapping class
                 T ObjRequestDetails = JsonConvert.DeserializeObject<T>(reqJson);
                 return ObjRequestDetails;
+            }
+            catch (Exception exception)
+            {
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                throw new DataAccessException(exception.Message, exception.InnerException);
+
+            }
+        }
+        public Dictionary<string, object> MapDBFieldstoBackendRequest(DataRow row, string jsonstring)
+        {
+            string callerMethodName = string.Empty;
+            try
+            {
+                //Get Caller Method name from CallerInformation class               
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                //dictionary initialization
+                Dictionary<string, object> dicRequestDetails = null;
+                string reqJson = string.Empty;
+                //verifying given datarow is null or not
+                if (row != null)
+                {
+
+                    dicRequestDetails = new Dictionary<string, object>();
+                    //Deserialize given json string into JObject class
+                    JObject mapJObject = JsonConvert.DeserializeObject<JObject>(jsonstring);
+
+                    //foreach column in given datarow
+                    foreach (DataColumn column in row.Table.Columns)
+                    {
+                        //foreach Property in mapJObject
+                        foreach (KeyValuePair<string, JToken> mapProperty in mapJObject)
+                        {
+                            //verifying the column name with jobject class property name                            
+                            if (column.ColumnName.ToLower() == mapProperty.Value.ToString().ToLower())
+                            {
+                                //if it match then add  jobject class property name and Datarow column value to  Dictionary<string, object> dicRequestDetails
+                                dicRequestDetails.Add(mapProperty.Key.ToString(), row[column.ColumnName]);
+                            }
+                        }
+                    }
+                    //Serialize the dictionary into json string
+                    // reqJson = JsonConvert.SerializeObject(dicRequestDetails);
+
+                }
+                //parse the json string into RequestDetailsMapping class
+
+                return dicRequestDetails;
             }
             catch (Exception exception)
             {

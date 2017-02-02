@@ -59,14 +59,14 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 //for each backend get minimum update frequency for all the userbackend's associated
                 Parallel.ForEach<BackendEntity>(lstbackends, backend=>                
                 {
-                    InsightLogger.TrackEvent("UpdateTriggering web job, Action :: for each backend :: set next collecting time (Rule R1) :: start() , Response :: Backend Name : " + backend.BackendID);
+                    InsightLogger.TrackEvent("UpdateTriggering, Action :: for each backend :: set next collecting time (Rule R1) :: start() , Response :: Backend Name : " + backend.BackendID);
                     string backendID = backend.RowKey;                    
                     //Get all the userbackends associated with the backend
                     TableQuery<UserBackendEntity> tquery = new TableQuery<UserBackendEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.RowKey, QueryComparisons.Equal, backend.RowKey));
                     List<UserBackendEntity> allUserBackends = UserDeviceConfigurationTable.ExecuteQuery(tquery).ToList();
                     //get minimum update frequency from User Backend list
                     int minUpdateFrequency = allUserBackends.Min(r => r.DefaultUpdateFrequency);
-                    //InsightLogger.TrackEvent("UpdateTriggering web job, Action :: Collecting the minimum Default Update Frequency of all the userbackends under the backend :" + backendID + " , Response :: Minimum Update Frquency :" + minUpdateFrequency );
+                    //InsightLogger.TrackEvent("UpdateTriggering, Action :: Collecting the minimum Default Update Frequency of all the userbackends under the backend :" + backendID + " , Response :: Minimum Update Frquency :" + minUpdateFrequency );
                     //Get next collecting hours based on update Triggering Rule :: R1                    
                     int nextCollectingTimeInMinutes;
                     if (minUpdateFrequency < defaultMinUpdateFrequency)
@@ -79,7 +79,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     }
                     //update backend next collecting time in refernecedata table
                     this.InsertorUpdateBackendNextCollectingTime(backendID, nextCollectingTimeInMinutes, backend.AverageAllRequestsLatency, backend.LastAllRequestsLatency,IsFirstTime);
-                    InsightLogger.TrackEvent("UpdateTriggering web job, Action :: for each backend :: Set next collecting time (Rule R1) :: End() , Response :: Success, Backend Name : " + backend.BackendID);
+                    InsightLogger.TrackEvent("UpdateTriggering, Action :: for each backend :: Set next collecting time (Rule R1) :: End() , Response :: Success, Backend Name : " + backend.BackendID);
                     // this.objdal.CollectUsersNeedUpdateByBackend(backendID);
                 });
 
@@ -201,7 +201,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     ObjUpdateNextCollectingTime.RegularUpdateNextCollectingTime = nextCollectingTime;
                     // Execute update operation.
                     DataProvider.UpdateEntity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, ObjUpdateNextCollectingTime);
-                    InsightLogger.TrackEvent("UpdateTriggering web job, Action :: Set next collecting time , Response :: Success, backend :[ " + backendID + " ]");
+                    InsightLogger.TrackEvent("UpdateTriggering, Action :: Set next collecting time , Response :: Success, backend :[ " + backendID + " ]");
                 }
             }
             catch (DataAccessException dalexception)
@@ -243,7 +243,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                         ObjMissedUpdateNextCollectingTime.MissingUpdateNextCollectingTime = utRules.GetNextMissingCollectingTime(missingUpdateLastCollectingTime, backendDetails.AverageAllRequestsLatency, backendDetails.LastAllRequestsLatency);
                         // Execute update operation.
                         DataProvider.UpdateEntity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, ObjMissedUpdateNextCollectingTime);
-                        InsightLogger.TrackEvent("UpdateTriggering web job, Action :: Set next collecting time , Response :: Success, backend :[ " + backendID + " ]");
+                        InsightLogger.TrackEvent("UpdateTriggering, Action :: Set next collecting time , Response :: Success, backend :[ " + backendID + " ]");
                     }
 
                 }

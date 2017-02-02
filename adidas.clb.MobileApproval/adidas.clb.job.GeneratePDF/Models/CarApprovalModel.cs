@@ -16,7 +16,7 @@ namespace adidas.clb.job.GeneratePDF.Models
     /// </summary>
     class CarApprovalModel
     {
-        public CarSummary CarBasicInformation { get; set; }
+        public Dictionary<string, object> CarBasicInformation { get; set; }
         public IEnumerable<CarCapexMatrix> CarCapexMatrixDetails { get; set; }
     }
     class CarSummary

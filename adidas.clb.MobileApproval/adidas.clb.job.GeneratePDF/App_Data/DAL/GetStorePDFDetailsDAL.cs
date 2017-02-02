@@ -54,7 +54,8 @@ namespace adidas.clb.job.GeneratePDF.App_Data.DAL
                 sqldataProvider.OpenConnection(ConfigurationManager.ConnectionStrings["BakendAgentStoreConnectionString"].ConnectionString);
                 // Execute stored procedure for fetching PDf details from STORE Backend.
                 DataSet dsPdfDetails = (DataSet)sqldataProvider.ExecuteDataSet(CommandType.StoredProcedure, ConfigurationManager.AppSettings["GetStorePDFDetailsSPName"], sqlParameters.ToArray());
-                StoreApprovalBasicInfo objSAbasicInfo = null;
+                //StoreApprovalBasicInfo objSAbasicInfo = null;
+                Dictionary<string, object> objReqDetails = null;
                 //stored procedure returns two result sets
                 if (dsPdfDetails != null && dsPdfDetails.Tables.Count > 0)
                 {
@@ -64,33 +65,33 @@ namespace adidas.clb.job.GeneratePDF.App_Data.DAL
                     //getting StoreApprovalBasicInfo details from dataset table 1
                     if (dsPdfDetails.Tables[0] != null && dsPdfDetails.Tables[0].Rows.Count > 0)
                     {
-                        DataRow row = dsPdfDetails.Tables[0].Rows[0];                       
-                       
-                        //Call FieldsMapping.MapDtFieldstoBackendRequest() method, which returns Mapping request details to RequestDetailsMapping class object
-                        StoreApprovalBasicInfo objReqDetails = objFieldsMap.MapDtFieldstoBackendRequest<StoreApprovalBasicInfo>(row, ObjMaps.RequestFieldsMappingJson);
-                        objSAbasicInfo = new StoreApprovalBasicInfo()
-                        {
-                            DisplayBPMID = (!string.IsNullOrEmpty(objReqDetails.DisplayBPMID)) ? objReqDetails.DisplayBPMID : string.Empty,
-                            RequestName = (!string.IsNullOrEmpty(objReqDetails.RequestName)) ? objReqDetails.RequestName : string.Empty,
-                            MarketName = (!string.IsNullOrEmpty(objReqDetails.MarketName)) ? objReqDetails.MarketName : string.Empty,
-                            ProjectName = (!string.IsNullOrEmpty(objReqDetails.ProjectName)) ? objReqDetails.ProjectName : string.Empty,
-                            BrandName = (!string.IsNullOrEmpty(objReqDetails.BrandName)) ? objReqDetails.BrandName : string.Empty,
-                            SecurityDeposit = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.SecurityDeposit))) ? objReqDetails.SecurityDeposit : 0,
-                            TotalInvestment = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.TotalInvestment))) ? objReqDetails.TotalInvestment : 0,
-                            KeyMoney = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.KeyMoney))) ? objReqDetails.KeyMoney : 0,
-                            Brand = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.Brand))) ? Convert.ToDecimal(objReqDetails.Brand) : 0,
-                            CaseID = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.CaseID))) ? Convert.ToInt32(objReqDetails.CaseID) : 0,
-                            StoreTypeName = (!string.IsNullOrEmpty(objReqDetails.StoreTypeName)) ? objReqDetails.StoreTypeName : string.Empty,
-                            NetSellingSpace = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.NetSellingSpace))) ? Convert.ToInt32(objReqDetails.NetSellingSpace) : 0,
-                            OpeningDate = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.OpeningDate))) ? Convert.ToDateTime(objReqDetails.OpeningDate) : (DateTime?)null,
-                            LeaseEndDate = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.LeaseEndDate))) ? Convert.ToDateTime(objReqDetails.LeaseEndDate) : (DateTime?)null,
-                            LeasingPeriodDec = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.LeasingPeriodDec))) ? Convert.ToDecimal(objReqDetails.LeasingPeriodDec) : 0,
-                            CancelPeriod = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.CancelPeriod))) ? Convert.ToInt32(objReqDetails.CancelPeriod) : 0,
-                            LeaseBreakOption = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.LeaseBreakOption))) ? Convert.ToInt32(objReqDetails.LeaseBreakOption) : 0,
-                            CapexSpendYear = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.CapexSpendYear))) ? Convert.ToInt32(objReqDetails.CapexSpendYear) : 0,
-                            GrossLeasedArea = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.GrossLeasedArea))) ? Convert.ToInt32(objReqDetails.GrossLeasedArea) : 0
-                        };
+                        DataRow row = dsPdfDetails.Tables[0].Rows[0];
 
+                        //Call FieldsMapping.MapDtFieldstoBackendRequest() method, which returns Mapping request details to RequestDetailsMapping class object
+                        //StoreApprovalBasicInfo objReqDetails = objFieldsMap.MapDtFieldstoBackendRequest<StoreApprovalBasicInfo>(row, ObjMaps.RequestFieldsMappingJson);
+                        //objSAbasicInfo = new StoreApprovalBasicInfo()
+                        //{
+                        //    DisplayBPMID = (!string.IsNullOrEmpty(objReqDetails.DisplayBPMID)) ? objReqDetails.DisplayBPMID : string.Empty,
+                        //    RequestName = (!string.IsNullOrEmpty(objReqDetails.RequestName)) ? objReqDetails.RequestName : string.Empty,
+                        //    MarketName = (!string.IsNullOrEmpty(objReqDetails.MarketName)) ? objReqDetails.MarketName : string.Empty,
+                        //    ProjectName = (!string.IsNullOrEmpty(objReqDetails.ProjectName)) ? objReqDetails.ProjectName : string.Empty,
+                        //    BrandName = (!string.IsNullOrEmpty(objReqDetails.BrandName)) ? objReqDetails.BrandName : string.Empty,
+                        //    SecurityDeposit = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.SecurityDeposit))) ? objReqDetails.SecurityDeposit : 0,
+                        //    TotalInvestment = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.TotalInvestment))) ? objReqDetails.TotalInvestment : 0,
+                        //    KeyMoney = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.KeyMoney))) ? objReqDetails.KeyMoney : 0,
+                        //    Brand = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.Brand))) ? Convert.ToDecimal(objReqDetails.Brand) : 0,
+                        //    CaseID = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.CaseID))) ? Convert.ToInt32(objReqDetails.CaseID) : 0,
+                        //    StoreTypeName = (!string.IsNullOrEmpty(objReqDetails.StoreTypeName)) ? objReqDetails.StoreTypeName : string.Empty,
+                        //    NetSellingSpace = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.NetSellingSpace))) ? Convert.ToInt32(objReqDetails.NetSellingSpace) : 0,
+                        //    OpeningDate = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.OpeningDate))) ? Convert.ToDateTime(objReqDetails.OpeningDate) : (DateTime?)null,
+                        //    LeaseEndDate = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.LeaseEndDate))) ? Convert.ToDateTime(objReqDetails.LeaseEndDate) : (DateTime?)null,
+                        //    LeasingPeriodDec = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.LeasingPeriodDec))) ? Convert.ToDecimal(objReqDetails.LeasingPeriodDec) : 0,
+                        //    CancelPeriod = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.CancelPeriod))) ? Convert.ToInt32(objReqDetails.CancelPeriod) : 0,
+                        //    LeaseBreakOption = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.LeaseBreakOption))) ? Convert.ToInt32(objReqDetails.LeaseBreakOption) : 0,
+                        //    CapexSpendYear = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.CapexSpendYear))) ? Convert.ToInt32(objReqDetails.CapexSpendYear) : 0,
+                        //    GrossLeasedArea = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.GrossLeasedArea))) ? Convert.ToInt32(objReqDetails.GrossLeasedArea) : 0
+                        //};
+                         objReqDetails = objFieldsMap.MapDBFieldstoBackendRequest(row, ObjMaps.RequestFieldsMappingJson);
                     }
                    //getting StoreExecutiveSummary details from dataset table 2
 
@@ -124,7 +125,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.DAL
                     //getting store pdf details into StoreApprovalModel class
                     ObjSA = new StoreApprovalModel()
                     {
-                        StoreBasicInformation = objSAbasicInfo,
+                        StoreBasicInformation = objReqDetails,
                         StoreSummaryDetails = lstSASummary
                     };
                 }

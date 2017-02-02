@@ -33,7 +33,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.DAL
         /// </summary>
         /// <param name="requestID"></param>
         /// <returns></returns>
-        public CarApprovalModel GetPDFDetailsFromCAR(string requestID,string backendID)
+        public CarApprovalModel GetPDFDetailsFromCAR(string requestID, string backendID)
         {
 
             string callerMethodName = string.Empty;
@@ -55,7 +55,8 @@ namespace adidas.clb.job.GeneratePDF.App_Data.DAL
                 sqldataProvider.OpenConnection(ConfigurationManager.ConnectionStrings["BakendAgentCarConnectionString"].ConnectionString);
                 // Execute stored procedure for fetching PDf details from CAR Backend.
                 DataSet dsPdfDetails = (DataSet)sqldataProvider.ExecuteDataSet(CommandType.StoredProcedure, ConfigurationManager.AppSettings["GetCarPDFDetailsSPName"], sqlParameters.ToArray());
-                CarSummary objCarbasicInfo = null;
+                // CarSummary objCarbasicInfo = null;
+                Dictionary<string, object> objReqDetails = null;
                 //stored procedure returns two result sets
                 if (dsPdfDetails != null && dsPdfDetails.Tables.Count > 0)
                 {
@@ -67,38 +68,39 @@ namespace adidas.clb.job.GeneratePDF.App_Data.DAL
                     {
                         DataRow row = dsPdfDetails.Tables[0].Rows[0];
                         //Call FieldsMapping.MapDtFieldstoBackendRequest() method, which returns Mapping request details to RequestDetailsMapping class object
-                        CarSummary objReqDetails = objFieldsMap.MapDtFieldstoBackendRequest<CarSummary>(row, ObjMaps.RequestFieldsMappingJson);
-                        objCarbasicInfo = new CarSummary()
-                        {
-                            Name = (!string.IsNullOrEmpty(objReqDetails.Name)) ? objReqDetails.Name : string.Empty,
-                            Description = (!string.IsNullOrEmpty(objReqDetails.Description)) ? objReqDetails.Description : string.Empty,
-                            Controller = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.Controller))) ? Convert.ToInt32(objReqDetails.Controller) : 0,
-                            Requestor = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.Requestor))) ? Convert.ToInt32(objReqDetails.Requestor) : 0,
-                            DateofRequest= (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.DateofRequest))) ? Convert.ToDateTime(objReqDetails.DateofRequest) : (DateTime?)null,
-                            BrandDescription = (!string.IsNullOrEmpty(objReqDetails.BrandDescription)) ? objReqDetails.BrandDescription : string.Empty,
-                            CountryDescription = (!string.IsNullOrEmpty(objReqDetails.CountryDescription)) ? objReqDetails.CountryDescription : string.Empty,
-                            MarketDescription = (!string.IsNullOrEmpty(objReqDetails.MarketDescription)) ? objReqDetails.MarketDescription : string.Empty,
-                            InvestmentTypeDescription = (!string.IsNullOrEmpty(objReqDetails.InvestmentTypeDescription)) ? objReqDetails.InvestmentTypeDescription : string.Empty,
-                            EstimatedStartDate = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.EstimatedStartDate))) ? Convert.ToDateTime(objReqDetails.EstimatedStartDate) : (DateTime?)null,
-                            EstimatedCompletionDate = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.EstimatedCompletionDate))) ? Convert.ToDateTime(objReqDetails.EstimatedCompletionDate) : (DateTime?)null,
-                            Budgeted= (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.Budgeted))) ? Convert.ToBoolean(Convert.ToInt32(objReqDetails.Budgeted)) : false,
-                            Capex = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.Capex))) ? Convert.ToDecimal(objReqDetails.Capex) : 0,
-                            CapexLocal = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.CapexLocal))) ? Convert.ToDecimal(objReqDetails.CapexLocal) : 0,
-                            SpenttodateEUR = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.SpenttodateEUR))) ? Convert.ToDecimal(objReqDetails.SpenttodateEUR) : 0,
-                            CAPEXThisRequest = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.CAPEXThisRequest))) ? Convert.ToDecimal(objReqDetails.CAPEXThisRequest) : 0,
-                            LocalCurency = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.LocalCurency))) ? Convert.ToInt32(objReqDetails.LocalCurency) : 0,
-                            AssetNo = (!string.IsNullOrEmpty(objReqDetails.AssetNo)) ? Convert.ToString(objReqDetails.AssetNo) : string.Empty,
-                            CostCenterInternalOrder = (!string.IsNullOrEmpty(objReqDetails.CostCenterInternalOrder)) ? Convert.ToString(objReqDetails.CostCenterInternalOrder) : string.Empty,
-                            IMSNumber = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.IMSNumber))) ? Convert.ToInt32(objReqDetails.IMSNumber) : 0,
-                            CAPEXCodeGrape = (!string.IsNullOrEmpty(objReqDetails.CAPEXCodeGrape))?objReqDetails.CAPEXCodeGrape : string.Empty,
-                            FinanceLease = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.FinanceLease))) ? Convert.ToBoolean(Convert.ToInt32(objReqDetails.FinanceLease)) : false,
-                            ContractualObligation = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.ContractualObligation))) ? Convert.ToBoolean(Convert.ToInt32(objReqDetails.ContractualObligation)) : false,
-                            PurchaseOption = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.PurchaseOption))) ? Convert.ToBoolean(Convert.ToInt32(objReqDetails.PurchaseOption)) : false,
-                            GlobalRealEstate = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.GlobalRealEstate))) ? Convert.ToBoolean(Convert.ToInt32(objReqDetails.GlobalRealEstate)) : false,
-                            NoOfYears = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.NoOfYears))) ? Convert.ToInt32(objReqDetails.NoOfYears) : 0,
+                        //CarSummary objReqDetails = objFieldsMap.MapDtFieldstoBackendRequest<CarSummary>(row, ObjMaps.RequestFieldsMappingJson);
+                        //objCarbasicInfo = new CarSummary()
+                        //{
+                        //    Name = (!string.IsNullOrEmpty(objReqDetails.Name)) ? objReqDetails.Name : string.Empty,
+                        //    Description = (!string.IsNullOrEmpty(objReqDetails.Description)) ? objReqDetails.Description : string.Empty,
+                        //    Controller = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.Controller))) ? Convert.ToInt32(objReqDetails.Controller) : 0,
+                        //    Requestor = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.Requestor))) ? Convert.ToInt32(objReqDetails.Requestor) : 0,
+                        //    DateofRequest= (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.DateofRequest))) ? Convert.ToDateTime(objReqDetails.DateofRequest) : (DateTime?)null,
+                        //    BrandDescription = (!string.IsNullOrEmpty(objReqDetails.BrandDescription)) ? objReqDetails.BrandDescription : string.Empty,
+                        //    CountryDescription = (!string.IsNullOrEmpty(objReqDetails.CountryDescription)) ? objReqDetails.CountryDescription : string.Empty,
+                        //    MarketDescription = (!string.IsNullOrEmpty(objReqDetails.MarketDescription)) ? objReqDetails.MarketDescription : string.Empty,
+                        //    InvestmentTypeDescription = (!string.IsNullOrEmpty(objReqDetails.InvestmentTypeDescription)) ? objReqDetails.InvestmentTypeDescription : string.Empty,
+                        //    EstimatedStartDate = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.EstimatedStartDate))) ? Convert.ToDateTime(objReqDetails.EstimatedStartDate) : (DateTime?)null,
+                        //    EstimatedCompletionDate = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.EstimatedCompletionDate))) ? Convert.ToDateTime(objReqDetails.EstimatedCompletionDate) : (DateTime?)null,
+                        //    Budgeted= (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.Budgeted))) ? Convert.ToBoolean(Convert.ToInt32(objReqDetails.Budgeted)) : false,
+                        //    Capex = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.Capex))) ? Convert.ToDecimal(objReqDetails.Capex) : 0,
+                        //    CapexLocal = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.CapexLocal))) ? Convert.ToDecimal(objReqDetails.CapexLocal) : 0,
+                        //    SpenttodateEUR = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.SpenttodateEUR))) ? Convert.ToDecimal(objReqDetails.SpenttodateEUR) : 0,
+                        //    CAPEXThisRequest = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.CAPEXThisRequest))) ? Convert.ToDecimal(objReqDetails.CAPEXThisRequest) : 0,
+                        //    LocalCurency = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.LocalCurency))) ? Convert.ToInt32(objReqDetails.LocalCurency) : 0,
+                        //    AssetNo = (!string.IsNullOrEmpty(objReqDetails.AssetNo)) ? Convert.ToString(objReqDetails.AssetNo) : string.Empty,
+                        //    CostCenterInternalOrder = (!string.IsNullOrEmpty(objReqDetails.CostCenterInternalOrder)) ? Convert.ToString(objReqDetails.CostCenterInternalOrder) : string.Empty,
+                        //    IMSNumber = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.IMSNumber))) ? Convert.ToInt32(objReqDetails.IMSNumber) : 0,
+                        //    CAPEXCodeGrape = (!string.IsNullOrEmpty(objReqDetails.CAPEXCodeGrape))?objReqDetails.CAPEXCodeGrape : string.Empty,
+                        //    FinanceLease = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.FinanceLease))) ? Convert.ToBoolean(Convert.ToInt32(objReqDetails.FinanceLease)) : false,
+                        //    ContractualObligation = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.ContractualObligation))) ? Convert.ToBoolean(Convert.ToInt32(objReqDetails.ContractualObligation)) : false,
+                        //    PurchaseOption = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.PurchaseOption))) ? Convert.ToBoolean(Convert.ToInt32(objReqDetails.PurchaseOption)) : false,
+                        //    GlobalRealEstate = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.GlobalRealEstate))) ? Convert.ToBoolean(Convert.ToInt32(objReqDetails.GlobalRealEstate)) : false,
+                        //    NoOfYears = (!string.IsNullOrEmpty(Convert.ToString(objReqDetails.NoOfYears))) ? Convert.ToInt32(objReqDetails.NoOfYears) : 0,
 
 
-                        };
+                        //};
+                        objReqDetails = objFieldsMap.MapDBFieldstoBackendRequest(row, ObjMaps.RequestFieldsMappingJson);
 
                     }
                     //getting CarCapexMatrix details from dataset table 2
@@ -122,7 +124,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.DAL
                     //clone CAR pdf details into CarApprovalModel class
                     ObjSA = new CarApprovalModel()
                     {
-                        CarBasicInformation = objCarbasicInfo,
+                        CarBasicInformation = objReqDetails,
                         CarCapexMatrixDetails = lstCarCapexmatrix
                     };
                 }

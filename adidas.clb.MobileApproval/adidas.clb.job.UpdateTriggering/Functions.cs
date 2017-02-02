@@ -47,7 +47,7 @@ namespace adidas.clb.job.UpdateTriggering
                 //checking update triggering queue message null or empty
                 if (!string.IsNullOrEmpty(message))
                 {
-                    //log.WriteLine("adidas.clb.job.UpdateTriggering web job :: Processing update triggering queue message :: start()" + message);
+                    //log.WriteLine("adidas.clb.job.UpdateTriggering :: Processing update triggering queue message :: start()" + message);
                     //write message into application insights
                     InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Process update triggering queue message : Start(), \n Response :: Message:" + message );
                     //Deserializ input queue message into UpdateTriggeringMsg object
@@ -90,7 +90,7 @@ namespace adidas.clb.job.UpdateTriggering
                             //Communicates a request for cancellation
                             ctsut.Cancel();
                         }
-                        //log.WriteLine("adidas.clb.job.UpdateTriggering web job :: Processing update triggering queue message :: End()" + message);
+                        //log.WriteLine("adidas.clb.job.UpdateTriggering :: Processing update triggering queue message :: End()" + message);
                         //write message into application insights
                         InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Process update triggering queue message : End()" );
                     }
@@ -145,7 +145,7 @@ namespace adidas.clb.job.UpdateTriggering
             }
             catch (Exception exception)
             {
-                //log.WriteLine("Error in adidas.clb.job.UpdateTriggering web job :: Functions :: UpdateNextCollectingTimeForAllBackends() :: Exception Message=" + exception.Message);
+                //log.WriteLine("Error in adidas.clb.job.UpdateTriggering :: Functions :: UpdateNextCollectingTimeForAllBackends() :: Exception Message=" + exception.Message);
                 //write exception into application insights
                 InsightLogger.Exception(exception.Message, exception, callerMethodName);
             }
@@ -173,7 +173,7 @@ namespace adidas.clb.job.UpdateTriggering
                 
                 Parallel.ForEach<NextUserCollectingTimeEntity>(lstbackends, backend =>               
                 {
-                    InsightLogger.TrackEvent("UpdateTriggering web job, Action :: for each backend :: collect users needing update : start(), Response :: Backend Name : " + backend.BackendID);
+                    InsightLogger.TrackEvent("UpdateTriggering, Action :: for each backend :: collect users needing update : start(), Response :: Backend Name : " + backend.BackendID);
                     //getting minutes difference between currenttime and Regular Update Next CollectingTime
                     double regularWaitingMinutes = (backend.RegularUpdateNextCollectingTime - DateTime.Now).TotalMinutes;
                     //if minutes difference is with in RegularChecksWaitingTimeInMinutes(>=-5 and <=0) then invoke CollectUsersNeedUpdateByBackend method()
@@ -183,11 +183,11 @@ namespace adidas.clb.job.UpdateTriggering
                         objdal.CollectUsersNeedUpdateByBackend(backend.BackendID);
                         //update the backend entity with new collecting time[i.e LastCollectingTime= NextCollectingTime and NextCollectingTime=NextCollectingTime+(Backend MinimumusersUpdateFrequency)/2 ]
                         objnextcollentingTime.UpdateBackendRegularNextCollectingTime(backend.BackendID, backend.MinimumUpdateFrequency, backend.RegularUpdateNextCollectingTime);
-                        InsightLogger.TrackEvent("UpdateTriggering web job, Action :: for each backend :: collect users needing update : End(), Response :: Success,  Backend Name : " + backend.BackendID);
+                        InsightLogger.TrackEvent("UpdateTriggering, Action :: for each backend :: collect users needing update : End(), Response :: Success,  Backend Name : " + backend.BackendID);
                     }
                     else
                     {
-                        InsightLogger.TrackEvent("UpdateTriggering web job, Action :: for each backend :: collect users needing update : End(), Response :: Condition is not met. i.e, next collecting time of the backend [ " + backend.BackendID + " ] is greater-than to current time.");
+                        InsightLogger.TrackEvent("UpdateTriggering, Action :: for each backend :: collect users needing update : End(), Response :: next collecting time of the backend [ " + backend.BackendID + " ] is greater-than to current time.");
 
                     }
 
@@ -210,7 +210,7 @@ namespace adidas.clb.job.UpdateTriggering
             }
             catch (Exception exception)
             {
-              //  log.WriteLine("Error in adidas.clb.job.UpdateTriggering web job :: Functions :: RegularChecksforBackendNeedsUpdate() :: Exception Message=" + exception.Message);
+              //  log.WriteLine("Error in adidas.clb.job.UpdateTriggering :: Functions :: RegularChecksforBackendNeedsUpdate() :: Exception Message=" + exception.Message);
                 //write exception into application insights
                 InsightLogger.Exception(exception.Message, exception, callerMethodName);
             }
@@ -235,7 +235,7 @@ namespace adidas.clb.job.UpdateTriggering
                 UserBackendDAL objUserBackendDAL = new UserBackendDAL();                
                 Parallel.ForEach<NextUserCollectingTimeEntity>(lstbackends, backend =>
                 {
-                    InsightLogger.TrackEvent("UpdateTriggering web job, Action :: for each backend :: collect missing updates : start() , Response :: Backend Name : " + backend.BackendID);
+                    InsightLogger.TrackEvent("UpdateTriggering, Action :: for each backend :: collect missing updates : start() , Response :: Backend Name : " + backend.BackendID);
                     //getting minutes difference between currenttime and Missing Update Next CollectingTime
                     double waitingMinutes = (backend.MissingUpdateNextCollectingTime - DateTime.Now).TotalMinutes;
                     //if minutes difference is with in RegularChecksWaitingTimeInMinutes(>=-8 and <=0) then invoke MissedUpdatesWaitingTimeInMinutes method()
@@ -249,11 +249,11 @@ namespace adidas.clb.job.UpdateTriggering
                         Task.WaitAll(tasksMissedUpdates);
                         //update the backend entity with new missing update collecting time[i.e MissingUpdateLastCollectingTime= MissingUpdateNextCollectingTime and MissingUpdateNextCollectingTime=Max(]
                         objnextcollectingTime.UpdateMisseduserBackendNextCollectingTime(backend.BackendID, backend.MissingUpdateNextCollectingTime);
-                        InsightLogger.TrackEvent("UpdateTriggering web job, Action :: for each backend :: collect missing updates : End() , Response :: Success, Backend Name : " + backend.BackendID);
+                        InsightLogger.TrackEvent("UpdateTriggering, Action :: for each backend :: collect missing updates : End() , Response :: Success, Backend Name : " + backend.BackendID);
                     }
                     else
                     {
-                        InsightLogger.TrackEvent("UpdateTriggering web job, Action :: for each backend :: collect missing updates : End(), Response :: Condition is not met. i.e, next missing update collecting time of the backend [ " + backend.BackendID + " ] is greater-than to current time.");
+                        InsightLogger.TrackEvent("UpdateTriggering, Action :: for each backend :: collect missing updates : End(), Response ::  next missing update collecting time of the backend [ " + backend.BackendID + " ] is greater-than to current time.");
 
                     }
                 });
@@ -275,7 +275,7 @@ namespace adidas.clb.job.UpdateTriggering
             }
             catch (Exception exception)
             {
-               // log.WriteLine("Error in adidas.clb.job.UpdateTriggering web job :: Functions :: RegularChecksforUserbackendLostsUpdate() :: Exception Message=" + exception.Message);
+               // log.WriteLine("Error in adidas.clb.job.UpdateTriggering :: Functions :: RegularChecksforUserbackendLostsUpdate() :: Exception Message=" + exception.Message);
                 //write  Exception into application insights
                 InsightLogger.Exception(exception.Message, exception, callerMethodName);
             }

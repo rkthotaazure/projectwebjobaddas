@@ -16,7 +16,7 @@ namespace adidas.clb.job.GeneratePDF.Models
     /// </summary>
     class StoreApprovalModel
     {
-        public StoreApprovalBasicInfo StoreBasicInformation { get; set; }
+        public Dictionary<string, object> StoreBasicInformation { get; set; }
         public IEnumerable<StoreExecutiveSummary> StoreSummaryDetails { get; set; }
 
     }
