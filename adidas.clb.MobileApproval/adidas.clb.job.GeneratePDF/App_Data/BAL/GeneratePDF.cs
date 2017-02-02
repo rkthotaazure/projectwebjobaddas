@@ -60,7 +60,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
                 //Call the stored procedure for gettting the  pdf details from Store backend
                 //clone the result set into StoreApprovalModel class
                 StoreApprovalModel objStoreDetails = objstorePDF.GetPDFDetailsFromStore(requestID, backendID);
-                StoreApprovalBasicInfo objstorebasicInfo = null; 
+                Dictionary<string, object> objstorebasicInfo = null; 
                 List<StoreExecutiveSummary> lststoresummary = null;
                 //checking StoreApprovalModel has null or not
                 if (objStoreDetails != null)
@@ -145,359 +145,397 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
                     cell.PaddingBottom = 10f;
                     table.AddCell(cell);
                     //writing store basic information into table format
-                    //DisplayBPMID Property Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("BPM ID", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //DisplayBPMID Property Value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(objstorebasicInfo.DisplayBPMID, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //CaseID Property Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(nameof(objstorebasicInfo.CaseID), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //CaseID Property Value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(Convert.ToString(objstorebasicInfo.CaseID), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //RequestName Property Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Store", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //RequestName Property Value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(objstorebasicInfo.RequestName, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //MarketName Property Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Market", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //MarketName Property Value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(objstorebasicInfo.MarketName, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //ProjectName Property Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Type", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //ProjectName Property Value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(objstorebasicInfo.ProjectName, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //BrandName Property Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Brand Name", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //BrandName Property value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(objstorebasicInfo.BrandName, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //SecurityDeposit Property Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Security Deposit", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //SecurityDeposit Property value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(Convert.ToString(objstorebasicInfo.SecurityDeposit), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //TotalInvestment Property Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Total Investment", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //TotalInvestment Property Value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(Convert.ToString(objstorebasicInfo.TotalInvestment), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //KeyMoney Property label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Key Money", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //KeyMoney Property Value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(Convert.ToString(objstorebasicInfo.KeyMoney), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //CAPEX Property Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("CAPEX", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //CAPEX Property Value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(Convert.ToString(objstorebasicInfo.Brand), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //StoreTypeName Property Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Store Type Name", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //StoreTypeName Property Value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(objstorebasicInfo.StoreTypeName, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //NetSellingSpace Property Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Net Selling Space", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //NetSellingSpace Property value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(Convert.ToString(objstorebasicInfo.NetSellingSpace), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //OpeningDate Property Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Opening Date", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //OpeningDate Property Value
-                    string openingDate = string.Empty;
-                    if (objstorebasicInfo.OpeningDate != null)
+                    string strvalue = string.Empty;
+                    foreach (KeyValuePair<string, Object> item in objstorebasicInfo)
                     {
-                        DateTime odate = (DateTime)(objstorebasicInfo.OpeningDate);
-                        openingDate = odate.ToString("dd/MM/yyyy");
+                        //converting datetime field value to string dd/MM/yyyy format
+                        strvalue = string.Empty;
+                        if (item.Value.GetType() == typeof(DateTime))
+                        {
+                            if (!string.IsNullOrEmpty(Convert.ToString(item.Value)))
+                            {
+                                DateTime dt = (DateTime)item.Value;
+                                strvalue = dt.ToString("dd/MM/yyyy");
+                            }
+
+                        }
+                        else
+                        {
+                            strvalue = !string.IsNullOrEmpty(Convert.ToString(item.Value)) ? Convert.ToString(item.Value) : string.Empty;
+                        }
+                        //Label
+                        phrase = new Phrase();
+                        phrase.Add(new Chunk(item.Key, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                        cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                        cell.PaddingBottom = 5f;
+                        cell.BorderWidth = 0.3f;
+                        cell.BorderColor = BaseColor.BLACK;
+                        table.AddCell(cell);
+                       //value
+                        phrase = new Phrase();
+                        phrase.Add(new Chunk(strvalue, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                        cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                        cell.PaddingBottom = 5f;
+                        cell.BorderWidth = 0.3f;
+                        cell.BorderColor = BaseColor.BLACK;
+                        table.AddCell(cell);
+
                     }
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(openingDate, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //LeaseEndDate Property Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Lease End Date", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //LeaseEndDate Property Value
-                    string leaseEndDate = string.Empty;
-                    if (objstorebasicInfo.LeaseEndDate != null)
-                    {
-                        //Converting datetime to dd/MM/yyyy format
-                        DateTime ldate = (DateTime)(objstorebasicInfo.LeaseEndDate);
-                        leaseEndDate = ldate.ToString("dd/MM/yyyy");
-                    }
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(leaseEndDate, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //LeasingPeriodDec Property Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Leasing Period Dec", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //LeasingPeriodDec Property Value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(Convert.ToString(objstorebasicInfo.LeasingPeriodDec), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //CancelPeriod Property Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Cancel Period", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //CancelPeriod Property Value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(Convert.ToString(objstorebasicInfo.CancelPeriod), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //LeaseBreakOption Property Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Lease Break Option", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //LeaseBreakOption Property Value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(Convert.ToString(objstorebasicInfo.LeaseBreakOption), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //CapexSpendYear Property Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Capex Spend Year", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //CapexSpendYear Property Value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(Convert.ToString(objstorebasicInfo.CapexSpendYear), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //GrossLeasedArea Property Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Gross Leased Area", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //GrossLeasedArea Property Value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(Convert.ToString(objstorebasicInfo.GrossLeasedArea), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_LEFT;
-                    cell.PaddingBottom = 5f;
-                    cell.BorderWidth = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
+
+                        
+                    //    //DisplayBPMID Property Label
+                    //    phrase = new Phrase();
+                    //phrase.Add(new Chunk("BPM ID", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////DisplayBPMID Property Value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(objstorebasicInfo.DisplayBPMID, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////CaseID Property Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(nameof(objstorebasicInfo.CaseID), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////CaseID Property Value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(Convert.ToString(objstorebasicInfo.CaseID), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////RequestName Property Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Store", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////RequestName Property Value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(objstorebasicInfo.RequestName, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////MarketName Property Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Market", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////MarketName Property Value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(objstorebasicInfo.MarketName, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////ProjectName Property Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Type", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////ProjectName Property Value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(objstorebasicInfo.ProjectName, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////BrandName Property Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Brand Name", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////BrandName Property value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(objstorebasicInfo.BrandName, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////SecurityDeposit Property Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Security Deposit", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////SecurityDeposit Property value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(Convert.ToString(objstorebasicInfo.SecurityDeposit), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////TotalInvestment Property Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Total Investment", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////TotalInvestment Property Value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(Convert.ToString(objstorebasicInfo.TotalInvestment), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////KeyMoney Property label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Key Money", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////KeyMoney Property Value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(Convert.ToString(objstorebasicInfo.KeyMoney), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////CAPEX Property Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("CAPEX", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////CAPEX Property Value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(Convert.ToString(objstorebasicInfo.Brand), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////StoreTypeName Property Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Store Type Name", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////StoreTypeName Property Value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(objstorebasicInfo.StoreTypeName, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////NetSellingSpace Property Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Net Selling Space", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////NetSellingSpace Property value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(Convert.ToString(objstorebasicInfo.NetSellingSpace), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////OpeningDate Property Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Opening Date", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////OpeningDate Property Value
+                    //string openingDate = string.Empty;
+                    //if (objstorebasicInfo.OpeningDate != null)
+                    //{
+                    //    DateTime odate = (DateTime)(objstorebasicInfo.OpeningDate);
+                    //    openingDate = odate.ToString("dd/MM/yyyy");
+                    //}
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(openingDate, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////LeaseEndDate Property Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Lease End Date", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////LeaseEndDate Property Value
+                    //string leaseEndDate = string.Empty;
+                    //if (objstorebasicInfo.LeaseEndDate != null)
+                    //{
+                    //    //Converting datetime to dd/MM/yyyy format
+                    //    DateTime ldate = (DateTime)(objstorebasicInfo.LeaseEndDate);
+                    //    leaseEndDate = ldate.ToString("dd/MM/yyyy");
+                    //}
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(leaseEndDate, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////LeasingPeriodDec Property Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Leasing Period Dec", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////LeasingPeriodDec Property Value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(Convert.ToString(objstorebasicInfo.LeasingPeriodDec), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////CancelPeriod Property Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Cancel Period", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////CancelPeriod Property Value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(Convert.ToString(objstorebasicInfo.CancelPeriod), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////LeaseBreakOption Property Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Lease Break Option", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////LeaseBreakOption Property Value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(Convert.ToString(objstorebasicInfo.LeaseBreakOption), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////CapexSpendYear Property Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Capex Spend Year", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////CapexSpendYear Property Value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(Convert.ToString(objstorebasicInfo.CapexSpendYear), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////GrossLeasedArea Property Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Gross Leased Area", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////GrossLeasedArea Property Value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(Convert.ToString(objstorebasicInfo.GrossLeasedArea), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_LEFT;
+                    //cell.PaddingBottom = 5f;
+                    //cell.BorderWidth = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
                     //Empty Cell
                     phrase = new Phrase();
                     phrase.Add(new Chunk(" ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
@@ -1023,7 +1061,7 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
                 //Call the stored procedure for gettting the  pdf details from Store backend
                 //clone the result set into CarApprovalModel class
                 CarApprovalModel objCarDetails = objCARPDF.GetPDFDetailsFromCAR(requestID, backendID);
-                CarSummary objCarSummary;
+                Dictionary<string, object> objCarSummary=null;
                 List<CarCapexMatrix> lstCarCapex = null;
                 //checking CarApprovalModel result has null or not
                 if (objCarDetails != null)
@@ -1102,452 +1140,500 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
                     cell.PaddingBottom = 10f;
                     table.AddCell(cell);
                     //writing store basic information into table format
-                    //DateOfRequest Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Date of Request", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.PaddingBottom = 8f;
-                    cell.PaddingTop = 8f; 
-                    cell.BorderWidthTop = 0.3f;
-                    cell.BorderWidthLeft = 0.3f;                   
-                    cell.BorderWidthRight = 0f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //DateOfRequest Label value
-                    string requestDate = string.Empty;
-                    if (objCarSummary.DateofRequest != null)
+
+                    string strvalue = string.Empty;
+                    foreach (KeyValuePair<string, Object> item in objCarSummary)
                     {
-                        DateTime dateofRequest =(DateTime)(objCarSummary.DateofRequest);
-                        requestDate = dateofRequest.ToString("dd/MM/yyyy");
-                    }                   
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    phrase.Add(new Chunk(requestDate, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.PaddingTop = 8f;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthTop = 0.3f;
-                    cell.BorderWidthRight = 0.3f;
-                    cell.BorderWidthLeft = 0f;                
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
+                        strvalue = string.Empty;
+                        if (item.Value.GetType() == typeof(DateTime))
+                        {
+                            if (!string.IsNullOrEmpty(Convert.ToString(item.Value)))
+                            {
+                                DateTime dt = (DateTime)item.Value;
+                                strvalue = dt.ToString("dd/MM/yyyy");
+                            }
 
-                    //Brand Description
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Brand", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0.3f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
+                        }
+                        else
+                        {
+                            strvalue = !string.IsNullOrEmpty(Convert.ToString(item.Value)) ? Convert.ToString(item.Value) : string.Empty;
+                        }
 
-                    //Brand Value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    phrase.Add(new Chunk(objCarSummary.BrandDescription, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0.3f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //MarketDescription label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Market / Function", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0.3f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //MarketDescription value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    phrase.Add(new Chunk(objCarSummary.MarketDescription, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0.3f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
+                        //Label
+                        phrase = new Phrase();
+                        phrase.Add(new Chunk(item.Key, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                        cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                        cell.PaddingBottom = 8f;
+                        cell.PaddingTop = 8f;
+                       // cell.BorderWidthTop = 0.3f;
+                       // cell.BorderWidthLeft = 0.3f;
+                       // cell.BorderWidthRight = 0f;
+                        //cell.BorderWidthBottom = 0f;
+                        cell.BorderColor = BaseColor.BLACK;
+                        table.AddCell(cell);
 
-                    //Country Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Country", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0.3f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //Country Description value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    phrase.Add(new Chunk(objCarSummary.CountryDescription, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0.3f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //InvestmentType Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Investment Type", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0.3f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //InvestmentType Value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    phrase.Add(new Chunk(objCarSummary.InvestmentTypeDescription, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0.3f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //EstimatedStartDate Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Estimated Start Date", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0.3f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //EstimatedStartDate value
-                    string estimatedStartDate = string.Empty;
-                    if (objCarSummary.EstimatedStartDate != null)
-                    {
-                        DateTime startdate = (DateTime)(objCarSummary.EstimatedStartDate);
-                        estimatedStartDate = startdate.ToString("dd/MM/yyyy");
+
+                        //value
+                        phrase = new Phrase();
+                       // phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                        phrase.Add(new Chunk(strvalue, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                        cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                        cell.PaddingTop = 8f;
+                        cell.PaddingBottom = 8f;
+                        //cell.BorderWidthTop = 0.3f;
+                        //cell.BorderWidthRight = 0.3f;
+                       // cell.BorderWidthLeft = 0f;
+                        //cell.BorderWidthBottom = 0f;
+                        cell.BorderColor = BaseColor.BLACK;
+                        table.AddCell(cell);
                     }
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    phrase.Add(new Chunk(estimatedStartDate, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0.3f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //EstimatedCompletionDate Lable
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Estimated Completion Date", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0.3f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //EstimatedCompletionDate Value
-                    string estimatedCompletionDate = string.Empty;
-                    if (objCarSummary.EstimatedCompletionDate != null)
-                    {
-                        DateTime completionDate = (DateTime)(objCarSummary.EstimatedCompletionDate);
-                        estimatedCompletionDate = completionDate.ToString("dd/MM/yyyy");
-                    }
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    phrase.Add(new Chunk(estimatedCompletionDate, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0.3f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //Budgeted Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Budgeted", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0.3f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //Budgeted Label Value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    phrase.Add(new Chunk(Convert.ToString(objCarSummary.Budgeted), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0.3f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //Capex Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Project Total Capex", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0.3f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //Capex Label value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    phrase.Add(new Chunk(Convert.ToString(objCarSummary.Capex), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0.3f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //CapexLocal Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Project Total Capex(Local Currency)", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0.3f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //CapexLocal Label Value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    phrase.Add(new Chunk(Convert.ToString(objCarSummary.CapexLocal), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0.3f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //LocalCurrency Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Local Currency", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0.3f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //LocalCurrency Label Value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    phrase.Add(new Chunk(Convert.ToString(objCarSummary.LocalCurency), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0.3f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //SpenttodateEUR Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Spent/Commited to date", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0.3f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //SpenttodateEUR Label value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    phrase.Add(new Chunk(Convert.ToString(objCarSummary.SpenttodateEUR), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0.3f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //CAPEXThisRequest Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("CAPEX this request", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0.3f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //CAPEXThisRequest Label Value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    phrase.Add(new Chunk(Convert.ToString(objCarSummary.CAPEXThisRequest), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0.3f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //FinanceLease Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Finance Lease", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0.3f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //FinanceLease Label Value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    phrase.Add(new Chunk(Convert.ToString(objCarSummary.FinanceLease), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthRight = 0.3f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthLeft = 0f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //PurchaseOption Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Purchase Option", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                     cell.PaddingBottom = 8f;                   
-                    cell.BorderWidthLeft = 0.3f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //PurchaseOption Label Value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    phrase.Add(new Chunk(Convert.ToString(objCarSummary.PurchaseOption), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0.3f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //GlobalRealEstate Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("Operating Lease/Global Real Estate", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0.3f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //GlobalRealEstate Label Value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    phrase.Add(new Chunk(Convert.ToString(objCarSummary.GlobalRealEstate), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0.3f;
-                    cell.BorderWidthBottom = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //NoOfYears Label
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk("No.Of Years", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft= 0.3f;
-                    cell.BorderWidthBottom = 0.3f;
-                    cell.BorderWidthRight = 0f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);
-                    //NoOfYears Label value
-                    phrase = new Phrase();
-                    phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
-                    phrase.Add(new Chunk(Convert.ToString(objCarSummary.NoOfYears), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
-                    cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
-                    cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
-                    cell.PaddingBottom = 8f;  
-                    cell.BorderWidthLeft = 0f;
-                    cell.BorderWidthTop = 0f;
-                    cell.BorderWidthRight = 0.3f;
-                    cell.BorderWidthBottom = 0.3f;
-                    cell.BorderColor = BaseColor.BLACK;
-                    table.AddCell(cell);                    
+                    //    //DateOfRequest Label
+                    //    phrase = new Phrase();
+                    //phrase.Add(new Chunk("Date of Request", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.PaddingBottom = 8f;
+                    //cell.PaddingTop = 8f; 
+                    //cell.BorderWidthTop = 0.3f;
+                    //cell.BorderWidthLeft = 0.3f;                   
+                    //cell.BorderWidthRight = 0f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////DateOfRequest Label value
+                    //string requestDate = string.Empty;
+                    //if (objCarSummary.DateofRequest != null)
+                    //{
+                    //    DateTime dateofRequest =(DateTime)(objCarSummary.DateofRequest);
+                    //    requestDate = dateofRequest.ToString("dd/MM/yyyy");
+                    //}                   
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //phrase.Add(new Chunk(requestDate, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.PaddingTop = 8f;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthTop = 0.3f;
+                    //cell.BorderWidthRight = 0.3f;
+                    //cell.BorderWidthLeft = 0f;                
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+
+                    ////Brand Description
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Brand", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0.3f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+
+                    ////Brand Value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //phrase.Add(new Chunk(objCarSummary.BrandDescription, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0.3f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////MarketDescription label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Market / Function", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0.3f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////MarketDescription value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //phrase.Add(new Chunk(objCarSummary.MarketDescription, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0.3f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+
+                    ////Country Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Country", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0.3f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////Country Description value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //phrase.Add(new Chunk(objCarSummary.CountryDescription, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0.3f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////InvestmentType Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Investment Type", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0.3f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////InvestmentType Value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //phrase.Add(new Chunk(objCarSummary.InvestmentTypeDescription, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0.3f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////EstimatedStartDate Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Estimated Start Date", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0.3f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////EstimatedStartDate value
+                    //string estimatedStartDate = string.Empty;
+                    //if (objCarSummary.EstimatedStartDate != null)
+                    //{
+                    //    DateTime startdate = (DateTime)(objCarSummary.EstimatedStartDate);
+                    //    estimatedStartDate = startdate.ToString("dd/MM/yyyy");
+                    //}
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //phrase.Add(new Chunk(estimatedStartDate, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0.3f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////EstimatedCompletionDate Lable
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Estimated Completion Date", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0.3f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////EstimatedCompletionDate Value
+                    //string estimatedCompletionDate = string.Empty;
+                    //if (objCarSummary.EstimatedCompletionDate != null)
+                    //{
+                    //    DateTime completionDate = (DateTime)(objCarSummary.EstimatedCompletionDate);
+                    //    estimatedCompletionDate = completionDate.ToString("dd/MM/yyyy");
+                    //}
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //phrase.Add(new Chunk(estimatedCompletionDate, FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0.3f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////Budgeted Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Budgeted", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0.3f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////Budgeted Label Value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //phrase.Add(new Chunk(Convert.ToString(objCarSummary.Budgeted), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0.3f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////Capex Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Project Total Capex", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0.3f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////Capex Label value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //phrase.Add(new Chunk(Convert.ToString(objCarSummary.Capex), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0.3f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////CapexLocal Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Project Total Capex(Local Currency)", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0.3f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////CapexLocal Label Value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //phrase.Add(new Chunk(Convert.ToString(objCarSummary.CapexLocal), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0.3f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////LocalCurrency Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Local Currency", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0.3f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////LocalCurrency Label Value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //phrase.Add(new Chunk(Convert.ToString(objCarSummary.LocalCurency), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0.3f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////SpenttodateEUR Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Spent/Commited to date", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0.3f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////SpenttodateEUR Label value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //phrase.Add(new Chunk(Convert.ToString(objCarSummary.SpenttodateEUR), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0.3f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////CAPEXThisRequest Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("CAPEX this request", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0.3f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////CAPEXThisRequest Label Value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //phrase.Add(new Chunk(Convert.ToString(objCarSummary.CAPEXThisRequest), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0.3f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////FinanceLease Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Finance Lease", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0.3f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////FinanceLease Label Value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //phrase.Add(new Chunk(Convert.ToString(objCarSummary.FinanceLease), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthRight = 0.3f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthLeft = 0f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////PurchaseOption Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Purchase Option", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    // cell.PaddingBottom = 8f;                   
+                    //cell.BorderWidthLeft = 0.3f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////PurchaseOption Label Value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //phrase.Add(new Chunk(Convert.ToString(objCarSummary.PurchaseOption), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0.3f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////GlobalRealEstate Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("Operating Lease/Global Real Estate", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0.3f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////GlobalRealEstate Label Value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //phrase.Add(new Chunk(Convert.ToString(objCarSummary.GlobalRealEstate), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0.3f;
+                    //cell.BorderWidthBottom = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////NoOfYears Label
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk("No.Of Years", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft= 0.3f;
+                    //cell.BorderWidthBottom = 0.3f;
+                    //cell.BorderWidthRight = 0f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);
+                    ////NoOfYears Label value
+                    //phrase = new Phrase();
+                    //phrase.Add(new Chunk(":   ", FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.BOLD, BaseColor.BLACK)));
+                    //phrase.Add(new Chunk(Convert.ToString(objCarSummary.NoOfYears), FontFactory.GetFont(pdfCellFontName, pdfCellFontSize, Font.NORMAL, BaseColor.BLACK)));
+                    //cell = PhraseCell(phrase, PdfPCell.ALIGN_LEFT);
+                    //cell.VerticalAlignment = PdfPCell.ALIGN_MIDDLE;
+                    //cell.PaddingBottom = 8f;  
+                    //cell.BorderWidthLeft = 0f;
+                    //cell.BorderWidthTop = 0f;
+                    //cell.BorderWidthRight = 0.3f;
+                    //cell.BorderWidthBottom = 0.3f;
+                    //cell.BorderColor = BaseColor.BLACK;
+                    //table.AddCell(cell);     
+                                   
                     //add summary table information to pdf document
                     document.Add(table);
 

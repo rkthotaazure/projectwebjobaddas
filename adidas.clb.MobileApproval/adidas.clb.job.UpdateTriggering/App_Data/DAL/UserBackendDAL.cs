@@ -62,7 +62,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
             string callerMethodName = string.Empty;
             try
             {
-                InsightLogger.TrackEvent("UpdateTriggering web job, Action :: Collect the users needing update for the backend [" + BackendID + "]");
+                InsightLogger.TrackEvent("UpdateTriggering, Action :: Collect the users needing update for the backend [" + BackendID + "]");
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 var cts = new CancellationTokenSource();
@@ -167,13 +167,13 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             //checking is user backend needs update or not with the help of Updatetriggering rule R2
                             if (userBackend.LastUpdate != null && utRule.IsuserBackendNeedsUpdate(userBackend.UpdateTriggered, userBackend.LastUpdate, userBackend.DefaultUpdateFrequency))
                             {
-                                InsightLogger.TrackEvent("UpdateTriggering web job, Action :: Is User [ " + userBackend.UserID + " ] need update for backend:[" + userBackend.BackendID + " ] based on UT Rule R2 , Response :: true");
+                                InsightLogger.TrackEvent("UpdateTriggering, Action :: Is User [ " + userBackend.UserID + " ] need update for backend:[" + userBackend.BackendID + " ] based on UT Rule R2 , Response :: true");
                                 //clone values to UpdateTriggeringMsg class
                                 msgFormat.Add(ConvertUserUpdateMsgToUpdateTriggeringMsg(userBackend, BackendID));
                             }
                             else
                             {
-                                InsightLogger.TrackEvent("UpdateTriggering web job, Action :: Is User [ " + userBackend.UserID + " ] need update for backend:[" + userBackend.BackendID + " ] based on UT Rule R2 , Response :: false");
+                                InsightLogger.TrackEvent("UpdateTriggering, Action :: Is User [ " + userBackend.UserID + " ] need update for backend:[" + userBackend.BackendID + " ] based on UT Rule R2 , Response :: false");
                             }
                         }
                         //add list of messages into update triggering input queue
@@ -231,7 +231,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             queuedoc.BeginAddMessage(message, callBack, null);
                             documentCount++;
                             IsSuccessful = true;
-                            InsightLogger.TrackEvent("UpdateTriggering web job, Action :: Put update message in queue , Response :: Success");
+                            InsightLogger.TrackEvent("UpdateTriggering, Action :: Put update message in queue , Response :: Success");
                         }
                         catch (StorageException storageException)
                         {
@@ -240,12 +240,12 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             //Checking retry call count is eual to max retry count or not
                             if (RetryAttemptCount == maxRetryCount)
                             {
-                                InsightLogger.Exception("UpdateTriggering web job :: " + callerMethodName + " method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, callerMethodName);
+                                InsightLogger.Exception("UpdateTriggering :: " + callerMethodName + " method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, callerMethodName);
                                 throw new DataAccessException(storageException.Message, storageException.InnerException);
                             }
                             else
                             {
-                                InsightLogger.Exception("UpdateTriggering web job :: " + callerMethodName + " method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, callerMethodName);
+                                InsightLogger.Exception("UpdateTriggering :: " + callerMethodName + " method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, callerMethodName);
                                 //Putting the thread into some milliseconds sleep  and again call the same method call.
                                 Thread.Sleep(maxThreadSleepInMilliSeconds);
                             }
@@ -313,7 +313,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 };
                 //Serialize UpdateTriggeringMsg Object into json string
                 updatetriggeringmsg = JsonConvert.SerializeObject(ObjUTMsg);
-                InsightLogger.TrackEvent("UpdateTriggering web job, Action :: Prepare update triggering message , Response :: message:" + updatetriggeringmsg);
+                InsightLogger.TrackEvent("UpdateTriggering, Action :: Prepare update triggering message , Response :: message:" + updatetriggeringmsg);
 
                 return updatetriggeringmsg;
             }
@@ -486,13 +486,13 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             //checking is user backend update missing or not with the help of Updatetriggering rule R6
                             if (utRule.IsUserUpdateMissing(muserBackend.UpdateTriggered, muserBackend.ExpectedUpdate))
                             {
-                                InsightLogger.TrackEvent("UpdateTriggering web job, Action :: Is User [ " + muserBackend.BackendID + " ] missed updates for the backend:[" + muserBackend.BackendID + " ] based on UT Rule R6 , Response :: true");
+                                InsightLogger.TrackEvent("UpdateTriggering, Action :: Is User [ " + muserBackend.UserID + " ] missed updates for the backend:[" + muserBackend.BackendID + " ] based on UT Rule R6 , Response :: true");
                                 //put the json message of UpdateTriggeringMsg class format into update triggering input queue.
                                 msgFormat.Add(ConvertUserUpdateMsgToUpdateTriggeringMsg(muserBackend, mBackendID));
                             }
                             else
                             {
-                                InsightLogger.TrackEvent("UpdateTriggering web job, Action :: Is User [ " + muserBackend.BackendID + " ] missed updates for the backend:[" + muserBackend.BackendID + " ] based on UT Rule R6 , Response :: false");
+                                InsightLogger.TrackEvent("UpdateTriggering, Action :: Is User [ " + muserBackend.UserID + " ] missed updates for the backend:[" + muserBackend.BackendID + " ] based on UT Rule R6 , Response :: false");
                             }
                         }
                         //add list of messages into update triggering input queue
@@ -544,16 +544,16 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                         updateEntity.UpdateTriggered = true;
                         // Execute the Replace TableOperation.
                         DataProvider.UpdateEntity<UserBackendEntity>(azureTableUserDeviceConfiguration, updateEntity);
-                        InsightLogger.TrackEvent("UpdateTriggering web job :: updatetriggerinputqueue, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R3) for the userbackend : " + userName + " ,  Response : Success");
+                        InsightLogger.TrackEvent("UpdateTriggering :: updatetriggerinputqueue, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R3) for the userbackend : " + userName + " ,  Response : Success");
                     }
                     else
                     {
-                        InsightLogger.TrackEvent("UpdateTriggering web job :: updatetriggerinputqueue, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R3) for the userbackend : " + userName + " ,  Response : Failed");
+                        InsightLogger.TrackEvent("UpdateTriggering :: updatetriggerinputqueue, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R3) for the userbackend : " + userName + " ,  Response : Failed");
                     }
                 }
                 else
                 {
-                    InsightLogger.TrackEvent("UpdateTriggering web job :: updatetriggerinputqueue, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R3) for the userbackend : " + userName + " ,  Response : Failed");
+                    InsightLogger.TrackEvent("UpdateTriggering :: updatetriggerinputqueue, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R3) for the userbackend : " + userName + " ,  Response : Failed");
                 }
             }
             catch (BusinessLogicException dalexception)
@@ -592,18 +592,18 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                         reqSyncEntity.UpdateTriggered = true;
                         // Execute the update operation.
                         DataProvider.UpdateEntity(azureTableRequestTransactions, reqSyncEntity);
-                        InsightLogger.TrackEvent("UpdateTriggering web job :: updatetriggerinputqueue, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R4) for the requestID : " + serviceLayerRequestID + " ,  Response : Success");
+                        InsightLogger.TrackEvent("UpdateTriggering :: updatetriggerinputqueue, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R4) for the requestID : " + serviceLayerRequestID + " ,  Response : Success");
 
                     }
                     else
                     {
-                        InsightLogger.TrackEvent("UpdateTriggering web job :: updatetriggerinputqueue, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R4) for the requestID : " + serviceLayerRequestID + " ,  Response : Failed");
+                        InsightLogger.TrackEvent("UpdateTriggering :: updatetriggerinputqueue, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R4) for the requestID : " + serviceLayerRequestID + " ,  Response : Failed");
 
                     }
                 }
                 else
                 {
-                    InsightLogger.TrackEvent("UpdateTriggering web job :: updatetriggerinputqueue, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R4) for the requestID : " + serviceLayerRequestID + " ,  Response : Failed");
+                    InsightLogger.TrackEvent("UpdateTriggering :: updatetriggerinputqueue, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R4) for the requestID : " + serviceLayerRequestID + " ,  Response : Failed");
 
                 }
 
@@ -630,7 +630,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackEvent("UpdateTriggering web job, Action :: collecting the requests which have missed updates for the backend [" + backendID + "] ");
+                InsightLogger.TrackEvent("UpdateTriggering, Action :: collecting the requests which have missed updates for the backend [" + backendID + "] ");
 
                 var ctsRequests = new CancellationTokenSource();
                 //get's azure table instance
@@ -742,13 +742,13 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             //checking is request  update missing or not with the help of Updatetriggering rule R6
                             if (utRule.IsRequestUpdateMissing(requestDetails.UpdateTriggered, requestDetails.ExpectedUpdate))
                             {
-                                InsightLogger.TrackEvent("UpdateTriggering web job, Action :: Is Request [ " + requestDetails.RowKey + " ] needs update based on UT Rule R6 , Response :: true");
+                                InsightLogger.TrackEvent("UpdateTriggering, Action :: Is Request [ " + requestDetails.RowKey + " ] needs update based on UT Rule R6 , Response :: true");
                                 //put the json message of UpdateTriggeringMsg class format into update triggering input queue.
                                 rmsgFormat.Add(ConvertRequestUpdateMsgToUpdateTriggeringMsg(requestDetails, rBackendID));
                             }
                             else
                             {
-                                InsightLogger.TrackEvent("UpdateTriggering web job, Action :: Is Request [ " + requestDetails.RowKey + " ] needs update based on UT Rule R6 , Response :: false");
+                                InsightLogger.TrackEvent("UpdateTriggering, Action :: Is Request [ " + requestDetails.RowKey + " ] needs update based on UT Rule R6 , Response :: false");
                             }
                         }
                         //add list of messages into update triggering input queue

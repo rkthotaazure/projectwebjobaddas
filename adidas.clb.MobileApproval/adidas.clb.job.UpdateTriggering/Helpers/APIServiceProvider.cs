@@ -69,12 +69,12 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
                             //        if (Objacknowledgement.Error == null)
                             //        {
                             //            acknowledgement = "Backend API has been invoked successfully. ";
-                            //            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: updatetriggerinputqueue, Action :: Pass user message to agent (Invoking backend agent API) , Response :: Success");
+                            //            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering :: updatetriggerinputqueue, Action :: Pass user message to agent (Invoking backend agent API) , Response :: Success");
 
                             //        }
                             //        else
                             //        {
-                            //            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering web job :: updatetriggerinputqueue, Action :: Pass user message to agent (Invoking backend agent API) , Response :: Backend API has thrown an error :: ErrorMessage=" + Objacknowledgement.Error.longtext);
+                            //            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering :: updatetriggerinputqueue, Action :: Pass user message to agent (Invoking backend agent API) , Response :: Backend API has thrown an error :: ErrorMessage=" + Objacknowledgement.Error.longtext);
                             //        }
                             //    }
 
