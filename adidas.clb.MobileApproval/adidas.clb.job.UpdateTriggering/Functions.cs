@@ -49,7 +49,7 @@ namespace adidas.clb.job.UpdateTriggering
                 {
                     //log.WriteLine("adidas.clb.job.UpdateTriggering :: Processing update triggering queue message :: start()" + message);
                     //write message into application insights
-                    InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Process update triggering queue message : Start(), \n Response :: Message:" + message );
+                    InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: UpdateTriggering input queue triggered : Start(), \n Response :: Message:" + message );
                     //Deserializ input queue message into UpdateTriggeringMsg object
                     UpdateTriggeringMsg objUTMsg = JsonConvert.DeserializeObject<UpdateTriggeringMsg>(message);
                     //checking UpdateTriggeringMsg is null or not
@@ -92,7 +92,7 @@ namespace adidas.clb.job.UpdateTriggering
                         }
                         //log.WriteLine("adidas.clb.job.UpdateTriggering :: Processing update triggering queue message :: End()" + message);
                         //write message into application insights
-                        InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Process update triggering queue message : End()" );
+                        InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: UpdateTriggering input queue triggered : End()");
                     }
                     else
                     {
