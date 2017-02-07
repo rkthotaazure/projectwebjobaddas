@@ -26,7 +26,7 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
         /// <param name="backendID"></param>
         /// <param name="UpdateTriggeringMessage"></param>
         /// <returns></returns>
-        public void CallBackendAgent(string backendID, string UpdateTriggeringMessage,string messagecategory)
+        public void CallBackendAgent(string backendID, string UpdateTriggeringMessage,string messagecategory, string queueName)
         {
             string callerMethodName = string.Empty;
             try
@@ -46,7 +46,7 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
                     int maxThreadSleepInMilliSeconds = Convert.ToInt32(ConfigurationManager.AppSettings["MaxThreadSleepInMilliSeconds"]);
                     int RetryAttemptCount = 0;
                     bool IsSuccessful = false;
-                    InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Pass " + messagecategory + " message to agent (Invoking backend agent API) :: \n Response :: Success \n API Endpont : " + backendApiEndpoint + " \n RequestUpdateMessage: " + UpdateTriggeringMessage);
+                    InsightLogger.TrackEvent(queueName + " , Action :: Pass " + messagecategory + " message to agent (Invoking backend agent API) :: \n Response :: Success \n API Endpont : " + backendApiEndpoint + " \n RequestUpdateMessage: " + UpdateTriggeringMessage);
                     //Implemented Use of retry / back-off logic
                     do
                     {
@@ -88,12 +88,12 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
                             //Checking retry call count is eual to max retry count or not
                             if (RetryAttemptCount == maxRetryCount)
                             {
-                                InsightLogger.Exception("Error in UpdateTriggering:: CallBackendAgent() method :: Retry attempt count: [ " + RetryAttemptCount + " ]", serviceException, callerMethodName);
+                                InsightLogger.Exception("Error in " + queueName +  ":: CallBackendAgent() method :: Retry attempt count: [ " + RetryAttemptCount + " ]", serviceException, callerMethodName);
                                 throw new ServiceLayerException(serviceException.Message, serviceException.InnerException);
                             }
                             else
                             {
-                                InsightLogger.Exception("Error in UpdateTriggering:: CallBackendAgent() method :: Retry attempt count: [ " + RetryAttemptCount + " ]", serviceException, callerMethodName);
+                                InsightLogger.Exception("Error in " + queueName + ":: CallBackendAgent() method :: Retry attempt count: [ " + RetryAttemptCount + " ]", serviceException, callerMethodName);
                                 //Putting the thread into some milliseconds sleep  and again call the same method call.
                                 Thread.Sleep(maxThreadSleepInMilliSeconds);
                             }
