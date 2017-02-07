@@ -521,7 +521,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         /// </summary>
         /// <param name="backendID"></param>
         /// <param name="userName"></param>
-        public void UpdateUserBackendExpectedUpdateTime(string backendID, string userName)
+        public void UpdateUserBackendExpectedUpdateTime(string backendID, string userName,string QueueName)
         {
             string callerMethodName = string.Empty;
             try
@@ -544,16 +544,16 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                         updateEntity.UpdateTriggered = true;
                         // Execute the Replace TableOperation.
                         DataProvider.UpdateEntity<UserBackendEntity>(azureTableUserDeviceConfiguration, updateEntity);
-                        InsightLogger.TrackEvent("UpdateTriggering :: updatetriggerinputqueue, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R3) for the userbackend : " + userName + " ,  Response : Success");
+                        InsightLogger.TrackEvent(QueueName + " , Action :: Compute and set Expected Updated Timestamp(UT Rule :: R3) for the userbackend : " + userName + " ,  Response : Success");
                     }
                     else
                     {
-                        InsightLogger.TrackEvent("UpdateTriggering :: updatetriggerinputqueue, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R3) for the userbackend : " + userName + " ,  Response : Failed");
+                        InsightLogger.TrackEvent(QueueName + " , Action :: Compute and set Expected Updated Timestamp(UT Rule :: R3) for the userbackend : " + userName + " ,  Response : Failed");
                     }
                 }
                 else
                 {
-                    InsightLogger.TrackEvent("UpdateTriggering :: updatetriggerinputqueue, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R3) for the userbackend : " + userName + " ,  Response : Failed");
+                    InsightLogger.TrackEvent(QueueName + " , Action :: Compute and set Expected Updated Timestamp(UT Rule :: R3) for the userbackend : " + userName + " ,  Response : Failed");
                 }
             }
             catch (BusinessLogicException dalexception)
@@ -571,7 +571,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         /// </summary>
         /// <param name="backendID"></param>
         /// <param name="serviceLayerRequestID"></param>
-        public void UpdateRequestExpectedUpdateTime(string backendID, string serviceLayerRequestID)
+        public void UpdateRequestExpectedUpdateTime(string backendID, string serviceLayerRequestID,string QueueName)
         {
             string callerMethodName = string.Empty;
             try
@@ -592,18 +592,18 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                         reqSyncEntity.UpdateTriggered = true;
                         // Execute the update operation.
                         DataProvider.UpdateEntity(azureTableRequestTransactions, reqSyncEntity);
-                        InsightLogger.TrackEvent("UpdateTriggering :: updatetriggerinputqueue, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R4) for the requestID : " + serviceLayerRequestID + " ,  Response : Success");
+                        InsightLogger.TrackEvent(QueueName + " , Action :: Compute and set Expected Updated Timestamp(UT Rule :: R4) for the requestID : " + serviceLayerRequestID + " ,  Response : Success");
 
                     }
                     else
                     {
-                        InsightLogger.TrackEvent("UpdateTriggering :: updatetriggerinputqueue, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R4) for the requestID : " + serviceLayerRequestID + " ,  Response : Failed");
+                        InsightLogger.TrackEvent(QueueName + " , Action :: Compute and set Expected Updated Timestamp(UT Rule :: R4) for the requestID : " + serviceLayerRequestID + " ,  Response : Failed");
 
                     }
                 }
                 else
                 {
-                    InsightLogger.TrackEvent("UpdateTriggering :: updatetriggerinputqueue, Action :: Compute and set Expected Updated Timestamp(UT Rule :: R4) for the requestID : " + serviceLayerRequestID + " ,  Response : Failed");
+                    InsightLogger.TrackEvent(QueueName + " , Action :: Compute and set Expected Updated Timestamp(UT Rule :: R4) for the requestID : " + serviceLayerRequestID + " ,  Response : Failed");
 
                 }
 
@@ -835,7 +835,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         /// </summary>
         /// <param name="lstUsers"></param>
         /// <param name="queueMessage"></param>
-        public void UpdateUserBackends(List<UserUpdateMsg> lstUsers, bool vip, bool generatePDF, Nullable<DateTime> changeAfter)
+        public void UpdateUserBackends(List<UserUpdateMsg> lstUsers, bool vip, bool generatePDF, Nullable<DateTime> changeAfter, string queueName)
         {
             string callerMethodName = string.Empty;
             try
@@ -856,7 +856,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                         //getting list of backends in each user
                         lstbackends = users.Backends.ToList();
                         userID = users.UserID;
-                        InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: For each provided user in Update triggering message, Response :: User:" + userID);
+                        InsightLogger.TrackEvent(queueName + " , Action :: For each provided user in Update triggering message, Response :: User:" + userID);
                         //creating Backend agent request query i.e RequestsUpdateQuery format
                         BackendUser objUser = new BackendUser()
                         {
@@ -867,7 +867,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                         foreach (Backend backend in lstbackends)
                         {
                             //Creating request update query which is input for backend agent requestupdateretrival api
-                            InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: For each backend in user, Response :: Backend: " + backend.BackendID + " ,User ::" + userID);
+                            InsightLogger.TrackEvent(queueName + " , Action :: For each backend in user, Response :: Backend: " + backend.BackendID + " ,User ::" + userID);
                             RequestsUpdateQuery objReqQuery = new RequestsUpdateQuery()
                             {
                                 User = objUser,
@@ -879,20 +879,20 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             };
                             //convert RequestsUpdateQuery object into json string
                             backendUserQuery = JsonConvert.SerializeObject(objReqQuery);
-                            InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Prepare agent user message, Response :: message:" + backendUserQuery);
+                            InsightLogger.TrackEvent(queueName + " , Action :: Prepare agent user message, Response :: message:" + backendUserQuery);
                             acknowledgment = string.Empty;
                             //initalize object for api service provider for callingt the web api
                             APIServiceProvider ObjserviceProvider = new APIServiceProvider();
                             //call backend agent api with backendID and input queue message and getting the acknowledgment from API
                             Task.Factory.StartNew(() =>
                             {
-                                ObjserviceProvider.CallBackendAgent(backend.BackendID, backendUserQuery, CoreConstants.Category.User);
+                                ObjserviceProvider.CallBackendAgent(backend.BackendID, backendUserQuery, CoreConstants.Category.User, queueName);
                             });
                             //if acknowledgment is not null or not empty then update the userbackend expected updatetime
                             //if (!string.IsNullOrEmpty(acknowledgment))
                             //{
                             //update ExpectedUpdateTime  with the help of update trigger Rule :: R3
-                            this.UpdateUserBackendExpectedUpdateTime(backend.BackendID, userID);
+                            this.UpdateUserBackendExpectedUpdateTime(backend.BackendID, userID,queueName);
                             //}
 
                         }
@@ -920,7 +920,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         /// </summary>
         /// <param name="lstRequests"></param>
         /// <param name="queueMessage"></param>
-        public void UpdateRequests(List<RequestUpdateMsg> lstRequests, bool vip, bool generatePDF, Nullable<DateTime> changeAfter)
+        public void UpdateRequests(List<RequestUpdateMsg> lstRequests, bool vip, bool generatePDF, Nullable<DateTime> changeAfter, string queueName)
         {
             string callerMethodName = string.Empty;
             try
@@ -941,7 +941,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     //foreach backend id
                     foreach (string backendID in bakcends.ToList())
                     {
-                        InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: For each backend in requests List, Response :: Backend ID: " + backendID );
+                        InsightLogger.TrackEvent(queueName + " , Action :: For each backend in requests List, Response :: Backend ID: " + backendID );
 
                         //getting list of RequestUpdateMsg's by same backend
                         var lstRequestsByBackend = (from requests in lstRequests
@@ -961,7 +961,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             };
                             //convert RequestsUpdateQuery object into json string
                             requestsUpdateQuery = JsonConvert.SerializeObject(objReqQuery);
-                            InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Prepare agent requests message, Response :: message:" + requestsUpdateQuery);
+                            InsightLogger.TrackEvent(queueName + " , Action :: Prepare agent requests message, Response :: message:" + requestsUpdateQuery);
                             acknowledgment = string.Empty;
                             //initalize object for api service provider for callingt the web api
                             APIServiceProvider ObjserviceProvider = new APIServiceProvider();
@@ -969,14 +969,14 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             //acknowledgment = 
                             Task.Factory.StartNew(() =>
                             {
-                                ObjserviceProvider.CallBackendAgent(backendID, requestsUpdateQuery,CoreConstants.Category.Request);
+                                ObjserviceProvider.CallBackendAgent(backendID, requestsUpdateQuery,CoreConstants.Category.Request, queueName);
                             });
 
                             //if acknowledgment is not null or not empty then update the userbackend expected updatetime
                             //if (!string.IsNullOrEmpty(acknowledgment))
                             //{
                             //update ExpectedUpdateTime  with the help of update trigger Rule :: R3
-                            this.UpdateRequestExpectedUpdateTime(backendID, serviceLayerRequestID);
+                            this.UpdateRequestExpectedUpdateTime(backendID, serviceLayerRequestID, queueName);
                             //}
                             //clearing RequestUpdateMsg list
                             lstRequestsByBackend = null;
