@@ -243,7 +243,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                         ObjMissedUpdateNextCollectingTime.MissingUpdateNextCollectingTime = utRules.GetNextMissingCollectingTime(missingUpdateLastCollectingTime, backendDetails.AverageAllRequestsLatency, backendDetails.LastAllRequestsLatency);
                         // Execute update operation.
                         DataProvider.UpdateEntity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, ObjMissedUpdateNextCollectingTime);
-                        InsightLogger.TrackEvent("UpdateTriggering, Action :: Set next collecting time , Response :: Success, backend :[ " + backendID + " ]");
+                        InsightLogger.TrackEvent("UpdateTriggering, Action :: Set next missed update collecting time , Response :: Success, backend :[ " + backendID + " ]");
                     }
 
                 }
