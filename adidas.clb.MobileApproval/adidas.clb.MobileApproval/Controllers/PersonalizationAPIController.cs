@@ -36,10 +36,10 @@ namespace adidas.clb.MobileApproval.Controllers
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: endpoint : api/personalizationapi/backends, action : starting method, timestamp: "+DateTime.UtcNow);
+                InsightLogger.TrackEvent("PersonalizationAPIController :: endpoint : api/personalizationapi/backends, action : starting method");
                 UserBackend userBackend = new UserBackend();                
                 PersonalizationResponseListDTO<BackendDTO> allBackends = userBackend.GetBackends();
-                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: endpoint : api/personalizationapi/backends, action : getting backends, response: successs, timestamp: "+DateTime.UtcNow);
+                InsightLogger.TrackEvent("PersonalizationAPIController :: endpoint : api/personalizationapi/backends, action : getting backends, response: successs");
                 //if backends exists return result other wise return status code as NotFound
                 if (allBackends.result != null)
                 {
@@ -82,7 +82,7 @@ namespace adidas.clb.MobileApproval.Controllers
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::endpoint : api/personalizationapi/users/{userID}, action: start put user, timestamp: "+DateTime.UtcNow);
+                InsightLogger.TrackEvent("PersonalizationAPIController ::endpoint : api/personalizationapi/users/{userID}, action: start put user");
                 //BL object instances created
                 Personalization personalization = new Personalization();
                 UserBackend userbackend = new UserBackend();
@@ -120,56 +120,56 @@ namespace adidas.clb.MobileApproval.Controllers
                     //create if user not exists else update
                     if (!isUserExists)
                     {
-                        InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: check user, response: false"+ personalizationrequset.user.UserID);
+                        InsightLogger.TrackEvent("PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: check user, response: false"+ personalizationrequset.user.UserID);
                         personalization.CreateUser(userentity);
-                        InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: create new user, response: success,userID: " + personalizationrequset.user.UserID);
+                        InsightLogger.TrackEvent("PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: create new user, response: success,userID: " + personalizationrequset.user.UserID);
                         //add user devices if provided in request
                         if (isDevicesProvided)
                         {
-                            InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: devices provided, response: true");                            
+                            InsightLogger.TrackEvent("PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: devices provided, response: true");                            
                             userdevice.AddDevices(userprovideddevices.ToList());
-                            InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: create and/or associate devices to user, response: success");
+                            InsightLogger.TrackEvent("PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: create and/or associate devices to user, response: success");
                         }
                         //associate user backends if provided in request other wise associate all backends in system
                         if (isBackendsProvided)
                         {
-                            InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: backends provided, response: true");
+                            InsightLogger.TrackEvent("PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: backends provided, response: true");
                             userbackend.AddBackends(userprovidedbackends.ToList());
-                            InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: create and/or associate backends to user, response: success");
+                            InsightLogger.TrackEvent("PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: create and/or associate backends to user, response: success");
                         }
                         else
                         {
-                            InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: backends provided, response: false");
+                            InsightLogger.TrackEvent("PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: backends provided, response: false");
                             userbackend.AddAllBackends(user.UserID);
-                            InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: create and/or associate all backends to user, response: success");
+                            InsightLogger.TrackEvent("PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: create and/or associate all backends to user, response: success");
                         }
                         updateduser = personalization.GetUser(personalizationrequset.user.UserID);                        
                         personalization.TriggerUserRequests(personalizationrequset.user.UserID,updateduser.userbackends);
-                        InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: trigger a user requests update, response: success, timestamp: "+DateTime.UtcNow);                        
+                        InsightLogger.TrackEvent("PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: trigger a user requests update, response: success");                        
                         int SynchTime=personalization.CalcSynchTime(userprovidedbackends);
-                        InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: calculate synch waiting time, response: success, synchWaitingtime:"+ SynchTime);
+                        InsightLogger.TrackEvent("PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: calculate synch waiting time, response: success, synchWaitingtime:"+ SynchTime);
                     }
                     else
                     {
-                        InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: check user, response: true");
+                        InsightLogger.TrackEvent("PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: check user, response: true");
                         personalization.UpdateUserProp(userentity);
                         //remove existing devices to user and add the provided userdevices in requset
                         if (isDevicesProvided)
                         {
-                            InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::  endpoint : api/personalizationapi/users/{userID}, action: devices provided, response: true");
+                            InsightLogger.TrackEvent("PersonalizationAPIController ::  endpoint : api/personalizationapi/users/{userID}, action: devices provided, response: true");
                             userdevice.RemoveDevices(personalizationrequset.user.UserID);
-                            InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::  endpoint : api/personalizationapi/users/{userID}, action: remove all existing associated devices , response: success");                            
+                            InsightLogger.TrackEvent("PersonalizationAPIController ::  endpoint : api/personalizationapi/users/{userID}, action: remove all existing associated devices , response: success");                            
                             userdevice.AddDevices(userprovideddevices.ToList());
-                            InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::  endpoint : api/personalizationapi/users/{userID}, action: create associated devices to user, response: success");
+                            InsightLogger.TrackEvent("PersonalizationAPIController ::  endpoint : api/personalizationapi/users/{userID}, action: create associated devices to user, response: success");
                         }
                         //remove existing backends to user and add the provided userbackends in requset
                         if (isBackendsProvided)
                         {
-                            InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::  endpoint : api/personalizationapi/users/{userID}, action: backends provided, response: true");
+                            InsightLogger.TrackEvent("PersonalizationAPIController ::  endpoint : api/personalizationapi/users/{userID}, action: backends provided, response: true");
                             userbackend.RemoveBackends(personalizationrequset.user.UserID);
-                            InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::  endpoint : api/personalizationapi/users/{userID}, action: remove all existing associated backends , response: success");
+                            InsightLogger.TrackEvent("PersonalizationAPIController ::  endpoint : api/personalizationapi/users/{userID}, action: remove all existing associated backends , response: success");
                             userbackend.AddBackends(userprovidedbackends.ToList());
-                            InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::  endpoint : api/personalizationapi/users/{userID}, action: create associated backends to user, response: success");
+                            InsightLogger.TrackEvent("PersonalizationAPIController ::  endpoint : api/personalizationapi/users/{userID}, action: create associated backends to user, response: success");
                         }
                         else
                         {
@@ -180,12 +180,12 @@ namespace adidas.clb.MobileApproval.Controllers
                     var ResponseUser = new PersonalizationResponseDTO<UserDTO>();
                     ResponseUser.result = updateduser;
                     ResponseUser.query = personalizationrequset;
-                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: populate user object to response, response: success, userid: "+ personalizationrequset.user.UserID + ", Timestamp: " + DateTime.UtcNow);
+                    InsightLogger.TrackEvent("PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: populate user object to response, response: success, userid: "+ personalizationrequset.user.UserID);
                     return Request.CreateResponse(HttpStatusCode.OK, ResponseUser);
                 }
                 else
                 {
-                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::endpoint : api/personalizationapi/users/{userID} , action : put user, response : userid is null");
+                    InsightLogger.TrackEvent("PersonalizationAPIController ::endpoint : api/personalizationapi/users/{userID} , action : put user, response : userid is null");
                     return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "Error in updating user", ""));
                 }
             }
@@ -221,7 +221,7 @@ namespace adidas.clb.MobileApproval.Controllers
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action : start get method, timestamp: "+DateTime.UtcNow);
+                InsightLogger.TrackEvent("PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action : start get method");
                 //check if userid is null
                 if (!string.IsNullOrEmpty(userID))
                 {
@@ -230,20 +230,20 @@ namespace adidas.clb.MobileApproval.Controllers
                     //if user exists returns response otherwise not found
                     if (user != null)
                     {
-                        InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action : getting user with associated backends and devices, response: success, userID: " + userID+", Timestamp: "+DateTime.UtcNow);
+                        InsightLogger.TrackEvent("PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action : getting user with associated backends and devices, response: success, userID: " + userID);
                         var ResponseUsers = new PersonalizationResponseDTO<UserDTO>();
                         ResponseUsers.result = user;
                         return Request.CreateResponse(HttpStatusCode.OK, ResponseUsers);
                     }
                     else
                     {
-                        InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action : getting user with associated backends and devices, response: user not available, userID: "+userID + ", Timestamp: " + DateTime.UtcNow);
+                        InsightLogger.TrackEvent("PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action : getting user with associated backends and devices, response: user not available, userID: "+userID);
                         return Request.CreateResponse(HttpStatusCode.OK, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "user does not exist", ""));
                     }
                 }
                 else                   
                 {
-                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID} , action: get user, response:userid is null");
+                    InsightLogger.TrackEvent("PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID} , action: get user, response:userid is null");
                     return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "user does not exist", ""));
                 }
             }
@@ -277,14 +277,14 @@ namespace adidas.clb.MobileApproval.Controllers
             string callerMethodName = string.Empty;
             try
             {
-                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: Delete method, endpoint - api / personalizationapi / users /"+ userID);                
+                InsightLogger.TrackEvent("PersonalizationAPIController :: Delete method, endpoint - api / personalizationapi / users /"+ userID);                
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 //check if userid is null
                 if (!string.IsNullOrEmpty(userID))
                 {
                     Personalization personalization = new Personalization();
-                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: Deleting user");
+                    InsightLogger.TrackEvent("PersonalizationAPIController :: Deleting user");
                     UserEntity deleteUserEntity = personalization.DeleteUser(userID);                    
                     //if user deleted returns ok otherwise not found
                     if (deleteUserEntity != null)
@@ -298,7 +298,7 @@ namespace adidas.clb.MobileApproval.Controllers
                 }
                 else
                 {
-                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::user does not exist to delete");
+                    InsightLogger.TrackEvent("PersonalizationAPIController ::user does not exist to delete");
                     return Request.CreateResponse(HttpStatusCode.BadRequest);
                 }
             }
@@ -335,13 +335,13 @@ namespace adidas.clb.MobileApproval.Controllers
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: Get method endpoint - api/personalizationapi/users/{userID}/devices");
+                InsightLogger.TrackEvent("PersonalizationAPIController :: Get method endpoint - api/personalizationapi/users/{userID}/devices");
 
                 //check if userid is null
                 if (!string.IsNullOrEmpty(userID))
                 {
                     UserDevice userdevices = new UserDevice();
-                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: Get all Associated devices  to user");
+                    InsightLogger.TrackEvent("PersonalizationAPIController :: Get all Associated devices  to user");
                     IEnumerable<UserDeviceDTO> alluserdevices = userdevices.GetUserAllDevices(userID);                   
                     //if user as devices associated returns response otherwise not found
                     if (alluserdevices != null)
@@ -359,7 +359,7 @@ namespace adidas.clb.MobileApproval.Controllers
                 }
                 else
                 {
-                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::userid is null or empty");
+                    InsightLogger.TrackEvent("PersonalizationAPIController ::userid is null or empty");
 
                     return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "user does not have associated devices", ""));
                 }
@@ -396,20 +396,20 @@ namespace adidas.clb.MobileApproval.Controllers
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: post method endpoint - api/personalizationapi/users/{userID}/devices");
+                InsightLogger.TrackEvent("PersonalizationAPIController :: post method endpoint - api/personalizationapi/users/{userID}/devices");
                 UserDevice userdevice = new UserDevice();
                 //if user devcies provided in requset
                 if (personalizationrequset.userdevices != null)
                 {
                     IEnumerable<UserDeviceDTO> userdevicesdto = personalizationrequset.userdevices;              
                     IEnumerable<UserDeviceEntity> userprovideddevices = userdevice.UserDeviceEntityGenerator(userdevicesdto);
-                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: Associate devices  to user");
+                    InsightLogger.TrackEvent("PersonalizationAPIController :: Associate devices  to user");
                     userdevice.AddDevices(userprovideddevices.ToList());                    
                     return Request.CreateResponse(HttpStatusCode.OK);
                 }
                 else
                 {
-                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::userdevices not provided to associate");
+                    InsightLogger.TrackEvent("PersonalizationAPIController ::userdevices not provided to associate");
 
                     return Request.CreateResponse(HttpStatusCode.BadRequest);
                 }
@@ -447,12 +447,12 @@ namespace adidas.clb.MobileApproval.Controllers
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: Get method, endpoint - api/personalizationapi/users/{userID}/devices/{userDeviceID}");
+                InsightLogger.TrackEvent("PersonalizationAPIController :: Get method, endpoint - api/personalizationapi/users/{userID}/devices/{userDeviceID}");
                 //checks userid and userdeviceis for null
                 if (!(string.IsNullOrEmpty(userID) || string.IsNullOrEmpty(userDeviceID)))
                 {
                     UserDevice userdevice = new UserDevice();
-                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: Get specific Associated device  to user");
+                    InsightLogger.TrackEvent("PersonalizationAPIController :: Get specific Associated device  to user");
                     PersonalizationResponseDTO<UserDeviceDTO> ResponseUserDevice = userdevice.GetUserDevice(userID, userDeviceID);
                     //if user has associated device return response otherwise not found                   
                     if (ResponseUserDevice.result != null)
@@ -467,7 +467,7 @@ namespace adidas.clb.MobileApproval.Controllers
                 }
                 else
                 {
-                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::userid or userdeviceid is null");
+                    InsightLogger.TrackEvent("PersonalizationAPIController ::userid or userdeviceid is null");
                     return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.PersonalizationResponseError<UserDeviceDTO>("400", "userid or deviceid can't be empty or null ", ""));
                 }
             }
@@ -504,12 +504,12 @@ namespace adidas.clb.MobileApproval.Controllers
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: delete method, endpoint - api/personalizationapi/users/{userID}/devices/{userDeviceID}");
+                InsightLogger.TrackEvent("PersonalizationAPIController :: delete method, endpoint - api/personalizationapi/users/{userID}/devices/{userDeviceID}");
                 //checks userid and userdeviceis for null
                 if (!(string.IsNullOrEmpty(userID) || string.IsNullOrEmpty(userDeviceID)))
                 {
                     UserDevice userdevice = new UserDevice();
-                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: delete specific Associated device to user");
+                    InsightLogger.TrackEvent("PersonalizationAPIController :: delete specific Associated device to user");
                     UserDeviceEntity deleteUserDeviceEntity = userdevice.DeleteUserDevice(userID, userDeviceID);
                     //if user has associated device deleted return ok otherwise not found                    
                     if (deleteUserDeviceEntity != null)
@@ -524,7 +524,7 @@ namespace adidas.clb.MobileApproval.Controllers
                 }
                 else
                 {
-                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::userid or userdeviceid is null");
+                    InsightLogger.TrackEvent("PersonalizationAPIController ::userid or userdeviceid is null");
                     return Request.CreateResponse(HttpStatusCode.BadRequest);
                 }
             }
@@ -560,12 +560,12 @@ namespace adidas.clb.MobileApproval.Controllers
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController ::Get method, endpoint - api/personalizationapi/users/{userID}/backends");
+                InsightLogger.TrackEvent("PersonalizationAPIController ::Get method, endpoint - api/personalizationapi/users/{userID}/backends");
                 //check userid for null
                 if (!string.IsNullOrEmpty(userID))
                 {
                     UserBackend userdevices = new UserBackend();
-                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: Get all Associated backends  to user");
+                    InsightLogger.TrackEvent("PersonalizationAPIController :: Get all Associated backends  to user");
                     IEnumerable<UserBackendDTO> alluserbackends = userdevices.GetUserAllBackends(userID);
                     //if user has associated backends return response else not found                   
                     if (alluserbackends != null)
@@ -582,7 +582,7 @@ namespace adidas.clb.MobileApproval.Controllers
                 }
                 else
                 {
-                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: userid is null");
+                    InsightLogger.TrackEvent("PersonalizationAPIController :: userid is null");
                     return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "user does not exists", ""));
                 }
             }
@@ -618,7 +618,7 @@ namespace adidas.clb.MobileApproval.Controllers
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: post backends method, endpoint - api/personalizationapi/users/{userID}/backends");
+                InsightLogger.TrackEvent("PersonalizationAPIController :: post backends method, endpoint - api/personalizationapi/users/{userID}/backends");
                 //check request for userbackend deatils
                 if (personalizationrequset.userbackends != null)
                 {
@@ -626,13 +626,13 @@ namespace adidas.clb.MobileApproval.Controllers
                     
                     IEnumerable<UserBackendDTO> userbackendsdto = personalizationrequset.userbackends;
                     IEnumerable<UserBackendEntity> userprovidedbackends = userbackend.UserBackendEntityGenerator(userbackendsdto);
-                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: associate backends to user");
+                    InsightLogger.TrackEvent("PersonalizationAPIController :: associate backends to user");
                     userbackend.AddBackends(userprovidedbackends.ToList());                   
                     return Request.CreateResponse(HttpStatusCode.OK);
                 }
                 else
                 {
-                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: backends not provided");
+                    InsightLogger.TrackEvent("PersonalizationAPIController :: backends not provided");
                     return Request.CreateResponse(HttpStatusCode.BadRequest);
                 }
             }
@@ -669,7 +669,7 @@ namespace adidas.clb.MobileApproval.Controllers
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: Get backend method, api/personalizationapi/users/{userID}/backends/{userBackendID}");
+                InsightLogger.TrackEvent("PersonalizationAPIController :: Get backend method, api/personalizationapi/users/{userID}/backends/{userBackendID}");
                 //check userid and userbackendid for null
                 if (!(string.IsNullOrEmpty(userID) || string.IsNullOrEmpty(userBackendID)))
                 {
@@ -685,7 +685,7 @@ namespace adidas.clb.MobileApproval.Controllers
                 }
                 else
                 {
-                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: userid or userbackendid is null");
+                    InsightLogger.TrackEvent("PersonalizationAPIController :: userid or userbackendid is null");
 
                     return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.PersonalizationResponseError<UserBackendDTO>("400", "userid or associated deviceid empty or null", ""));
                 }
@@ -723,12 +723,12 @@ namespace adidas.clb.MobileApproval.Controllers
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: delete backend method, endpoint - api/personalizationapi/users/{userID}/backends/{userBackendID}");
+                InsightLogger.TrackEvent("PersonalizationAPIController :: delete backend method, endpoint - api/personalizationapi/users/{userID}/backends/{userBackendID}");
                 //check userid and userbackendid for null
                 if (!(string.IsNullOrEmpty(userID) || string.IsNullOrEmpty(userBackendID)))
                 {
                     UserBackend userbackend = new UserBackend();
-                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: delete specific backend  to user");
+                    InsightLogger.TrackEvent("PersonalizationAPIController :: delete specific backend  to user");
                     UserBackendEntity deleteUserBackendEntity = userbackend.DeleteUserBackend(userID, userBackendID);                   
                     // if user deleted return ok otherwise not found
                     if (deleteUserBackendEntity != null)
@@ -743,7 +743,7 @@ namespace adidas.clb.MobileApproval.Controllers
                 }
                 else
                 {
-                    InsightLogger.TrackEvent("adidas.clb.MobileApproval:: PersonalizationAPIController :: userid or userbackendid is null");
+                    InsightLogger.TrackEvent("PersonalizationAPIController :: userid or userbackendid is null");
                     return Request.CreateResponse(HttpStatusCode.BadRequest);
                 }
             }
