@@ -9,6 +9,9 @@
         <div class="container-fluid alert alert-info" ng-show="ShowwaitingMessage">
             <p>Please try after sometime. Your requests are being synched.</p>
         </div>
+        <div class="container-fluid alert alert-info" ng-show="ShowforceupdateMessage">
+            <p>We are trying to check if you have any requests. Please wait for some time !</p>
+        </div>        
         <div class="mobile-button row">
             <div class="col-xs-6 text-align-center first-col">
                 <div ng-click="SyncUpdate()">
@@ -156,7 +159,7 @@
                         </div>
                         <div class="col-xs-2">
                             @*<a href="/Landing/ApprovalDetails?backend={{backend.BackendID}}" style="font-size: 25px; margin-bottom: 4px; margin-right: 10px; padding: 9px" class="badge badge-primary">{{backend.OpenApprovals}}</a>*@
-                            <span style="font-size: 25px; margin-bottom: 4px; margin-right: 10px; padding: 5px;padding-bottom: 8px;" class="badge badge-primary" ng-click="redirectToDetailsPage(backend.BackendID)">{{backend.Pending}}</span>
+                            <span style="font-size: 25px; margin-bottom: 4px; margin-right: 10px; padding: 5px;padding-bottom: 8px;" class="badge badge-primary" ng-click="redirectToDetailsPage(backend.BackendID)">{{backend.Count}}</span>
                         </div>
                     </div>
 

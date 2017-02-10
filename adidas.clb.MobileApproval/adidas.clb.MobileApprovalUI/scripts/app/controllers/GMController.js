@@ -1,17 +1,44 @@
 ﻿//AngularJS controller to check user is eisits or not
-app.controller('HomeController', function ($scope, $http, $location) {
+app.controller('HomeController', function ($scope, $http, $location, $route, ShareData) {
     //On page load check user is exisits or not 
     $scope.init = function () {
         $scope.userResults = "";
         //Getting user exisits or not from Personalization API redirect to create/update page
         $http.get("/Home/CheckUserExisits").success(function (data) {
             //console.log(data.userResults);
-            if (data.userResults != null) {
-                //Redirect to create page
-                $location.path('/updateUser');
+            if (data.UserID != null) {
+                console.log("test landing");
+                console.log(data);
+                var userbackends = [];
+                var userdevices = [];
+                //Storing in ShareData factory and retrive where ever we need details
+                //Iterate backends details and bind to backends scope
+                angular.forEach(data.userbackends, function (backendItems) {
+                    userbackends.push(backendItems.backend);
+                });
+                //Iterate Devices details and bind to devices scope
+                angular.forEach(data.userdevices, function (deviceItems) {
+                    userdevices.push(deviceItems.device);
+                });
+                ShareData.userDevices = data.userdevices;
+                ShareData.userBackends = data.userbackends;
+                ShareData.ShowwaitingMessage = false;                
+                console.log(userbackends);
+                //Redirect to landing page
+                if ($location.$$path == '/approvalLanding')
+                {
+                    ShareData.reload = false;
+                   $route.reload('/approvalLanding');
+                }
+                else
+                {
+                    ShareData.reload = true;
+                    $location.path('/approvalLanding');
+                }
+                                
             }
             else {
-                //Redirect to update page
+                //Redirect to create page
                 $location.path('/createUser');
             }
         }).error(function (data, status) {
@@ -135,6 +162,7 @@ app.controller('CreateUserController', function ($scope, $http, $location, Share
                     });
                 }, 1500);
                 $scope.tasksuccess = true;
+                ShareData.reload = true;
                 window.setTimeout(function () {
                     $scope.$apply(function () {
                         $location.path('/approvalLanding');
@@ -318,7 +346,7 @@ app.controller('UpdateUserController', function ($scope, $http, $location, Share
 });
 
 //AngularJS controller to get backend approval details
-app.controller('ApprovalLandingController', function ($scope, $http, $location, ShareData) {
+app.controller('ApprovalLandingController', function ($scope, $http, $location, ShareData,$interval) {
     $scope.ShowwaitingMessage = ShareData.ShowwaitingMessage;
     $scope.showloader = true;
     $scope.showcontent = false;
@@ -382,46 +410,76 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
             parameters: params
         }
         $scope.requestsync = requestsync;
-        console.log(requestsync);
+        console.log(requestsync);        
         var config = {
             headers: {
                 'Content-Type': 'application/json'
             }
-        }
+        }        
         $scope.config = config;
-        //Post request variable to update user method
-        $http.post("/Landing/GetBackendApprovalrequestcount", requestsync, config).success(function (data) {
-            console.log(data);
-            window.setTimeout(function () {
-                $scope.$apply(function () {
-                    $scope.showloader = false;
-                });
-            }, 1500);
-            $scope.pendingselected = true;
-            $scope.completedselected = false;
-            $scope.showcontent = true;
-            angular.forEach(data, function (BackendItems) {
-                //$scope.openRequest.push({ OpenRequests: BackendItems.backend.OpenRequests });
-                //$scope.openApproval.push({ OpenApprovals: BackendItems.backend.OpenApprovals });
-                $scope.backends.push({ BackendID: BackendItems.BackendID, BackendName: BackendItems.BackendName, Pending: BackendItems.WaitingCount, Approved: BackendItems.ApprovedCount, Rejected: BackendItems.RejectedCount });
+        //$scope.start = function () {
+        //    // stops any running interval to avoid two intervals running at the same time
+        //    //$scope.stop();
+        //    myCall;
+        //};
+        //$scope.stop = function () {
+        //    $interval.cancel(myCall);
+        //};
+        //$scope.start();        
+        //// stops the interval
+        
+        //var myCall = $interval(function () {
+            //Post request variable to update user method
+            $http.post("/Landing/GetBackendApprovalrequestcount", requestsync, config).success(function (data) {
+                $scope.backends = [];              
+                if (ShareData.reload) {
+                    window.setTimeout(function () {
+                        $scope.$apply(function () {
+                            $scope.showloader = false;
+                        });
+                    }, 1500);                    
+                    $scope.showcontent = true;
+                    angular.forEach(data, function (BackendItems) {
+                        //$scope.openRequest.push({ OpenRequests: BackendItems.backend.OpenRequests });
+                        //$scope.openApproval.push({ OpenApprovals: BackendItems.backend.OpenApprovals });
+                        if (ShareData.aprStatus == "Waiting")
+                        {
+                            $scope.pendingselected = true;
+                            $scope.completedselected = false;
+                            $scope.backends.push({ BackendID: BackendItems.BackendID, BackendName: BackendItems.BackendName, Count: BackendItems.WaitingCount, Pending: BackendItems.WaitingCount, Approved: BackendItems.ApprovedCount, Rejected: BackendItems.RejectedCount });
+                        }
+                        else {
+                            $scope.pendingselected = false;
+                            $scope.completedselected = true;
+                            $scope.backends.push({ BackendID: BackendItems.BackendID, BackendName: BackendItems.BackendName, Count: BackendItems.ApprovedCount + BackendItems.RejectedCount, Pending: BackendItems.WaitingCount, Approved: BackendItems.ApprovedCount, Rejected: BackendItems.RejectedCount });
+                        }
+                        
+                    });
+                    $scope.pending = $scope.sum($scope.backends, 'Pending');
+                    var Approved = $scope.sum($scope.backends, 'Approved');
+                    var Rejected = $scope.sum($scope.backends, 'Rejected');
+                    $scope.completed = Approved + Rejected;
+                    console.log("pending" + $scope.pending + " ,Complete" + $scope.completed);
+                    drawRequestCountCircles($scope.pending + $scope.completed, $scope.pending, 'canvaspending', 'procentpending');
+                    drawRequestCountCircles($scope.pending + $scope.completed, $scope.completed, 'canvascompleted', 'procentcompleted');
+                    ShareData.backendCount = $scope.backends;
+                    console.log($scope.backends);
+                    //$(".progress-bar-success").css("width", ($scope.Completed / openRequests)*100 + "%");
+                    //$(".progress-bar-danger").css("width", ($scope.Pending / openRequests) * 100 + "%");
+                }
+                else
+                {
+                   // $scope.stop();
+                }
+                ShareData.reload = true;
+            }).error(function (data, status) {
+                console.log(data);
             });
-            $scope.pending = $scope.sum($scope.backends, 'Pending');
-            var Approved = $scope.sum($scope.backends, 'Approved');
-            var Rejected = $scope.sum($scope.backends, 'Rejected');
-            $scope.completed = Approved + Rejected;
-            drawRequestCountCircles($scope.pending + $scope.completed, $scope.pending, 'canvaspending', 'procentpending');
-            drawRequestCountCircles($scope.pending + $scope.completed, $scope.completed, 'canvascompleted', 'procentcompleted');
-            ShareData.backendCount = $scope.backends;
-            console.log($scope.backends);
-            //$(".progress-bar-success").css("width", ($scope.Completed / openRequests)*100 + "%");
-            //$(".progress-bar-danger").css("width", ($scope.Pending / openRequests) * 100 + "%");
-        }).error(function (data, status) {
-            console.log(data);
-        });
+        //}, 100000);        
     };
     $scope.SyncUpdate = function () {
         $scope.ShowwaitingMessage = true;
-        //    window.location.reload();
+        window.location.reload();
     };
     //$scope.forceUpdate = 'false';
     $scope.update = function () {
@@ -429,7 +487,9 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
         console.log($scope.requestsync.parameters.forceUpdate);
         //Post request variable to update user method
         $http.post("/Landing/ForceUpdate", $scope.requestsync, $scope.config).success(function (data) {
-            $scope.ShowwaitingMessage = true;
+            $scope.ShowforceupdateMessage = true;
+            //$scope.stop();
+            //$scope.start();
             console.log(data);
             $scope.requestsync.parameters.forceUpdate = 'false';
         }).error(function (data, status) {
@@ -449,7 +509,7 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
             var Approved = backend.Approved;
             var Rejected = backend.Rejected;
             var Completed = Approved + Rejected;
-            $scope.backends.push({ BackendID: backend.BackendID, BackendName: backend.BackendName, Pending: Completed });
+            $scope.backends.push({ BackendID: backend.BackendID, BackendName: backend.BackendName, Count: Completed });
         });
     }
     //On click pending
@@ -461,12 +521,13 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
         ShareData.aprStatus = approvalStatus;
         $scope.backends = []
         angular.forEach(backendCount, function (backend) {
-            $scope.backends.push({ BackendID: backend.BackendID, BackendName: backend.BackendName, Pending: backend.Pending });
+            $scope.backends.push({ BackendID: backend.BackendID, BackendName: backend.BackendName, Count: backend.Pending });
         });
     }
     //On click backend count
     $scope.redirectToDetailsPage = function (backendid) {
         ShareData.backendId = backendid;
+        //$scope.stop();
         $location.path('/approvalDetails');
     };
     $scope.sum = function (items, prop) {

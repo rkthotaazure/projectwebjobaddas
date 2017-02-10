@@ -144,6 +144,16 @@ button.btn-pdf {
     box-shadow: 1px 1px 5px grey;
     width:50%;
 }
+.btn-pdf.active.focus, .btn-pdf.active:focus, .btn-pdf.active:hover, .btn-pdf:active.focus, .btn-pdf:active:focus, .btn-pdf:active:hover, .open>.dropdown-toggle.btn-pdf.focus, .open>.dropdown-toggle.btn-pdf:focus, .open>.dropdown-toggle.btn-pdf:hover {
+    border-color: #ffc119;
+    background-color: #ffc119;
+}
+
+button.btn.btn-pdf:hover {
+    
+    border-color: #ffc119;
+    background-color: #ffc119;
+}
 .btn-pdf span {
         color: #2a2a2a;
         font-weight: bold;
@@ -324,6 +334,7 @@ padding-left:0px;
 
             .mobile-button > div:hover {
                 font-weight: bold;
+                    color: black;
             }
 
         .text-align-center {

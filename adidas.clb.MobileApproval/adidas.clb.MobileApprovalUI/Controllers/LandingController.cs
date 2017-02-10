@@ -376,7 +376,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                 List<UserTaskcountJsonResult> userTaskRejectedCount = userTaskRejectedResponse.userTaskcountJsonResult;
                 List<ApprovalCountDTO> approvalCountobj = new List<ApprovalCountDTO>();
                 //Checks whether the JSON response is not null
-                if (userTaskPendingResponse != null)
+                if (userTaskPendingResponse != null&& userBackends != null)
                 {
                     int i = 0;
                     //Iterate json format result and bind to Model
@@ -391,17 +391,29 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                         //Get Pending approval count
                         if (userTaskPendingCount != null && userTaskPendingCount.Count > 0)
                         {
-                            approvalCount.WaitingCount = userTaskPendingCount.Where(x => x.BackendID == backendID).First().Count;
+                            List<UserTaskcountJsonResult> taskcountlist = userTaskPendingCount.Where(x => x.BackendID == backendID).ToList();
+                            if (taskcountlist.Count > 0)
+                            {
+                                approvalCount.WaitingCount = taskcountlist.First().Count;
+                            }                           
                         }
                         //Get Approved approval count
                         if (userTaskApprovedCount != null && userTaskApprovedCount.Count > 0)
-                        {
-                            approvalCount.ApprovedCount = userTaskApprovedCount.Where(x => x.BackendID == backendID).First().Count;
+                        {                            
+                            List<UserTaskcountJsonResult> taskcountlist = userTaskApprovedCount.Where(x => x.BackendID == backendID).ToList();
+                            if (taskcountlist.Count > 0)
+                            {
+                                approvalCount.ApprovedCount = taskcountlist.First().Count;
+                            }
                         }
                         //Get Rejected approval count
                         if (userTaskRejectedCount != null && userTaskRejectedCount.Count > 0)
-                        {
-                            approvalCount.RejectedCount = userTaskRejectedCount.Where(x => x.BackendID == backendID).First().Count;
+                        {                            
+                            List<UserTaskcountJsonResult> taskcountlist = userTaskRejectedCount.Where(x => x.BackendID == backendID).ToList();
+                            if (taskcountlist.Count > 0)
+                            {
+                                approvalCount.RejectedCount = taskcountlist.First().Count;
+                            }
                         }
                         //Add ApprovalCountDTO Model object
                         approvalCountobj.Add(approvalCount);
