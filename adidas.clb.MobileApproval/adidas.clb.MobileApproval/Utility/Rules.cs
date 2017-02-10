@@ -21,9 +21,9 @@ namespace adidas.clb.MobileApproval.Utility
         /// </summary>
         /// <param name="userbackends">takes userbackends as input</param>
         /// <returns></returns>
-        public static int SynchWaitingTime(IEnumerable<UserBackendEntity> userbackends)
+        public static int SynchWaitingTime(IEnumerable<BackendEntity> backends)
         {
-            int MaxLatency = userbackends.Max(m => Math.Max(m.AverageAllRequestsLatency, m.LastAllRequestsLatency));
+            int MaxLatency = backends.Max(m => Math.Max(m.AverageAllRequestsLatency, m.LastAllRequestsLatency));
             return Convert.ToInt32(MaxLatency * 1.2);
         }
 

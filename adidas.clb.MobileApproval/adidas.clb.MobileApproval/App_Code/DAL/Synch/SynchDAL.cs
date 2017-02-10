@@ -218,7 +218,7 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
             try
             {
                 //call dataprovider method to insert entity into azure table
-                DataProvider.InsertReplaceEntity<SynchEntity>(CoreConstants.AzureTables.RequestTransactions, synch);
+                DataProvider.InsertReplaceEntity<SynchEntity>(CoreConstants.AzureTables.UserDeviceConfiguration, synch);
             }
             catch (Exception exception)
             {
@@ -237,7 +237,7 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
             try
             {
                 //call dataprovider method to insert entity into azure table
-                DataProvider.InsertReplaceEntity<RequestSynchEntity>(CoreConstants.AzureTables.RequestTransactions, synch);
+                DataProvider.InsertReplaceEntity<RequestSynchEntity>(CoreConstants.AzureTables.UserDeviceConfiguration, synch);
             }
             catch (Exception exception)
             {

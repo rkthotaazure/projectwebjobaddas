@@ -80,6 +80,47 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         }
 
         /// <summary>
+        /// method to get required backends
+        /// </summary>
+        /// <param name="userbackendslist">takes userbackend list as input to get backendids</param>
+        /// <returns>returns required backends</returns>
+        public List<BackendEntity> GetRequiredBackends(IEnumerable<UserBackendEntity> userbackendslist)
+        {
+            try
+            {               
+                string finalfilter = string.Empty;
+                //partionkey filter
+                string partitionkeyfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, CoreConstants.AzureTables.Backend);
+                //loop through each userbackend to generate rowkey filter for each one
+                foreach (UserBackendEntity userbackend in userbackendslist)
+                {
+                    string rowkeyfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.RowKey, QueryComparisons.Equal, userbackend.BackendID);
+                    //combine partitionkey filter with rowkey to get each entity
+                    string currentrowfilter = TableQuery.CombineFilters(partitionkeyfilter, TableOperators.And, rowkeyfilter);
+                    //if it is at first postion, no need to add OR condotion
+                    if ((userbackendslist.First().BackendID == userbackend.BackendID))
+                    {
+                        finalfilter = currentrowfilter;
+                    }
+                    else
+                    {
+                        finalfilter = TableQuery.CombineFilters(finalfilter, TableOperators.Or, currentrowfilter);
+                    }
+                }
+                //generate query to get all user associated backends
+                TableQuery<BackendEntity> query = new TableQuery<BackendEntity>().Where(finalfilter);
+                List<BackendEntity> backends = DataProvider.GetEntitiesList<BackendEntity>(CoreConstants.AzureTables.ReferenceData, query);
+                return backends;
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error while retrieving backends to caliculate synchwaitingtime from referencedata azure table in DAL : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new DataAccessException();
+            }
+        }
+
+        /// <summary>
         /// method to get userbackends
         /// </summary>
         /// <param name="UserID">takes userid as input</param>
