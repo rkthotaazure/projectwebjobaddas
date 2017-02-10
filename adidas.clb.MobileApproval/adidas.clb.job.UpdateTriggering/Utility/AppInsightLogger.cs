@@ -45,7 +45,7 @@ namespace adidas.clb.job.UpdateTriggering.Utility
             if (IsTraceEnabledForEvents)
             {
                 //assign Instrumentation Key to TelemetryClient object            
-                client.InstrumentationKey = InstrumentationKey;                
+                client.InstrumentationKey = InstrumentationKey;
                 client.TrackEvent(message);
                 //flush the buffer data
                 client.Flush();
@@ -99,22 +99,34 @@ namespace adidas.clb.job.UpdateTriggering.Utility
         /// <param name="message"></param>
         /// <param name="exception"></param>
         /// <param name="EventID"></param>
-        public void Exception(string message, Exception exception, string EventID)
+        public void Exception(string message, Exception exception, string methodName)
         {
+            //check TraceEnable or not from app.config
             if (IsTraceEnabledForExceptions)
             {
+                string exceptionMsg = message;
                 //assign Instrumentation Key to TelemetryClient object 
                 client.InstrumentationKey = InstrumentationKey;
+                //create dictionary object <string,string>
                 Dictionary<string, string> prop = new Dictionary<string, string>();
-                prop["Message"] = message;
-                prop["EventID"] = EventID;
+                //add exception.message and Methodname to dictionay
+                //checking is innerexception is null or not
+                //if it is null add exception strack trace to dictionary
+                if (exception.InnerException == null)
+                {
+                    exceptionMsg = exception.ToString();
+                }
+                prop["Message"] = exceptionMsg;
+                prop["MethodName"] = methodName;
+                //log the exception
                 client.TrackException(exception, prop);
                 //flush the buffer data
                 client.Flush();
             }
         }
-        
-       
+
+
+
 
 
 
