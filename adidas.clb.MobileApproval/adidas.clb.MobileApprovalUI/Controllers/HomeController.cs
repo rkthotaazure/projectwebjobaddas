@@ -54,34 +54,14 @@ namespace adidas.clb.MobileApprovalUI.Controllers
         //Check user exisits or not
         [HttpGet]
         public async Task<ActionResult> CheckUserExisits()
-        {
-            //creates list Backend model object
-            List<UserBackendDTO> backends = new List<UserBackendDTO>();
-            //creates list Backend model object
-            List<UserBackendDTO> userBackend = new List<UserBackendDTO>();
-            //creates list Device model object
-            List<UserDeviceDTO> UserDevicedetails = new List<UserDeviceDTO>();
-            //NewUser model object initialization
+        {            
             UserDTO userdetails = new UserDTO();
             try
-            {
-                //Api Controller object initialization
-                APIController apiControllerObj = new APIController();
-                NewuserJsonData newuserjsonResponse = new NewuserJsonData();
-                //Gets the user details returned by Personalization API
-                string strUserExisits = await apiControllerObj.Getuserinfo(userid);
-                if (!string.IsNullOrEmpty(strUserExisits))
-                {
-                    //Deseralize the result returned by the API
-                    newuserjsonResponse = JsonConvert.DeserializeObject<NewuserJsonData>(strUserExisits);
-                    if (newuserjsonResponse.userResults != null)
-                    {
-                        // Return Json Formate object and pass to UI
-                        return Json(newuserjsonResponse, JsonRequestBehavior.AllowGet);
-                    }
-                }
+            {                
+                // Get user details as list
+                userdetails = await Getuserdetails();
                 // Return Json Formate object and pass to UI
-                return Json(newuserjsonResponse, JsonRequestBehavior.AllowGet);
+                return Json(userdetails, JsonRequestBehavior.AllowGet);                
             }
             catch (Exception exception)
             {
@@ -193,7 +173,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                             userdetails.DeviceOS = newuserjsonResponse.userResults.DeviceOS;
                         }
                         //Checks whether the JSON response is not null
-                        if (userBackendjsonResponse != null)
+                        if (userBackendjsonResponse != null && userBackendjsonResponse.userBackendResults.userBackenddetails!=null)
                         {
                             //Iterate user backend json format result and bind to Model
                             foreach (userBackenddetails UserbackendInfo in userBackendjsonResponse.userBackendResults.userBackenddetails)
@@ -221,7 +201,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                                 BackendObj.backend.LastRequestLatency = UserbackendInfo.userBackend.LastRequestLatency;
                                 BackendObj.backend.LastRequestSize = UserbackendInfo.userBackend.LastRequestSize;
                                 DateTime? lstdate = UserbackendInfo.userBackend.LastUpdate;
-                                if (expdate != null)
+                                if (lstdate != null)
                                 {
                                     BackendObj.backend.LastUpdate = lstdate.Value;
                                 }                                 
@@ -239,7 +219,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                             }
                         }
                         //Checks whether the JSON response is not null
-                        if (userDevicejsonResponse != null)
+                        if (userDevicejsonResponse != null && userDevicejsonResponse.userDevicesResults.userDevicedetails!=null)
                         {
                             //Iterate user devices json format result and bind to Model
                             foreach (userDevicedetails userDeviceInfo in userDevicejsonResponse.userDevicesResults.userDevicedetails)
