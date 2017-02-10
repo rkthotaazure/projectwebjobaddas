@@ -12,7 +12,7 @@ namespace adidas.clb.job.UpdateTriggering.Utility
     public class CoreConstants
     {
         // Logging Priority Constants
-       
+
         public struct Priority
         {
             public const string Lowest = "Lowest";
@@ -56,9 +56,9 @@ namespace adidas.clb.job.UpdateTriggering.Utility
             public const string CAR = "car";
             public const string BPMOnline = "bpmonline";
         }
-            #endregion
-            //Azure Table constants
-            public struct AzureTables
+        #endregion
+        //Azure Table constants
+        public struct AzureTables
         {
             public const string ReferenceData = "ReferenceData";
             public const string UserDeviceConfiguration = "UserDeviceConfiguration";
@@ -77,9 +77,10 @@ namespace adidas.clb.job.UpdateTriggering.Utility
         }
         public struct AzureQueues
         {
-           public const string UpdateTriggerInputQueue = "updatetriggerinputqueue";
+            public const string UpdateTriggerInputQueue = "updatetriggerinputqueue";
             public const string GeneratePdfQueue = "generatepdfqueue";
             public const string UTQueue = "utQueue";
+            public const string VIPQueue = "vipQueue";
             public const string PDFQueue = "pdfQueue";
         }
         public struct AzureWebJobTimers
