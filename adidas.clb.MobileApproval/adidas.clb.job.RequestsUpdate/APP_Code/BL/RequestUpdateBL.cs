@@ -103,27 +103,33 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                 //check if approval exists or not
                 if (ServiceLayerApproval != null)
                 {
-                    //check for Status Confirmation and update approval flags
-                    if (ServiceLayerApproval.Status == approver.Status)
+                    if(!ServiceLayerApproval.BackendConfirmed)
                     {
-                        ServiceLayerApproval.Backendoverwritten = false;
-                        ServiceLayerApproval.BackendConfirmed = true;
-                        ServiceLayerApproval.Missingconfirmations = 0;
-                    }
-                    else
-                    {
-                        ServiceLayerApproval.Missingconfirmations = ServiceLayerApproval.Missingconfirmations + 1;
-                        ServiceLayerApproval.Backendoverwritten = false;
-                        ServiceLayerApproval.BackendConfirmed = true;
-                        //check for Missing confirmation limit
-                        if (ServiceLayerApproval.Missingconfirmations > missingconfirmationlimit)
+                        //check for Status Confirmation and update approval flags
+                        if (ServiceLayerApproval.Status == approver.Status)
                         {
-                            ServiceLayerApproval.Backendoverwritten = true;
+                            ServiceLayerApproval.Backendoverwritten = false;
                             ServiceLayerApproval.BackendConfirmed = true;
                             ServiceLayerApproval.Missingconfirmations = 0;
-                            ServiceLayerApproval.Status = approver.Status;
                         }
-                    }
+                        else
+                        {
+                            //increase Missingconfirmation limit as status is not matching
+                            ServiceLayerApproval.Missingconfirmations = ServiceLayerApproval.Missingconfirmations + 1;
+                            ServiceLayerApproval.Backendoverwritten = false;
+                            ServiceLayerApproval.BackendConfirmed = false;
+                            //Add message to update triggering VIP queue to trigger request update.
+                            RequestUpdateTrigger(requestid,UserID,backendId);
+                            //check for Missing confirmation limit
+                            if (ServiceLayerApproval.Missingconfirmations > missingconfirmationlimit)
+                            {
+                                ServiceLayerApproval.Backendoverwritten = true;
+                                ServiceLayerApproval.BackendConfirmed = true;
+                                ServiceLayerApproval.Missingconfirmations = 0;
+                                ServiceLayerApproval.Status = approver.Status;
+                            }
+                        }
+                    }                    
                     //calling DAL method to add request entity
                     requestupdatedal.AddUpdateApproval(ServiceLayerApproval);
                 }
@@ -156,6 +162,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                 throw new BusinessLogicException();
             }
         }
+
         /// <summary>
         /// BL method to add approvers entities into azure table
         /// </summary>
@@ -329,31 +336,34 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                 //calling DAL method to add update userbackend entity
                 RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
                 UserBackendEntity userbackend = requestupdatedal.GetUserBackend(userId, BackendId);
-                //calling methods to update Open requests, open approvals and urgent approvals
-                userbackend.OpenRequests = requestupdatedal.GetOpenRequestsCount(userId, BackendId);
-                userbackend.OpenApprovals = requestupdatedal.GetOpenApprovalsCount(userId, BackendId);
-                userbackend.UrgentApprovals = requestupdatedal.GetUrgentApprovalsCount(userId, BackendId);
-                //if request count more than one.
-                if (requestscount > 0)
+                if (userbackend != null)
                 {
-                    //updating average, last request sizes for user backend 
-                    userbackend.AverageRequestSize = GetAverage(userbackend.AverageRequestSize, userbackend.TotalRequestsCount, Totalrequestssize, requestscount);
-                    userbackend.AverageAllRequestsSize = GetAverage(userbackend.AverageAllRequestsSize, userbackend.TotalBatchRequestsCount, Totalrequestssize, requestscount);
-                    userbackend.LastRequestSize = Convert.ToInt32(Totalrequestssize / requestscount);
-                    userbackend.LastAllRequestsSize = Totalrequestssize;
-                    //updating average, last request latencies for user backend
-                    userbackend.AverageRequestLatency = GetAverage(userbackend.AverageRequestLatency, userbackend.TotalRequestsCount, TotalRequestlatency, requestscount);
-                    userbackend.AverageAllRequestsLatency = GetAverage(userbackend.AverageAllRequestsLatency, userbackend.TotalBatchRequestsCount, TotalRequestlatency, requestscount);
-                    userbackend.LastRequestLatency = Convert.ToInt32(TotalRequestlatency / requestscount);
-                    userbackend.LastAllRequestsLatency = TotalRequestlatency;
-                    //updaing total requests per userbackend and total request batches/messages per userbackend
-                    userbackend.TotalRequestsCount = userbackend.TotalRequestsCount + requestscount;
-                    userbackend.TotalBatchRequestsCount = userbackend.TotalBatchRequestsCount + 1;
-                }
-                userbackend.LastUpdate = DateTime.Now;
-                userbackend.UpdateTriggered = false;
-                //calling DAL method to update userbackend
-                requestupdatedal.UpdateUserBackend(userbackend);
+                    //calling methods to update Open requests, open approvals and urgent approvals
+                    userbackend.OpenRequests = requestupdatedal.GetOpenRequestsCount(userId, BackendId);
+                    userbackend.OpenApprovals = requestupdatedal.GetOpenApprovalsCount(userId, BackendId);
+                    userbackend.UrgentApprovals = requestupdatedal.GetUrgentApprovalsCount(userId, BackendId);
+                    //if request count more than one.
+                    if (requestscount > 0)
+                    {
+                        //updating average, last request sizes for user backend 
+                        userbackend.AverageRequestSize = GetAverage(userbackend.AverageRequestSize, userbackend.TotalRequestsCount, Totalrequestssize, requestscount);
+                        userbackend.AverageAllRequestsSize = GetAverage(userbackend.AverageAllRequestsSize, userbackend.TotalBatchRequestsCount, Totalrequestssize, requestscount);
+                        userbackend.LastRequestSize = Convert.ToInt32(Totalrequestssize / requestscount);
+                        userbackend.LastAllRequestsSize = Totalrequestssize;
+                        //updating average, last request latencies for user backend
+                        userbackend.AverageRequestLatency = GetAverage(userbackend.AverageRequestLatency, userbackend.TotalRequestsCount, TotalRequestlatency, requestscount);
+                        userbackend.AverageAllRequestsLatency = GetAverage(userbackend.AverageAllRequestsLatency, userbackend.TotalBatchRequestsCount, TotalRequestlatency, requestscount);
+                        userbackend.LastRequestLatency = Convert.ToInt32(TotalRequestlatency / requestscount);
+                        userbackend.LastAllRequestsLatency = TotalRequestlatency;
+                        //updaing total requests per userbackend and total request batches/messages per userbackend
+                        userbackend.TotalRequestsCount = userbackend.TotalRequestsCount + requestscount;
+                        userbackend.TotalBatchRequestsCount = userbackend.TotalBatchRequestsCount + 1;
+                    }
+                    userbackend.LastUpdate = DateTime.Now;
+                    userbackend.UpdateTriggered = false;
+                    //calling DAL method to update userbackend
+                    requestupdatedal.UpdateUserBackend(userbackend);
+                }                
             }
             catch (DataAccessException DALexception)
             {
@@ -436,6 +446,50 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
             {
                 //write exception into application insights
                 InsightLogger.Exception(exception.Message + " - Error in BL while updating backend", exception, callerMethodName);
+                throw new BusinessLogicException();
+            }
+        }
+       
+        /// <summary>
+        /// method to add message to queue to trigger request update
+        /// </summary>
+        /// <param name="requestID">takes requestid as input</param>
+        /// <param name="UserID">takes userid as input</param>
+        /// <param name="BackendID">takes backendid as input</param>
+        public void RequestUpdateTrigger(string requestID,string UserID,string BackendID)
+        {
+            try
+            {
+                UpdateTriggeringMessage updateTriggerMessage = new UpdateTriggeringMessage();
+                List<RequestUpdateMsg> updatetriggerrequestlist = new List<RequestUpdateMsg>();
+                RequestUpdateMsg triggerrequset = new RequestUpdateMsg();
+                //adding request to message object
+                RequestMsg requestobj = new RequestMsg();
+                requestobj.ID = requestID;
+                requestobj.UserID = UserID;
+                triggerrequset.request = requestobj;
+                //adding backend to queue message
+                UpdateTriggerBackend backendobj = new UpdateTriggerBackend();
+                backendobj.BackendID = BackendID;
+                triggerrequset.request.Backend = backendobj;
+                //add requests to list which will be added to message
+                updatetriggerrequestlist.Add(triggerrequset);
+                updateTriggerMessage.Requests = updatetriggerrequestlist;
+                //set VIP message flag to true
+                updateTriggerMessage.VIP = true;
+                //calling DAL method to update backend entity
+                RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
+                requestupdatedal.AddUpdateTriggerMessageToQueue(updateTriggerMessage);
+
+            }
+            catch (DataAccessException DALexception)
+            {
+                throw DALexception;
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error in BL while formatting updatetriggering message : "
+                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new BusinessLogicException();
             }
         }
