@@ -12,6 +12,7 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -24,7 +25,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -122,6 +122,7 @@
     <Compile Include="Models\Request.cs" />
     <Compile Include="Models\RequsetEntity.cs" />
     <Compile Include="Models\RequestPDF.cs" />
+    <Compile Include="Models\UpdateTriggeringMessage.cs" />
     <Compile Include="Models\UserBackendEntity.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Functions.cs" />
@@ -140,6 +141,8 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="Properties\PublishProfiles\mobileapproval - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\mobileapproval - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\mobileapproval.pubxml" />
     <None Include="Properties\webjob-publish-settings.json" />
   </ItemGroup>

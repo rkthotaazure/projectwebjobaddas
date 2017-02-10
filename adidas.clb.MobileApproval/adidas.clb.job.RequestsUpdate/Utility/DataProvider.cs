@@ -11,6 +11,7 @@ using Microsoft.Azure;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.RetryPolicies;
 using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.WindowsAzure.Storage.Queue;
 
 namespace adidas.clb.job.RequestsUpdate.Utility
 {
@@ -49,6 +50,37 @@ namespace adidas.clb.job.RequestsUpdate.Utility
             {
                 //write exception into application insights
                 InsightLogger.Exception(exception.Message + " - Error in DataProver while getting instance of azure table " + TableName, exception, callerMethodName);
+                throw new Exception();
+            }
+        }
+
+        /// <summary>
+        /// method to get azure queue storage object instance
+        /// </summary>
+        /// <param name="QueueName">takes queuename as inpu</param>
+        /// <returns>Azure Queue Instance</returns>        
+        public static CloudQueue GetAzureQueueInstance(string QueueName)
+        {
+            try
+            {
+                // Retrieve storage account from connection string.
+                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
+                CloudConfigurationManager.GetSetting(CoreConstants.AzureTables.AzureStorageConnectionString));
+                // Create the queue client.
+                CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
+                // set retry for the connection for transient failures
+                queueClient.DefaultRequestOptions = new QueueRequestOptions
+                {
+                    RetryPolicy = new LinearRetry(TimeSpan.FromSeconds(5), 3)
+                };
+                // Retrieve a reference to a queue.
+                CloudQueue queue = queueClient.GetQueueReference(QueueName);
+                return queue;
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - exception in dataprovider while getting insatance of azure queue " + QueueName + " :- "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new Exception();
             }
         }
@@ -288,5 +320,28 @@ namespace adidas.clb.job.RequestsUpdate.Utility
             }
         }
 
+        /// <summary>
+        /// method to add message to queue
+        /// </summary>
+        /// <param name="queuename">takes queue name as input</param>
+        /// <param name="message">takes message as input</param>
+        public static void AddMessagetoQueue(string queuename, string message)
+        {
+            try
+            {
+                //get's azure queue instance    
+                CloudQueue queue = GetAzureQueueInstance(queuename);
+                //serialize object to string           
+                CloudQueueMessage queuemessage = new CloudQueueMessage(message);
+                //adds message to queue
+                queue.AddMessage(queuemessage);
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - exception in dataprovider while adding message to queue " + queuename + " :- "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new Exception();
+            }
+        }
     }
 }

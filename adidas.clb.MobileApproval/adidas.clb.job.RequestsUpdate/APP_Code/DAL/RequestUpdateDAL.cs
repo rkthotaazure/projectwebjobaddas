@@ -471,5 +471,25 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.DAL
                 throw new DataAccessException();
             }
         }
+
+        /// <summary>
+        /// method to add user to be updated into updatetrigger queue
+        /// </summary>
+        /// <param name="updateTriggeringMessage">takes message object as input</param>
+        public void AddUpdateTriggerMessageToQueue(UpdateTriggeringMessage updateTriggeringMessage)
+        {
+            try
+            {
+                string message = JsonConvert.SerializeObject(updateTriggeringMessage);
+                //call dataprovider method to add message to azure queue
+                DataProvider.AddMessagetoQueue(CoreConstants.AzureQueues.UpdateTriggerVIPQueueName, message);
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error while adding message to updatetriggering queue in DAL : "
+                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new DataAccessException();
+            }
+        }
     }
 }

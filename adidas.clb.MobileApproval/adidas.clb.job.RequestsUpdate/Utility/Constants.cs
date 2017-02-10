@@ -31,6 +31,7 @@ namespace adidas.clb.job.RequestsUpdate.Utility
         {
             public const string RequsetUpdateQueue = "requestupdateinputqueue";
             public const string RequsetPDFQueue = "requestpdfuriqueue";
+            public const string UpdateTriggerVIPQueueName = "vipmessagesqueue";
             public const string Trace = "Trace";
             public const string Error = "Error";
         }
