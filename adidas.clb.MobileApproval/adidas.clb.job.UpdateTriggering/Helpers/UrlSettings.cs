@@ -9,6 +9,29 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
 {
     public class UrlSettings
     {
+
+        public static string UserName
+        {
+            get
+            {
+                return Convert.ToString(ConfigurationManager.AppSettings["BackendAPIUserName"]);
+            }
+        }
+        public static string Password
+        {
+            get
+            {
+                return Convert.ToString(ConfigurationManager.AppSettings["BackendAPIPassword"]);
+            }
+        }
+        public static string AuthSchema
+        {
+            get
+            {
+                return Convert.ToString(ConfigurationManager.AppSettings["AuthorizationSchema"]);
+            }
+        }
+
         //Application insights interface reference for logging the error details into Application Insight azure service.
         static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
         /// <summary>
@@ -24,7 +47,7 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 //concat backend agent main url + api method
-                string apiuri = string.Format(ConfigurationManager.AppSettings["BackendAgentURL"].ToString() + string.Format(ConfigurationManager.AppSettings["BackendAgentRequestUpdateAPI"].ToString(), bacekndID));
+                string apiuri = string.Format(Convert.ToString(ConfigurationManager.AppSettings["BackendAgentURL"]) + string.Format(ConfigurationManager.AppSettings["BackendAgentRequestUpdateAPI"].ToString(), bacekndID));
                 return apiuri;
             }
             catch (Exception exception)
