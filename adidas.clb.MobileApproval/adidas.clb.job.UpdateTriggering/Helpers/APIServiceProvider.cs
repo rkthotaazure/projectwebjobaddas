@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Web;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using adidas.clb.job.UpdateTriggering.Exceptions;
 using adidas.clb.job.UpdateTriggering.Utility;
 using adidas.clb.job.UpdateTriggering.Models;
@@ -37,7 +38,13 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
                // RequestsUpdateAck Objacknowledgement = null;
                 using (HttpClient client = new HttpClient())
                 {
-                   
+                    //access to backend agent required username & password(basic authentication)
+                    //get username from config and encode it
+                    string username = Convert.ToBase64String(Encoding.UTF8.GetBytes(UrlSettings.UserName));
+                    //get passwoed from config and encode
+                    string password = Convert.ToBase64String(Encoding.UTF8.GetBytes(UrlSettings.Password));
+                    //get authorization schema name from config
+                    string authSchema = UrlSettings.AuthSchema;
                     //get API endpoint and format
                     string backendApiEndpoint = UrlSettings.GetBackendAgentRequestApprovalAPI(backendID);
                     //Post Triggers the pulling of updated requests data from a the given backend / given requests
@@ -52,6 +59,8 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
                     {
                         try
                         {
+                            //add authentication information to client header
+                            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(authSchema, username + ":" + password);
                             var request = new HttpRequestMessage(HttpMethod.Post, backendApiEndpoint);
                             request.Content = new StringContent(UpdateTriggeringMessage, Encoding.UTF8, "application/json");
                            // InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Pass user message to agent (Invoking backend agent API) , Response :: Success");
