@@ -113,7 +113,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 // Create a retrieve operation that takes a NextUserCollectingTime Entity.
-                NextUserCollectingTimeEntity ObjNextCollectingTime = DataProvider.RetrieveEntity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, CoreConstants.AzureTables.UpdateTriggerNextCollectingTime, backendID);
+                NextUserCollectingTimeEntity ObjNextCollectingTime = DataProvider.RetrieveEntity<NextUserCollectingTimeEntity>(azureTableReference, CoreConstants.AzureTables.UpdateTriggerNextCollectingTime, backendID);
                 if (ObjNextCollectingTime != null)
                 {
                     //update the existing entity
@@ -144,7 +144,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     //update Missing Update NextCollectingTime based on updatetriggering Rule R5
                     ObjNextCollectingTime.MissingUpdateNextCollectingTime = utRules.GetNextMissingCollectingTime(MissedUpdateLastCollectingTime, avgAllRequestsLatency, lastAllRequestsLatency);
                     //call dataprovider method to update entity to azure table
-                    DataProvider.UpdateEntity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, ObjNextCollectingTime);
+                    DataProvider.UpdateEntity<NextUserCollectingTimeEntity>(azureTableReference, ObjNextCollectingTime);
                 }
                 else
                 {
@@ -158,7 +158,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     nextCollectingTime.MissingUpdateLastCollectingTime = collectingTime;
                     nextCollectingTime.MissingUpdateNextCollectingTime = utRules.GetNextMissingCollectingTime(collectingTime, avgAllRequestsLatency, lastAllRequestsLatency);
                     // Create the TableOperation object that inserts the NextUserCollectingTime entity.                                        
-                    DataProvider.InsertEntity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, nextCollectingTime);
+                    DataProvider.InsertEntity<NextUserCollectingTimeEntity>(azureTableReference, nextCollectingTime);
 
                 }
             }
@@ -190,7 +190,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 // Create a retrieve operation that takes a NextUserCollectingTime Entity.
-                NextUserCollectingTimeEntity ObjUpdateNextCollectingTime = DataProvider.RetrieveEntity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, CoreConstants.AzureTables.UpdateTriggerNextCollectingTime, backendID);
+                NextUserCollectingTimeEntity ObjUpdateNextCollectingTime = DataProvider.RetrieveEntity<NextUserCollectingTimeEntity>(azureTableReference, CoreConstants.AzureTables.UpdateTriggerNextCollectingTime, backendID);
                 if (ObjUpdateNextCollectingTime != null)
                 {
                     //update the existing entity                   
@@ -200,7 +200,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     //update  NextCollectingTime value based on new MinimumUpdateFrequency,last collecting Time
                     ObjUpdateNextCollectingTime.RegularUpdateNextCollectingTime = nextCollectingTime;
                     // Execute update operation.
-                    DataProvider.UpdateEntity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, ObjUpdateNextCollectingTime);
+                    DataProvider.UpdateEntity<NextUserCollectingTimeEntity>(azureTableReference, ObjUpdateNextCollectingTime);
                     InsightLogger.TrackEvent("UpdateTriggering, Action :: Set next collecting time , Response :: Success, backend :[ " + backendID + " ]");
                 }
             }
@@ -229,7 +229,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 // Create a retrieve operation that takes a NextUserCollectingTime Entity.
-                NextUserCollectingTimeEntity ObjMissedUpdateNextCollectingTime = DataProvider.RetrieveEntity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, CoreConstants.AzureTables.UpdateTriggerNextCollectingTime, backendID);
+                NextUserCollectingTimeEntity ObjMissedUpdateNextCollectingTime = DataProvider.RetrieveEntity<NextUserCollectingTimeEntity>(azureTableReference, CoreConstants.AzureTables.UpdateTriggerNextCollectingTime, backendID);
                 if (ObjMissedUpdateNextCollectingTime != null)
                 {
                     //get backend details by backendid from userconfiguration
@@ -242,7 +242,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                         //update Missing Update NextCollectingTime based on updatetriggering Rule R5
                         ObjMissedUpdateNextCollectingTime.MissingUpdateNextCollectingTime = utRules.GetNextMissingCollectingTime(missingUpdateLastCollectingTime, backendDetails.AverageAllRequestsLatency, backendDetails.LastAllRequestsLatency);
                         // Execute update operation.
-                        DataProvider.UpdateEntity<NextUserCollectingTimeEntity>(CoreConstants.AzureTables.ReferenceData, ObjMissedUpdateNextCollectingTime);
+                        DataProvider.UpdateEntity<NextUserCollectingTimeEntity>(azureTableReference, ObjMissedUpdateNextCollectingTime);
                         InsightLogger.TrackEvent("UpdateTriggering, Action :: Set next missed update collecting time , Response :: Success, backend :[ " + backendID + " ]");
                     }
 
