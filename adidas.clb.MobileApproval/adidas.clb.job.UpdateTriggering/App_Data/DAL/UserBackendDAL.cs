@@ -521,7 +521,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         /// </summary>
         /// <param name="backendID"></param>
         /// <param name="userName"></param>
-        public void UpdateUserBackendExpectedUpdateTime(string backendID, string userName,string QueueName)
+        public void UpdateUserBackendExpectedUpdateTime(string backendID, string userName, string QueueName)
         {
             string callerMethodName = string.Empty;
             try
@@ -571,43 +571,48 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         /// </summary>
         /// <param name="backendID"></param>
         /// <param name="serviceLayerRequestID"></param>
-        public void UpdateRequestExpectedUpdateTime(string backendID, string serviceLayerRequestID,string QueueName)
+        public void UpdateRequestExpectedUpdateTime(string backendID, List<RequestUpdateMsg> lstrequests, string QueueName)
         {
             string callerMethodName = string.Empty;
             try
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                //get request sync details based on serviceLayerRequestID                 
-                RequestSynchEntity reqSyncEntity = DataProvider.RetrieveEntity<RequestSynchEntity>(azureTableRequestTransactions, CoreConstants.AzureTables.RequestSynchPK, serviceLayerRequestID);
-                if (reqSyncEntity != null)
+                //get backend details
+                BackendEntity backendDetails = GetBackendDetailsByBackendID(backendID);
+                if (backendDetails != null)
                 {
-                    //get backend details
-                    BackendEntity backendDetails = GetBackendDetailsByBackendID(backendID);
-                    if (backendDetails != null)
+                    //get expected update time by using update triggering rule :: R4
+                    DateTime expectedUpdateTime = utRule.GetRequestExpectedUpdate(backendDetails.AverageRequestLatency, backendDetails.LastRequestLatency);
+                    foreach (RequestUpdateMsg reqdt in lstrequests)
                     {
-                        // update request ExpectedUpdate value by using update triggering rule :: R4
-                        reqSyncEntity.ExpectedUpdate = utRule.GetRequestExpectedUpdate(backendDetails.AverageRequestLatency, backendDetails.LastRequestLatency);
-                        //update request UpdateTriggered
-                        reqSyncEntity.UpdateTriggered = true;
-                        // Execute the update operation.
-                        DataProvider.UpdateEntity(azureTableRequestTransactions, reqSyncEntity);
-                        InsightLogger.TrackEvent(QueueName + " , Action :: Compute and set Expected Updated Timestamp(UT Rule :: R4) for the requestID : " + serviceLayerRequestID + " ,  Response : Success");
+                        string serviceLayerRequestID = reqdt.request.ID;
+                        //get request sync details based on serviceLayerRequestID                 
+                        RequestSynchEntity reqSyncEntity = DataProvider.RetrieveEntity<RequestSynchEntity>(azureTableRequestTransactions, CoreConstants.AzureTables.RequestSynchPK, serviceLayerRequestID);
+                        if (reqSyncEntity != null)
+                        {
+                            // update request ExpectedUpdate value 
+                            reqSyncEntity.ExpectedUpdate = expectedUpdateTime;
+                            //update request UpdateTriggered
+                            reqSyncEntity.UpdateTriggered = true;
+                            // Execute the update operation.
+                            DataProvider.UpdateEntity(azureTableRequestTransactions, reqSyncEntity);
+                            InsightLogger.TrackEvent(QueueName + " , Action :: Compute and set Expected Updated Timestamp(UT Rule :: R4) for the requestID : " + serviceLayerRequestID + " ,  Response : Success");
+                        }
+                        else
+                        {
+                            InsightLogger.TrackEvent(QueueName + " , Action :: Compute and set Expected Updated Timestamp(UT Rule :: R4) for the requestID : " + serviceLayerRequestID + " ,  Response : Failed");
 
+                        }
                     }
-                    else
-                    {
-                        InsightLogger.TrackEvent(QueueName + " , Action :: Compute and set Expected Updated Timestamp(UT Rule :: R4) for the requestID : " + serviceLayerRequestID + " ,  Response : Failed");
+                   
 
-                    }
                 }
                 else
                 {
-                    InsightLogger.TrackEvent(QueueName + " , Action :: Compute and set Expected Updated Timestamp(UT Rule :: R4) for the requestID : " + serviceLayerRequestID + " ,  Response : Failed");
+                    InsightLogger.TrackEvent(QueueName + " , Action :: Compute and set Expected Updated Timestamp for requests based on UT Rule :: R4  ,  Response : Failed");
 
-                }
-
-
+                }         
             }
             catch (BusinessLogicException dalexception)
             {
@@ -737,23 +742,27 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     if (requestitem.ToList() != null)
                     {
                         List<string> rmsgFormat = new List<string>();
+                        List<RequestSynchEntity> reqmissedUpdateslst = new List<Models.RequestSynchEntity>();
                         foreach (RequestSynchEntity requestDetails in requestitem.ToList())
                         {
                             //checking is request  update missing or not with the help of Updatetriggering rule R6
                             if (utRule.IsRequestUpdateMissing(requestDetails.UpdateTriggered, requestDetails.ExpectedUpdate))
                             {
                                 InsightLogger.TrackEvent("UpdateTriggering, Action :: Is Request [ " + requestDetails.RowKey + " ] needs update based on UT Rule R6 , Response :: true");
-                                //put the json message of UpdateTriggeringMsg class format into update triggering input queue.
-                                rmsgFormat.Add(ConvertRequestUpdateMsgToUpdateTriggeringMsg(requestDetails, rBackendID));
+                                //add request details to RequestSynchEntity list
+                                reqmissedUpdateslst.Add(requestDetails);
                             }
                             else
                             {
                                 InsightLogger.TrackEvent("UpdateTriggering, Action :: Is Request [ " + requestDetails.RowKey + " ] needs update based on UT Rule R6 , Response :: false");
                             }
                         }
-                        //add list of messages into update triggering input queue
-                        if (rmsgFormat.Count > 0)
+                        //check missed update requests count
+                        if (reqmissedUpdateslst.Count > 0)
                         {
+                            //put the json message of UpdateTriggeringMsg class format into update triggering input queue.
+                            rmsgFormat.Add(ConvertRequestUpdateMsgToUpdateTriggeringMsg(reqmissedUpdateslst, rBackendID));
+                            //add list of messages into update triggering input queue
                             AddMessagestoInputQueue(rmsgFormat);
                         }
 
@@ -778,38 +787,43 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         /// <param name="objrequestSynch"></param>
         /// <param name="rBackendName"></param>
         /// <returns></returns>
-        private string ConvertRequestUpdateMsgToUpdateTriggeringMsg(RequestSynchEntity objrequestSynch, string rBackendName)
+        private string ConvertRequestUpdateMsgToUpdateTriggeringMsg(List<RequestSynchEntity> reqlst, string rBackendName)
         {
             string callerMethodName = string.Empty;
             try
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                string updatetriggeringmsg = string.Empty;
-
-                //create object and assign values to properties for Backend class 
-                Backend objBackend = new Backend()
-                {
-                    BackendID = objrequestSynch.BackendID,
-                    BackendName = rBackendName
-                };
-                //create object and assign values to properties for Request class 
-                Request objRequest = new Request()
-                {
-                    ID = objrequestSynch.RowKey,
-                    UserID = objrequestSynch.UserID,
-                    Backend = objBackend
-                };
-                //create object and assign values to properties for RequestUpdateMsg class 
-                RequestUpdateMsg objRequestMsg = new RequestUpdateMsg()
-                {
-                    ServiceLayerReqID = objrequestSynch.RowKey,
-                    request = objRequest
-
-                };
                 //add RequestUpdateMsg to list
                 List<RequestUpdateMsg> lstRequestUpdateMsg = new List<RequestUpdateMsg>();
-                lstRequestUpdateMsg.Add(objRequestMsg);
+
+                string updatetriggeringmsg = string.Empty;
+                foreach (RequestSynchEntity objrequestSynch in reqlst)
+                {
+                    //create object and assign values to properties for Backend class 
+                    Backend objBackend = new Backend()
+                    {
+                        BackendID = objrequestSynch.BackendID,
+                        BackendName = rBackendName
+                    };
+                    //create object and assign values to properties for Request class 
+                    Request objRequest = new Request()
+                    {
+                        ID = objrequestSynch.RowKey,
+                        UserID = objrequestSynch.UserID,
+                        Backend = objBackend
+                    };
+                    //create object and assign values to properties for RequestUpdateMsg class 
+                    RequestUpdateMsg objRequestMsg = new RequestUpdateMsg()
+                    {
+                        ServiceLayerReqID = objrequestSynch.RowKey,
+                        request = objRequest
+
+                    };
+                    lstRequestUpdateMsg.Add(objRequestMsg);
+                }
+
+
                 //create object and assign values to properties for UpdateTriggeringMsg class 
                 UpdateTriggeringMsg ObjUTMsg = new UpdateTriggeringMsg()
                 {
@@ -892,7 +906,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             //if (!string.IsNullOrEmpty(acknowledgment))
                             //{
                             //update ExpectedUpdateTime  with the help of update trigger Rule :: R3
-                            this.UpdateUserBackendExpectedUpdateTime(backend.BackendID, userID,queueName);
+                            this.UpdateUserBackendExpectedUpdateTime(backend.BackendID, userID, queueName);
                             //}
 
                         }
@@ -941,7 +955,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     //foreach backend id
                     foreach (string backendID in bakcends.ToList())
                     {
-                        InsightLogger.TrackEvent(queueName + " , Action :: For each backend in requests List, Response :: Backend ID: " + backendID );
+                        InsightLogger.TrackEvent(queueName + " , Action :: For each backend in requests List, Response :: Backend ID: " + backendID);
 
                         //getting list of RequestUpdateMsg's by same backend
                         var lstRequestsByBackend = (from requests in lstRequests
@@ -969,14 +983,14 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             //acknowledgment = 
                             Task.Factory.StartNew(() =>
                             {
-                                ObjserviceProvider.CallBackendAgent(backendID, requestsUpdateQuery,CoreConstants.Category.Request, queueName);
+                                ObjserviceProvider.CallBackendAgent(backendID, requestsUpdateQuery, CoreConstants.Category.Request, queueName);
                             });
 
                             //if acknowledgment is not null or not empty then update the userbackend expected updatetime
                             //if (!string.IsNullOrEmpty(acknowledgment))
                             //{
                             //update ExpectedUpdateTime  with the help of update trigger Rule :: R3
-                            this.UpdateRequestExpectedUpdateTime(backendID, serviceLayerRequestID, queueName);
+                            this.UpdateRequestExpectedUpdateTime(backendID, lstRequestsByBackend.ToList(), queueName);
                             //}
                             //clearing RequestUpdateMsg list
                             lstRequestsByBackend = null;
