@@ -159,6 +159,14 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
                             }
 
                         }
+                        else if (item.Value.GetType() == typeof(decimal))
+                        {
+                            if (!string.IsNullOrEmpty(Convert.ToString(item.Value)))
+                            {
+                                Decimal quantity = Math.Round(Convert.ToDecimal(item.Value), 2);
+                                strvalue = Convert.ToString(quantity);
+                            }
+                        }
                         else
                         {
                             strvalue = !string.IsNullOrEmpty(Convert.ToString(item.Value)) ? Convert.ToString(item.Value) : string.Empty;
@@ -1153,6 +1161,14 @@ namespace adidas.clb.job.GeneratePDF.App_Data.BAL
                                 strvalue = dt.ToString("dd/MM/yyyy");
                             }
 
+                        }
+                        else if (item.Value.GetType() == typeof(decimal))
+                        {
+                            if (!string.IsNullOrEmpty(Convert.ToString(item.Value)))
+                            {
+                                Decimal quantity = Math.Round(Convert.ToDecimal(item.Value), 2);
+                                strvalue = Convert.ToString(quantity);
+                            }
                         }
                         else
                         {
