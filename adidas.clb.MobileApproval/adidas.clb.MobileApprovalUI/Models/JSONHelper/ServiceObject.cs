@@ -71,6 +71,8 @@ namespace adidas.clb.MobileApprovalUI.Models.JSONHelper
 
         [JsonProperty(PropertyName = "requests")]
         public userBackendRequest[] userBackendRequestinfo { get; set; }
+        [JsonProperty(PropertyName = "approvalsCount")]
+        public UserTaskcountJsonResult userTaskcountJsonResult { get; set; }
     }
     public class UserRequestJsonData
     {

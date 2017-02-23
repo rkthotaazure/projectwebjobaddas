@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Web;
 using System.Web.Mvc;
 using adidas.clb.MobileApprovalUI.Models;
@@ -28,7 +29,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
     public class LandingController : Controller
     {
         // Initialize the userid
-        string userid = SettingsHelper.UserId;
+        string userid = SettingsHelper.UserId;        
         // Return Approval Landing page
         [HttpGet]
         public ActionResult ApprovalLanding()
@@ -56,7 +57,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                 //Api Controller object initialization
                 APIController apiControllerObj = new APIController();
                 //Send approval details to Approval API
-                string stApprovalrequeststatus = await apiControllerObj.SendApprovalInfo(approvalInfo, approvalInfo.ApprovalRequestID);
+                //string stApprovalrequeststatus = await apiControllerObj.SendApprovalInfo(approvalInfo, approvalInfo.ApprovalRequestID);
                 //creates list request details object
                 List<ApprovalRequestDTO> requestsDetails = new List<ApprovalRequestDTO>();
                 // Return Json Formate object and pass to UI
@@ -329,14 +330,17 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                     //Create ApprovalRequestDTO Model object
                     ApprovalRequestDTO requestObj = new ApprovalRequestDTO();
                     requestObj.approval = new ApprovalDTO();
-                    //Get the approval task Request ID
-                    requestObj.approval.RequestId = userbackendRequestdetails.approvalDetails.RequestId;
-                    //Get the approval task Request Status
-                    requestObj.approval.Status = userbackendRequestdetails.approvalDetails.Status;
-                    //requestObj.request = new RequestDTO();
-                    //requestObj.request.ID = userbackendRequestdetails.requestDetails.ID;
-                    //requestObj.request.Status= userbackendRequestdetails.requestDetails.Status;
-                    requestsDetails.Add(requestObj);
+                    if(userbackendRequestdetails.approvalDetails!=null)
+                    {
+                        //Get the approval task Request ID
+                        requestObj.approval.RequestId = userbackendRequestdetails.approvalDetails.RequestId;
+                        //Get the approval task Request Status
+                        requestObj.approval.Status = userbackendRequestdetails.approvalDetails.Status;
+                        //requestObj.request = new RequestDTO();
+                        //requestObj.request.ID = userbackendRequestdetails.requestDetails.ID;
+                        //requestObj.request.Status= userbackendRequestdetails.requestDetails.Status;
+                        requestsDetails.Add(requestObj);
+                    }                   
                 }
             }
             //Return request details list
@@ -363,17 +367,17 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                 syncRequest.parameters.filters.apprStatus = "Rejected";
                 string stApprovalRejectedCount = await apiControllerObj.GetApprovalcompletedcount(syncRequest, userid);
                 //Deseralize the result returned by the API
-                UserTaskcountJsonData userTaskPendingResponse = JsonConvert.DeserializeObject<UserTaskcountJsonData>(stApprovalPendingCount);
-                UserTaskcountJsonData userTaskApprovedResponse = JsonConvert.DeserializeObject<UserTaskcountJsonData>(stApprovalApprovedCount);
-                UserTaskcountJsonData userTaskRejectedResponse = JsonConvert.DeserializeObject<UserTaskcountJsonData>(stApprovalRejectedCount);
+                UserBackendrequestJsonData userTaskPendingResponse = JsonConvert.DeserializeObject<UserBackendrequestJsonData>(stApprovalPendingCount);
+                UserBackendrequestJsonData userTaskApprovedResponse = JsonConvert.DeserializeObject<UserBackendrequestJsonData>(stApprovalApprovedCount);
+                UserBackendrequestJsonData userTaskRejectedResponse = JsonConvert.DeserializeObject<UserBackendrequestJsonData>(stApprovalRejectedCount);
                 //creates list Backend model object
                 List<string> userBackends = new List<string>();
                 userBackends = syncRequest.parameters.filters.backends;
                 List<string> userBackendName = syncRequest.parameters.filters.backendName;
                 //creates lists for Pending/Approval/Reject Count for json object result
-                List<UserTaskcountJsonResult> userTaskPendingCount = userTaskPendingResponse.userTaskcountJsonResult;
-                List<UserTaskcountJsonResult> userTaskApprovedCount = userTaskApprovedResponse.userTaskcountJsonResult;
-                List<UserTaskcountJsonResult> userTaskRejectedCount = userTaskRejectedResponse.userTaskcountJsonResult;
+                UserBackendRequestJsonResult[] userBackendwithTaskPendingCount = userTaskPendingResponse.userBackendRequestResults;
+                UserBackendRequestJsonResult[] userBackendwithTaskApprovedCount = userTaskApprovedResponse.userBackendRequestResults;
+                UserBackendRequestJsonResult[] userBackendwithTaskRejectedCount = userTaskRejectedResponse.userBackendRequestResults;
                 List<ApprovalCountDTO> approvalCountobj = new List<ApprovalCountDTO>();
                 //Checks whether the JSON response is not null
                 if (userTaskPendingResponse != null&& userBackends != null)
@@ -389,30 +393,33 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                         //Get approval backend Name
                         approvalCount.BackendName = userBackendName[i];
                         //Get Pending approval count
-                        if (userTaskPendingCount != null && userTaskPendingCount.Count > 0)
+                        if (userBackendwithTaskPendingCount != null)
                         {
-                            List<UserTaskcountJsonResult> taskcountlist = userTaskPendingCount.Where(x => x.BackendID == backendID).ToList();
-                            if (taskcountlist.Count > 0)
+                            UserBackendRequestJsonResult taskcountlist = userBackendwithTaskPendingCount.ToList().Find(x => x.userBackend.BackendID == backendID);
+                            //List<UserTaskcountJsonResult> taskcountlist = userTaskPendingCount.Where(x => x.userBackend.BackendID == backendID).ToList();
+                            if (taskcountlist != null)
                             {
-                                approvalCount.WaitingCount = taskcountlist.First().Count;
+                                approvalCount.WaitingCount = taskcountlist.userTaskcountJsonResult.Count;
                             }                           
                         }
                         //Get Approved approval count
-                        if (userTaskApprovedCount != null && userTaskApprovedCount.Count > 0)
-                        {                            
-                            List<UserTaskcountJsonResult> taskcountlist = userTaskApprovedCount.Where(x => x.BackendID == backendID).ToList();
-                            if (taskcountlist.Count > 0)
+                        if (userBackendwithTaskApprovedCount != null)
+                        {
+                            UserBackendRequestJsonResult taskcountlist = userBackendwithTaskApprovedCount.ToList().Find(x => x.userBackend.BackendID == backendID);
+                            //List<UserTaskcountJsonResult> taskcountlist = userTaskApprovedCount.Where(x => x.BackendID == backendID).ToList();
+                            if (taskcountlist != null)
                             {
-                                approvalCount.ApprovedCount = taskcountlist.First().Count;
+                                approvalCount.ApprovedCount = taskcountlist.userTaskcountJsonResult.Count;
                             }
                         }
                         //Get Rejected approval count
-                        if (userTaskRejectedCount != null && userTaskRejectedCount.Count > 0)
-                        {                            
-                            List<UserTaskcountJsonResult> taskcountlist = userTaskRejectedCount.Where(x => x.BackendID == backendID).ToList();
-                            if (taskcountlist.Count > 0)
+                        if (userBackendwithTaskRejectedCount != null)
+                        {
+                            UserBackendRequestJsonResult taskcountlist = userBackendwithTaskRejectedCount.ToList().Find(x => x.userBackend.BackendID == backendID);
+                            //List<UserTaskcountJsonResult> taskcountlist = userTaskRejectedCount.Where(x => x.BackendID == backendID).ToList();
+                            if (taskcountlist != null)
                             {
-                                approvalCount.RejectedCount = taskcountlist.First().Count;
+                                approvalCount.RejectedCount = taskcountlist.userTaskcountJsonResult.Count;
                             }
                         }
                         //Add ApprovalCountDTO Model object
@@ -421,7 +428,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                     }
                 }
                 // Return Json formate object and pass to UI
-                return Json(approvalCountobj, JsonRequestBehavior.AllowGet);
+                return Json(approvalCountobj, JsonRequestBehavior.AllowGet);                              
             }
             catch (Exception exception)
             {

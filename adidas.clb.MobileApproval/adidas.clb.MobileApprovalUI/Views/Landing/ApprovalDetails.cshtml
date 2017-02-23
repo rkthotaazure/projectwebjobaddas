@@ -13,12 +13,12 @@
         <p>Please try after sometime. Your requests are being synched.</p>
     </div>
     <div class="alert alert-success" ng-show="tasksuccess">
-        <p>Request {{taskrequestid}} updated successfully!</p> 
+        <p>Request {{taskrequestid}} {{taskrequeststatus}} successfully!</p> 
     </div>
     <div class="backends">
-        <div class="title-section row">
+        <div class="title-section">
             <div class="title-text">
-                Pending Approvals
+                {{Approvaltaskheader}}
             </div>
         </div>
         <div class="table-responsive">           
@@ -27,16 +27,16 @@
                     <tr>
                         <th><label>Request#</label></th>
                         <th><label>Status</label></th>
-                        <th>Take Action</th>
+                        <th><span ng-show="hideButton">Take Action</span></th>
                     </tr>
                 </thead>
                 <tbody>
                     @*<tr ng-class-odd="'odd'" ng-class-even="'even'" ng-show="loading">
                         <td></td><td align="center" class="glyphicon glyphicon-refresh gly-spin"></td><td></td>
                     </tr>*@
-                    <tr ng-repeat="approvaltask in approvalTasks | filter:paginate" ng-class-odd="'odd'" ng-class-even="'even'">
+                    <tr ng-repeat="approvaltask in approvalTasks | filter:paginate">
                         <td>
-                            <div class="input-group" ng-click="showDetails(approvaltask.RequestId)">
+                            <div class="input-group decoration" ng-click="showDetails(approvaltask.RequestId)">
                                 {{approvaltask.RequestId}}
                             </div>
                         </td>
@@ -44,7 +44,7 @@
                             <div class="input-group">
                                 {{approvaltask.Status}}
                             </div>
-                        </td>
+                        </td>                        
                         <td>
                             @*<div class="input-group align-middle" style="position:relative;z-index:1000;" ng-show="CurrentTask(approvaltask.RequestId)">
                                 <div class="glyphicon glyphicon-refresh gly-spin">
@@ -59,7 +59,7 @@
                     </tr>
                 </tbody>
             </table>
-            <div class="align-middle"><ul uib-pagination total-items="totalItems" ng-model="currentPage" items-per-page='5'></ul></div>
+            <div class="align-middle"><ul uib-pagination total-items="totalItems" max-size="5" force-ellipses="true" ng-model="currentPage" items-per-page='5'></ul></div>
              
         </div>
     </div>

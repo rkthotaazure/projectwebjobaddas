@@ -1,7 +1,7 @@
 ﻿var app = angular.module('ApplicationModule', ['ngRoute', 'ngResource', 'ui.bootstrap']);
 
 app.factory("ShareData", function () {
-    return { backendId: '', detailTaskinfo: '', userDevices: {}, userBackends: {}, aprStatus: '', reqStatus: '', backendCount: {} }
+    return { backendId: '', detailTaskinfo: '', userDevices: {}, userBackends: {}, aprStatus: '', reqStatus: '', backendCount: {}, ShowwaitingMessage:false }
 });
 //Showing Routing
 app.config(['$routeProvider', function ($routeProvider) {
