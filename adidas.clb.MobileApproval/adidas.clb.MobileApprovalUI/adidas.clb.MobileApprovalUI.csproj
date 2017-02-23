@@ -275,6 +275,7 @@
     <Content Include="Images\background3.jpg" />
     <Content Include="Images\business.jpg" />
     <Content Include="Images\Mobile.jpg" />
+    <Content Include="Images\MobileApproval.png" />
     <Content Include="Images\remove.png" />
     <Content Include="Images\newyork.jpg" />
     <Content Include="Images\paris.jpg" />

@@ -1,4 +1,4 @@
-﻿<div id="mobile-home" class="page-width" ng-controller="ApprovalLandingController" ng-init="init()">
+﻿<div id="mobile-home" class="page-width approval-landing" ng-controller="ApprovalLandingController" ng-init="init()">
     <div id="overlay" ng-show="showloader">
     </div>
     <div id="spinner" ng-show="showloader">
@@ -26,33 +26,44 @@
                     </div>
                 </div>
         </div>
+        <div class="" style="padding: 5px 0px;text-align: right;">Last Synch:{{lastsynch | date:'dd/MM/yyyy hh:mm:ss a'}}</div>
         <div class="container-fluid bgGray">
-            <div class="row">
-                <div class="col-xs-6 text-align-center">
+            @*<div class="" style="font-size:24px;line-height:26px;text-align:center;background-color:#ffc119;padding: 14px 8px;width: 10%;float: left;">
+            <div>T</div>
+            <div>A</div>
+            <div>S</div>
+            <div>K</div>
+            <div>S</div>
+        </div>*@
+
+            <div class="">
+                <div class="col-xs-6 text-align-center pendingbox"  ng-class="{pendingselect:pendingselected}">
                     <div class="canvas-wrap" ng-click="pendingCount()">
                         <canvas id="canvaspending" width="150" height="150"></canvas>
                         <span id="procentpending"></span>
+                        <span style="font-size:22px" class="tasktypetext">PENDING</span>
                     </div>
                     @*<div class="pendingDiv" ng-click="pendingCount()">{{pending}}</div>*@
 
                 </div>
-                <div class="col-xs-6 text-align-center">
+                <div class="col-xs-6 text-align-center completebox"  ng-class="{completedselect:completedselected}">
                     <div class="canvas-wrap" ng-click="completedCount()">
                         <canvas id="canvascompleted" width="150" height="150"></canvas>
                         <span id="procentcompleted"></span>
+                        <span style="font-size:22px" class="tasktypetext">COMPLETED</span>
                     </div>
                     @*<div class="completeDiv" ng-click="completedCount()">{{completed}}</div>*@                    
 
                 </div>
             </div>
-            <div class="row">
+            @*<div class="row">
                 <div class="col-xs-6 text-align-center" ng-class="{pendingselect:pendingselected}">
                     <span style="font-size:16px">Pending</span>
                 </div>
                 <div class="col-xs-6 text-align-center" ng-class="{completedselect:completedselected}">
                     <span style="font-size:16px">Completed</span>
                 </div>
-            </div>
+            </div>*@
         </div>
         <div class="container-fluid text-center">
             <div class="row">
@@ -149,7 +160,7 @@
             <!-- Container (Services Section) -->
             <div id="services" class="container-fluid">
                 <div class="row">
-                    <div class="col-xs-12" ng-repeat="backend in backends" ng-class-odd="'odd'" ng-class-even="'even'">
+                    <div class="col-xs-12" ng-repeat="backend in backends" ng-class-odd="'odd'" ng-class-even="'even'"  ng-click="redirectToDetailsPage(backend.BackendID)">
                         <div class="col-xs-2">
                             <span class="glyphicon glyphicon-tasks themeImageSmall"></span>
                         </div>
@@ -159,7 +170,7 @@
                         </div>
                         <div class="col-xs-2">
                             @*<a href="/Landing/ApprovalDetails?backend={{backend.BackendID}}" style="font-size: 25px; margin-bottom: 4px; margin-right: 10px; padding: 9px" class="badge badge-primary">{{backend.OpenApprovals}}</a>*@
-                            <span style="font-size: 25px; margin-bottom: 4px; margin-right: 10px; padding: 5px;padding-bottom: 8px;" class="badge badge-primary" ng-click="redirectToDetailsPage(backend.BackendID)">{{backend.Count}}</span>
+                            <span style="font-size: 25px; margin-bottom: 4px; margin-right: 10px; padding: 5px;padding-bottom: 8px;" class="badge badge-primary">{{backend.Count}}</span>
                         </div>
                     </div>
 
