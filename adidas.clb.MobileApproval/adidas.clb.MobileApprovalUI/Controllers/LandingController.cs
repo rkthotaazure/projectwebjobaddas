@@ -57,7 +57,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                 //Api Controller object initialization
                 APIController apiControllerObj = new APIController();
                 //Send approval details to Approval API
-                //string stApprovalrequeststatus = await apiControllerObj.SendApprovalInfo(approvalInfo, approvalInfo.ApprovalRequestID);
+                string stApprovalrequeststatus = await apiControllerObj.SendApprovalInfo(approvalInfo, approvalInfo.ApprovalRequestID);
                 //creates list request details object
                 List<ApprovalRequestDTO> requestsDetails = new List<ApprovalRequestDTO>();
                 // Return Json Formate object and pass to UI
