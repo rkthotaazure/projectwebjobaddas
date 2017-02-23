@@ -125,11 +125,29 @@ namespace adidas.clb.MobileApproval.Utility
         /// </summary>
         /// <param name="query">takes qury as input</param>
         /// <param name="request">takes request as input</param>
+        /// <param name="approvalStatus">takes approvalStatus as input</param>
+        /// <param name="requestsynch">takes requestsynch as input</param>
         /// <returns>returns whether filtered requests are sent back or all</returns>
-        public static Boolean IsTargetRequest(SynchRequestDTO query, RequestEntity request)
+        public static Boolean IsTargetRequest(SynchRequestDTO query, RequestEntity request, ApprovalEntity approval, RequestSynchEntity requestsynch)
         {
-            //code here
-            return true;
+            string QueryRequestStatus = query.parameters.filters.reqStatus;
+            string QueryApprovalStatus = query.parameters.filters.apprStatus;
+            string approvalStatus = null;
+            if (approval!=null)
+            {
+                approvalStatus = approval.Status;
+            }
+            if (requestsynch != null)
+            {
+                return ((string.IsNullOrEmpty(QueryRequestStatus) && (request.Status == QueryRequestStatus)) || (!string.IsNullOrEmpty(QueryRequestStatus))) &&
+                                ((string.IsNullOrEmpty(QueryApprovalStatus) && (approvalStatus == QueryApprovalStatus)) || (!string.IsNullOrEmpty(QueryApprovalStatus))) &&
+                                ((query.parameters.filters.onlyChangedReq && request.LastUpdate != null && (request.LastUpdate > requestsynch.LastChange)) || (!query.parameters.filters.onlyChangedReq));
+            }
+            else
+            {
+                return ((string.IsNullOrEmpty(QueryRequestStatus) && (request.Status == QueryRequestStatus)) || (!string.IsNullOrEmpty(QueryRequestStatus))) &&
+                                                ((string.IsNullOrEmpty(QueryApprovalStatus) && (approvalStatus == QueryApprovalStatus)) || (!string.IsNullOrEmpty(QueryApprovalStatus)));
+            }           
         }
 
         /// <summary>
@@ -150,10 +168,17 @@ namespace adidas.clb.MobileApproval.Utility
         /// <param name="query">takes qury as input</param>
         /// <param name="request">takes request as input</param>
         /// <returns>returns whether request is changed after last synch</returns>
-        public static Boolean IsRequestATarget(SynchRequestDTO query, RequestEntity request)
+        public static Boolean IsRequestATarget(SynchRequestDTO query, RequestEntity request, RequestSynchEntity requestsynch)
         {
-
-            return true;
+            if(requestsynch!=null)
+            {
+                return ((query.parameters.filters.onlyChangedReq && request.LastUpdate != null && (request.LastUpdate > requestsynch.LastChange)) || (!query.parameters.filters.onlyChangedReq));
+            }
+            else
+            {
+                return true;
+            }
+            
         }
 
         /// <summary>

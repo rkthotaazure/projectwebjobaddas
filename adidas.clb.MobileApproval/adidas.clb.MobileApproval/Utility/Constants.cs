@@ -55,7 +55,7 @@ namespace adidas.clb.MobileApproval.Utility
             public const string BackendId = "BackendID";
             public const string UnderScore = "_";
             public const string Status = "Status";
-            public const string InProgress = "In-Progress";
+            public const string InProgress = "In Progress";
             public const string Waiting = "Waiting";
 
         }

@@ -19,14 +19,19 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
     /// </summary>
     public class UserDevice
     {
+        //Application insights interface reference for logging the error details into Application Insight azure service.
+        static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
         /// <summary>
         ///method to add userdevices
         /// </summary>
         /// <param name="deviceofuser">takes list of user devices as input</param>             
         public void AddDevices(List<UserDeviceEntity> deviceofuser)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 UserDeviceDAL userdevicedal = new UserDeviceDAL();
                 //calling data access layer method
                 userdevicedal.AddDevices(deviceofuser);
@@ -37,8 +42,9 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while adding userdevices : "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error in BL while adding userdevices : "
+                //+exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new BusinessLogicException();
             }
         }
@@ -49,8 +55,11 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <param name="UserID">takes userid as input</param>        
         public void RemoveDevices(string UserID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 UserDeviceDAL userdevicedal = new UserDeviceDAL();
                 //get all user devices to remove
                 List<UserDeviceEntity> alluserdevices = userdevicedal.GetUserAllDevices(UserID);
@@ -66,8 +75,9 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while removing userdevices : "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error in BL while removing userdevices : "
+                //+exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new BusinessLogicException();
             }
         }
@@ -79,8 +89,11 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <returns>returns list of user device</returns>
         public IEnumerable<UserDeviceDTO> GetUserAllDevices(string UserID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 UserDeviceDAL userdevicedal = new UserDeviceDAL();
                 //calling data access layer method
                 List<UserDeviceEntity> alluserdevices = userdevicedal.GetUserAllDevices(UserID);
@@ -109,8 +122,9 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while retreiving userdevices : "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error in BL while retreiving userdevices : "
+                //+exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new BusinessLogicException();
             }
         }
@@ -124,8 +138,11 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <returns>returns user device with id associated to user in the form of personalization response</returns>
         public PersonalizationResponseDTO<UserDeviceDTO> GetUserDevice(string userID, string userDeviceID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 UserDeviceDAL userdevicedal = new UserDeviceDAL();
                 UserDeviceEntity userdeviceentity = userdevicedal.GetUserDevice(userID, userDeviceID);
                 //converting userdevice entity to Response data transfer object
@@ -147,8 +164,9 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while retreiving single userdevice: "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error in BL while retreiving single userdevice: "
+                //+exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new BusinessLogicException();
             }
         }
@@ -161,8 +179,11 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <returns>returns deleted user backend entity</returns>
         public UserDeviceEntity DeleteUserDevice(string userID, string userDeviceID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 UserDeviceDAL userdevicedal = new UserDeviceDAL();
                 //calling data access layer method 
                 UserDeviceEntity userdeviceentity = userdevicedal.DeleteUserDevice(userID, userDeviceID);
@@ -174,8 +195,9 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while deleting single userdevice : "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error in BL while deleting single userdevice : "
+                //+exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new BusinessLogicException();
             }
 

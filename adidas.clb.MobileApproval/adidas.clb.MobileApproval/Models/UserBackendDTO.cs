@@ -20,6 +20,7 @@ namespace adidas.clb.MobileApproval.Models
         public Backend backend { get; set; }
         public SynchDTO synch { get; set; }
         public List<ApprovalRequestDTO> requests { get; set; }
+        public ApprovalsCountDTO approvalsCount { get; set; }
         public UserBackendDTO() { _type = "userBackend"; }
     }
 

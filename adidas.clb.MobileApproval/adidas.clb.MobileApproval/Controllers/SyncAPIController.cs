@@ -37,25 +37,26 @@ namespace adidas.clb.MobileApproval.Controllers
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackEvent("SyncAPIController ::" + callerMethodName + " method execution has been started.");
+                InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: starting method");
                 //check null for input query
                 if (query != null)
                 {
                     Synch synch = new Synch();
-                    List<string> userbackends = query.parameters.filters.backends;
-                    InsightLogger.TrackEvent("SyncAPIController :: Get userbackends list from the query provided");
+                    List<string> userbackends = query.parameters.filters.backends;                    
                     //get userbackends associated to user
-                    List<UserBackendEntity> allUserBackends = synch.GetUserBackendsList(userID, userbackends);
-                    InsightLogger.TrackEvent("SyncAPIController :: Get all requests associated to user");
+                    List<UserBackendEntity> allUserBackends = synch.GetUserBackendsList(userID, userbackends);                    
                     //get requests associated to user
                     List<RequestEntity> requestslist = synch.GetUserRequests(userID, query.parameters.filters.reqStatus);
+                    //get approvals associated to user based on approval status
+                    List<ApprovalEntity> approvalslist = synch.GetUserApprovalsForCount(userID, query.parameters.filters.apprStatus);
                     Boolean requestsunfulfilled = false;
                     Boolean requestsfulfilled = false;
                     List<UserBackendDTO> userbackendlist = new List<UserBackendDTO>();
                     //check extended depth flag
                     if (Rules.ExtendedDepthperAllBackends(query, allUserBackends, Convert.ToInt32(ConfigurationManager.AppSettings[CoreConstants.Config.MaxSynchReplySize])))
                     {
-                        InsightLogger.TrackEvent("SyncAPIController :: Loop through all backends");
+                        InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: check extended Depth, response: true");
+                        InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action:looping through backends");
                         //loop all backends to check updated or not for synch
                         foreach (UserBackendEntity userbackend in allUserBackends)
                         {
@@ -63,56 +64,26 @@ namespace adidas.clb.MobileApproval.Controllers
                             UserBackendDTO userbackenddto = DataProvider.ResponseObjectMapper<UserBackendDTO, UserBackendEntity>(userbackend);
                             Backend backenddto = DataProvider.ResponseObjectMapper<Backend, UserBackendEntity>(userbackend);
                             userbackenddto.backend = backenddto;
+                            //approvals list associated to userbackend
+                            List<ApprovalEntity> userbackendapprovalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID).ToList();
+                            ApprovalsCountDTO approvalcountdto = new ApprovalsCountDTO();
+                            InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: Adding approval count to response, response: success, backendID:" + userbackend.BackendID);
+                            approvalcountdto.BackendID = userbackend.BackendID;
+                            approvalcountdto.Status = query.parameters.filters.apprStatus;
+                           // approvalcountdto.Count = userbackendapprovalslist.Count;
+                            userbackenddto.approvalsCount = approvalcountdto;
                             List<ApprovalRequestDTO> approvalrequestlist = new List<ApprovalRequestDTO>();
+                            List<RequestEntity> userbackendrequestslist = requestslist.Where(x => x.BackendID == userbackend.BackendID).ToList();
                             //check if backend updated
                             if (Rules.IsBackendUpdated(userbackend, query))
                             {
-                                InsightLogger.TrackEvent("SyncAPIController :: backend is upto date");
+                                InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: check backend update, response: true");
                                 //if extended depth is userbackend level
                                 if (Rules.ExtendedDepthperBackend(userbackend, Convert.ToInt32(ConfigurationManager.AppSettings[CoreConstants.Config.MaxSynchReplySize])))
                                 {
-                                    List<RequestEntity> userbackendrequestslist = requestslist.Where(x => x.BackendID == userbackend.BackendID).ToList();
-                                    InsightLogger.TrackEvent("SyncAPIController :: Loop through all requests in backend");
-                                    //loop through each request in the userbackend
-                                    foreach (RequestEntity request in userbackendrequestslist)
-                                    {
-                                        ApprovalRequestDTO approvalrequest = new ApprovalRequestDTO();
-                                        RequestDTO requestdto = new RequestDTO();
-                                        //if request is updated
-                                        if (Rules.IsRequestUpdated(request, userbackend.DefaultUpdateFrequency))
-                                        {
-                                            InsightLogger.TrackEvent("SyncAPIController :: request is upto date");
-                                            //check if requests which have changed since the last synch need to send in response or all requests.
-                                            if (Rules.IsTargetRequest(query, request))
-                                            {
-                                                requestdto = DataProvider.ResponseObjectMapper<RequestDTO, RequestEntity>(request);
-                                                InsightLogger.TrackEvent("SyncAPIController :: Add request synch, add request to response object");
-                                                approvalrequest.request = requestdto;
-                                                //code here to populate extended depth
-                                                //code here to update request synch time stamp
-                                                synch.AddUpdateRequestSynch(request, query.userId);
-                                                requestsfulfilled = true;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            InsightLogger.TrackEvent("SyncAPIController :: request is not upto date, trigger updatetriggering for request");
-                                            //check if request update is in progress in service layer then send the latency in response
-                                            if (Rules.IsRequestUpdateInProgress(request))
-                                            {
-                                                approvalrequest.retryAfter = request.ExpectedLatency;
-                                            }
-                                            else
-                                            {
-                                                synch.TriggerRequestUpdate(request, query.userId);
-                                                approvalrequest.retryAfter = Convert.ToInt32(Rules.RequestRetryTime(userbackend));
-                                            }
-                                            requestsunfulfilled = true;
-                                        }
-                                        //add approval request to list which will be added to corresponding backend
-                                        approvalrequestlist.Add(approvalrequest);
-                                    }
-                                    userbackenddto.requests = approvalrequestlist;
+                                    InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: check extended depth, response: true");
+                                    userbackenddto = synch.AddRequsetsTasksCountToSynchResponse(userbackendrequestslist, userbackendapprovalslist, userbackend, query, userbackenddto);
+                                    
                                 }
                                 //check requestsfullfilled flag
                                 if (!requestsfulfilled)
@@ -122,27 +93,34 @@ namespace adidas.clb.MobileApproval.Controllers
                                 //check requestsunfullfilled flag
                                 if (!requestsunfulfilled)
                                 {
-                                    //code to update backend synch timestamp
-                                    synch.AddUpdateBackendSynch(userbackend);
+                                    //code to update backend synch timestamp                                    ;
                                 }
+                                synch.AddUpdateBackendSynch(userbackend);
                             }
                             else
                             {
-                                InsightLogger.TrackEvent("SyncAPIController :: backend is not upto date, trigger updatetriggering for backend");
+                                InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: check backend update, response: false");
                                 SynchDTO synchdto = new SynchDTO();
                                 //check if backend update is in progress in service layer then send the latency in response
                                 if (Rules.IsBackendUpdateInProgress(userbackend))
                                 {
+                                    InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: check in-progress backend update, response: true");
                                     synchdto.retryAfter = userbackend.ExpectedLatency;
+                                    InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: add expected backend latency to response as retry time, response: success");
                                     userbackenddto.synch = synchdto;
                                 }
                                 else
                                 {
+                                    InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: check in-progress backend update, response: false");
                                     //if update is not in progress, trigger it
                                     synch.TriggerUserBackendUpdate(userbackend);
+                                    InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: trigger a backend update, response: success");
                                     synchdto.retryAfter = Convert.ToInt32(Rules.BackendRetryTime(userbackend));
+                                    InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: add backend retry time to response, response: success");
                                     userbackenddto.synch = synchdto;
                                 }
+                                userbackenddto = synch.AddRequsetsTasksCountToSynchResponse(userbackendrequestslist, userbackendapprovalslist, userbackend, query, userbackenddto);
+                                
                             }
                             //add each userbackend to list
                             userbackendlist.Add(userbackenddto);
@@ -190,17 +168,17 @@ namespace adidas.clb.MobileApproval.Controllers
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackEvent("SyncAPIController ::" + callerMethodName + " method execution has been started.");
+                InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: method start");
                 //check null for input query
                 if (query != null)
                 {
-                    Synch synch = new Synch();
-                    InsightLogger.TrackEvent("SyncAPIController :: Get userbackend");
+                    Synch synch = new Synch();                    
                     //get userbackend associated to user with backendid
-                    UserBackendEntity userbackend = synch.GetUserBackend(userID, usrBackendID);
-                    InsightLogger.TrackEvent("SyncAPIController :: Get all requests associated to userbackend");
+                    UserBackendEntity userbackend = synch.GetUserBackend(userID, usrBackendID);                    
                     //get requests associated to userbackend
                     List<RequestEntity> requestslist = synch.GetUserBackendRequests(userID, usrBackendID, query.parameters.filters.reqStatus);
+                    //get approvals associated to userbackend
+                    List<ApprovalEntity> approvalslist = synch.GetUserBackendApprovals(userID, usrBackendID, query.parameters.filters.apprStatus);
                     //use mmapper to convert userbackend entity to userbackend data transfer object
                     UserBackendDTO userbackenddto = DataProvider.ResponseObjectMapper<UserBackendDTO, UserBackendEntity>(userbackend);
                     Backend backenddto = DataProvider.ResponseObjectMapper<Backend, UserBackendEntity>(userbackend);
@@ -211,80 +189,49 @@ namespace adidas.clb.MobileApproval.Controllers
                     //check if backend updated
                     if (Rules.IsBackendUpdated(userbackend, query))
                     {
-                        InsightLogger.TrackEvent("SyncAPIController :: backend is upto date");
+                        InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: check backend update, response: true,");
                         //if extended depth is userbackend level
                         if (Rules.ExtendedDepthperBackend(userbackend, Convert.ToInt32(ConfigurationManager.AppSettings[CoreConstants.Config.MaxSynchReplySize])))
                         {
-                            InsightLogger.TrackEvent("SyncAPIController :: Loop through all requests in backend");
-                            //loop through each request in the userbackend
-                            foreach (RequestEntity request in requestslist)
-                            {
-                                ApprovalRequestDTO approvalrequest = new ApprovalRequestDTO();
-                                RequestDTO requestdto = new RequestDTO();
-                                //if request is updated
-                                if (Rules.IsRequestUpdated(request, userbackend.DefaultUpdateFrequency))
-                                {
-                                    InsightLogger.TrackEvent("SyncAPIController :: request is upto date");
-                                    //check if requests which have changed since the last synch need to send in response or all requests.
-                                    if (Rules.IsTargetRequest(query, request))
-                                    {
-                                        requestdto = DataProvider.ResponseObjectMapper<RequestDTO, RequestEntity>(request);
-                                        InsightLogger.TrackEvent("SyncAPIController :: Add request synch, add request to response object");
-                                        approvalrequest.request = requestdto;
-                                        //code to populate extended depth
-                                        //code to update request synch timestamp
-                                        synch.AddUpdateRequestSynch(request, query.userId);
-                                        requestsfulfilled = true;
-                                    }
-                                }
-                                else
-                                {
-                                    InsightLogger.TrackEvent("SyncAPIController :: request is not upto date, trigger updatetriggering for request");
-                                    //check if request update is in progress in service layer then send the latency in response
-                                    if (Rules.IsRequestUpdateInProgress(request))
-                                    {
-                                        approvalrequest.retryAfter = request.ExpectedLatency;
-                                    }
-                                    else
-                                    {
-                                        synch.TriggerRequestUpdate(request, query.userId);
-                                        approvalrequest.retryAfter = Convert.ToInt32(Rules.RequestRetryTime(userbackend));
-                                    }
-                                    requestsunfulfilled = true;
-                                }
-                                //add approval request to list which will be added to corresponding backend
-                                approvalrequestlist.Add(approvalrequest);
-                            }
+                            InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: check extended depth, response: true");
+                            InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action:Loop through all requests in backend");
+                            approvalrequestlist=synch.AddRequsetsTasksToSynchResponse(requestslist,approvalslist,userbackend,query);                            
                         }
                         //check requestsfullfilled flag
-                        if (!requestsfulfilled)
+                        if (requestsfulfilled)
                         {
                             //code to clear extended depth flags
                         }
                         //check requestsunfullfilled flag
                         if (!requestsunfulfilled)
                         {
-                            //code to update backend synch timestamp
-                            synch.AddUpdateBackendSynch(userbackend);
+                            //code to update backend synch timestamp                           
                         }
+                        synch.AddUpdateBackendSynch(userbackend);
                     }
                     else
                     {
-                        InsightLogger.TrackEvent("SyncAPIController :: backend is not upto date, trigger updatetriggering for backend");
+                        InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: check backend update, response: false");
                         SynchDTO synchdto = new SynchDTO();
                         //check if backend update is in progress in service layer then send the latency in response
                         if (Rules.IsBackendUpdateInProgress(userbackend))
                         {
+                            InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: check in-progress backend update , response: true");
                             synchdto.retryAfter = userbackend.ExpectedLatency;
+                            InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: add expected backend latency to response as retrytime, response: success");
                             userbackenddto.synch = synchdto;
                         }
                         else
                         {
+                            InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: check backend update in-progress, response: false");
                             //if update is not in progress, trigger it
                             synch.TriggerUserBackendUpdate(userbackend);
+                            InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: trigger a backend update, response: succses");
                             synchdto.retryAfter = Convert.ToInt32(Rules.BackendRetryTime(userbackend));
+                            InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: add backend retry time to response, response: success");
                             userbackenddto.synch = synchdto;
                         }
+                        approvalrequestlist = synch.AddRequsetsTasksToSynchResponse(requestslist, approvalslist, userbackend, query);
                     }
                     //add requests list to user backend
                     userbackenddto.requests = approvalrequestlist;
@@ -337,9 +284,9 @@ namespace adidas.clb.MobileApproval.Controllers
                 //check null for input query
                 if (query != null)
                 {
-                    Synch synch = new Synch();                    
+                    Synch synch = new Synch();
                     //get requests with requestid
-                    RequestEntity requestentity = synch.GetRequest(query.userId, apprReqID);                    
+                    RequestEntity requestentity = synch.GetRequest(query.userId, apprReqID);
                     //get fileds associated to request
                     List<FieldDTO> fields = synch.GetFields(apprReqID);
                     ApprovalRequestDTO approvalrequest = new ApprovalRequestDTO();
@@ -349,11 +296,13 @@ namespace adidas.clb.MobileApproval.Controllers
                     if (Rules.IsRequestUpdated(requestentity, userbackend.DefaultUpdateFrequency))
                     {
                         InsightLogger.TrackEvent("SyncAPIController ::endpoint - api/synch/requests/{apprReqID}, action: is request upto date, response:true");
+                        //get request synch entity
+                        RequestSynchEntity requestsynch = synch.GetRequestSynch(requestentity);
                         //check if requests which have changed since the last synch need to send in response or all requests.
-                        if (Rules.IsRequestATarget(query, requestentity))
+                        if (Rules.IsRequestATarget(query, requestentity, requestsynch))
                         {
                             InsightLogger.TrackEvent("SyncAPIController ::endpoint - api/synch/requests/{apprReqID}, action: is request target, response:true");
-                            InsightLogger.TrackEvent("SyncAPIController ::endpoint - api/synch/requests/{apprReqID}, action: add request details to response, response:success, RequsetID:"+apprReqID);
+                            InsightLogger.TrackEvent("SyncAPIController ::endpoint - api/synch/requests/{apprReqID}, action: add request details to response, response:success, RequsetID:" + apprReqID);
                             RequestDTO requestdto = DataProvider.ResponseObjectMapper<RequestDTO, RequestEntity>(requestentity);
                             //fill requester details to request dto
                             if (!string.IsNullOrEmpty(requestentity.RequesterName))
@@ -379,7 +328,7 @@ namespace adidas.clb.MobileApproval.Controllers
                             }
                             InsightLogger.TrackEvent("SyncAPIController ::endpoint - api/synch/requests/{apprReqID}, action: update request last synch time, response:success");
                             //code update request synch timestamp
-                            synch.AddUpdateRequestSynch(requestentity, query.userId);
+                            synch.AddUpdateRequestSynch(requestentity, requestsynch, query.userId);
                         }
                     }
                     else
@@ -400,12 +349,28 @@ namespace adidas.clb.MobileApproval.Controllers
                             approvalrequest.retryAfter = Convert.ToInt32(Rules.RequestRetryTime(userbackend));
                         }
                         //code to clear extended depth flags
+
+                        InsightLogger.TrackEvent("SyncAPIController ::endpoint - api/synch/requests/{apprReqID}, action: add request details to response, response:success, RequsetID:" + apprReqID);
+                        RequestDTO requestdto = DataProvider.ResponseObjectMapper<RequestDTO, RequestEntity>(requestentity);
+                        //fill requester details to request dto
+                        if (!string.IsNullOrEmpty(requestentity.RequesterName))
+                        {
+                            Requester requesterdetails = new Requester();
+                            requesterdetails.UserID = requestentity.RequesterID;
+                            requesterdetails.Name = requestentity.RequesterName;
+                            requestdto.Requester = requesterdetails;
+                        }
+                        //add fields to request
+                        Fields fielddto = new Fields();
+                        fielddto.Overview = fields;
+                        requestdto.Fields = fielddto;
+                        approvalrequest.request = requestdto;
                     }
                     //add request to list to send it in response
                     List<ApprovalRequestDTO> approvalrequestlist = new List<ApprovalRequestDTO>();
                     approvalrequestlist.Add(approvalrequest);
                     SynchResponseDTO<ApprovalRequestDTO> response = new SynchResponseDTO<ApprovalRequestDTO>();
-                    response.result = approvalrequestlist;                    
+                    response.result = approvalrequestlist;
                     return Request.CreateResponse(HttpStatusCode.OK, response);
                 }
                 else
@@ -450,11 +415,11 @@ namespace adidas.clb.MobileApproval.Controllers
                 if (query != null)
                 {
                     Synch synch = new Synch();
-                    SynchResponseDTO<ApproverDTO> SynchResponse = new SynchResponseDTO<ApproverDTO>();                    
+                    SynchResponseDTO<ApproverDTO> SynchResponse = new SynchResponseDTO<ApproverDTO>();
                     //get requests with requestid
                     RequestEntity requestentity = synch.GetRequest(query.userId, apprReqID);
                     //get userbackend
-                    UserBackendEntity userbackend = synch.GetUserBackend(query.userId, requestentity.BackendID);                    
+                    UserBackendEntity userbackend = synch.GetUserBackend(query.userId, requestentity.BackendID);
                     //get approvers associated to request
                     List<ApproverDTO> approvers = synch.GetApprovers(apprReqID);
                     double retrytime = 0;
@@ -462,16 +427,18 @@ namespace adidas.clb.MobileApproval.Controllers
                     if (Rules.IsRequestUpdated(requestentity, userbackend.DefaultUpdateFrequency))
                     {
                         InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/requests/{apprReqID}/approvers, action: check request update, response:true");
+                        //get request synch entity
+                        RequestSynchEntity requestsynch = synch.GetRequestSynch(requestentity);
                         //check if requests which have changed since the last synch need to send in response or all requests.
-                        if (Rules.IsRequestATarget(query, requestentity))
+                        if (Rules.IsRequestATarget(query, requestentity, requestsynch))
                         {
-                            InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/requests/{apprReqID}/approvers, action: checking is request target, response:true"); 
+                            InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/requests/{apprReqID}/approvers, action: checking is request target, response:true");
                             InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/requests/{apprReqID}/approvers, action: add approvers to response, response: succuess");
                             SynchResponse.query = query;
                             SynchResponse.result = approvers;
                             InsightLogger.TrackEvent("SyncAPIController ::endpoint - api/synch/requests/{apprReqID}/approvers action:updating synch timestamp");
-                            //code update request synch timestamp
-                            synch.AddUpdateRequestSynch(requestentity, query.userId);
+                            //update request synch timestamp
+                            synch.AddUpdateRequestSynch(requestentity, requestsynch, query.userId);
                         }
                     }
                     else
@@ -493,7 +460,9 @@ namespace adidas.clb.MobileApproval.Controllers
                             retrytime = Rules.RequestRetryTime(userbackend);
                             InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/requests/{apprReqID}/approvers, action:add retry time, response:success");
                         }
-                    }                    
+                        InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/requests/{apprReqID}/approvers, action: add approvers to response, response: succuess");
+                        SynchResponse.result = approvers;
+                    }
                     return Request.CreateResponse(HttpStatusCode.OK, SynchResponse);
                 }
                 else
@@ -535,12 +504,12 @@ namespace adidas.clb.MobileApproval.Controllers
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/requests/{apprReqID}/details, action: start method");
                 Synch synch = new Synch();
-                
+
                 //get requests with requestid
-                RequestEntity requestentity = synch.GetRequest(query.userId, apprReqID);                
+                RequestEntity requestentity = synch.GetRequest(query.userId, apprReqID);
                 if (!string.IsNullOrEmpty(requestentity.PDFUri))
                 {
-                    InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/requests/{apprReqID}/details, action:getting request pdfuri ,response:success, RequestID:"+apprReqID);
+                    InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/requests/{apprReqID}/details, action:getting request pdfuri ,response:success, RequestID:" + apprReqID);
                     Uri saspdfuri = synch.GetSASPdfUri(requestentity.PDFUri);
                     return Request.CreateResponse(HttpStatusCode.OK, saspdfuri.ToString());
                 }
@@ -587,7 +556,7 @@ namespace adidas.clb.MobileApproval.Controllers
                 {
                     Synch synch = new Synch();
                     //get userbackend associated to user with backendid
-                    UserBackendEntity userbackend = synch.GetUserBackend(userID, usrBackendID);                    
+                    UserBackendEntity userbackend = synch.GetUserBackend(userID, usrBackendID);
                     //get approvals associated to userbackend
                     List<ApprovalEntity> approvalslist = synch.GetUserBackendApprovals(userID, usrBackendID, query.parameters.filters.apprStatus);
                     //use mmapper to convert userbackend entity to userbackend data transfer object
@@ -596,28 +565,28 @@ namespace adidas.clb.MobileApproval.Controllers
                     userbackenddto.backend = backenddto;
                     List<ApprovalRequestDTO> approvalrequestlist = new List<ApprovalRequestDTO>();
                     //check if backend updated
-                    if (Rules.IsBackendUpdated(userbackend, query))
+                    //if (Rules.IsBackendUpdated(userbackend, query))
+                    //{
+                    InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: check backend update, response: true,");
+                    //if extended depth is userbackend level
+                    //if (Rules.ExtendedDepthperBackend(userbackend, Convert.ToInt32(ConfigurationManager.AppSettings[CoreConstants.Config.MaxSynchReplySize])))
+                    //{
+                    InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: check extended depth, response: true");
+
+                    //loop through each approval in the userbackend
+                    foreach (ApprovalEntity approval in approvalslist)
                     {
-                        InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: check backend update, response: true,");
-                        //if extended depth is userbackend level
-                        if (Rules.ExtendedDepthperBackend(userbackend, Convert.ToInt32(ConfigurationManager.AppSettings[CoreConstants.Config.MaxSynchReplySize])))
-                        {
-                            InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: check extended depth, response: true");
-                            
-                            //loop through each approval in the userbackend
-                            foreach (ApprovalEntity approval in approvalslist)
-                            {
-                                ApprovalRequestDTO approvalrequest = new ApprovalRequestDTO();
-                                ApprovalDTO approvaldto = new ApprovalDTO();
-                                approvaldto = DataProvider.ResponseObjectMapper<ApprovalDTO, ApprovalEntity>(approval);
-                                approvalrequest.approval = approvaldto;
-                                //add approval request to list which will be added to corresponding backend
-                                approvalrequestlist.Add(approvalrequest);
-                            }
-                            InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: adding approval tasks list, response: success");
-                        }
+                        ApprovalRequestDTO approvalrequest = new ApprovalRequestDTO();
+                        ApprovalDTO approvaldto = new ApprovalDTO();
+                        approvaldto = DataProvider.ResponseObjectMapper<ApprovalDTO, ApprovalEntity>(approval);
+                        approvalrequest.approval = approvaldto;
+                        //add approval request to list which will be added to corresponding backend
+                        approvalrequestlist.Add(approvalrequest);
                     }
-                    else
+                    InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: adding approval tasks list, response: success");
+                    //    }
+                    //}
+                    if (!Rules.IsBackendUpdated(userbackend, query))
                     {
                         InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: check backend update, response: false");
                         SynchDTO synchdto = new SynchDTO();
@@ -646,7 +615,7 @@ namespace adidas.clb.MobileApproval.Controllers
                     //add userbackend to userbackend list to add to response
                     userbackendlist.Add(userbackenddto);
                     SynchResponseDTO<UserBackendDTO> response = new SynchResponseDTO<UserBackendDTO>();
-                    response.result = userbackendlist;                    
+                    response.result = userbackendlist;
                     return Request.CreateResponse(HttpStatusCode.OK, response);
                 }
                 else
@@ -686,7 +655,7 @@ namespace adidas.clb.MobileApproval.Controllers
             try
             {
                 //Get Caller Method name from CallerInformation class
-                callerMethodName = CallerInformation.TrackCallerMethodName();                
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: starting method");
                 //check null for input query
                 if (query != null)
@@ -698,7 +667,7 @@ namespace adidas.clb.MobileApproval.Controllers
                     List<UserBackendEntity> allUserBackends = synch.GetUserBackendsList(userID, userbackends);
                     //get approvals associated to user absed on approval status
                     List<ApprovalEntity> approvalslist = synch.GetUserApprovalsForCount(userID, query.parameters.filters.apprStatus);
-                    List<ApprovalsCountDTO> approvalcountlist = new List<ApprovalsCountDTO>();                    
+                    List<ApprovalsCountDTO> approvalcountlist = new List<ApprovalsCountDTO>();
                     //check extended depth flag
                     if (Rules.ExtendedDepthperAllBackends(query, allUserBackends, Convert.ToInt32(ConfigurationManager.AppSettings[CoreConstants.Config.MaxSynchReplySize])))
                     {
@@ -708,18 +677,18 @@ namespace adidas.clb.MobileApproval.Controllers
                         foreach (UserBackendEntity userbackend in allUserBackends)
                         {
                             //check if backend updated
-                            if (Rules.IsBackendUpdated(userbackend, query))
-                            {
-                                InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: check backend update, response: true");
-                                List<ApprovalEntity> userbackendapprovalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID).ToList();
-                                ApprovalsCountDTO approvalcountdto = new ApprovalsCountDTO();
-                                InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: Adding approval count to response, response: success, backendID:"+userbackend.BackendID);
-                                approvalcountdto.BackendID = userbackend.BackendID;
-                                approvalcountdto.Status = query.parameters.filters.apprStatus;
-                                approvalcountdto.Count = userbackendapprovalslist.Count;
-                                approvalcountlist.Add(approvalcountdto);
-                            }
-                            else
+                            //if (Rules.IsBackendUpdated(userbackend, query))
+                            //{
+                            InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: check backend update, response: true");
+                            List<ApprovalEntity> userbackendapprovalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID).ToList();
+                            ApprovalsCountDTO approvalcountdto = new ApprovalsCountDTO();
+                            InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: Adding approval count to response, response: success, backendID:" + userbackend.BackendID);
+                            approvalcountdto.BackendID = userbackend.BackendID;
+                            approvalcountdto.Status = query.parameters.filters.apprStatus;
+                            approvalcountdto.Count = userbackendapprovalslist.Count;
+                            approvalcountlist.Add(approvalcountdto);
+                            //
+                            if (!Rules.IsBackendUpdated(userbackend, query))
                             {
                                 InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: check backend update, response: false");
                                 SynchDTO synchdto = new SynchDTO();
@@ -746,7 +715,7 @@ namespace adidas.clb.MobileApproval.Controllers
                         }
                     }
                     SynchResponseDTO<ApprovalsCountDTO> response = new SynchResponseDTO<ApprovalsCountDTO>();
-                    response.result = approvalcountlist;                    
+                    response.result = approvalcountlist;
                     return Request.CreateResponse(HttpStatusCode.OK, response);
                 }
                 else
