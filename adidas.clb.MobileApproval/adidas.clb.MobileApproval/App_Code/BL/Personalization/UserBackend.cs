@@ -20,14 +20,19 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
     /// </summary>
     public class UserBackend
     {
+        //Application insights interface reference for logging the error details into Application Insight azure service.
+        static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
         /// <summary>
         ///method to add userbackends
         /// </summary>
         /// <param name="Backendtouser">takes list of user backends as input</param>              
         public void AddBackends(List<UserBackendEntity> Backendtouser)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 UserBackendDAL userbackenddal = new UserBackendDAL();
                 //calling data access layer method
                 userbackenddal.AddBackends(Backendtouser);
@@ -38,8 +43,9 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while adding userbackends : "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error in BL while adding userbackends : "
+                //+exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new BusinessLogicException();
             }
         }
@@ -50,8 +56,11 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <param name="userid">takes userid as input</param>
         public void AddAllBackends(string userid)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 UserBackendDAL userbackenddal = new UserBackendDAL();
                 //method to get all backends available in system
                 List<BackendEntity> backends=userbackenddal.GetBackends();
@@ -76,8 +85,9 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while adding userbackends : "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error in BL while adding userbackends : "
+                //+exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new BusinessLogicException();
             }
         }
@@ -88,8 +98,11 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <param name="UserID">takes userid as input</param>        
         public void RemoveBackends(string UserID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 UserBackendDAL userbackenddal = new UserBackendDAL();
                 //to get all backends associated to user
                 List<UserBackendEntity> alluserbackends = userbackenddal.GetUserAllBackends(UserID);
@@ -105,8 +118,9 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while removing userbackends : "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error in BL while removing userbackends : "
+                //+exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new BusinessLogicException();
             }
         }
@@ -117,8 +131,11 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <returns>returns list of backends as personalization response form</returns>
         public PersonalizationResponseListDTO<BackendDTO> GetBackends()
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 UserBackendDAL userbackenddal = new UserBackendDAL();
                 //calling data access layer method
                 List<BackendEntity> backends = userbackenddal.GetBackends();
@@ -147,8 +164,9 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while retreiving backends : "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error in BL while retreiving backends : "
+                //+exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new BusinessLogicException();
             }
         }
@@ -160,8 +178,11 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <returns>returns list of user backend</returns>
         public IEnumerable<UserBackendDTO> GetUserAllBackends(string UserID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 UserBackendDAL userbackenddal = new UserBackendDAL();
                 //calling data access layer method to get user backends
                 List<UserBackendEntity> alluserbackends = userbackenddal.GetUserAllBackends(UserID);
@@ -199,8 +220,9 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while retreiving userbackends : "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error in BL while retreiving userbackends : "
+                //+exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new BusinessLogicException();
             }
         }
@@ -213,8 +235,11 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <returns>returns user backend with id associated to user in the form of personalization response</returns>
         public PersonalizationResponseDTO<UserBackendDTO> GetUserBackend(string userID, string userBackendID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 UserBackendDAL userbackenddal = new UserBackendDAL();
                 UserBackendEntity userbackendentity = userbackenddal.GetUserBackend(userID, userBackendID);
                 SynchEntity synch = userbackenddal.GetBackendSynch(userID, userBackendID);
@@ -244,8 +269,9 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while retreiving single userbackend : "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error in BL while retreiving single userbackend : "
+                //+exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new BusinessLogicException();
             }
         }
@@ -258,8 +284,11 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <returns>returns deleted user backend entity</returns>
         public UserBackendEntity DeleteUserBackend(string userID, string userBackendID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 UserBackendDAL userbackenddal = new UserBackendDAL();
                 //calling data access layer method 
                 UserBackendEntity userbackendentity = userbackenddal.DeleteUserBackend(userID, userBackendID);
@@ -271,8 +300,9 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while deleting single userbackend : "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error in BL while deleting single userbackend : "
+                //+exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new BusinessLogicException();
             }
         }

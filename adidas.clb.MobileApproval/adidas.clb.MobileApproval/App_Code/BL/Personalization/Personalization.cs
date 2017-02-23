@@ -19,6 +19,8 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
     /// </summary>
     public class Personalization
     {
+        //Application insights interface reference for logging the error details into Application Insight azure service.
+        static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
         /// <summary>
         /// method to check user availability
         /// </summary>
@@ -26,8 +28,11 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <returns>returns true if user exists else false</returns>        
         public Boolean CheckUser(string UserID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 PersonalizationDAL personalizationdal = new PersonalizationDAL();
                 //calling data access layer method               
                 UserEntity user = personalizationdal.GetUser(UserID);
@@ -43,8 +48,9 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while checking user existance : "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error in BL while checking user existance : "
+                //+exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new BusinessLogicException();
             }
         }
@@ -55,8 +61,11 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <param name="user">takes user entity to create new user</param>               
         public void CreateUser(UserEntity user)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 PersonalizationDAL personalizationdal = new PersonalizationDAL();
                 //calling data access layer method                
                 personalizationdal.CreateUser(user);
@@ -67,8 +76,9 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while creating user : "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error in BL while creating user : "
+                //+exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new BusinessLogicException();
             }
         }
@@ -79,8 +89,11 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <param name="user">takes user entity to update existing user</param>        
         public void UpdateUserProp(UserEntity user)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 PersonalizationDAL personalizationdal = new PersonalizationDAL();
                 //calling data access layer method
                 personalizationdal.UpdateUserProp(user);
@@ -91,8 +104,9 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while updating user props: "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error in BL while updating user props: "
+                //+exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new BusinessLogicException();
             }
         }
@@ -104,8 +118,11 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <param name="userbackendslist">takes userbackends list as input</param>
         public void TriggerUserRequests(string userID, IEnumerable<UserBackendDTO> userbackendslist)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 UpdateTriggeringMessage updateTriggerMessage = new UpdateTriggeringMessage();                
                 UserUpdateMsg usermsg = new UserUpdateMsg();
                 usermsg.UserID = userID;              
@@ -134,8 +151,9 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while formatting updatetriggering message : "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error in BL while formatting updatetriggering message : "
+                //+exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new BusinessLogicException();
             }
         }
@@ -169,8 +187,11 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <returns> returns user along with associated devices and backends </returns>        
         public UserDTO GetUser(string UserID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 PersonalizationDAL personalizationdal = new PersonalizationDAL();
                 UserEntity user = personalizationdal.GetUser(UserID);
                 if (user != null)
@@ -198,8 +219,9 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while retrieving user : "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error in BL while retrieving user : "
+                //+exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new BusinessLogicException();
             }
         }
@@ -211,8 +233,11 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
         /// <returns>returns deleted user entity</returns>        
         public UserEntity DeleteUser(string UserID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 PersonalizationDAL personalizationdal = new PersonalizationDAL();
                 //calling data access layer method
                 UserEntity deleteuser = personalizationdal.DeleteUser(UserID);
@@ -224,8 +249,9 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error in BL while deleting user : "
-                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error in BL while deleting user : "
+                //+exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new BusinessLogicException();
             }
         }

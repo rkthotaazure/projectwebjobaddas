@@ -19,6 +19,8 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
     /// </summary> 
     public class SynchDAL
     {
+        //Application insights interface reference for logging the error details into Application Insight azure service.
+        static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
         /// <summary>
         /// method to get all requests per user
         /// </summary>
@@ -26,22 +28,26 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
         /// <returns>returns list of requests associated to user</returns>
         public List<RequestEntity> GetUserRequests(string UserID,string requeststatus)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //partionkey filter
                 string partitionkeyfilter=TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.RequestsPK, UserID));
                 //request status filter
                 string statusfilter=TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.Status, QueryComparisons.Equal, requeststatus);
                 //generate query to get all requests per user based on filter conditions
-                TableQuery<RequestEntity> query = new TableQuery<RequestEntity>().Where(TableQuery.CombineFilters(partitionkeyfilter,TableOperators.And,statusfilter));
+                TableQuery<RequestEntity> query = new TableQuery<RequestEntity>().Where(partitionkeyfilter);
                 //call dataprovider method to get entities from azure table
                 List<RequestEntity> allrequests = DataProvider.GetEntitiesList<RequestEntity>(CoreConstants.AzureTables.RequestTransactions, query);
                 return allrequests;
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while retrieving requests per user from RequestTransactions azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error while retrieving requests per user from RequestTransactions azure table in DAL : "
+                //+ exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new DataAccessException();
             }
         }
@@ -54,26 +60,30 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
         /// <returns>returns list of requets associated userbackend</returns>
         public List<RequestEntity> GetUserBackendRequests(string UserID, string backendID, string requeststatus)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 string partitionkeyfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.RequestsPK, UserID));
                 string backendfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.BackendId, QueryComparisons.Equal, backendID);
                 //combine partionkey filter with backend filter 
-                string combinefiletr = TableQuery.CombineFilters(partitionkeyfilter,TableOperators.And,backendfilter);
+                string combinefilter = TableQuery.CombineFilters(partitionkeyfilter,TableOperators.And,backendfilter);
                 //request status filter
                 string statusfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.Status, QueryComparisons.Equal, requeststatus);
                 //final filter to get requests based on partitionkey, backendid, request status
-                string finalfilter = TableQuery.CombineFilters(combinefiletr, TableOperators.And, statusfilter);
+                string finalfilter = TableQuery.CombineFilters(combinefilter, TableOperators.And, statusfilter);
                 //generate query to get all user associated requests
-                TableQuery<RequestEntity> query = new TableQuery<RequestEntity>().Where(finalfilter);
+                TableQuery<RequestEntity> query = new TableQuery<RequestEntity>().Where(combinefilter);
                 //call dataprovider method to get entities from azure table
                 List<RequestEntity> allrequests = DataProvider.GetEntitiesList<RequestEntity>(CoreConstants.AzureTables.RequestTransactions, query);
                 return allrequests;
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while retrieving requests per userbackend from RequestTransactions azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error while retrieving requests per userbackend from RequestTransactions azure table in DAL : "
+                //+ exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new DataAccessException();
             }
         }
@@ -85,16 +95,20 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
         /// <returns>returns request</returns>
         public RequestEntity GetRequest(string userID, string requestID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //call dataprovider method to get entities from azure table
                 RequestEntity request = DataProvider.Retrieveentity<RequestEntity>(CoreConstants.AzureTables.RequestTransactions, string.Concat(CoreConstants.AzureTables.RequestsPK, userID), requestID);
                 return request;
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while retrieving request from RequestTransactions azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error while retrieving request from RequestTransactions azure table in DAL : "
+                //+ exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new DataAccessException();
             }
         }
@@ -106,15 +120,19 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
         /// <returns>returns SAS PDFUri</returns>
         public Uri GetSASPdfUri(string PDFUri)
         {
+            string callerMethodName = string.Empty;
             try
-            {               
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //call dataprovider method to get sas blob uri                
                 return DataProvider.GetBlobSASUri(PDFUri);
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while retrieving shared access service pdf uri in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error while retrieving shared access service pdf uri in DAL : "
+                //+ exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new DataAccessException();
             }
         }
@@ -126,8 +144,11 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
         /// <returns>returns list of approvers per request</returns>
         public List<ApproverEntity> GetApprovers(string requestID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //generate query to get all approvers associated request
                 TableQuery<ApproverEntity> query = new TableQuery<ApproverEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.ApproverPK, requestID)));
                 //call dataprovider method to get entities from azure table
@@ -136,8 +157,9 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while retrieving approvers from RequestTransactions azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error while retrieving approvers from RequestTransactions azure table in DAL : "
+                //+ exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new DataAccessException();
             }
         }
@@ -149,8 +171,11 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
         /// <returns>returns list of fields per request</returns>
         public List<FieldEntity> GetFields(string requestID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //generate query to get all fields associated request
                 TableQuery<FieldEntity> query = new TableQuery<FieldEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.FieldPK, requestID)));
                 //call dataprovider method to get entities from azure table
@@ -159,8 +184,9 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while retrieving fields from RequestTransactions azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error while retrieving fields from RequestTransactions azure table in DAL : "
+                //+ exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new DataAccessException();
             }
         }
@@ -173,16 +199,20 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
         /// <returns>returns backend synch entity for user</returns>
         public SynchEntity GetUserBackendSynch(string UserID, string UserBackendID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //call dataprovider method to get entities from azure table
-                SynchEntity synchentity = DataProvider.Retrieveentity<SynchEntity>(CoreConstants.AzureTables.UserDeviceConfiguration, (string.Concat(CoreConstants.AzureTables.BackendSynchPK, UserID)), UserBackendID);
+                SynchEntity synchentity = DataProvider.Retrieveentity<SynchEntity>(CoreConstants.AzureTables.UserDeviceConfiguration, (string.Concat(CoreConstants.AzureTables.BackendSynchPK, UserID)), (string.Concat(CoreConstants.AzureTables.BackendSynchPK, UserBackendID)));
                 return synchentity;
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while retrieving userbackendsynch from userdeviceconfig azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error while retrieving userbackendsynch from userdeviceconfig azure table in DAL : "
+                //+ exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new DataAccessException();
             }
         }
@@ -195,16 +225,20 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
         /// <returns>returns backend synch entity for user</returns>
         public RequestSynchEntity GetRequestSynch(string requestsynchpk, string requestid)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //call dataprovider method to get entities from azure table
                 RequestSynchEntity synchentity = DataProvider.Retrieveentity<RequestSynchEntity>(CoreConstants.AzureTables.UserDeviceConfiguration, requestsynchpk, requestid);
                 return synchentity;
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while retrieving request synch from userdeviceconfig azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error while retrieving request synch from userdeviceconfig azure table in DAL : "
+                //+ exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new DataAccessException();
             }
         }
@@ -215,15 +249,19 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
         /// <param name="synch">takes userbackend synch entity as input</param>
         public void AddUpdateBackendSynch(SynchEntity synch)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //call dataprovider method to insert entity into azure table
                 DataProvider.InsertReplaceEntity<SynchEntity>(CoreConstants.AzureTables.UserDeviceConfiguration, synch);
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while inserting userbackend synch into requestTransactions azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error while inserting userbackend synch into requestTransactions azure table in DAL : "
+                //+ exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new DataAccessException();
             }
         }
@@ -234,15 +272,19 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
         /// <param name="synch">takes request synch entity as input</param>
         public void AddUpdateRequestSynch(RequestSynchEntity synch)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //call dataprovider method to insert entity into azure table
                 DataProvider.InsertReplaceEntity<RequestSynchEntity>(CoreConstants.AzureTables.UserDeviceConfiguration, synch);
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while inserting request synch into requestTransactions azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error while inserting request synch into requestTransactions azure table in DAL : "
+                //+ exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new DataAccessException();
             }
         }
@@ -254,8 +296,11 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
         /// <returns> returns list of user backends associated to user</returns>
         public List<UserBackendEntity> GetUserAllBackends(string UserID, List<string> userbackendidslist)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 string finalfilter = string.Empty;
                 //partionkey filter
                 string partitionkeyfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.UserBackendPK, UserID));
@@ -282,8 +327,9 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while retrieving userbackends from userdeviceconfig azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error while retrieving userbackends from userdeviceconfig azure table in DAL : "
+                //+ exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new DataAccessException();
             }
         }
@@ -297,8 +343,11 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
         /// <returns>returns list of approvals associated userbackend</returns>
         public List<ApprovalEntity> GetUserBackendApprovals(string UserID, string backendID, string approvalstatus)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 string partitionkeyfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.ApprovalPK, UserID));
                 string backendfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.BackendId, QueryComparisons.Equal, backendID);
                 //combine partionkey filter with backend filter 
@@ -315,8 +364,9 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while retrieving approvals per userbackend from RequestTransactions azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error while retrieving approvals per userbackend from RequestTransactions azure table in DAL : "
+                //+ exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new DataAccessException();
             }
         }
@@ -328,29 +378,28 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
         /// <returns>returns list of requests associated to user</returns>
         public List<ApprovalEntity> GetUserApprovalsForCount(string UserID, string approvalstatus)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //partionkey filter
                 string partitionkeyfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.ApprovalPK, UserID));
                 //request status filter
                 string statusfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.Status, QueryComparisons.Equal, approvalstatus);
-                //generate query to get all requests per user based on filter conditions
-                //selecting only few columnas as we are just caliculating count of open requests
-                TableQuery<ApprovalEntity> query = new TableQuery<ApprovalEntity>()
-                {
-                    SelectColumns = new List<string>()
-                    {
-                        CoreConstants.AzureTables.PartitionKey, CoreConstants.AzureTables.BackendId
-                    }
-                }.Where(TableQuery.CombineFilters(partitionkeyfilter, TableOperators.And, statusfilter));                
+                //final filter to get approvals based on partitionkey, status
+                string finalfilter = TableQuery.CombineFilters(partitionkeyfilter, TableOperators.And, statusfilter);
+                //generate query to get all approvals per user based on status                
+                TableQuery<ApprovalEntity> query = new TableQuery<ApprovalEntity>().Where(finalfilter);
                 //call dataprovider method to get entities from azure table
                 List<ApprovalEntity> allapprovals = DataProvider.GetEntitiesList<ApprovalEntity>(CoreConstants.AzureTables.RequestTransactions, query);
                 return allapprovals;
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while retrieving approvals count per user from RequestTransactions azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error while retrieving approvals count per user from RequestTransactions azure table in DAL : "
+                //+ exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new DataAccessException();
             }
         }

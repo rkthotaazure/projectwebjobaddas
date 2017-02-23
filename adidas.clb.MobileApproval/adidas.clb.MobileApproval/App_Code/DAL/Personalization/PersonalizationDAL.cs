@@ -20,6 +20,8 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
     /// </summary>    
     public class PersonalizationDAL
     {
+        //Application insights interface reference for logging the error details into Application Insight azure service.
+        static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
         /// <summary>
         /// method to get user entity with UserID
         /// </summary>
@@ -27,16 +29,20 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         /// <returns>returns user entity</returns>                     
         public UserEntity GetUser(string UserID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //call dataprovider method to retrieve entity from azure table
                 UserEntity user=DataProvider.Retrieveentity<UserEntity>(CoreConstants.AzureTables.ReferenceData,CoreConstants.AzureTables.User, UserID);                
                 return user;
             }
             catch (Exception exception)
-            {                
-                LoggerHelper.WriteToLog(exception + " - Error while retrieving user from ReferenceData azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+            {
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error while retrieving user from ReferenceData azure table in DAL : "
+                //+ exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new DataAccessException();
             }
         }
@@ -47,15 +53,19 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         /// <param name="user">takes user entity as input</param>                
         public void CreateUser(UserEntity user)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //call dataprovider method to insert entity into azure table
                 DataProvider.InsertEntity<UserEntity>(CoreConstants.AzureTables.ReferenceData, user);
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while creating user into ReferenceData azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error while creating user into ReferenceData azure table in DAL : "
+                //+ exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new DataAccessException();
             }
         }
@@ -66,15 +76,19 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         /// <param name="user">takes user entity as input</param>        
         public void UpdateUserProp(UserEntity user)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //call dataprovider method to update entity to azure table
                 DataProvider.UpdateEntity<UserEntity>(CoreConstants.AzureTables.ReferenceData, user);
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while updating user props into ReferenceData azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error while updating user props into ReferenceData azure table in DAL : "
+                //+ exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new DataAccessException();
             }
         }
@@ -86,16 +100,20 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         /// <returns>returns deleted user entity</returns>        
         public UserEntity DeleteUser(string UserID)
         {
+            string callerMethodName = string.Empty;
             try
             {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 //call dataprovider method to delete entity from azure table            
                 UserEntity deleteUserEntity = DataProvider.DeleteEntity<UserEntity>(CoreConstants.AzureTables.ReferenceData, CoreConstants.AzureTables.User, UserID);                
                 return deleteUserEntity;
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while deleting user from ReferenceData azure table in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error while deleting user from ReferenceData azure table in DAL : "
+                //+ exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new DataAccessException();
             }
         }
@@ -106,16 +124,20 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         /// <param name="updateTriggeringMessage">takes message object as input</param>
         public void AddUpdateTriggerMessageToQueue(UpdateTriggeringMessage updateTriggeringMessage)
         {
+            string callerMethodName = string.Empty;
             try
-            {                
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
                 string message = JsonConvert.SerializeObject(updateTriggeringMessage);
                 //call dataprovider method to add message to azure queue
                 DataProvider.AddMessagetoQueue(CoreConstants.AzureQueues.UpdateTriggerQueueName, message);
             }
             catch (Exception exception)
             {
-                LoggerHelper.WriteToLog(exception + " - Error while adding message to updatetriggering queue in DAL : "
-                      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error while adding message to updatetriggering queue in DAL : "
+                //+ exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new DataAccessException();
             }
         }
