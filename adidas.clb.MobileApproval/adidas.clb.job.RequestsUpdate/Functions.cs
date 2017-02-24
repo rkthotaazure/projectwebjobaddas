@@ -59,7 +59,7 @@ namespace adidas.clb.job.RequestsUpdate
                             InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:clearing request waiting flag, response:success");
                             requsetupdatebl.AddUpdateRequest(backendrequest, request.UserID, requestsdata.BackendID);
                             InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:update request object, response:success, requestID:"+request.ID);
-                            requsetupdatebl.AddUpdateApproval(approvers, request.ID, backendrequest.RequestsList.UserID, requestsdata.BackendID,backend.MissingConfirmationsLimit);
+                            requsetupdatebl.AddUpdateApproval(approvers, request.ID, backendrequest.RequestsList.UserID, requestsdata.BackendID,backend.MissingConfirmationsLimit,request.Title);
                             InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:update/remove/create approval object, response:success");
                             requsetupdatebl.AddUpdateApprovers(approvers, request.ID);                            
                             requsetupdatebl.AddUpdateFields(genericInfoFields, overviewFields, request.ID);                            
