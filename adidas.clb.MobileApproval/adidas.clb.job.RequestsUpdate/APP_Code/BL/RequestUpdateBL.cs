@@ -39,7 +39,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                 //get the request to update
                 RequsetEntity existingrequest = requestupdatedal.GetRequest(string.Concat(CoreConstants.AzureTables.RequestsPK, UserID), backendrequest.RequestsList.ID);
                 //if request exists update otherwise craete new request
-                if(existingrequest!=null)
+                if (existingrequest != null)
                 {
                     existingrequest.Created = backendrequest.RequestsList.Created;
                     existingrequest.LastUpdate = DateTime.Now;
@@ -68,7 +68,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                     }
                     //calling DAL method to add request entity
                     requestupdatedal.AddUpdateRequest(requestentity);
-                }                
+                }
             }
             catch (DataAccessException DALexception)
             {
@@ -95,61 +95,79 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
-                string partitionkey = string.Concat(CoreConstants.AzureTables.ApprovalPK, UserID);
-                //get approval from service layer
-                ApprovalEntity ServiceLayerApproval = requestupdatedal.GetApproval(partitionkey, requestid);
-                //get the current approver from list of approvers got from backend
-                Approvers approver = approverslist.Find(x => x.User.UserID == UserID);
-                //check if approval exists or not
-                if (ServiceLayerApproval != null)
+
+                //get the user tasks  from list of approvers got from backend
+                List<Approvers> lstapprover = (from apr in approverslist
+                                               where apr.User.UserID.Equals(UserID)
+                                               select apr).ToList();
+
+                if (lstapprover != null && lstapprover.Count > 0)
                 {
-                    if(!ServiceLayerApproval.BackendConfirmed)
-                    {
-                        //check for Status Confirmation and update approval flags
-                        if (ServiceLayerApproval.Status == approver.Status)
+
+                    foreach (Approvers approver in lstapprover)
+                    {                        
+                        string partitionkey = string.Concat(CoreConstants.AzureTables.ApprovalPK, UserID);
+                        string approverOrder = Convert.ToString(approver.Order);
+                        string serviceLayerTaskID = requestid + "_" + approverOrder;
+                        //get approval from service layer
+                        ApprovalEntity ServiceLayerApproval = requestupdatedal.GetApproval(partitionkey, serviceLayerTaskID);
+                        //get the current approver from list of approvers got from backend
+                        // Approvers approver = approverslist.Find(x => x.User.UserID == UserID);
+                        //check if approval exists or not
+                        if (ServiceLayerApproval != null)
                         {
-                            ServiceLayerApproval.Backendoverwritten = false;
-                            ServiceLayerApproval.BackendConfirmed = true;
-                            ServiceLayerApproval.Missingconfirmations = 0;
+                            if (!ServiceLayerApproval.BackendConfirmed)
+                            {
+                                //check for Status Confirmation and update approval flags
+                                if (ServiceLayerApproval.Status == approver.Status)
+                                {
+                                    ServiceLayerApproval.Backendoverwritten = false;
+                                    ServiceLayerApproval.BackendConfirmed = true;
+                                    ServiceLayerApproval.Missingconfirmations = 0;
+                                }
+                                else
+                                {
+                                    //increase Missingconfirmation limit as status is not matching
+                                    ServiceLayerApproval.Missingconfirmations = ServiceLayerApproval.Missingconfirmations + 1;
+                                    ServiceLayerApproval.Backendoverwritten = false;
+                                    ServiceLayerApproval.BackendConfirmed = false;
+                                    //Add message to update triggering VIP queue to trigger request update.
+                                    RequestUpdateTrigger(requestid, UserID, backendId);
+                                    //check for Missing confirmation limit
+                                    if (ServiceLayerApproval.Missingconfirmations > missingconfirmationlimit)
+                                    {
+                                        ServiceLayerApproval.Backendoverwritten = true;
+                                        ServiceLayerApproval.BackendConfirmed = true;
+                                        ServiceLayerApproval.Missingconfirmations = 0;
+                                        ServiceLayerApproval.Status = approver.Status;
+                                    }
+                                }
+                            }
+                            //calling DAL method to add request entity
+                            requestupdatedal.AddUpdateApproval(ServiceLayerApproval);
                         }
                         else
                         {
-                            //increase Missingconfirmation limit as status is not matching
-                            ServiceLayerApproval.Missingconfirmations = ServiceLayerApproval.Missingconfirmations + 1;
-                            ServiceLayerApproval.Backendoverwritten = false;
-                            ServiceLayerApproval.BackendConfirmed = false;
-                            //Add message to update triggering VIP queue to trigger request update.
-                            RequestUpdateTrigger(requestid,UserID,backendId);
-                            //check for Missing confirmation limit
-                            if (ServiceLayerApproval.Missingconfirmations > missingconfirmationlimit)
+                            //generating approval entity from input approver,request obj by adding partitionkey and rowkey
+                            ApprovalEntity approvalentity = new ApprovalEntity();
+                            approvalentity.PartitionKey = partitionkey;
+                            approvalentity.RowKey = serviceLayerTaskID;
+                            approvalentity.RequestId = requestid;
+                            string status = approver.Status;
+                            if (string.IsNullOrEmpty(status))
                             {
-                                ServiceLayerApproval.Backendoverwritten = true;
-                                ServiceLayerApproval.BackendConfirmed = true;
-                                ServiceLayerApproval.Missingconfirmations = 0;
-                                ServiceLayerApproval.Status = approver.Status;
+                                status = CoreConstants.AzureTables.Waiting;
                             }
+                            approvalentity.Status = status;
+                            approvalentity.BackendID = backendId;
+                            approvalentity.ServiceLayerTaskID = serviceLayerTaskID;
+                            //calling DAL method to add request entity
+                            requestupdatedal.AddUpdateApproval(approvalentity);
                         }
-                    }                    
-                    //calling DAL method to add request entity
-                    requestupdatedal.AddUpdateApproval(ServiceLayerApproval);
-                }
-                else
-                {
-                    //generating approval entity from input approver,request obj by adding partitionkey and rowkey
-                    ApprovalEntity approvalentity = new ApprovalEntity();
-                    approvalentity.PartitionKey = partitionkey;
-                    approvalentity.RowKey = requestid;
-                    approvalentity.RequestId = requestid;
-                    string status = approver.Status;
-                    if (string.IsNullOrEmpty(status))
-                    {
-                        status = CoreConstants.AzureTables.Waiting;
                     }
-                    approvalentity.Status = status;
-                    approvalentity.BackendID = backendId;
-                    //calling DAL method to add request entity
-                    requestupdatedal.AddUpdateApproval(approvalentity);
                 }
+
+
             }
             catch (DataAccessException DALexception)
             {
@@ -363,7 +381,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                     userbackend.UpdateTriggered = false;
                     //calling DAL method to update userbackend
                     requestupdatedal.UpdateUserBackend(userbackend);
-                }                
+                }
             }
             catch (DataAccessException DALexception)
             {
@@ -449,14 +467,14 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                 throw new BusinessLogicException();
             }
         }
-       
+
         /// <summary>
         /// method to add message to queue to trigger request update
         /// </summary>
         /// <param name="requestID">takes requestid as input</param>
         /// <param name="UserID">takes userid as input</param>
         /// <param name="BackendID">takes backendid as input</param>
-        public void RequestUpdateTrigger(string requestID,string UserID,string BackendID)
+        public void RequestUpdateTrigger(string requestID, string UserID, string BackendID)
         {
             try
             {
