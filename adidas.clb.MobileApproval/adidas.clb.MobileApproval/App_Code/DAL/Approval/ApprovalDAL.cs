@@ -46,16 +46,18 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Approval
                 string domain = string.Empty;
                 //reading ApprovalQuery request object properties and assign the values to below variables.
                 string userID = objApprQry.UserID;
-                string requestID = objApprQry.ApprovalRequestID;
+                string taskID = objApprQry.ApprovalRequestID;
                 string status = objApprQry.ApprovalDecision.Status;
                 string comment = objApprQry.ApprovalDecision.Comment;
                 DateTime decisionDate = objApprQry.ApprovalDecision.DecisionDate;
+                string requestID = string.Empty;
                 //get approvalrequest object from RequestTransactions azure table based on partitionkey and rowkey(requestID)
-                ApprovalEntity apprReqEntity = DataProvider.Retrieveentity<ApprovalEntity>(CoreConstants.AzureTables.RequestTransactions, string.Concat(CoreConstants.AzureTables.ApprovalPK, userID), requestID);
+                ApprovalEntity apprReqEntity = DataProvider.Retrieveentity<ApprovalEntity>(CoreConstants.AzureTables.RequestTransactions, string.Concat(CoreConstants.AzureTables.ApprovalPK, userID), taskID);
                 if (apprReqEntity != null)
                 {
                     backendID = apprReqEntity.BackendID;
                     domain = apprReqEntity.Domain;
+                    requestID = apprReqEntity.RequestId;
                     //update status,decisiondate,comment column values in approvalrequest object
                     apprReqEntity.Status = status;
                     apprReqEntity.DecisionDate = decisionDate;
@@ -78,7 +80,7 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Approval
                 }
                 else
                 {
-                    InsightLogger.TrackEvent("ApprovalAPIController :: Endpoint : api/approval/requests/{ " + requestID + "} , Action :: Update Approval object data in Azure table, Response :: Error ,Details are ApprovalRequestID=" + requestID + " Approver:" + userID + " status:" + status);
+                    InsightLogger.TrackEvent("ApprovalAPIController :: Endpoint : api/approval/requests/{ requestID } , Action :: Update Approval object data in Azure table, Response :: Error ,Details are ApprovalRequestID=" + requestID + " Approver:" + userID + " status:" + status);
 
                 }
                 //return acknowledgement;
