@@ -51,5 +51,7 @@ namespace adidas.clb.MobileApprovalUI.Models
         public Boolean BackendConfirmed { get; set; }
         public int Missingconfirmations { get; set; }
         public Boolean Backendoverwritten { get; set; }
+        public string TaskTitle { get; set; }
+        public string ServiceLayerTaskID { get; set; }
     }
 }

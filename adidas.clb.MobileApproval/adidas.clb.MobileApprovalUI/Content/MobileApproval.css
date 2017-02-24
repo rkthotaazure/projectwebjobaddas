@@ -474,7 +474,10 @@ div.required label.control-label:after {
 .table-bordered > thead > tr > th, .table-bordered > tbody > tr > th, .table-bordered > tfoot > tr > th, .table-bordered > thead > tr > td, .table-bordered > tbody > tr > td, .table-bordered > tfoot > tr > td {
     border: 1px solid #ddd;
 }
-
+.tasktitle{
+    white-space: initial !important;
+    word-break: break-word;
+}
 .badge {
     font-size: 25px;
     margin-bottom: 4px;

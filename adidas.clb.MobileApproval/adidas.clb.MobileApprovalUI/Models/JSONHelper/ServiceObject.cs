@@ -113,6 +113,7 @@ namespace adidas.clb.MobileApprovalUI.Models.JSONHelper
     public class Approval
     {
         public string RequestId { get; set; }
+        public string TaskTitle { get; set; }
         public string BackendID { get; set; }
         public string Status { get; set; }
         public DateTime? DueDate { get; set; }
@@ -120,6 +121,7 @@ namespace adidas.clb.MobileApprovalUI.Models.JSONHelper
         public Boolean BackendConfirmed { get; set; }
         public int Missingconfirmations { get; set; }
         public Boolean Backendoverwritten { get; set; }
+        public string ServiceLayerTaskID { get; set; }
     }
     public class Requester
     {

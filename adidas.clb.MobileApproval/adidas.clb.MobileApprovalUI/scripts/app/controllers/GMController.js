@@ -695,11 +695,12 @@ app.controller('ApprovalDetailsController', function ($scope, $http, $location, 
         });
     };
     // Show pendind task request information
-    $scope.showDetails = function (requestId) {
+    $scope.showDetails = function (requestId,taskid) {
         ShareData.detailTaskinfo = requestId;
+        ShareData.detailTaskId = taskid;
         $location.path('/detailTaskInfo');
     };
-    $scope.requestStatus = function (status, requestId) {
+    $scope.requestStatus = function (status, requestId,taskId) {
         $scope.hideButton = true;
         $scope.decisionDate = $filter('date')(new Date(), 'yyyy-MM-dd HH:mm');
         var userDevices = ShareData.userDevices;
@@ -710,7 +711,7 @@ app.controller('ApprovalDetailsController', function ($scope, $http, $location, 
             Status: status
         }
         var approvalDetails = {
-            ApprovalRequestID: requestId,
+            ApprovalRequestID: taskId,
             ApprovalDecision: approvalDecision,
             DeviceID: ShareData.userDevices.DeviceID
         }
@@ -724,7 +725,7 @@ app.controller('ApprovalDetailsController', function ($scope, $http, $location, 
         $http.post("/Landing/SendApprovalstatus", approvalDetails, config).success(function (data) {
             console.log(data);
             for (var i = 0; i < $scope.approvalTasks.length; i++) {
-                if ($scope.approvalTasks[i].RequestId === requestId) {
+                if ($scope.approvalTasks[i].ServiceLayerTaskID === taskId) {
                     $scope.approvalTasks.splice(i, 1);
                     //reduce total items in pagination
                     $scope.totalItems = $scope.totalItems - 1;
@@ -762,6 +763,7 @@ app.controller('ApprovalDetailstaskController', function ($scope, $http, $locati
         $scope.hideButton = true;
         $scope.showloader = true;
         var requestId = ShareData.detailTaskinfo;
+        var taskId=ShareData.detailTaskId;
         var userDevices = ShareData.userDevices;
         var approvalStatus = ShareData.aprStatus;
         var requestStatus = ShareData.reqStatus;
@@ -797,6 +799,7 @@ app.controller('ApprovalDetailstaskController', function ($scope, $http, $locati
             }
         }
         $scope.requestDetails = requestDetails;
+        $scope.TaskID = taskId;
         $scope.config = config;
         console.log(requestDetails);
         $scope.fields = [];
@@ -859,7 +862,7 @@ app.controller('ApprovalDetailstaskController', function ($scope, $http, $locati
             console.log(data);
         });
     };
-    $scope.requestStatus = function (status, requestId) {
+    $scope.requestStatus = function (status, requestId, taskid) {
         $scope.showloader = true;
         var userDevices = ShareData.userDevices;
         $scope.decisionDate = $filter('date')(new Date(), 'yyyy-MM-dd HH:mm');
@@ -869,7 +872,7 @@ app.controller('ApprovalDetailstaskController', function ($scope, $http, $locati
             Status: status
         }
         var approvalDetails = {
-            ApprovalRequestID: requestId,
+            ApprovalRequestID: taskid,
             ApprovalDecision: approvalDecision,
             DeviceID: ShareData.userDevices.DeviceID
         }
