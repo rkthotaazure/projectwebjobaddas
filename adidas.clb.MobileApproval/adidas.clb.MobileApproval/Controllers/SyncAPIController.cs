@@ -46,7 +46,7 @@ namespace adidas.clb.MobileApproval.Controllers
                     //get userbackends associated to user
                     List<UserBackendEntity> allUserBackends = synch.GetUserBackendsList(userID, userbackends);                    
                     //get requests associated to user
-                    List<RequestEntity> requestslist = synch.GetUserRequests(userID, query.parameters.filters.reqStatus);
+                    //List<RequestEntity> requestslist = synch.GetUserRequests(userID, query.parameters.filters.reqStatus);
                     //get approvals associated to user based on approval status
                     List<ApprovalEntity> approvalslist = synch.GetUserApprovalsForCount(userID, query.parameters.filters.apprStatus);
                     Boolean requestsunfulfilled = false;
@@ -70,10 +70,11 @@ namespace adidas.clb.MobileApproval.Controllers
                             InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: Adding approval count to response, response: success, backendID:" + userbackend.BackendID);
                             approvalcountdto.BackendID = userbackend.BackendID;
                             approvalcountdto.Status = query.parameters.filters.apprStatus;
-                           // approvalcountdto.Count = userbackendapprovalslist.Count;
+                           approvalcountdto.Count = userbackendapprovalslist.Count;
                             userbackenddto.approvalsCount = approvalcountdto;
                             List<ApprovalRequestDTO> approvalrequestlist = new List<ApprovalRequestDTO>();
-                            List<RequestEntity> userbackendrequestslist = requestslist.Where(x => x.BackendID == userbackend.BackendID).ToList();
+                            //get requests associated to each user backend
+                            //List<RequestEntity> userbackendrequestslist = requestslist.Where(x => x.BackendID == userbackend.BackendID).ToList();
                             //check if backend updated
                             if (Rules.IsBackendUpdated(userbackend, query))
                             {
@@ -82,8 +83,9 @@ namespace adidas.clb.MobileApproval.Controllers
                                 if (Rules.ExtendedDepthperBackend(userbackend, Convert.ToInt32(ConfigurationManager.AppSettings[CoreConstants.Config.MaxSynchReplySize])))
                                 {
                                     InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: check extended depth, response: true");
-                                    userbackenddto = synch.AddRequsetsTasksCountToSynchResponse(userbackendrequestslist, userbackendapprovalslist, userbackend, query, userbackenddto);
-                                    
+                                    //commented code related to adding requests and tasks to response
+                                    //userbackenddto = synch.AddRequsetsTasksCountToSynchResponse(userbackendrequestslist, userbackendapprovalslist, userbackend, query, userbackenddto);
+
                                 }
                                 //check requestsfullfilled flag
                                 if (!requestsfulfilled)
@@ -119,7 +121,8 @@ namespace adidas.clb.MobileApproval.Controllers
                                     InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: add backend retry time to response, response: success");
                                     userbackenddto.synch = synchdto;
                                 }
-                                userbackenddto = synch.AddRequsetsTasksCountToSynchResponse(userbackendrequestslist, userbackendapprovalslist, userbackend, query, userbackenddto);
+                                //commented code related to adding requests and tasks to response
+                                //userbackenddto = synch.AddRequsetsTasksCountToSynchResponse(userbackendrequestslist, userbackendapprovalslist, userbackend, query, userbackenddto);
                                 
                             }
                             //add each userbackend to list
@@ -186,6 +189,18 @@ namespace adidas.clb.MobileApproval.Controllers
                     List<ApprovalRequestDTO> approvalrequestlist = new List<ApprovalRequestDTO>();
                     Boolean requestsunfulfilled = false;
                     Boolean requestsfulfilled = false;
+                    //adding approval tasks list to response
+                    //loop through each approval in the userbackend
+                    foreach (ApprovalEntity approval in approvalslist)
+                    {
+                        ApprovalRequestDTO approvalrequest = new ApprovalRequestDTO();
+                        ApprovalDTO approvaldto = new ApprovalDTO();
+                        approvaldto = DataProvider.ResponseObjectMapper<ApprovalDTO, ApprovalEntity>(approval);
+                        approvalrequest.approval = approvaldto;
+                        //add approval request to list which will be added to corresponding backend
+                        approvalrequestlist.Add(approvalrequest);
+                    }
+
                     //check if backend updated
                     if (Rules.IsBackendUpdated(userbackend, query))
                     {
@@ -195,7 +210,7 @@ namespace adidas.clb.MobileApproval.Controllers
                         {
                             InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: check extended depth, response: true");
                             InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action:Loop through all requests in backend");
-                            approvalrequestlist=synch.AddRequsetsTasksToSynchResponse(requestslist,approvalslist,userbackend,query);                            
+                            //approvalrequestlist=synch.AddRequsetsTasksToSynchResponse(requestslist,approvalslist,userbackend,query);                            
                         }
                         //check requestsfullfilled flag
                         if (requestsfulfilled)
@@ -231,7 +246,7 @@ namespace adidas.clb.MobileApproval.Controllers
                             InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: add backend retry time to response, response: success");
                             userbackenddto.synch = synchdto;
                         }
-                        approvalrequestlist = synch.AddRequsetsTasksToSynchResponse(requestslist, approvalslist, userbackend, query);
+                        //approvalrequestlist = synch.AddRequsetsTasksToSynchResponse(requestslist, approvalslist, userbackend, query);
                     }
                     //add requests list to user backend
                     userbackenddto.requests = approvalrequestlist;
