@@ -86,7 +86,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
         /// BL method to add approval entity into azure table
         /// </summary>
         /// <param name="request">takes request as input</param>
-        public void AddUpdateApproval(List<Approvers> approverslist, string requestid, string UserID, string backendId, int missingconfirmationlimit)
+        public void AddUpdateApproval(List<Approvers> approverslist, string requestid, string UserID, string backendId, int missingconfirmationlimit,string requestTitle)
         {
             //Get Caller Method name
             string callerMethodName = string.Empty;
@@ -161,6 +161,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                             approvalentity.Status = status;
                             approvalentity.BackendID = backendId;
                             approvalentity.ServiceLayerTaskID = serviceLayerTaskID;
+                            approvalentity.TaskTitle = requestTitle;
                             //calling DAL method to add request entity
                             requestupdatedal.AddUpdateApproval(approvalentity);
                         }

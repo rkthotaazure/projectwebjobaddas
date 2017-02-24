@@ -49,6 +49,7 @@ namespace adidas.clb.job.RequestsUpdate.Models
         public Boolean BackendConfirmed { get; set; }
         public int Missingconfirmations { get; set; }
         public string ServiceLayerTaskID { get; set; }
+        public string TaskTitle { get; set; }
         public Boolean Backendoverwritten { get; set; }
     }
 }
