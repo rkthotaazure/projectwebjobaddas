@@ -26,6 +26,7 @@
                 <thead class="thead-inverse">
                     <tr>
                         <th><label>Request#</label></th>
+                        <th class="tasktitle"><label>Title</label></th>
                         <th><label>Status</label></th>
                         <th><span ng-show="hideButton">Take Action</span></th>
                     </tr>
@@ -36,8 +37,13 @@
                     </tr>*@
                     <tr ng-repeat="approvaltask in approvalTasks | filter:paginate">
                         <td>
-                            <div class="input-group decoration" ng-click="showDetails(approvaltask.RequestId)">
+                            <div class="input-group decoration" ng-click="showDetails(approvaltask.RequestId, approvaltask.ServiceLayerTaskID)">
                                 {{approvaltask.RequestId}}
+                            </div>
+                        </td>
+                        <td class="tasktitle">
+                            <div class="input-group">
+                                {{approvaltask.TaskTitle}}
                             </div>
                         </td>
                         <td>
@@ -52,8 +58,8 @@
                                 </div>
                             </div>*@
                             <div class="input-group" ng-show="hideButton">
-                                <div><button type="button" class="btn btn-primary" data-toggle="tooltip" title="Approve" data-placement="top"><span class="glyphicon glyphicon-ok" ng-click="requestStatus('Approved',approvaltask.RequestId)"></span></button>
-                                <button type="button" class="btn btn-primary" data-toggle="tooltip" title="Reject" data-placement="top"><span class="glyphicon glyphicon-remove" ng-click="requestStatus('Rejected',approvaltask.RequestId)"></span></button></div>
+                                <div><button type="button" class="btn btn-primary" data-toggle="tooltip" title="Approve" data-placement="top"><span class="glyphicon glyphicon-ok" ng-click="requestStatus('Approved',approvaltask.RequestId, approvaltask.ServiceLayerTaskID)"></span></button>
+                                <button type="button" class="btn btn-primary" data-toggle="tooltip" title="Reject" data-placement="top"><span class="glyphicon glyphicon-remove" ng-click="requestStatus('Rejected',approvaltask.RequestId, approvaltask.ServiceLayerTaskID)"></span></button></div>
                             </div>
                         </td>
                     </tr>

@@ -21,13 +21,13 @@
         </div>
         <div class="mobile-button row" ng-show="hideButton">
             <div class="col-xs-6 text-align-center first-col">
-                <div ng-click="requestStatus('Rejected',id)">
+                <div ng-click="requestStatus('Rejected',id,TaskID)">
                     <span class="glyphicon glyphicon-remove"></span>
                     Reject
                 </div>
             </div>
             <div class="col-xs-6 text-align-center first-col">
-                <div ng-click="requestStatus('Approved',id)">
+                <div ng-click="requestStatus('Approved',id,TaskID)">
                     <span class="glyphicon glyphicon-ok"></span>
                     Approve
                 </div>

@@ -336,6 +336,8 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                         requestObj.approval.RequestId = userbackendRequestdetails.approvalDetails.RequestId;
                         //Get the approval task Request Status
                         requestObj.approval.Status = userbackendRequestdetails.approvalDetails.Status;
+                        requestObj.approval.TaskTitle = userbackendRequestdetails.approvalDetails.TaskTitle;
+                        requestObj.approval.ServiceLayerTaskID = userbackendRequestdetails.approvalDetails.ServiceLayerTaskID;
                         //requestObj.request = new RequestDTO();
                         //requestObj.request.ID = userbackendRequestdetails.requestDetails.ID;
                         //requestObj.request.Status= userbackendRequestdetails.requestDetails.Status;
