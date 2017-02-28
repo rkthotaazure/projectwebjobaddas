@@ -183,6 +183,8 @@
     <None Include="Properties\PublishProfiles\mobileapproval - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\mobileapproval - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\mobileapproval - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\t-mobileapproval-api - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\t-mobileapproval-api - Web Deploy.pubxml" />
     <None Include="Properties\webjob-publish-settings.json" />
   </ItemGroup>
   <ItemGroup>
