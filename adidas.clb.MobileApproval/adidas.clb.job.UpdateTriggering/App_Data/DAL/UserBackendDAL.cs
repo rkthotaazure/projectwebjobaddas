@@ -596,7 +596,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             //update request UpdateTriggered
                             reqSyncEntity.UpdateTriggered = true;
                             // Execute the update operation.
-                            DataProvider.UpdateEntity(azureTableRequestTransactions, reqSyncEntity);
+                            DataProvider.UpdateEntity<RequestSynchEntity>(azureTableRequestTransactions, reqSyncEntity);
                             InsightLogger.TrackEvent(QueueName + " , Action :: Compute and set Expected Updated Timestamp(UT Rule :: R4) for the requestID : " + serviceLayerRequestID + " ,  Response : Success");
                         }
                         else
