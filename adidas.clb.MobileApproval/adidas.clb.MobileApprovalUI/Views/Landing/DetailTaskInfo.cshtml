@@ -54,7 +54,7 @@
                 </div>
                 <div class="col-xs-5">
                     <label for="Albert" class="control-label">Created:</label><br />
-                    {{created | dateFilter | date: "dd-MM-yyyy HH:mm"}}
+                    {{created | dateFilter | date: "dd.MM.yyyy HH:mm"}}
                 </div>
             </div>
             <div class="row">
@@ -111,7 +111,7 @@
 
                             </td>
                             <td>
-                                <label class="approver-lable">{{approver.DueDate | dateFilter | date: "dd-MM-yyyy"}}</label>
+                                <label class="approver-lable">{{approver.DueDate | dateFilter | date: "dd.MM.yyyy"}}</label>
                             </td>
                         </tr>
                     </tbody>
