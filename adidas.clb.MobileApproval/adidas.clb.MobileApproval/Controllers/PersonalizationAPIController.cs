@@ -120,7 +120,7 @@ namespace adidas.clb.MobileApproval.Controllers
                     //create if user not exists else update
                     if (!isUserExists)
                     {
-                        InsightLogger.TrackEvent("PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: check user, response: false"+ personalizationrequset.user.UserID);
+                        InsightLogger.TrackEvent("PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: check user, response: false,userID: " + personalizationrequset.user.UserID);
                         personalization.CreateUser(userentity);
                         InsightLogger.TrackEvent("PersonalizationAPIController :: endpoint : api/personalizationapi/users/{userID}, action: create new user, response: success,userID: " + personalizationrequset.user.UserID);
                         //add user devices if provided in request

@@ -36,19 +36,7 @@ namespace adidas.clb.MobileApproval.Models
             }
 
             set { this.lastchange = value; }
-        }
-
-        private DateTime? expectedupdate = null;
-
-        public DateTime? ExpectedUpdate
-        {
-            get
-            {
-                return this.expectedupdate.HasValue ? this.expectedupdate.Value : (DateTime?)null;
-            }
-
-            set { this.lastchange = value; }
-        }        
+        }               
         public RequestSynchEntity() { }
     }
 }

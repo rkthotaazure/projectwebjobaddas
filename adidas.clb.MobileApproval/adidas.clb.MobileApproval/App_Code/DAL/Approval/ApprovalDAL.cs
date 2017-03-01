@@ -71,6 +71,7 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Approval
                     //get domain,backendid details from service layer
                     objApprQry.Domain = domain;
                     objApprQry.BackendID = backendID;
+                    objApprQry.ApprovalRequestID = requestID;
                     //call backend requestApproval/ api
                     var result = apiController.UpdateApprovalRequest(objApprQry, backendID, requestID);
                     //if (string.IsNullOrEmpty(result.ToString()))
