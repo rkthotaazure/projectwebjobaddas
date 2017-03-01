@@ -1,9 +1,4 @@
-﻿//-----------------------------------------------------------
-// <copyright file="AppInsightLogger.cs" company="adidas AG">
-// Copyright (C) 2016 adidas AG.
-// </copyright>
-//-----------------------------------------------------------
-using Microsoft.ApplicationInsights;
+﻿using Microsoft.ApplicationInsights;
 using Microsoft.WindowsAzure;
 using System;
 using System.Collections.Generic;
@@ -12,12 +7,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime;
+/// <summary>
+/// implements IAppInsight interface
+/// </summary>
 
 namespace adidas.clb.job.RequestsUpdate.Utility
 {
-    /// <summary>
-    /// implements IAppInsight interface
-    /// </summary>
     public sealed class AppInsightLogger : IAppInsight
     {
         //Create object for AppInsightLogger class
@@ -26,8 +21,12 @@ namespace adidas.clb.job.RequestsUpdate.Utility
         private TelemetryClient client = new TelemetryClient();
         //Read instrumentationkey from app.config
         private static string InstrumentationKey = ConfigurationManager.AppSettings["APPINSIGHTS_INSTRUMENTATIONKEY"];
-        //Read trace value from app.config
-        bool IsTraceEnabled = Convert.ToBoolean(ConfigurationManager.AppSettings["AppInsightTrace"]);
+        //Read IsTraceEnabledForExceptions value from app.config
+        bool IsTraceEnabledForExceptions = Convert.ToBoolean(ConfigurationManager.AppSettings["AppInsightTraceForExceptions"]);
+        //Read IsTraceEnabledForEvents value from app.config
+        bool IsTraceEnabledForEvents = Convert.ToBoolean(ConfigurationManager.AppSettings["AppInsightTraceForCustomEvents"]);
+        //Read IsTraceEnabledForMetrics value from app.config
+        bool IsTraceEnabledForMetrics = Convert.ToBoolean(ConfigurationManager.AppSettings["AppInsightTraceForMetrics"]);
         private AppInsightLogger() { }
         //cosntrut the values
         public static AppInsightLogger Instance
@@ -43,7 +42,7 @@ namespace adidas.clb.job.RequestsUpdate.Utility
         /// <param name="message"></param>
         public void TrackEvent(string message)
         {
-            if (IsTraceEnabled)
+            if (IsTraceEnabledForEvents)
             {
                 //assign Instrumentation Key to TelemetryClient object            
                 client.InstrumentationKey = InstrumentationKey;                
@@ -51,33 +50,8 @@ namespace adidas.clb.job.RequestsUpdate.Utility
                 //flush the buffer data
                 client.Flush();
             }
-        }
-        public void TrackStartEvent(string methodname)
-        {
-            if (IsTraceEnabled)
-            {
-                //assign Instrumentation Key to TelemetryClient object            
-                client.InstrumentationKey = InstrumentationKey;
-                //get AppInsightMessageForMethodStart from app.config
-                string startMsg = string.Format(ConfigurationManager.AppSettings["AppInsightMessageForMethodStart"], methodname);
-                client.TrackEvent(startMsg);
-                //flush the buffer data
-                client.Flush();
-            }
-        }
-        public void TrackEndEvent(string methodname)
-        {
-            if (IsTraceEnabled)
-            {
-                //assign Instrumentation Key to TelemetryClient object            
-                client.InstrumentationKey = InstrumentationKey;
-                //get AppInsightMessageForMethodStart from app.config
-                string startMsg = string.Format(ConfigurationManager.AppSettings["AppInsightMessageForMethodEnd"], methodname);
-                client.TrackEvent(startMsg);
-                //flush the buffer data
-                client.Flush();
-            }
-        }
+        }      
+      
         /// <summary>
         /// This method logs Performance measurements such as queue lengths...etc.
         /// </summary>
@@ -85,7 +59,7 @@ namespace adidas.clb.job.RequestsUpdate.Utility
         /// <param name="duration"></param>
         public void TrackMetric(string message, long duration)
         {
-            if (IsTraceEnabled)
+            if (IsTraceEnabledForMetrics)
             {
                 //assign Instrumentation Key to TelemetryClient object 
                 client.InstrumentationKey = InstrumentationKey;
@@ -100,22 +74,33 @@ namespace adidas.clb.job.RequestsUpdate.Utility
         /// <param name="message"></param>
         /// <param name="exception"></param>
         /// <param name="EventID"></param>
-        public void Exception(string message, Exception exception, string EventID)
+        public void Exception(string message, Exception exception, string methodName)
         {
-            if (IsTraceEnabled)
+            //check TraceEnable or not from app.config
+            if (IsTraceEnabledForExceptions)
             {
+                string exceptionMsg = message;
                 //assign Instrumentation Key to TelemetryClient object 
                 client.InstrumentationKey = InstrumentationKey;
+                //create dictionary object <string,string>
                 Dictionary<string, string> prop = new Dictionary<string, string>();
-                prop["Message"] = message;
-                prop["EventID"] = EventID;
+                //add exception.message and Methodname to dictionay
+                //checking is innerexception is null or not
+                //if it is null add exception strack trace to dictionary
+                if (exception.InnerException == null)
+                {
+                    exceptionMsg = exception.ToString();
+                }
+                prop["Message"] = exceptionMsg;
+                prop["MethodName"] = methodName;
+                //log the exception
                 client.TrackException(exception, prop);
                 //flush the buffer data
                 client.Flush();
             }
         }
-        
-       
+
+
 
 
 

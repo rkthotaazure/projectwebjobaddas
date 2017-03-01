@@ -15,9 +15,7 @@ namespace adidas.clb.job.RequestsUpdate.Utility
     {
         void TrackEvent(string message);
         void TrackMetric(string message, long duration);
-        void Exception(string message, Exception exception, string EventID);
-        void TrackStartEvent(string methodname);
-        void TrackEndEvent(string methodname);
+        void Exception(string message, Exception exception, string EventID);       
     }
 
 }
