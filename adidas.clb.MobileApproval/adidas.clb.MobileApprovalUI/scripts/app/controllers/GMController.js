@@ -570,7 +570,7 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
         c.lineCap = 'round';
         var posX = can.width / 2,
             posY = can.height / 2;
-        if (Total > 0) {
+        if (Total > 0 && Current > 0) {
             var fps = 1000 / 200,
             procent = 0,
             oneProcent = (360 / Total),
