@@ -4,6 +4,7 @@
 // </copyright>
 //-----------------------------------------------------------
 using System;
+using System.Configuration;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,7 +21,10 @@ namespace adidas.clb.job.RequestsUpdate
         // AzureWebJobsDashboard and AzureWebJobsStorage
         static void Main()
         {
-            var host = new JobHost();
+            JobHostConfiguration config = new JobHostConfiguration();
+            //QueueTrigger function runs singleton on a single instance
+            config.Queues.BatchSize = Convert.ToInt32(ConfigurationManager.AppSettings["QueueBatchSize"]);
+            var host = new JobHost(config);
             log4net.Config.XmlConfigurator.Configure();
             // The following code ensures that the WebJob will be running continuously
             host.RunAndBlock();

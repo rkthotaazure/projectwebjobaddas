@@ -112,6 +112,7 @@ namespace adidas.clb.job.RequestsUpdate
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
+                System.Threading.Thread.Sleep(5000);
                 InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestpdfuri queue trigger, action:reading queue message, response:success, message:"+message);
                 //deserialize Queue message to get PDF uri 
                 RequestPDF requestPDFdata = JsonConvert.DeserializeObject<RequestPDF>(message);
