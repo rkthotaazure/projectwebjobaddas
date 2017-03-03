@@ -160,6 +160,7 @@
     <Compile Include="Models\RequestsUpdateAck.cs" />
     <Compile Include="Models\RequestsUpdateQuery.cs" />
     <Compile Include="Models\RequestSynchEntity.cs" />
+    <Compile Include="Models\RequestEntity.cs" />
     <Compile Include="Models\StoreApprovalModel.cs" />
     <Compile Include="Models\UpdateTriggeringMsg.cs" />
     <Compile Include="Models\UserBackend.cs" />
