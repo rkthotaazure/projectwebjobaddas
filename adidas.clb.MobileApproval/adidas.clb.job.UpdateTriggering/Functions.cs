@@ -265,9 +265,9 @@ namespace adidas.clb.job.UpdateTriggering
                     double regularWaitingMinutes = (backend.RegularUpdateNextCollectingTime - DateTime.Now).TotalMinutes;
                     //if minutes difference is with in RegularChecksWaitingTimeInMinutes(>=-5 and <=0) then invoke CollectUsersNeedUpdateByBackend method()
                     if (regularWaitingMinutes >= -(Convert.ToDouble(ConfigurationManager.AppSettings["RegularChecksWaitingTimeInMinutes"])) && regularWaitingMinutes <= 1)
-                    {
+                    {                       
                         //collect the users needing update and keep the messages in update trigger input queue
-                        objdal.CollectUsersNeedUpdateByBackend(backend.BackendID);
+                        objdal.CollectUsersNeedUpdateByBackend(backend.BackendID,DateTime.Now);
                         //update the backend entity with new collecting time[i.e LastCollectingTime= NextCollectingTime and NextCollectingTime=NextCollectingTime+(Backend MinimumusersUpdateFrequency)/2 ]
                         objnextcollentingTime.UpdateBackendRegularNextCollectingTime(backend.BackendID, backend.MinimumUpdateFrequency, backend.RegularUpdateNextCollectingTime);
                         InsightLogger.TrackEvent("UpdateTriggering, Action :: for each backend :: collect users needing update : End(), Response :: Success,  Backend Name : " + backend.BackendID);
@@ -328,12 +328,15 @@ namespace adidas.clb.job.UpdateTriggering
                     //if minutes difference is with in RegularChecksWaitingTimeInMinutes(>=-8 and <=0) then invoke MissedUpdatesWaitingTimeInMinutes method()
                     if (waitingMinutes >= -(Convert.ToDouble(ConfigurationManager.AppSettings["MissedUpdatesWaitingTimeInMinutes"])) && waitingMinutes <= 0)
                     {
-                        Task[] tasksMissedUpdates = new Task[2];
-                        //collects the missed update userbackends and convert into update trigger message format and put into UT input queue
-                        tasksMissedUpdates[0] = Task.Factory.StartNew(() => objUserBackendDAL.CollectUsersMissedUpdatesByBackend(backend.BackendID));
-                        //collects the missed update requests and convert into update trigger message format and put into UT input queue
-                        tasksMissedUpdates[1] = Task.Factory.StartNew(() => objUserBackendDAL.CollectsRequestsMissedUpdateByBackendID(backend.BackendID));
-                        Task.WaitAll(tasksMissedUpdates);
+                        //collects the missed update userbackends,Requests and convert into update trigger message format and put into UT input queue
+                        objUserBackendDAL.CollectUsersMissedUpdatesByBackend(backend.BackendID,DateTime.Now);
+                        //Task[] tasksMissedUpdates = new Task[2];
+                        ////
+                        //tasksMissedUpdates[0] = Task.Factory.StartNew(() => );
+                        ////collects the missed update requests and convert into update trigger message format and put into UT input queue
+                        //tasksMissedUpdates[1] = Task.Factory.StartNew(() => objUserBackendDAL.CollectsRequestsMissedUpdateByBackendID(backend.BackendID));
+                        //Task.WaitAll(tasksMissedUpdates);
+                        
                         //update the backend entity with new missing update collecting time[i.e MissingUpdateLastCollectingTime= MissingUpdateNextCollectingTime and MissingUpdateNextCollectingTime=Max(]
                         objnextcollectingTime.UpdateMisseduserBackendNextCollectingTime(backend.BackendID, backend.MissingUpdateNextCollectingTime);
                         InsightLogger.TrackEvent("UpdateTriggering, Action :: for each backend :: collect missing updates : End() , Response :: Success, Backend Name : " + backend.BackendID);

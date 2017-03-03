@@ -45,7 +45,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
         /// <param name="UserBackendLastUpdate"></param>
         /// <param name="UserBackendUpdateFrequency"></param>
         /// <returns></returns>
-        public  bool IsuserBackendNeedsUpdate(bool UserBackendUpdateTriggered, DateTime UserBackendLastUpdate, int UserBackendUpdateFrequency)
+        public  bool IsuserBackendNeedsUpdate(bool UserBackendUpdateTriggered, DateTime UserBackendLastUpdate, int UserBackendUpdateFrequency,DateTime currentTime)
         {
             string callerMethodName = string.Empty;
             try
@@ -54,7 +54,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 bool IsNeedsUpdate = false;
                 //Update triggering Rules (R2) :: UserNeedsUpdate=(NOT UserBackend.UpdateTriggered AND (UserBackend.lastUpdate + UserBackend.UpdateFrequency >Now))
-                if ((!UserBackendUpdateTriggered) && (UserBackendLastUpdate.AddSeconds(ConvertMinutesToSeconds(UserBackendUpdateFrequency)) > DateTime.Now))
+                if ((!UserBackendUpdateTriggered) && (UserBackendLastUpdate.AddSeconds(ConvertMinutesToSeconds(UserBackendUpdateFrequency)) > currentTime))
                 {
                     IsNeedsUpdate = true;
                 }
@@ -152,7 +152,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
         /// <param name="UserBackendUpdateTriggered"></param>
         /// <param name="UserBackendExpectedUpdate"></param>
         /// <returns></returns>
-        public bool IsUserUpdateMissing(bool UserBackendUpdateTriggered, DateTime UserBackendExpectedUpdate)
+        public bool IsUserUpdateMissing(bool UserBackendUpdateTriggered, DateTime UserBackendExpectedUpdate,DateTime now)
         {
             string callerMethodName = string.Empty;
             try
@@ -161,7 +161,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 bool IsUpdateMissing=false;
                 //Rule R6 :: UserBackend.UpdateTriggered AND (NOW >UserBackend.ExpectedUpdate)
-                if ((UserBackendUpdateTriggered) && (DateTime.Now > UserBackendExpectedUpdate))
+                if ((UserBackendUpdateTriggered) && (now > UserBackendExpectedUpdate))
                 {
                     IsUpdateMissing = true;
                 }
@@ -180,7 +180,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
         /// <param name="RequestUpdateTriggered"></param>
         /// <param name="RequestExpectedUpdate"></param>
         /// <returns></returns>
-        public bool IsRequestUpdateMissing(bool RequestUpdateTriggered, DateTime RequestExpectedUpdate)
+        public bool IsRequestUpdateMissing(bool RequestUpdateTriggered, DateTime? RequestExpectedUpdate,DateTime nowTime)
         {
             string callerMethodName = string.Empty;
             try
@@ -189,7 +189,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 bool IsUpdateMissing = false;
                 //Rule R6 :: UserBackend.UpdateTriggered AND (NOW >UserBackend.ExpectedUpdate)
-                if ((RequestUpdateTriggered) && (DateTime.Now > RequestExpectedUpdate))
+                if ((RequestUpdateTriggered) && (nowTime > RequestExpectedUpdate))
                 {
                     IsUpdateMissing = true;
                 }

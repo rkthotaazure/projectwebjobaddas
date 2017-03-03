@@ -71,6 +71,7 @@ namespace adidas.clb.job.UpdateTriggering.Utility
             public const string UserBackendPK = "UB_";
             public const string BackendSynchPK = "BS_";
             public const string RequestSynchPK = "RequestSynch";
+            public const string RequestPK = "Requests_";
             public const string UpdateTriggerNextCollectingTime = "B_NextCollectingTime";
             public const string BackendID = "BackendID";
 

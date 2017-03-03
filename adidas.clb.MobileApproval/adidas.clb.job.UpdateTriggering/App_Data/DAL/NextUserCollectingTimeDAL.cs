@@ -64,8 +64,13 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     //Get all the userbackends associated with the backend
                     TableQuery<UserBackendEntity> tquery = new TableQuery<UserBackendEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.RowKey, QueryComparisons.Equal, backend.RowKey));
                     List<UserBackendEntity> allUserBackends = UserDeviceConfigurationTable.ExecuteQuery(tquery).ToList();
+                    int minUpdateFrequency=0;
+                    if (allUserBackends != null && allUserBackends.Count > 0)
+                    {
+                        minUpdateFrequency = allUserBackends.Min(r => r.DefaultUpdateFrequency);
+                    }
                     //get minimum update frequency from User Backend list
-                    int minUpdateFrequency = allUserBackends.Min(r => r.DefaultUpdateFrequency);
+                    
                     //InsightLogger.TrackEvent("UpdateTriggering, Action :: Collecting the minimum Default Update Frequency of all the userbackends under the backend :" + backendID + " , Response :: Minimum Update Frquency :" + minUpdateFrequency );
                     //Get next collecting hours based on update Triggering Rule :: R1                    
                     int nextCollectingTimeInMinutes;
