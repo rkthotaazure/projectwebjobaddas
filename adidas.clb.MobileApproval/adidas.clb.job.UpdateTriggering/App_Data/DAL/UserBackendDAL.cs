@@ -170,7 +170,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                                 InsightLogger.TrackEvent("UpdateTriggering, Action :: Is User [ " + userBackend.UserID + " ] need update for backend:[" + userBackend.BackendID + " ] based on UT Rule R2 , Response :: true");
                                 //parse data to UpdateTriggeringMsg class and seralize UpdateTriggeringMsg object into json string                           
                                 //put json string into update triggering input queue
-                                AddMessagestoInputQueue(ConvertUserUpdateMsgToUpdateTriggeringMsg(userBackend, BackendID));
+                                this.AddMessagestoInputQueue(ConvertUserUpdateMsgToUpdateTriggeringMsg(userBackend, BackendID));
                             }
                             else
                             {
@@ -484,7 +484,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                                 InsightLogger.TrackEvent("UpdateTriggering, Action :: Is User [ " + muserBackend.UserID + " ] missed updates for the backend:[" + muserBackend.BackendID + " ] based on UT Rule R6 , Response :: true");
                                 //parse data to UpdateTriggeringMsg class and seralize UpdateTriggeringMsg object into json string                           
                                 //put json string into update triggering input queue
-                                AddMessagestoInputQueue(ConvertUserUpdateMsgToUpdateTriggeringMsg(muserBackend, mBackendID));
+                                this.AddMessagestoInputQueue(ConvertUserUpdateMsgToUpdateTriggeringMsg(muserBackend, mBackendID));
                             }
                             else
                             {
@@ -492,7 +492,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             }
 
                             //Checking is any request missed update for this userbackend
-                            CollectsRequestsMissedUpdateByBackendID(muserBackend.BackendID, muserBackend.UserID, curtime);
+                           this.CollectsRequestsMissedUpdateByBackendID(muserBackend.BackendID, muserBackend.UserID, curtime);
 
                         });                       
                       
@@ -530,7 +530,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 if (updateEntity != null)
                 {
                     //get backend details from service layer by backendid
-                    BackendEntity backendDetails = GetBackendDetailsByBackendID(backendID);
+                    BackendEntity backendDetails =this.GetBackendDetailsByBackendID(backendID);
                     if (backendDetails != null)
                     {
                         // update userbackend ExpectedUpdate value  by using update triggering rule :: R3
@@ -574,7 +574,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 //get backend details
-                BackendEntity backendDetails = GetBackendDetailsByBackendID(backendID);
+                BackendEntity backendDetails = this.GetBackendDetailsByBackendID(backendID);
                 if (backendDetails != null)
                 {
                     //get expected update time by using update triggering rule :: R4
@@ -749,7 +749,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                                 reqmissedUpdateslst.Add(requestDetails);
                                 //parse data to UpdateTriggeringMsg class and seralize UpdateTriggeringMsg object into json string                           
                                 //put json string into update triggering input queue
-                                AddMessagestoInputQueue(ConvertRequestUpdateMsgToUpdateTriggeringMsg(reqmissedUpdateslst, rBackendID, rUserID));
+                                this.AddMessagestoInputQueue(ConvertRequestUpdateMsgToUpdateTriggeringMsg(reqmissedUpdateslst, rBackendID, rUserID));
                             }
                             else
                             {
@@ -896,7 +896,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             //if (!string.IsNullOrEmpty(acknowledgment))
                             //{
                             //update ExpectedUpdateTime  with the help of update trigger Rule :: R3
-                            UpdateUserBackendExpectedUpdateTime(backend.BackendID, userID, queueName);
+                            this.UpdateUserBackendExpectedUpdateTime(backend.BackendID, userID, queueName);
                             //}
 
                         }
@@ -980,7 +980,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             //if (!string.IsNullOrEmpty(acknowledgment))
                             //{
                             //update ExpectedUpdateTime  with the help of update trigger Rule :: R3
-                            UpdateRequestExpectedUpdateTime(backendID, lstRequestsByBackend.ToList(), queueName);
+                           this.UpdateRequestExpectedUpdateTime(backendID, lstRequestsByBackend.ToList(), queueName);
                             //}
                             //clearing RequestUpdateMsg list
                             lstRequestsByBackend = null;

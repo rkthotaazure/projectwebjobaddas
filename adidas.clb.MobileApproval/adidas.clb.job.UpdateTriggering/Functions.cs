@@ -257,17 +257,17 @@ namespace adidas.clb.job.UpdateTriggering
                 List<NextUserCollectingTimeEntity> lstbackends = objnextcollentingTime.GetBackendsNeedsUpdate();
                 UserBackendDAL objdal = new UserBackendDAL();
                 //foreach backend  
-                
+                DateTime currentTimestamp = DateTime.Now;
                 Parallel.ForEach<NextUserCollectingTimeEntity>(lstbackends, backend =>               
                 {
                     InsightLogger.TrackEvent("UpdateTriggering, Action :: for each backend :: collect users needing update : start(), Response :: Backend Name : " + backend.BackendID);
                     //getting minutes difference between currenttime and Regular Update Next CollectingTime
-                    double regularWaitingMinutes = (backend.RegularUpdateNextCollectingTime - DateTime.Now).TotalMinutes;
+                    double regularWaitingMinutes = (backend.RegularUpdateNextCollectingTime - currentTimestamp).TotalMinutes;
                     //if minutes difference is with in RegularChecksWaitingTimeInMinutes(>=-5 and <=0) then invoke CollectUsersNeedUpdateByBackend method()
                     if (regularWaitingMinutes >= -(Convert.ToDouble(ConfigurationManager.AppSettings["RegularChecksWaitingTimeInMinutes"])) && regularWaitingMinutes <= 1)
                     {                       
                         //collect the users needing update and keep the messages in update trigger input queue
-                        objdal.CollectUsersNeedUpdateByBackend(backend.BackendID,DateTime.Now);
+                        objdal.CollectUsersNeedUpdateByBackend(backend.BackendID, currentTimestamp);
                         //update the backend entity with new collecting time[i.e LastCollectingTime= NextCollectingTime and NextCollectingTime=NextCollectingTime+(Backend MinimumusersUpdateFrequency)/2 ]
                         objnextcollentingTime.UpdateBackendRegularNextCollectingTime(backend.BackendID, backend.MinimumUpdateFrequency, backend.RegularUpdateNextCollectingTime);
                         InsightLogger.TrackEvent("UpdateTriggering, Action :: for each backend :: collect users needing update : End(), Response :: Success,  Backend Name : " + backend.BackendID);
@@ -319,17 +319,18 @@ namespace adidas.clb.job.UpdateTriggering
                 NextUserCollectingTimeDAL objnextcollectingTime = new NextUserCollectingTimeDAL();
                 //get all the userbackends needs to update
                 List<NextUserCollectingTimeEntity> lstbackends = objnextcollectingTime.GetBackendsNeedsUpdate();
-                UserBackendDAL objUserBackendDAL = new UserBackendDAL();                
+                UserBackendDAL objUserBackendDAL = new UserBackendDAL();
+                DateTime currentTimestampForMissedUpdates = DateTime.Now;
                 Parallel.ForEach<NextUserCollectingTimeEntity>(lstbackends, backend =>
                 {
                     InsightLogger.TrackEvent("UpdateTriggering, Action :: for each backend :: collect missing updates : start() , Response :: Backend Name : " + backend.BackendID);
                     //getting minutes difference between currenttime and Missing Update Next CollectingTime
-                    double waitingMinutes = (backend.MissingUpdateNextCollectingTime - DateTime.Now).TotalMinutes;
+                    double waitingMinutes = (backend.MissingUpdateNextCollectingTime - currentTimestampForMissedUpdates).TotalMinutes;
                     //if minutes difference is with in RegularChecksWaitingTimeInMinutes(>=-8 and <=0) then invoke MissedUpdatesWaitingTimeInMinutes method()
                     if (waitingMinutes >= -(Convert.ToDouble(ConfigurationManager.AppSettings["MissedUpdatesWaitingTimeInMinutes"])) && waitingMinutes <= 0)
                     {
                         //collects the missed update userbackends,Requests and convert into update trigger message format and put into UT input queue
-                        objUserBackendDAL.CollectUsersMissedUpdatesByBackend(backend.BackendID,DateTime.Now);
+                        objUserBackendDAL.CollectUsersMissedUpdatesByBackend(backend.BackendID, currentTimestampForMissedUpdates);
                         //Task[] tasksMissedUpdates = new Task[2];
                         ////
                         //tasksMissedUpdates[0] = Task.Factory.StartNew(() => );
