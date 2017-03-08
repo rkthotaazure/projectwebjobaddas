@@ -75,7 +75,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 //read Userbackends from azure table which are needs update
                 tasks[0] = Task.Factory.StartNew(() => ReadUsrBackendsDataFromAzureTable(UserDeviceConfigurationTable, tquery, entityCollection), TaskCreationOptions.LongRunning);
                 //write update trigger messages into input queue
-                tasks[1] = Task.Factory.StartNew(() => WriteMessagesIntoInputQueue(entityCollection, BackendID,currentTime), TaskCreationOptions.LongRunning);
+                tasks[1] = Task.Factory.StartNew(() => WriteMessagesIntoInputQueue(entityCollection, BackendID, currentTime), TaskCreationOptions.LongRunning);
                 int timeoutperiod = Convert.ToInt32(CloudConfigurationManager.GetSetting("timeoutperiod"));
                 if (!Task.WaitAll(tasks, timeoutperiod, cts.Token))
                 {
@@ -149,37 +149,37 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         /// </summary>
         /// <param name="source"></param>
         /// <param name="ObjBackend"></param>
-        private void WriteMessagesIntoInputQueue(BlockingCollection<List<UserBackend>> source, string BackendID,DateTime currentTimeStamp)
+        private void WriteMessagesIntoInputQueue(BlockingCollection<List<UserBackend>> source, string BackendID, DateTime currentTimeStamp)
         {
-            string callerMethodName = string.Empty;
+            string callerMethodName = string.Empty;           
             try
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-
-                foreach (var item in source.GetConsumingEnumerable())
+                Parallel.ForEach(source.GetConsumingEnumerable(), item => 
                 {
                     if (item.ToList() != null)
                     {
                         List<string> msgFormat = new List<string>();
-                        Parallel.ForEach<UserBackend>(item.ToList(), userBackend => 
+                        Parallel.ForEach<UserBackend>(item.ToList(), userBackend =>
                         {
                             //checking is user backend needs update or not with the help of Updatetriggering rule R2
                             if (userBackend.LastUpdate != null && utRule.IsuserBackendNeedsUpdate(userBackend.UpdateTriggered, userBackend.LastUpdate, userBackend.DefaultUpdateFrequency, currentTimeStamp))
                             {
+                                
                                 InsightLogger.TrackEvent("UpdateTriggering, Action :: Is User [ " + userBackend.UserID + " ] need update for backend:[" + userBackend.BackendID + " ] based on UT Rule R2 , Response :: true");
-                                //parse data to UpdateTriggeringMsg class and seralize UpdateTriggeringMsg object into json string                           
-                                //put json string into update triggering input queue
-                                this.AddMessagestoInputQueue(ConvertUserUpdateMsgToUpdateTriggeringMsg(userBackend, BackendID));
+                                //parse data to UpdateTriggeringMsg class and seralize UpdateTriggeringMsg object into json string
+                                ConvertUserUpdateMsgToUpdateTriggeringMsg(userBackend, BackendID);
+                                
                             }
                             else
                             {
                                 InsightLogger.TrackEvent("UpdateTriggering, Action :: Is User [ " + userBackend.UserID + " ] need update for backend:[" + userBackend.BackendID + " ] based on UT Rule R2 , Response :: false");
                             }
-                        });                                            
+                        });
                     }
 
-                }
+                });
             }
             catch (BusinessLogicException dalexception)
             {
@@ -214,7 +214,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 AsyncCallback callBack = new AsyncCallback(AddMessageComplete);
                 int documentCount = 0;
                 //add each message from list
-                if(string.IsNullOrEmpty(content))
+                if (string.IsNullOrEmpty(content))
                 {
                     string dMessage = string.Empty;
                     dMessage = content;
@@ -264,7 +264,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         /// <param name="objuserBackend"></param>
         /// <param name="BackendName"></param>
         /// <returns></returns>
-        private string ConvertUserUpdateMsgToUpdateTriggeringMsg(UserBackend objuserBackend, string BackendName)
+        private void ConvertUserUpdateMsgToUpdateTriggeringMsg(UserBackend objuserBackend, string BackendName)
         {
             string callerMethodName = string.Empty;
             try
@@ -309,8 +309,9 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 //Serialize UpdateTriggeringMsg Object into json string
                 updatetriggeringmsg = JsonConvert.SerializeObject(ObjUTMsg);
                 InsightLogger.TrackEvent("UpdateTriggering, Action :: Prepare update triggering message , Response :: message:" + updatetriggeringmsg);
-
-                return updatetriggeringmsg;
+                //put json string into update triggering input queue
+                AddMessagestoInputQueue(updatetriggeringmsg);
+                //return updatetriggeringmsg;
             }
             catch (Exception exception)
             {
@@ -371,7 +372,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         /// This method collects all the user backends which are missed updates based on BackendID
         /// </summary>
         /// <param name="BackendID"></param>
-        public void CollectUsersMissedUpdatesByBackend(string BackendID,DateTime currentTimestamp)
+        public void CollectUsersMissedUpdatesByBackend(string BackendID, DateTime currentTimestamp)
         {
             string callerMethodName = string.Empty;
             try
@@ -387,7 +388,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 Task[] tasks = new Task[2];
                 var entityUserMissedupdateCollection = new BlockingCollection<List<UserBackend>>();
                 tasks[0] = Task.Factory.StartNew(() => ReadMissedUpdatesFromUsrBackendsDataFromAzureTable(UserMissedDeviceConfigurationTable, tquerymissedupdate, entityUserMissedupdateCollection), TaskCreationOptions.LongRunning);
-                tasks[1] = Task.Factory.StartNew(() => WriteMissedUpdatesMessagesIntoInputQueue(entityUserMissedupdateCollection, BackendID,currentTimestamp), TaskCreationOptions.LongRunning);
+                tasks[1] = Task.Factory.StartNew(() => WriteMissedUpdatesMessagesIntoInputQueue(entityUserMissedupdateCollection, BackendID, currentTimestamp), TaskCreationOptions.LongRunning);
                 int timeoutperiod = Convert.ToInt32(CloudConfigurationManager.GetSetting("timeoutperiod"));
                 if (!Task.WaitAll(tasks, timeoutperiod, cts.Token))
                 {
@@ -464,27 +465,27 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         /// </summary>
         /// <param name="msource"></param>
         /// <param name="mBackendID"></param>
-        private void WriteMissedUpdatesMessagesIntoInputQueue(BlockingCollection<List<UserBackend>> msource, string mBackendID,DateTime curtime)
+        private void WriteMissedUpdatesMessagesIntoInputQueue(BlockingCollection<List<UserBackend>> msource, string mBackendID, DateTime curtime)
         {
-            string callerMethodName = string.Empty;
+            string callerMethodName = string.Empty;            
             try
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                foreach (var mitem in msource.GetConsumingEnumerable())
-                {
+                Parallel.ForEach(msource.GetConsumingEnumerable(), mitem => 
+                {               
                     if (mitem.ToList() != null)
                     {
                         List<string> msgFormat = new List<string>();
-                        Parallel.ForEach<UserBackend>(mitem.ToList(), muserBackend => 
+                        Parallel.ForEach<UserBackend>(mitem.ToList(), muserBackend =>
                         {
                             //checking is user backend update missing or not with the help of Updatetriggering rule R6
                             if (utRule.IsUserUpdateMissing(muserBackend.UpdateTriggered, muserBackend.ExpectedUpdate, curtime))
-                            {
+                            {                                
                                 InsightLogger.TrackEvent("UpdateTriggering, Action :: Is User [ " + muserBackend.UserID + " ] missed updates for the backend:[" + muserBackend.BackendID + " ] based on UT Rule R6 , Response :: true");
                                 //parse data to UpdateTriggeringMsg class and seralize UpdateTriggeringMsg object into json string                           
-                                //put json string into update triggering input queue
-                                this.AddMessagestoInputQueue(ConvertUserUpdateMsgToUpdateTriggeringMsg(muserBackend, mBackendID));
+                                ConvertUserUpdateMsgToUpdateTriggeringMsg(muserBackend, mBackendID);
+                                
                             }
                             else
                             {
@@ -492,13 +493,13 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             }
 
                             //Checking is any request missed update for this userbackend
-                           this.CollectsRequestsMissedUpdateByBackendID(muserBackend.BackendID, muserBackend.UserID, curtime);
+                            CollectsRequestsMissedUpdateByBackendID(muserBackend.BackendID, muserBackend.UserID, curtime);
 
-                        });                       
-                      
+                        });
+
                     }
 
-                }
+                });
             }
             catch (BusinessLogicException dalexception)
             {
@@ -530,7 +531,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 if (updateEntity != null)
                 {
                     //get backend details from service layer by backendid
-                    BackendEntity backendDetails =this.GetBackendDetailsByBackendID(backendID);
+                    BackendEntity backendDetails = GetBackendDetailsByBackendID(backendID);
                     if (backendDetails != null)
                     {
                         // update userbackend ExpectedUpdate value  by using update triggering rule :: R3
@@ -574,7 +575,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 //get backend details
-                BackendEntity backendDetails = this.GetBackendDetailsByBackendID(backendID);
+                BackendEntity backendDetails = GetBackendDetailsByBackendID(backendID);
                 if (backendDetails != null)
                 {
                     //get expected update time by using update triggering rule :: R4
@@ -601,14 +602,14 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
 
                         }
                     }
-                   
+
 
                 }
                 else
                 {
                     InsightLogger.TrackEvent(QueueName + " , Action :: Compute and set Expected Updated Timestamp for requests based on UT Rule :: R4  ,  Response : Failed");
 
-                }         
+                }
             }
             catch (BusinessLogicException dalexception)
             {
@@ -624,7 +625,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         /// This methid collects missed requests which have missed updates and put these requests into UT input queue in requestsUpdateMsg Format
         /// </summary>
         /// <param name="backendID"></param>
-        public void CollectsRequestsMissedUpdateByBackendID(string backendID,string userID,DateTime timestamp)
+        public void CollectsRequestsMissedUpdateByBackendID(string backendID, string userID, DateTime timestamp)
         {
             string callerMethodName = string.Empty;
             try
@@ -725,40 +726,40 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         /// </summary>
         /// <param name="rsource"></param>
         /// <param name="rBackendID"></param>
-        private void WriteMissedUpdatesRequestsIntoInputQueue(BlockingCollection<List<RequestEntity>> rsource, string rBackendID,string rUserID,DateTime CurTimestamp)
+        private void WriteMissedUpdatesRequestsIntoInputQueue(BlockingCollection<List<RequestEntity>> rsource, string rBackendID, string rUserID, DateTime CurTimestamp)
         {
-            string callerMethodName = string.Empty;
+            string callerMethodName = string.Empty;           
             try
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-
-                foreach (var requestitem in rsource.GetConsumingEnumerable())
+                Parallel.ForEach(rsource.GetConsumingEnumerable(), requestitem =>  
                 {
                     if (requestitem.ToList() != null)
                     {
                         List<string> rmsgFormat = new List<string>();
                         List<RequestEntity> reqmissedUpdateslst = new List<Models.RequestEntity>();
-                        Parallel.ForEach<RequestEntity>(requestitem.ToList(), requestDetails => 
+                        Parallel.ForEach<RequestEntity>(requestitem.ToList(), requestDetails =>
                         {
                             //checking is request  update missing or not with the help of Updatetriggering rule R6
                             if (utRule.IsRequestUpdateMissing(requestDetails.UpdateTriggered, requestDetails.ExpectedUpdate, CurTimestamp))
                             {
+                                
                                 InsightLogger.TrackEvent("UpdateTriggering, Action :: Is Request [ " + requestDetails.RowKey + " ] needs update based on UT Rule R6 , Response :: true");
                                 //add request details to RequestSynchEntity list
                                 reqmissedUpdateslst.Add(requestDetails);
-                                //parse data to UpdateTriggeringMsg class and seralize UpdateTriggeringMsg object into json string                           
-                                //put json string into update triggering input queue
-                                this.AddMessagestoInputQueue(ConvertRequestUpdateMsgToUpdateTriggeringMsg(reqmissedUpdateslst, rBackendID, rUserID));
+                                //parse data to UpdateTriggeringMsg class and seralize UpdateTriggeringMsg object into json string 
+                                ConvertRequestUpdateMsgToUpdateTriggeringMsg(reqmissedUpdateslst, rBackendID, rUserID);
+                                
                             }
                             else
                             {
                                 InsightLogger.TrackEvent("UpdateTriggering, Action :: Is Request [ " + requestDetails.RowKey + " ] needs update based on UT Rule R6 , Response :: false");
                             }
-                        });                      
+                        });
                     }
 
-                }
+                });
             }
             catch (BusinessLogicException dalexception)
             {
@@ -777,7 +778,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         /// <param name="objrequestSynch"></param>
         /// <param name="rBackendName"></param>
         /// <returns></returns>
-        private string ConvertRequestUpdateMsgToUpdateTriggeringMsg(List<RequestEntity> reqlst, string rBackendName,string userID)
+        private void ConvertRequestUpdateMsgToUpdateTriggeringMsg(List<RequestEntity> reqlst, string rBackendName, string userID)
         {
             string callerMethodName = string.Empty;
             try
@@ -787,7 +788,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 //add RequestUpdateMsg to list
                 List<RequestUpdateMsg> lstRequestUpdateMsg = new List<RequestUpdateMsg>();
 
-                string updatetriggeringmsg = string.Empty;
+                string requpdatetriggeringmsg = string.Empty;
                 foreach (RequestEntity objrequestSynch in reqlst)
                 {
                     //create object and assign values to properties for Backend class 
@@ -824,8 +825,10 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
 
                 };
                 //Serialize UpdateTriggeringMsg Object into json string
-                updatetriggeringmsg = JsonConvert.SerializeObject(ObjUTMsg);
-                return updatetriggeringmsg;
+                requpdatetriggeringmsg = JsonConvert.SerializeObject(ObjUTMsg);
+                //put json string into update triggering input queue
+                AddMessagestoInputQueue(requpdatetriggeringmsg);
+               // return updatetriggeringmsg;
             }
             catch (Exception exception)
             {
@@ -896,7 +899,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             //if (!string.IsNullOrEmpty(acknowledgment))
                             //{
                             //update ExpectedUpdateTime  with the help of update trigger Rule :: R3
-                            this.UpdateUserBackendExpectedUpdateTime(backend.BackendID, userID, queueName);
+                            UpdateUserBackendExpectedUpdateTime(backend.BackendID, userID, queueName);
                             //}
 
                         }
@@ -980,7 +983,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             //if (!string.IsNullOrEmpty(acknowledgment))
                             //{
                             //update ExpectedUpdateTime  with the help of update trigger Rule :: R3
-                           this.UpdateRequestExpectedUpdateTime(backendID, lstRequestsByBackend.ToList(), queueName);
+                            UpdateRequestExpectedUpdateTime(backendID, lstRequestsByBackend.ToList(), queueName);
                             //}
                             //clearing RequestUpdateMsg list
                             lstRequestsByBackend = null;

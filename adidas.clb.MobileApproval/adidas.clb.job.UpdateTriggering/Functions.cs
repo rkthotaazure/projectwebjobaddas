@@ -262,9 +262,10 @@ namespace adidas.clb.job.UpdateTriggering
                 {
                     InsightLogger.TrackEvent("UpdateTriggering, Action :: for each backend :: collect users needing update : start(), Response :: Backend Name : " + backend.BackendID);
                     //getting minutes difference between currenttime and Regular Update Next CollectingTime
-                    double regularWaitingMinutes = (backend.RegularUpdateNextCollectingTime - currentTimestamp).TotalMinutes;
+                    TimeSpan span = backend.RegularUpdateNextCollectingTime.Subtract(currentTimestamp);
+                    int minutes = span.Minutes;                   
                     //if minutes difference is with in RegularChecksWaitingTimeInMinutes(>=-5 and <=0) then invoke CollectUsersNeedUpdateByBackend method()
-                    if (regularWaitingMinutes >= -(Convert.ToDouble(ConfigurationManager.AppSettings["RegularChecksWaitingTimeInMinutes"])) && regularWaitingMinutes <= 1)
+                    if (minutes >= -(Convert.ToInt32(ConfigurationManager.AppSettings["RegularChecksWaitingTimeInMinutes"])) && minutes <=0)
                     {                       
                         //collect the users needing update and keep the messages in update trigger input queue
                         objdal.CollectUsersNeedUpdateByBackend(backend.BackendID, currentTimestamp);
@@ -325,9 +326,10 @@ namespace adidas.clb.job.UpdateTriggering
                 {
                     InsightLogger.TrackEvent("UpdateTriggering, Action :: for each backend :: collect missing updates : start() , Response :: Backend Name : " + backend.BackendID);
                     //getting minutes difference between currenttime and Missing Update Next CollectingTime
-                    double waitingMinutes = (backend.MissingUpdateNextCollectingTime - currentTimestampForMissedUpdates).TotalMinutes;
+                    TimeSpan tspan = backend.RegularUpdateNextCollectingTime.Subtract(currentTimestampForMissedUpdates);
+                    int waitingMinutes = tspan.Minutes;
                     //if minutes difference is with in RegularChecksWaitingTimeInMinutes(>=-8 and <=0) then invoke MissedUpdatesWaitingTimeInMinutes method()
-                    if (waitingMinutes >= -(Convert.ToDouble(ConfigurationManager.AppSettings["MissedUpdatesWaitingTimeInMinutes"])) && waitingMinutes <= 0)
+                    if (waitingMinutes >= -(Convert.ToInt32(ConfigurationManager.AppSettings["MissedUpdatesWaitingTimeInMinutes"])) && waitingMinutes <= 0)
                     {
                         //collects the missed update userbackends,Requests and convert into update trigger message format and put into UT input queue
                         objUserBackendDAL.CollectUsersMissedUpdatesByBackend(backend.BackendID, currentTimestampForMissedUpdates);
