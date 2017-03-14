@@ -29,6 +29,7 @@ namespace adidas.clb.job.UpdateTriggering
     {
         //Application insights interface reference for logging the error details into Application Insight azure service.
         static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
+        public static string azureTableUserDeviceConfiguration = ConfigurationManager.AppSettings["AzureTables.UserDeviceConfiguration"];
         // This function will get triggered/executed when a new message is written 
         // on an Azure Queue called queue.
         /// <summary>
@@ -49,7 +50,7 @@ namespace adidas.clb.job.UpdateTriggering
                 {
                     //log.WriteLine("adidas.clb.job.UpdateTriggering :: Processing update triggering queue message :: start()" + message);
                     //write message into application insights
-                    InsightLogger.TrackEvent(queueName + " , Action :: UpdateTriggering input queue triggered : Start(), \n Response :: Message:" + message );
+                    InsightLogger.TrackEvent(queueName + " , Action :: UpdateTriggering input queue triggered : Start(), \n Response :: Message:" + message);
                     //Deserializ input queue message into UpdateTriggeringMsg object
                     UpdateTriggeringMsg objUTMsg = JsonConvert.DeserializeObject<UpdateTriggeringMsg>(message);
                     //checking UpdateTriggeringMsg is null or not
@@ -110,7 +111,7 @@ namespace adidas.clb.job.UpdateTriggering
             catch (Exception exception)
             {
                 //write exception message to web job dashboard logs
-               // log.WriteLine(exception.Message);
+                // log.WriteLine(exception.Message);
                 //write exception into application insights
                 InsightLogger.Exception(exception.Message, exception, callerMethodName);
 
@@ -203,7 +204,7 @@ namespace adidas.clb.job.UpdateTriggering
 
             }
         }
-        
+
         /// <summary>        
         /// This method updates all the backends next collecting time in Azure Referencedata table
         /// This method triggered based on given time interval(i.e MyDailyScheduleForUpdateNextCollectingTime)
@@ -216,11 +217,11 @@ namespace adidas.clb.job.UpdateTriggering
             {
                 //Get Caller Method name from CallerInformation class                
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                bool IsFirstTime = false;                
+                bool IsFirstTime = false;
                 ////Create object for NextUserCollectingTime class
                 NextUserCollectingTimeDAL objdal = new NextUserCollectingTimeDAL();
                 //call the UpdateNextCollectingTime method which will update the Next Collecting Time of the each backend
-                objdal.UpdateNextCollectingTime(IsFirstTime);                
+                objdal.UpdateNextCollectingTime(IsFirstTime);
                 // InsightLogger.TrackEndEvent(callerMethodName);
             }
             catch (DataAccessException dalexception)
@@ -251,22 +252,22 @@ namespace adidas.clb.job.UpdateTriggering
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                
+
                 NextUserCollectingTimeDAL objnextcollentingTime = new NextUserCollectingTimeDAL();
                 //get all the userbackends needs to update
                 List<NextUserCollectingTimeEntity> lstbackends = objnextcollentingTime.GetBackendsNeedsUpdate();
-                UserBackendDAL objdal = new UserBackendDAL();
                 //foreach backend  
                 DateTime currentTimestamp = DateTime.Now;
-                Parallel.ForEach<NextUserCollectingTimeEntity>(lstbackends, backend =>               
+                Parallel.ForEach<NextUserCollectingTimeEntity>(lstbackends, backend =>
                 {
                     InsightLogger.TrackEvent("UpdateTriggering, Action :: for each backend :: collect users needing update : start(), Response :: Backend Name : " + backend.BackendID);
                     //getting minutes difference between currenttime and Regular Update Next CollectingTime
                     TimeSpan span = backend.RegularUpdateNextCollectingTime.Subtract(currentTimestamp);
-                    int minutes = span.Minutes;                   
+                    int minutes = span.Minutes;
                     //if minutes difference is with in RegularChecksWaitingTimeInMinutes(>=-5 and <=0) then invoke CollectUsersNeedUpdateByBackend method()
-                    if (minutes >= -(Convert.ToInt32(ConfigurationManager.AppSettings["RegularChecksWaitingTimeInMinutes"])) && minutes <=0)
-                    {                       
+                    if (minutes >= -(Convert.ToInt32(ConfigurationManager.AppSettings["RegularChecksWaitingTimeInMinutes"])) && minutes <= 0)
+                    {
+                        UserBackendDAL objdal = new UserBackendDAL();
                         //collect the users needing update and keep the messages in update trigger input queue
                         objdal.CollectUsersNeedUpdateByBackend(backend.BackendID, currentTimestamp);
                         //update the backend entity with new collecting time[i.e LastCollectingTime= NextCollectingTime and NextCollectingTime=NextCollectingTime+(Backend MinimumusersUpdateFrequency)/2 ]
@@ -280,12 +281,12 @@ namespace adidas.clb.job.UpdateTriggering
                     }
 
                 });
-               
+
             }
             catch (BusinessLogicException balexception)
             {
                 //write exception message to web job dashboard logs
-               // log.WriteLine(balexception.Message);
+                // log.WriteLine(balexception.Message);
                 //write (Business Logic Exception into application insights
                 InsightLogger.Exception(balexception.Message, balexception, callerMethodName);
             }
@@ -298,7 +299,7 @@ namespace adidas.clb.job.UpdateTriggering
             }
             catch (Exception exception)
             {
-              //  log.WriteLine("Error in adidas.clb.job.UpdateTriggering :: Functions :: RegularChecksforBackendNeedsUpdate() :: Exception Message=" + exception.Message);
+                //  log.WriteLine("Error in adidas.clb.job.UpdateTriggering :: Functions :: RegularChecksforBackendNeedsUpdate() :: Exception Message=" + exception.Message);
                 //write exception into application insights
                 InsightLogger.Exception(exception.Message, exception, callerMethodName);
             }
@@ -315,12 +316,12 @@ namespace adidas.clb.job.UpdateTriggering
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-               // InsightLogger.TrackStartEvent(callerMethodName);
+                // InsightLogger.TrackStartEvent(callerMethodName);
                 //foreach backend               
                 NextUserCollectingTimeDAL objnextcollectingTime = new NextUserCollectingTimeDAL();
                 //get all the userbackends needs to update
                 List<NextUserCollectingTimeEntity> lstbackends = objnextcollectingTime.GetBackendsNeedsUpdate();
-                UserBackendDAL objUserBackendDAL = new UserBackendDAL();
+
                 DateTime currentTimestampForMissedUpdates = DateTime.Now;
                 Parallel.ForEach<NextUserCollectingTimeEntity>(lstbackends, backend =>
                 {
@@ -331,15 +332,9 @@ namespace adidas.clb.job.UpdateTriggering
                     //if minutes difference is with in RegularChecksWaitingTimeInMinutes(>=-8 and <=0) then invoke MissedUpdatesWaitingTimeInMinutes method()
                     if (waitingMinutes >= -(Convert.ToInt32(ConfigurationManager.AppSettings["MissedUpdatesWaitingTimeInMinutes"])) && waitingMinutes <= 0)
                     {
+                        UserBackendDAL objUserBackendDAL = new UserBackendDAL();
                         //collects the missed update userbackends,Requests and convert into update trigger message format and put into UT input queue
                         objUserBackendDAL.CollectUsersMissedUpdatesByBackend(backend.BackendID, currentTimestampForMissedUpdates);
-                        //Task[] tasksMissedUpdates = new Task[2];
-                        ////
-                        //tasksMissedUpdates[0] = Task.Factory.StartNew(() => );
-                        ////collects the missed update requests and convert into update trigger message format and put into UT input queue
-                        //tasksMissedUpdates[1] = Task.Factory.StartNew(() => objUserBackendDAL.CollectsRequestsMissedUpdateByBackendID(backend.BackendID));
-                        //Task.WaitAll(tasksMissedUpdates);
-                        
                         //update the backend entity with new missing update collecting time[i.e MissingUpdateLastCollectingTime= MissingUpdateNextCollectingTime and MissingUpdateNextCollectingTime=Max(]
                         objnextcollectingTime.UpdateMisseduserBackendNextCollectingTime(backend.BackendID, backend.MissingUpdateNextCollectingTime);
                         InsightLogger.TrackEvent("UpdateTriggering, Action :: for each backend :: collect missing updates : End() , Response :: Success, Backend Name : " + backend.BackendID);
@@ -350,7 +345,7 @@ namespace adidas.clb.job.UpdateTriggering
 
                     }
                 });
-               
+
             }
             catch (BusinessLogicException balexception)
             {
@@ -368,13 +363,83 @@ namespace adidas.clb.job.UpdateTriggering
             }
             catch (Exception exception)
             {
-               // log.WriteLine("Error in adidas.clb.job.UpdateTriggering :: Functions :: RegularChecksforUserbackendLostsUpdate() :: Exception Message=" + exception.Message);
+                // log.WriteLine("Error in adidas.clb.job.UpdateTriggering :: Functions :: RegularChecksforUserbackendLostsUpdate() :: Exception Message=" + exception.Message);
                 //write  Exception into application insights
                 InsightLogger.Exception(exception.Message, exception, callerMethodName);
             }
 
         }
-                
+        /// <summary>
+        /// This method collects the request which are not updated
+        /// </summary>
+        /// <param name="timerInfo"></param>
+        /// <param name="log"></param>
+        //public static void CollectsRequests([TimerTrigger(typeof(MyDailyScheduleForRequestsUpdateNextCollectingTime))] TimerInfo timerInfo, TextWriter log)
+        //{
+        //    string callerMethodName = string.Empty;
+        //    try
+        //    {
+        //        //Get Caller Method name from CallerInformation class
+        //        callerMethodName = CallerInformation.TrackCallerMethodName();
+        //        //get's azure table instance
+        //        CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(azureTableUserDeviceConfiguration);                    
+        //        UserBackendDAL objdal = new UserBackendDAL();
+        //        //Get all backends    
+        //        List<BackendEntity> lstbackends = objdal.GetBackends();
+        //        //get current timestamp
+        //        DateTime currentTimestampForRequestUpdates = DateTime.Now;
+        //        //for each backend
+        //        Parallel.ForEach<BackendEntity>(lstbackends, backend =>
+        //        {
+        //            //get backend id from backend entity
+        //            string backendID = backend.RowKey;
+        //            //table queryGet for getting the all userbackends associated with the backend
+        //            TableQuery<UserBackendEntity> tquery = new TableQuery<UserBackendEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.RowKey, QueryComparisons.Equal, backend.RowKey));
+        //            //query returns response into UserBackendEntity list
+        //            List<UserBackendEntity> allUserBackends = UserDeviceConfigurationTable.ExecuteQuery(tquery).ToList();
+        //            if (allUserBackends != null && allUserBackends.Count > 0)
+        //            {
+        //                //for each userbackend
+        //                foreach (UserBackendEntity userbackend in allUserBackends)
+        //                {
+        //                    //get user id from userbacekdn entity
+        //                    string userID = userbackend.UserID;
+        //                    //get update frequency of the user backend
+        //                    double updateFrequency = Convert.ToDouble(userbackend.DefaultUpdateFrequency);
+        //                    InsightLogger.TrackEvent("UpdateTriggering, Action :: for each user backend :: Verify request is update or not :: start() , Response :: Backend Name : " + backend.BackendID + "user ID : " + userID);
+        //                    //Collect the requests which are not updated based on approval sych rule r5
+        //                    objdal.CollectsRequestsNeedsUpdateByUserBackend(backendID, userID, currentTimestampForRequestUpdates, updateFrequency);
+        //                    InsightLogger.TrackEvent("UpdateTriggering, Action :: for each user backend :: Verify request is update or not :: End() , Response :: Backend Name : " + backend.BackendID + "user ID : " + userID);
+
+        //                }
+
+        //            }
+        //        });
+
+        //    }
+        //    catch (BusinessLogicException balexception)
+        //    {
+        //        //write exception message to web job dashboard logs
+        //        //log.WriteLine(balexception.Message);
+        //        //write Business Logic Exception into application insights
+        //        InsightLogger.Exception(balexception.Message, balexception, callerMethodName);
+        //    }
+        //    catch (DataAccessException dalexception)
+        //    {
+        //        //write exception message to web job dashboard logs
+        //        //log.WriteLine(dalexception.Message);
+        //        //write Data layer logic Exception into application insights
+        //        InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
+        //    }
+        //    catch (Exception exception)
+        //    {
+        //        // log.WriteLine("Error in adidas.clb.job.UpdateTriggering :: Functions :: RegularChecksforUserbackendLostsUpdate() :: Exception Message=" + exception.Message);
+        //        //write  Exception into application insights
+        //        InsightLogger.Exception(exception.Message, exception, callerMethodName);
+        //    }
+
+        //}
+
         /// <summary>
         /// This method generates time intervals based on given minutes time span
         /// </summary>
@@ -488,6 +553,16 @@ namespace adidas.clb.job.UpdateTriggering
 
             }
         }
+        /// <summary>
+        /// This class generates the time schedule for collecting the requests which are not updated from azure layer based on application configuration setting value
+        /// </summary>
+        //public class MyDailyScheduleForRequestsUpdateNextCollectingTime : DailySchedule
+        //{
+        //    public MyDailyScheduleForRequestsUpdateNextCollectingTime() : base(GetTimeIntervals(int.Parse(ConfigurationManager.AppSettings["DailyScheduleForRequestsUpdateNextCollectingTime"])))
+        //    {
+
+        //    }
+        //}
 
     }
 
