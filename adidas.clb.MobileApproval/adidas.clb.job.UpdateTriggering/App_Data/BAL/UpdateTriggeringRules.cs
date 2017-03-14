@@ -137,6 +137,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                 DateTime nextMissingCollectingTime;
                 //Now + Max(Backend.AverageRequestsLatency;Backend.LastRequestLatency)*1.2
                 nextMissingCollectingTime = MissedUpdateLastCollectingTime.AddSeconds((Math.Max(BackendAverageAllRequestsLatency, BackendLastAllRequestsLatency)) / 2);
+                InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Compute and set Next Missing Collecting TimeStamp for backend(UT Rule :: R5) ,  Response : Next missed collecting Time ::" + Convert.ToString(nextMissingCollectingTime));
                 return nextMissingCollectingTime;
             }
             catch (Exception exception)
@@ -194,6 +195,36 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                     IsUpdateMissing = true;
                 }
                 return IsUpdateMissing;
+            }
+            catch (Exception exception)
+            {
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+
+                throw new BusinessLogicException(exception.Message, exception.InnerException);
+            }
+        }
+        /// <summary>
+        /// This method verifies the request needs update or not
+        /// </summary>
+        /// <param name="RequestUpdateTriggered"></param>
+        /// <param name="RequestLastUpdate"></param>
+        /// <param name="UserBackendUpdateFrequency"></param>
+        /// <param name="nowTime"></param>
+        /// <returns></returns>
+        public bool IsRequestUpdated(bool RequestUpdateTriggered, DateTime RequestLastUpdate,double UserBackendUpdateFrequency, DateTime nowTime)
+        {
+            string callerMethodName = string.Empty;
+            try
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                bool isRequestUpdated = false;
+                //Approval Sync Rule R5 
+                if ((!RequestUpdateTriggered) && ((RequestLastUpdate.AddSeconds(ConvertMinutesToSeconds(UserBackendUpdateFrequency))) > nowTime))
+                {
+                    isRequestUpdated = true;
+                }
+                return isRequestUpdated;
             }
             catch (Exception exception)
             {
