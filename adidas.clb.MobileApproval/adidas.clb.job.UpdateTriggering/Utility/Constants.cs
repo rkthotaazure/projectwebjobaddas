@@ -74,7 +74,7 @@ namespace adidas.clb.job.UpdateTriggering.Utility
             public const string RequestPK = "Requests_";
             public const string UpdateTriggerNextCollectingTime = "B_NextCollectingTime";
             public const string BackendID = "BackendID";
-
+            public const string Status = "Status";
         }
         public struct AzureQueues
         {

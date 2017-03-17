@@ -654,11 +654,17 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 //get's azure table instance
                 CloudTable RequestsMissedDeviceConfigurationTable = DataProvider.GetAzureTableInstance(azureTableRequestTransactions);
                 //Get all the userbackends associated with the backend
-
+                //partition key
                 string partitionFilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, CoreConstants.AzureTables.RequestPK + userID);
+                //row key
                 string rowfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.BackendID, QueryComparisons.Equal, backendID);
-                TableQuery<RequestEntity> tquerymissedRequests = new TableQuery<RequestEntity>().Where(TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowfilter));
-
+                //TableQuery<RequestEntity> tquerymissedRequests = new TableQuery<RequestEntity>().Where(TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowfilter));
+                //status filter
+                string statusfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.Status, QueryComparisons.NotEqual, Convert.ToString(ConfigurationManager.AppSettings["RequestStatus"]));
+                string combinedFilter = string.Format("({0}) {1} ({2}) {3} ({4})", partitionFilter, TableOperators.And, rowfilter, TableOperators.And, statusfilter);
+                //combine all the filters with And operator
+                TableQuery<RequestEntity> tquerymissedRequests = new TableQuery<RequestEntity>().Where(combinedFilter);
+                //create task which will parallelly read & checks the Rules from azure table
                 Task[] taskRequestCollection = new Task[2];
                 var entityMissedupdateRequestsCollection = new BlockingCollection<List<RequestEntity>>();
                 taskRequestCollection[0] = Task.Factory.StartNew(() => ReadMissedUpdatesRequestsByBackend(RequestsMissedDeviceConfigurationTable, tquerymissedRequests, entityMissedupdateRequestsCollection), TaskCreationOptions.LongRunning);
@@ -1076,8 +1082,11 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
 
                 string partitionKeyFilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, CoreConstants.AzureTables.RequestPK + userID);
                 string rowKeyfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.BackendID, QueryComparisons.Equal, backendID);
-                TableQuery<RequestEntity> tqueryRequests = new TableQuery<RequestEntity>().Where(TableQuery.CombineFilters(partitionKeyFilter, TableOperators.And, rowKeyfilter));
-
+                string statusfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.Status, QueryComparisons.NotEqual, Convert.ToString(ConfigurationManager.AppSettings["RequestStatus"]));
+                string combinedFilter = string.Format("({0}) {1} ({2}) {3} ({4})", partitionKeyFilter, TableOperators.And, rowKeyfilter, TableOperators.And, statusfilter);
+                //combine all the filters with And operator
+                TableQuery<RequestEntity> tqueryRequests = new TableQuery<RequestEntity>().Where(combinedFilter);
+                //create task which will parallelly read & checks the Rules from azure table
                 Task[] taskReqCollection = new Task[2];
                 var entityReqCollection = new BlockingCollection<List<RequestEntity>>();
                 taskReqCollection[0] = Task.Factory.StartNew(() => ReadRequestsEntitiesByBackend(RequestsConfigurationTable, tqueryRequests, entityReqCollection), TaskCreationOptions.LongRunning);
