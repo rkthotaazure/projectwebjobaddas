@@ -824,7 +824,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 //add RequestUpdateMsg to list
-                List<RequestUpdateMsg> lstRequestUpdateMsg = new List<RequestUpdateMsg>();
+                List<RequestUpdateMsg> lstRequestUpdateMsg = null;
                 string requpdatetriggeringmsg = string.Empty;
                 //split the request list into number of child lists based on batch size and put the child lists into ienumerable
                 IEnumerable<List<RequestEntity>> lstbatchRequests = this.splitList<RequestEntity>(reqlst, batchsize);
@@ -832,9 +832,12 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 //foeach list in IEnumerable
                 foreach (List<RequestEntity> lstentites in lstbatchRequests)
                 {
+                    requpdatetriggeringmsg = string.Empty;
+                    lstRequestUpdateMsg = new List<RequestUpdateMsg>();
                     //for each request in list
                     foreach (RequestEntity objrequestSynch in lstentites)
                     {
+                        
                         //create object and assign values to properties for Backend class 
                         Backend objBackend = new Backend()
                         {
