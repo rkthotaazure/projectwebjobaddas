@@ -35,6 +35,8 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         public static int nextCollectingTimeDividend = Convert.ToInt32(ConfigurationManager.AppSettings["NextCollectingTimeDividend"]);
         //get default MinUpdateFrequency from config
         public static int defaultMinUpdateFrequency = Convert.ToInt32(ConfigurationManager.AppSettings["DefaultMinUpdateFrequency"]);
+        public static int missedUpdatesWaitingTimeInMinutes = Convert.ToInt32(ConfigurationManager.AppSettings["MissedUpdatesWaitingTimeInMinutes"]);
+        public static int missedupdateFraction = Convert.ToInt32(ConfigurationManager.AppSettings["MissedUpdatesWaitingTimeInMinutesFraction"]);
         private UserBackendDAL objdal;
         private UpdateTriggeringRules utRules;
         public NextUserCollectingTimeDAL()
@@ -128,6 +130,9 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     DateTime lastCollectingTime = timestamp;
                     DateTime MissedUpdateLastCollectingTime = timestamp;
                     int oldminUpdateFrequency = ObjNextCollectingTime.MinimumUpdateFrequency;
+                    DateTime oldMissingUpdateNextCollectingTime = ObjNextCollectingTime.MissingUpdateNextCollectingTime;
+                    TimeSpan tspanmin = timestamp.Subtract(oldMissingUpdateNextCollectingTime);
+                    int missedwaitingMins = tspanmin.Minutes;
                     //if it is not first time then get the last collecting time for regular user updates from azure table
                     if (!isFirstTimePull)
                     {
@@ -142,6 +147,14 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             //call dataprovider method to update entity to azure table
                             DataProvider.UpdateEntity<NextUserCollectingTimeEntity>(azureTableReference, ObjNextCollectingTime);
                         }
+                        if (missedwaitingMins > (missedUpdatesWaitingTimeInMinutes + missedupdateFraction ))
+                        {
+                            ObjNextCollectingTime.MissingUpdateLastCollectingTime = MissedUpdateLastCollectingTime;
+                            //update Missing Update NextCollectingTime based on updatetriggering Rule R5
+                            ObjNextCollectingTime.MissingUpdateNextCollectingTime = utRules.GetNextMissingCollectingTime(MissedUpdateLastCollectingTime, avgAllRequestsLatency, lastAllRequestsLatency);
+                            //call dataprovider method to update entity to azure table
+                            DataProvider.UpdateEntity<NextUserCollectingTimeEntity>(azureTableReference, ObjNextCollectingTime);
+                        }
                     }
                     else
                     {
@@ -149,6 +162,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                         ObjNextCollectingTime.RegularUpdateLastCollectingTime = lastCollectingTime;
                         //update  NextCollectingTime value based on new MinimumUpdateFrequency,last collecting Time
                         ObjNextCollectingTime.RegularUpdateNextCollectingTime = lastCollectingTime.AddMinutes(minimumUpdateFrequency);
+
                         ObjNextCollectingTime.MissingUpdateLastCollectingTime = MissedUpdateLastCollectingTime;
                         //update Missing Update NextCollectingTime based on updatetriggering Rule R5
                         ObjNextCollectingTime.MissingUpdateNextCollectingTime = utRules.GetNextMissingCollectingTime(MissedUpdateLastCollectingTime, avgAllRequestsLatency, lastAllRequestsLatency);
