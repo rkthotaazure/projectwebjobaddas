@@ -336,7 +336,7 @@ namespace adidas.clb.job.UpdateTriggering
                         //collects the missed update userbackends,Requests and convert into update trigger message format and put into UT input queue
                         objUserBackendDAL.CollectUsersMissedUpdatesByBackend(backend.BackendID, currentTimestampForMissedUpdates);
                         //update the backend entity with new missing update collecting time[i.e MissingUpdateLastCollectingTime= MissingUpdateNextCollectingTime and MissingUpdateNextCollectingTime=Max(]
-                        objnextcollectingTime.UpdateMisseduserBackendNextCollectingTime(backend.BackendID, backend.MissingUpdateNextCollectingTime);
+                        objnextcollectingTime.UpdateMisseduserBackendNextCollectingTime(backend.BackendID, backend.MissingUpdateNextCollectingTime, DateTime.Now);
                         InsightLogger.TrackEvent("UpdateTriggering, Action :: for each backend :: collect missing updates : End() , Response :: Success, Backend Name : " + backend.BackendID);
                     }
                     else
@@ -368,8 +368,8 @@ namespace adidas.clb.job.UpdateTriggering
                 InsightLogger.Exception(exception.Message, exception, callerMethodName);
             }
 
-        }     
-      
+        }
+
 
         /// <summary>
         /// This method generates time intervals based on given minutes time span

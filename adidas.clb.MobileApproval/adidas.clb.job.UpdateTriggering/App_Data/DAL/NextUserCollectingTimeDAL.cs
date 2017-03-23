@@ -248,7 +248,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         /// <param name="missingUpdateLastCollectingTime"></param>
         /// <param name="avgAllRequestsLatency"></param>
         /// <param name="lastAllRequestsLatency"></param>
-        public void UpdateMisseduserBackendNextCollectingTime(string backendID, DateTime missingUpdateLastCollectingTime)
+        public void UpdateMisseduserBackendNextCollectingTime(string backendID, DateTime missingUpdateLastCollectingTime,DateTime currTimestamp)
         {
             string callerMethodName = string.Empty;
             try
@@ -267,7 +267,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                         //update  Missing Update Last CollectingTime  with previous Missing Update NextCollectingTime
                         ObjMissedUpdateNextCollectingTime.MissingUpdateLastCollectingTime = missingUpdateLastCollectingTime;
                         //update Missing Update NextCollectingTime based on updatetriggering Rule R5
-                        ObjMissedUpdateNextCollectingTime.MissingUpdateNextCollectingTime = utRules.GetNextMissingCollectingTime(missingUpdateLastCollectingTime, backendDetails.AverageAllRequestsLatency, backendDetails.LastAllRequestsLatency);
+                        ObjMissedUpdateNextCollectingTime.MissingUpdateNextCollectingTime = utRules.GetNextMissingCollectingTime(currTimestamp, backendDetails.AverageAllRequestsLatency, backendDetails.LastAllRequestsLatency);
                         // Execute update operation.
                         DataProvider.UpdateEntity<NextUserCollectingTimeEntity>(azureTableReference, ObjMissedUpdateNextCollectingTime);
                         InsightLogger.TrackEvent("UpdateTriggering, Action :: Set next missed update collecting time , Response :: Success, backend :[ " + backendID + " ]");
