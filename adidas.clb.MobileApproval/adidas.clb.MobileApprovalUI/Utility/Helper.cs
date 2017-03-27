@@ -45,7 +45,7 @@ namespace adidas.clb.MobileApprovalUI.Utility
                 {
                     client.DefaultRequestHeaders.Add("Accept", "application/json;odata=verbose");
                     client.DefaultRequestHeaders.Add("ContentType", "application/json;odata=verbose");
-                    //client.DefaultRequestHeaders.Add("Authorization", "Bearer " + await userProfileObj.GetTokenForApplication());
+                    client.DefaultRequestHeaders.Add("Authorization", "Bearer " + await userProfileObj.GetTokenForApplication());
                     result = await client.GetStringAsync(endpointUri);
                     //if(responseMessage.StatusCode.Equals(HttpStatusCode.NotFound))
                     //{
@@ -72,7 +72,7 @@ namespace adidas.clb.MobileApprovalUI.Utility
                 {
                     client.DefaultRequestHeaders.Add("Accept", "application/json;odata=verbose");
                     client.DefaultRequestHeaders.Add("ContentType", "application/json;odata=verbose");
-                   //client.DefaultRequestHeaders.Add("Authorization", "Bearer " + await userProfileObj.GetTokenForApplication());
+                   client.DefaultRequestHeaders.Add("Authorization", "Bearer " + await userProfileObj.GetTokenForApplication());
                     HttpResponseMessage responseMessage = await client.PutAsJsonAsync(endpointUri, data);
                     if ((HttpStatusCode.OK).ToString().Equals(responseMessage.ReasonPhrase))
                     {
@@ -104,7 +104,7 @@ namespace adidas.clb.MobileApprovalUI.Utility
                 {
                     client.DefaultRequestHeaders.Add("Accept", "application/json;odata=verbose");
                     client.DefaultRequestHeaders.Add("ContentType", "application/json;odata=verbose");
-                    //client.DefaultRequestHeaders.Add("Authorization", "Bearer " + await userProfileObj.GetTokenForApplication());
+                    client.DefaultRequestHeaders.Add("Authorization", "Bearer " + await userProfileObj.GetTokenForApplication());
                     //get API endpoint and format
 
                     var request1 = new HttpRequestMessage(HttpMethod.Post, endpointUri);
@@ -138,7 +138,7 @@ namespace adidas.clb.MobileApprovalUI.Utility
 
                     client.DefaultRequestHeaders.Add("Accept", "application/json;odata=verbose");
                     client.DefaultRequestHeaders.Add("ContentType", "application/json;odata=verbose");
-                    //client.DefaultRequestHeaders.Add("Authorization", "Bearer " + await userProfileObj.GetTokenForApplication());
+                    client.DefaultRequestHeaders.Add("Authorization", "Bearer " + await userProfileObj.GetTokenForApplication());
                    
                     //get API endpoint and format
 
