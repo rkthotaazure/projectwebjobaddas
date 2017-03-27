@@ -143,6 +143,10 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                                     }
                                 }
                             }
+                            else
+                            {
+                                ServiceLayerApproval.Status = approver.Status;
+                            }
                             //calling DAL method to add request entity
                             requestupdatedal.AddUpdateApproval(ServiceLayerApproval);
                         }
