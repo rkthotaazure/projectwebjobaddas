@@ -29,7 +29,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
     public class LandingController : Controller
     {
         // Initialize the userid
-        string userid = SettingsHelper.UserId;        
+        string userid = System.Web.HttpContext.Current.User.Identity.Name.Split('@')[0];        
         // Return Approval Landing page
         [HttpGet]
         public ActionResult ApprovalLanding()
@@ -57,7 +57,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                 //Api Controller object initialization
                 APIController apiControllerObj = new APIController();
                 //Send approval details to Approval API
-                string stApprovalrequeststatus = await apiControllerObj.SendApprovalInfo(approvalInfo, approvalInfo.ApprovalRequestID);
+                //string stApprovalrequeststatus = await apiControllerObj.SendApprovalInfo(approvalInfo, approvalInfo.ApprovalRequestID);
                 //creates list request details object
                 List<ApprovalRequestDTO> requestsDetails = new List<ApprovalRequestDTO>();
                 // Return Json Formate object and pass to UI
@@ -100,9 +100,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                     foreach (userBackendRequest userbackendRequestdetails in userBackendjsonResponse.userBackendRequestinfo)
                     {
                         //Create ApprovalDTO Model object
-                        requestObj.approval = new ApprovalDTO();
-                        //requestObj.approval.RequestId = userbackendRequestdetails.approvalDetails.RequestId;
-                        //requestObj.approval.status = userbackendRequestdetails.approvalDetails.status;
+                        requestObj.approval = new ApprovalDTO();                       
                         //Create RequestDTO Model object
                         requestObj.request = new RequestDTO();
                         if (userbackendRequestdetails.requestDetails != null)
@@ -237,28 +235,26 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                 APIController apiControllerObj = new APIController();
                 //creates list request details object for waiting
                 List<ApprovalRequestDTO> requestsDetails = new List<ApprovalRequestDTO>();
-                // Get the waiting approval status details
-                if (syncRequest.parameters.filters.apprStatus == "Waiting")
-                {
-                    //Get request details from Synch API
-                    string stApprovalPendingDetails = await apiControllerObj.GetUserBackendTasks(syncRequest, userid, userbackend);
+                // Get the waiting approval status details                
+                syncRequest.parameters.filters.apprStatus = "Waiting";
+                //Get request details from Synch API
+                string stApprovalPendingDetails = await apiControllerObj.GetUserBackendTasks(syncRequest, userid, userbackend);
                     //Deseralize the result returned by the API
                     UserBackendrequestJsonData userBackendjsonResponse = JsonConvert.DeserializeObject<UserBackendrequestJsonData>(stApprovalPendingDetails);
                     //Bind the Json result data to list 
-                    requestsDetails = ApprovalTasks(userBackendjsonResponse);
-                }
-                else
-                {
+                    requestsDetails = ApprovalTasks(userBackendjsonResponse);                
                     //creates list request details object for approval and reject
                     List<ApprovalRequestDTO> requestsRejectedDetails = new List<ApprovalRequestDTO>();
-                    // Get the Approved approval status details
-                    syncRequest.parameters.filters.apprStatus = "Approved";
+                List<ApprovalRequestDTO> requestsApprovedDetails = new List<ApprovalRequestDTO>();
+                // Get the Approved approval status details
+                syncRequest.parameters.filters.apprStatus = "Approved";
                     //Get request details from Synch API
                     string stApprovalApprovedDetails = await apiControllerObj.GetUserBackendTasks(syncRequest, userid, userbackend);
                     //Deseralize the result returned by the API
-                    UserBackendrequestJsonData userBackendjsonResponse = JsonConvert.DeserializeObject<UserBackendrequestJsonData>(stApprovalApprovedDetails);
+                    UserBackendrequestJsonData userBackendApprovedjsonResponse = JsonConvert.DeserializeObject<UserBackendrequestJsonData>(stApprovalApprovedDetails);
                     //Bind the Json result data to list 
-                    requestsDetails = ApprovalTasks(userBackendjsonResponse);
+                    requestsApprovedDetails = ApprovalTasks(userBackendApprovedjsonResponse);
+                requestsDetails.AddRange(requestsApprovedDetails);
                     // Get the Rejected approval status details
                     syncRequest.parameters.filters.apprStatus = "Rejected";
                     //Get request details from Synch API
@@ -268,8 +264,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                     //Bind the Json result data to list 
                     requestsRejectedDetails = ApprovalTasks(userBackendjsonRejectResponse);
                     //Add approval and rejected details tasks
-                    requestsDetails.AddRange(requestsRejectedDetails);
-                }
+                    requestsDetails.AddRange(requestsRejectedDetails);                
                 // Return Json formate object and pass to UI
                 return Json(requestsDetails, JsonRequestBehavior.AllowGet);
             }
@@ -297,9 +292,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
             string strpdfuri = await apiControllerObj.GetPDFUri(syncRequest, requestInfo.requestID);
                 if(!string.IsNullOrEmpty(strpdfuri))
                 {
-                    string pdfuri = JsonConvert.DeserializeObject<string>(strpdfuri);
-                    //var fileContent = new System.Net.WebClient().DownloadData(new Uri(pdfuri)); //byte[]
-                    //FileContentResult filecontent = File(fileContent, "application/pdf", requestInfo.requestID+".pdf");
+                    string pdfuri = JsonConvert.DeserializeObject<string>(strpdfuri);                    
                     // Return Json formate object and pass to UI
                     return Json(new Uri(pdfuri), JsonRequestBehavior.AllowGet);
                 }
@@ -337,10 +330,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                         //Get the approval task Request Status
                         requestObj.approval.Status = userbackendRequestdetails.approvalDetails.Status;
                         requestObj.approval.TaskTitle = userbackendRequestdetails.approvalDetails.TaskTitle;
-                        requestObj.approval.ServiceLayerTaskID = userbackendRequestdetails.approvalDetails.ServiceLayerTaskID;
-                        //requestObj.request = new RequestDTO();
-                        //requestObj.request.ID = userbackendRequestdetails.requestDetails.ID;
-                        //requestObj.request.Status= userbackendRequestdetails.requestDetails.Status;
+                        requestObj.approval.ServiceLayerTaskID = userbackendRequestdetails.approvalDetails.ServiceLayerTaskID;                        
                         requestsDetails.Add(requestObj);
                     }                   
                 }
@@ -358,8 +348,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                 //Assign user id to SynchRequestDTO model
                 syncRequest.userId = userid;
                 //Api Controller object initialization
-                APIController apiControllerObj = new APIController();
-                //string stApprovalrequestcount = await apiControllerObj.GetApprovalrequestcount(syncRequest, userid);
+                APIController apiControllerObj = new APIController();                
                 //Get Pending approval count from Synch API
                 string stApprovalPendingCount = await apiControllerObj.GetApprovalcompletedcount(syncRequest, userid);
                 //Get approved count details from API
@@ -397,8 +386,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                         //Get Pending approval count
                         if (userBackendwithTaskPendingCount != null)
                         {
-                            UserBackendRequestJsonResult taskcountlist = userBackendwithTaskPendingCount.ToList().Find(x => x.userBackend.BackendID == backendID);
-                            //List<UserTaskcountJsonResult> taskcountlist = userTaskPendingCount.Where(x => x.userBackend.BackendID == backendID).ToList();
+                            UserBackendRequestJsonResult taskcountlist = userBackendwithTaskPendingCount.ToList().Find(x => x.userBackend.BackendID == backendID);                            
                             if (taskcountlist != null)
                             {
                                 approvalCount.WaitingCount = taskcountlist.userTaskcountJsonResult.Count;
@@ -407,8 +395,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                         //Get Approved approval count
                         if (userBackendwithTaskApprovedCount != null)
                         {
-                            UserBackendRequestJsonResult taskcountlist = userBackendwithTaskApprovedCount.ToList().Find(x => x.userBackend.BackendID == backendID);
-                            //List<UserTaskcountJsonResult> taskcountlist = userTaskApprovedCount.Where(x => x.BackendID == backendID).ToList();
+                            UserBackendRequestJsonResult taskcountlist = userBackendwithTaskApprovedCount.ToList().Find(x => x.userBackend.BackendID == backendID);                            
                             if (taskcountlist != null)
                             {
                                 approvalCount.ApprovedCount = taskcountlist.userTaskcountJsonResult.Count;
@@ -417,8 +404,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                         //Get Rejected approval count
                         if (userBackendwithTaskRejectedCount != null)
                         {
-                            UserBackendRequestJsonResult taskcountlist = userBackendwithTaskRejectedCount.ToList().Find(x => x.userBackend.BackendID == backendID);
-                            //List<UserTaskcountJsonResult> taskcountlist = userTaskRejectedCount.Where(x => x.BackendID == backendID).ToList();
+                            UserBackendRequestJsonResult taskcountlist = userBackendwithTaskRejectedCount.ToList().Find(x => x.userBackend.BackendID == backendID);                            
                             if (taskcountlist != null)
                             {
                                 approvalCount.RejectedCount = taskcountlist.userTaskcountJsonResult.Count;
@@ -444,8 +430,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
         public async Task<ActionResult> ForceUpdate(SynchRequestDTO syncRequest)
         {
             try
-            {
-                //SynchRequestDTO syncRequest = new SynchRequestDTO();
+            {                
                 //Assign user id to SynchRequestDTO model
                 syncRequest.userId = userid;
                 //Api Controller object initialization

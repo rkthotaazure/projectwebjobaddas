@@ -1,75 +1,56 @@
-﻿<div id="mobile-home" class="page-width approval-details" ng-controller="ApprovalDetailsController" ng-init="init()">
-    <div id="overlay" ng-show="loading">
+﻿<div id="mobile-home" class="approval-details" ng-controller="ApprovalDetailsController" ng-init="init()">    
+    <div id="spinner1" style="position:absolute;top:0;z-index:999999;width:100%;height:100vh;background-color:rgba(0,0,0,0.5)" ng-show="loading">
+        <img style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:100px" src="~/Images/adidas-loading.gif" />
     </div>
-    <div id="spinner" ng-show="loading">
-        <div class="double-bounce1"></div>
-        <div class="double-bounce2"></div>
-    </div>
-    <div class="align-text-top" ng-click="redirect()">
-        <span class="glyphicon glyphicon-arrow-left"></span>
-        Approval Dashboard
-    </div><br />
-    <div class="alert alert-info" ng-show="ShowwaitingMessage">
-        <p>Please try after sometime. Your requests are being synched.</p>
-    </div>
-    <div class="alert alert-success" ng-show="tasksuccess">
-        <p>Request {{taskrequestid}} {{taskrequeststatus}} successfully!</p> 
-    </div>
-    <div class="backends">
-        <div class="title-section">
-            <div class="title-text">
-                {{Approvaltaskheader}}
+    <span class="notification-glyph glyphicon glyphicon-triangle-top" ng-if="cs.notificationActive"></span>
+    <div class="notification-content alert alert-info" ng-class="cs.notificationActive?'enable':'disable'" ng-if="cs.notificationActive">
+        <p ng-bind="cs.notificationText"></p>
+    </div>  
+    <div class="btn-footer">
+        <div class="col-xs-12 text-align-center btn-back">
+            <div ng-click="redirect()">
+                <span class="glyphicon glyphicon-menu-left"></span>
+                Dashboard
             </div>
         </div>
-        <div class="table-responsive" style="padding:0px 2px;">           
-            <table class="table table-inverse" id="tab_logic_Backend">
-                <thead class="thead-inverse">
-                    <tr>
-                        <th><label>Request#</label></th>
-                        <th class="tasktitle"><label>Name</label></th>
-                        <th><label>Status</label></th>
-                        <th><span ng-show="hideButton">Take Action</span></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @*<tr ng-class-odd="'odd'" ng-class-even="'even'" ng-show="loading">
-                        <td></td><td align="center" class="glyphicon glyphicon-refresh gly-spin"></td><td></td>
-                    </tr>*@
-                    <tr ng-repeat="approvaltask in approvalTasks | filter:paginate">
-                        <td>
-                            <div class="input-group decoration" ng-click="showDetails(approvaltask.RequestId, approvaltask.ServiceLayerTaskID)">
-                                {{approvaltask.RequestId}}
-                            </div>
-                        </td>
-                        <td class="tasktitle">
-                            <div class="input-group">
-                                {{approvaltask.TaskTitle}}
-                            </div>
-                        </td>
-                        <td>
-                            <div class="input-group">
-                                {{approvaltask.Status}}
-                            </div>
-                        </td>                        
-                        <td>
-                            @*<div class="input-group align-middle" style="position:relative;z-index:1000;" ng-show="CurrentTask(approvaltask.RequestId)">
-                                <div class="glyphicon glyphicon-refresh gly-spin">
-                                    
-                                </div>
-                            </div>*@
-                            <div class="input-group" ng-show="hideButton">
-                                <div><button type="button" class="btn btn-primary" data-toggle="tooltip" title="Approve" data-placement="top"><span class="glyphicon glyphicon-ok" ng-click="requestStatus('Approved',approvaltask.RequestId, approvaltask.ServiceLayerTaskID)"></span></button>
-                                <button type="button" class="btn btn-primary" data-toggle="tooltip" title="Reject" data-placement="top"><span class="glyphicon glyphicon-remove" ng-click="requestStatus('Rejected',approvaltask.RequestId, approvaltask.ServiceLayerTaskID)"></span></button></div>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class="align-middle"><ul uib-pagination total-items="totalItems" max-size="5" force-ellipses="true" ng-model="currentPage" items-per-page='5'></ul></div>
-             
+    </div>
+    <div class="main-section">
+        <div class="title-section">
+            <div class="title-text tab-titles">
+                <div class="tab-pending" ng-class="{'tab-active': showpending}" ng-click="showpendingtasks();showpending=true;">Pending Tasks</div><div class="tab-completed" ng-class="{'tab-active': !showpending}" ng-click="showcompletedtasks();showpending=false;">Completed Tasks</div>
+            </div>
         </div>
+        <div class="details-section padding-top-none">
+            <div ng-repeat="approvaltask in approvalTasks" ng-init="$parent.selectedIndex = -1">
+                <div class="row task-section bottom-border" ng-class="{'pendingtask': showpending}" ng-click="$parent.selectedIndex == $index?$parent.selectedIndex = -1:$parent.selectedIndex = $index;">
+                    <div class="col-xs-11 task-content" ng-class="{'move-left': $parent.selectedIndex == $index}">
+                        <div class="col-xs-5 label-task-head" ng-bind="approvaltask.RequestId"></div>
+                        <div class="col-xs-7 label-task-date" ng-show="showpending">
+                            Due Date : <span ng-bind="approvaltask.DueDate | dateFilter | date: 'dd.MM.yyyy'"></span>
+                        </div>
+                        <div class="col-xs-7 label-task-date" ng-show="!showpending">                            
+                            Decision Date : <span ng-bind='approvaltask.DecisionDate | dateFilter | date: "dd.MM.yyyy"'></span>
+                        </div>
+                        <div class="col-xs-12 label-task-title">
+                        Name : <span ng-bind='approvaltask.TaskTitle'></span>
+                        </div>
+                        <div class="col-xs-12 label-task-status">
+                        Status : <span ng-bind='approvaltask.Status'></span>
+                        </div>
+                    </div>
+                    <div class="col-xs-1 task-arrow"><span class="glyphicon glyphicon-menu-right"></span></div>
+                    <div class="action-items" ng-class="{'move-right': $parent.selectedIndex == $index}">
+                        <div class="task-action action-reject" ng-show="showpending" ng-click="requestStatus('Rejected',approvaltask.RequestId, approvaltask.ServiceLayerTaskID)">Reject</div>
+                        <div class="task-action action-approve" ng-show="showpending" ng-click="requestStatus('Approved',approvaltask.RequestId, approvaltask.ServiceLayerTaskID)">Approve</div>
+                        <div class="task-action action-more" ng-click="showDetails(approvaltask.RequestId, approvaltask.ServiceLayerTaskID)">More<div>...</div></div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>     
+          
     </div>
 </div>
 
- 
-    
+
+

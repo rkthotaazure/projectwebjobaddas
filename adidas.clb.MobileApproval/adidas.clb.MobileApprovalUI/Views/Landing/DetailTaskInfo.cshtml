@@ -1,126 +1,136 @@
 ﻿<form name="DetailTask" role="form">
-    <div id="mobile-home" class="page-width detail-task" ng-controller="ApprovalDetailstaskController" ng-init="init()">
-        <div id="overlay" ng-show="showloader">
+    <div id="mobile-home" class="detail-task" ng-controller="ApprovalDetailstaskController" ng-init="init()">       
+        <div id="spinner1" style="position:absolute;top:0;z-index:999999;width:100%;height:100vh;background-color:rgba(0,0,0,0.7)" ng-show="showloader">
+            <img style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:100px" src="~/Images/adidas-loading.gif" />
         </div>
-        <div id="spinner" ng-show="showloader">
-            <div class="double-bounce1"></div>
-            <div class="double-bounce2"></div>
-        </div>
-        <div class="align-text-top" ng-click="redirect()">
-            <span class="glyphicon glyphicon-arrow-left"></span>
-            Approvals List
-        </div> <br />
-        <div class="alert alert-info" ng-show="showretry">
-            <p>Please try after sometime. Request is being synched.</p>
-        </div>
-        <div class="alert alert-info" ng-show="nopdfmessage">
-            <p>PDF is not available for this Request.</p>
-        </div>        
-        <div class="alert alert-success" ng-show="tasksuccess">
-            <p>Request {{taskrequeststatus}} successfully!</p>
-        </div>
-        <div class="mobile-button row" ng-show="hideButton">
-            <div class="col-xs-6 text-align-center first-col">
-                <div ng-click="requestStatus('Rejected',id,TaskID)">
-                    <span class="glyphicon glyphicon-remove"></span>
-                    Reject
+        <span class="notification-glyph glyphicon glyphicon-triangle-top" ng-if="cs.notificationActive"></span>
+        <div class="notification-content alert alert-info" ng-class="cs.notificationActive?'enable':'disable'" ng-if="cs.notificationActive">
+            <p ng-bind="cs.notificationText"></p>
+        </div>    
+        <div class="btn-footer" >            
+            <div class="col-xs-2 text-align-center first-col btn-back" ng-show="hidePendingButton">
+                <div ng-click="redirect()">
+                    <span class="glyphicon glyphicon-menu-left"></span>
                 </div>
-            </div>
-            <div class="col-xs-6 text-align-center first-col">
+            </div>           
+            <div class="col-xs-5 text-align-center mid-col btn-approve" ng-show="hidePendingButton">
                 <div ng-click="requestStatus('Approved',id,TaskID)">
-                    <span class="glyphicon glyphicon-ok"></span>
                     Approve
                 </div>
             </div>
+            <div class="col-xs-5 text-align-center last-col btn-reject" ng-show="hidePendingButton">
+                <div ng-click="requestStatus('Rejected',id,TaskID)">
+                    Reject
+                </div>
+            </div>
+            <div class="col-xs-12 text-align-center btn-back" ng-show="hideCompletedButton">
+                <div ng-click="redirect()">
+                    <span class="glyphicon glyphicon-menu-left"></span>
+                    Completed Tasks
+                </div>
+            </div>
         </div>
-        <div class="task-details">
-            <div class="title-section row">
+        <div class="main-section">
+            <div class="title-section">
                 <div class="title-text">Request Details</div>
             </div>
-            <div class="row">
-                <div class="col-xs-7">
-                    <label for="Albert" class="control-label">Request#:</label><br />
-                    {{id}}
+            <div class="details-section">
+                <div class="row">
+                    <div class="col-xs-3 label-name">
+                        Request#
+                    </div>
+                    <div class="col-xs-1 label-name">
+                        :
+                    </div>
+                    <div class="col-xs-8 label-value" ng-bind="id"></div>
                 </div>
-                <div class="col-xs-5">
-                    <label for="Shine" class="control-label">Title:</label><br />
-                    {{title}}
+                <div class="row">
+                    <div class="col-xs-3 label-name">
+                        Title
+                    </div>
+                    <div class="col-xs-1 label-name">
+                        :
+                    </div>
+                    <div class="col-xs-8 label-value" ng-bind="title">                       
+                    </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-7">
-                    <label for="Albert" class="control-label">Status:</label><br />
-                    {{status}}
+                <div class="row">
+                    <div class="col-xs-3 label-name">
+                        Status
+                    </div>
+                    <div class="col-xs-1 label-name">
+                        :
+                    </div>
+                    <div class="col-xs-8 label-value" ng-bind="status">                        
+                    </div>
                 </div>
-                <div class="col-xs-5">
-                    <label for="Albert" class="control-label">Created:</label><br />
-                    {{created | dateFilter | date: "dd.MM.yyyy HH:mm"}}
+
+                <div class="row">
+                    <div class="col-xs-3 label-name">
+                        Created
+                    </div>
+                    <div class="col-xs-1 label-name">
+                        :
+                    </div>
+                    <div class="col-xs-8 label-value" ng-bind='created | dateFilter | date: "dd.MM.yyyy HH:mm"'>                        
+                    </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-7">
-                    <label for="Shine" class="control-label">Requester:</label><br />
-                    {{name}}
+                <div class="row">
+                    <div class="col-xs-3 label-name">
+                        Requester
+                    </div>
+                    <div class="col-xs-1 label-name">
+                        :
+                    </div>
+                    <div class="col-xs-8 label-value" ng-bind="name">                        
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="task-details fields-details">
+        <div class="main-section">
             <div class="title-section">
                 <div class="title-text">Request Overview</div>
             </div>
-            <div class="table-responsive">
-                <table class="table table-inverse" id="tab_logic_Backend">
-                    <tr ng-repeat="field in fields">
-                        <td>
-                            <div class="input-group">
-                                <b>{{field.Name}}</b>
-                            </div>
-                        </td>
-                        <td>:</td>
-                        <td>
-                            <div class="input-group">
-                                {{field.Value}}
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-            </div>           
-        </div>
-        <div class="backends">
-            <div class="title-section">
-                <div class="title-text">
-                    Approvers
+            <div class="details-section">
+                <div class="row" ng-repeat="field in fields">
+                    <div class="col-xs-3 label-name" ng-bind="field.Name">                        
+                    </div>
+                    <div class="col-xs-1 label-name">
+                        :
+                    </div>
+                    <div class="col-xs-8 label-value" ng-bind="field.Value">                        
+                    </div>
                 </div>
             </div>
-            <div class="table-responsive">
-                <table class="table table-inverse" id="tab_logic_Backend">
-                    <thead class="thead-inverse">
-                        <tr>
-                            <th><label><b>User</b></label></th>
-                            <th><label><b>Status</b></label></th>
-                            <th><label><b>Due Date</b></label></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr ng-repeat="approver in approvers">
-                            <td>
-                                <label class="approver-lable" style="white-space:pre-wrap;">{{approver.UserName}}</label>
-                            </td>
-                            <td>
-                                <label class="approver-lable">{{approver.Status}}</label>
-
-                            </td>
-                            <td>
-                                <label class="approver-lable">{{approver.DueDate | dateFilter | date: "dd.MM.yyyy"}}</label>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
         </div>
-        
-            <div style="text-align: center;">
-                <button type="button" style="" class="btn btn-primary btn-pdf" data-toggle="tooltip" title="Download Request" data-placement="top"><span style="" ng-click="openpdf()">Download Request</span></button>                
+        <div class="main-section bottom-border">
+            <div class="title-section">
+                <div class="title-text">Approvers</div>
             </div>
+            <div class="details-section padding-bottom-none">
+                <div class="row bottom-border">
+                    <div class="col-xs-5 label-name">
+                        User
+                    </div>
+                    <div class="col-xs-3 label-name">
+                        Status
+                    </div>
+                    <div class="col-xs-4 label-name">
+                        Due Date
+                    </div>
+                </div>
+                <div class="row" ng-repeat="approver in approvers">
+                    <div class="col-xs-5 label-value" ng-bind="approver.UserName">                       
+                    </div>
+                    <div class="col-xs-3 label-value" ng-bind="approver.Status">                       
+                    </div>
+                    <div class="col-xs-4 label-value" ng-bind='approver.DueDate | dateFilter | date: "dd.MM.yyyy"'>                        
+                    </div>
+                </div>
+            </div>           
+        </div>
+        <div class="btn-section text-align-center">
+            <button type="button" style="" class="btn btn-primary btn-pdf" data-toggle="tooltip" title="Download Request" data-placement="top"><span style="" ng-click="openpdf();">Download Request</span></button>            
+        </div>
     </div>
 </form>
