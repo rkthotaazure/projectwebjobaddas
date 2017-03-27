@@ -53,5 +53,15 @@ namespace adidas.clb.job.RequestsUpdate.Models
         }
         public bool UpdateTriggered { get; set; }
         public string PDFUri { get; set; }
+        private DateTime? expectedupdate = null;
+        public DateTime? ExpectedUpdate
+        {
+            get
+            {
+                return this.expectedupdate.HasValue ? this.expectedupdate.Value : (DateTime?)null;
+            }
+
+            set { this.expectedupdate = value; }
+        }
     }
 }
