@@ -2,79 +2,67 @@
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
+<div id="splash">
+    <img src="~/Images/Adidas_Task_Management.jpg" style="width:100%;height:auto;" />
+</div>
 <link href="~/Content/Site.css" rel="stylesheet" type="text/css" />
 <link href="~/Content/bootstrap.min.css" rel="stylesheet" type="text/css" />
 <link href="~/Content/MobileApproval.css" rel="stylesheet" type="text/css" />
-<link href="~/Content/angular-material.min.css" rel="stylesheet" type="text/css" />
+<link href="~/Content/CSS/Packages/angular-material.min.css" rel="stylesheet" type="text/css" />
 <link rel="stylesheet" href="~/Content/AppName.css" type="text/css" />
-<body ng-app="ApplicationModule" ng-controller="HomeController" ng-init="init()">
-    <div class="jumbotron text-center bounceInDown">
-        <h1 style="visibility:hidden;">Mobile Approval</h1>
-    </div>
+<link rel="stylesheet" href="~/Content/CSS/AppCSS/MobileApproval.css" type="text/css" />
+<div ng-app="ApplicationModule" ng-controller="HomeController" ng-init="init()">
+    <header>
+        <div id="ma-header" class="container">
+            <div class="hamburger-button navbar-default col-xs-2">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar" ng-click="showSideMenu=true">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div ng-bind="cs.pageTitle" class="page-title col-xs-8 text-align-center"></div>
+            <div class="notification-icon col-xs-2 text-align-right">
+                <img src="~/Images/notification.png" ng-if="!cs.notificationActive" />
+                <span class="glyphicon glyphicon-remove" ng-if="cs.notificationActive" ng-click="cs.hideNotifications()"></span>
+            </div>
+        </div>
+        <div class="side-menu ng-hide" ng-show="showSideMenu" ng-init="showSideMenu=false">
+            <div class="menu-head">
+                <div class="profile"><span class="glyphicon glyphicon-user"></span></div>
+                <div class="userinfo">
+                    <div>Thota Siva</div><div class="mail">Thota.Siv@adidas.com</div>
+                    </div>
+                </div>
+            <div class="menu-list">
+                <div class="menu-list-item bottom-border" ng-click="redirectcontrol('updateUser')"><span class="menu-list-item-text">Update Profile</span><span class="glyphicon glyphicon-menu-right menu-list-item-arrow"></span></div>                
+                <div class="menu-list-item bottom-border"><span class="menu-list-item-text">Terms & policies</span><span class="glyphicon glyphicon-menu-right menu-list-item-arrow"></span></div>                
+            </div>
+        </div>
+        <div class="side-menu-bg" ng-show="showSideMenu" ng-click="showSideMenu=false"></div>
+    </header>    
     <div>
         <div data-ng-view></div>
     </div>
-</body>
-<script src="~/Scripts/app/js/jquery-1.10.2.min.js"></script>
-<script src="~/Scripts/app/js/angular.min.js"></script>
-<script src="~/Scripts/app/js/angular-resource.min.js"></script>
-<script src="~/Scripts/app/js/angular-route.min.js"></script>
-<script src="~/Scripts/app/js/angular-material.min.js"></script>
-<script src="~/Scripts/app/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="~/Scripts/app/js/jquery.validate.js"></script>
-<script type="text/javascript" src="~/Scripts/app/js/jquery.validate.unobtrusive.js"></script>
-<script src="~/Scripts/app/js/ui-bootstrap-tpls-2.2.0.min.js"></script>
+</div>
+<script src="~/Scripts/app/Packages/jquery-1.10.2.min.js"></script>
+<script src="~/Scripts/app/Packages/angular.min.js"></script>
+<script src="~/Scripts/app/Packages/angular-resource.min.js"></script>
+<script src="~/Scripts/app/Packages/angular-route.min.js"></script>
+<script src="~/Scripts/app/Packages/angular-material.min.js"></script>
+<script src="~/Scripts/app/Packages/bootstrap.min.js"></script>
+<script type="text/javascript" src="~/Scripts/app/Packages/jquery.validate.js"></script>
+<script type="text/javascript" src="~/Scripts/app/Packages/jquery.validate.unobtrusive.js"></script>
+<script src="~/Scripts/app/Packages/ui-bootstrap-tpls-2.2.0.min.js"></script>
 <script src="~/Scripts/app/MobileApprovalConstants.js"></script>
 <script src="~/Scripts/app/App.js"></script>
 
 <!--Generic Mobile App Controller-->
 <script src="~/Scripts/app/controllers/GMController.js"></script>
-<script src="~/Scripts/app/controllers/common.js"></script>
+<script src="~/Scripts/app/common.js"></script>
 <!--Generic Mobile App Service-->
 <script src="~/Scripts/app/services/GMService.js"></script>
 <!--Generic Mobile App Directives-->
 <script src="~/Scripts/app/directives/GMDirectives.js"></script>
 
-<script>
-	$(document).ready(function(){
-	//$(".badge").click(function() {
-	//	window.location.href = "Details.html";
-	//});
-	//$(".progress-bar-success").css("width","50%");
-	//$(".progress-bar-danger").css("width","50%");
-	  // Add smooth scrolling to all links in navbar + footer link
-	  $(".navbar a, footer a[href='#myPage']").on('click', function(event) {
-		// Make sure this.hash has a value before overriding default behavior
-		if (this.hash !== "") {
-		  // Prevent default anchor click behavior
-		  event.preventDefault();
-
-		  // Store hash
-		  var hash = this.hash;
-
-		  // Using jQuery's animate() method to add smooth page scroll
-		  // The optional number (900) specifies the number of milliseconds it takes to scroll to the specified area
-		  $('html, body').animate({
-			scrollTop: $(hash).offset().top
-		  }, 900, function(){
-
-			// Add hash (#) to URL when done scrolling (default click behavior)
-			window.location.hash = hash;
-		  });
-		} // End if
-	  });
-
-	  $(window).scroll(function() {
-	    $(".slideanim").each(function(){
-	      var pos = $(this).offset().top;
-
-	      var winTop = $(window).scrollTop();
-	    	if (pos < winTop + 500) {
-	    	  $(this).addClass("slide");
-	    	}
-	    });
-	  });
-	})
-</script>
 

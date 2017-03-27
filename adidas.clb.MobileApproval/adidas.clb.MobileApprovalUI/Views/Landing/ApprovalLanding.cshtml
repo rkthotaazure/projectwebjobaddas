@@ -1,208 +1,68 @@
-﻿<div id="mobile-home" class="page-width approval-landing" ng-controller="ApprovalLandingController" ng-init="init()">
-    <div id="overlay" ng-show="showloader">
-    </div>
-    <div id="spinner" ng-show="showloader">
-        <div class="double-bounce1"></div>
-        <div class="double-bounce2"></div>
-    </div>
+﻿<div id="mobile-home" class="approval-landing" ng-controller="ApprovalLandingController" ng-init="init()">   
+    <div id="spinner1" style="position:absolute;top:0;z-index:999999;width:100%;height:100vh;background-color:rgba(0,0,0,0.5)" ng-show="showloader" >
+        <img style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:100px" src="~/Images/adidas-loading.gif" />        
+   </div>
     <div ng-show="showcontent">
-        <div class="container-fluid alert alert-info" ng-show="ShowwaitingMessage">
-            <p>Please try after sometime. Your requests are being synched.</p>
+        <span class="notification-glyph glyphicon glyphicon-triangle-top" ng-if="cs.notificationActive"></span>
+        <div class="notification-content alert alert-info" ng-class="cs.notificationActive?'enable':'disable'" ng-if="cs.notificationActive">
+            <p ng-bind="cs.notificationText"></p>
         </div>
-        <div class="container-fluid alert alert-info" ng-show="ShowforceupdateMessage">
-            <p>We are trying to check if you have any requests. Please wait for some time !</p>
-        </div>        
-        <div class="mobile-button row">
-            <div class="col-xs-6 text-align-center first-col">
-                <div ng-click="SyncUpdate()">
-                    <span class="glyphicon glyphicon-time"></span>
+        <div class="btn-footer">
+            @*<div class="col-xs-6 text-align-center first-col btn-save">
+                <div ng-click="SyncUpdate()">                    
                     Sync Request
                 </div>
-            </div>
-            <div class="col-xs-6 text-align-center">
-                    <div ng-click="update('true')">
-                        <span class="glyphicon glyphicon-refresh"></span>
-                        Force Update
-                    </div>
-                </div>
-        </div>
-        <div class="" style="padding: 5px 0px;text-align: right;">Last Synch: {{lastsynch | date:'dd.MM.yyyy hh:mm a'}}</div>
-        <div class="container-fluid bgGray">
-            @*<div class="" style="font-size:24px;line-height:26px;text-align:center;background-color:#ffc119;padding: 14px 8px;width: 10%;float: left;">
-            <div>T</div>
-            <div>A</div>
-            <div>S</div>
-            <div>K</div>
-            <div>S</div>
-        </div>*@
-
-            <div class="">
-                <div class="col-xs-6 text-align-center pendingbox"  ng-class="{pendingselect:pendingselected}">
-                    <div class="canvas-wrap" ng-click="pendingCount()">
-                        <canvas id="canvaspending" width="150" height="150"></canvas>
-                        <span id="procentpending"></span>
-                        <span style="font-size:22px" class="tasktypetext">PENDING</span>
-                    </div>
-                    @*<div class="pendingDiv" ng-click="pendingCount()">{{pending}}</div>*@
-
-                </div>
-                <div class="col-xs-6 text-align-center completebox"  ng-class="{completedselect:completedselected}">
-                    <div class="canvas-wrap" ng-click="completedCount()">
-                        <canvas id="canvascompleted" width="150" height="150"></canvas>
-                        <span id="procentcompleted"></span>
-                        <span style="font-size:22px" class="tasktypetext">COMPLETED</span>
-                    </div>
-                    @*<div class="completeDiv" ng-click="completedCount()">{{completed}}</div>*@                    
-
-                </div>
-            </div>
-            @*<div class="row">
-                <div class="col-xs-6 text-align-center" ng-class="{pendingselect:pendingselected}">
-                    <span style="font-size:16px">Pending</span>
-                </div>
-                <div class="col-xs-6 text-align-center" ng-class="{completedselect:completedselected}">
-                    <span style="font-size:16px">Completed</span>
-                </div>
             </div>*@
-        </div>
-        <div class="container-fluid text-center">
-            <div class="row">
-                @*<div class="col-md-6" style="display:none;">
-                        <!--panel-->
-                        <div class="panel panel-default">
-                            <div class="panel-heading" data-toggle="collapse" data-target="#collapse1">
-                                <h3 class="panel-title">
-                                    Filter
-                                </h3>
-                                <span class="glyphicons glyphicons-chevron-down"></span>
-                            </div>
-                            <div id="collapse1" class="collapse">
-                                <div class="panel-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-inverse" id="tab_logic_Backend">
-                                            <tr>
-                                                <td>
-                                                    <div class="input-group">
-                                                        <b>Backends</b>
-                                                    </div>
-                                                </td>
-                                                <td>:</td>
-                                                <td>
-                                                    <div class="input-group" ng-repeat="backend in userBackendid">
-                                                        <input type="checkbox" ng-model="checked" ng-checked="true">{{backend}} <br />
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <div class="input-group">
-                                                        <b>Request Status</b>
-                                                    </div>
-                                                </td>
-                                                <td>:</td>
-                                                <td>
-                                                    <div class="input-group">
-                                                        <select data-role="listview" data-inset="true" ng-options="reqStatus as reqStatus.name for reqStatus in requestStatus" ng-model="rqStatus"></select>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <div class="input-group">
-                                                        <b>Approval Status</b>
-                                                    </div>
-                                                </td>
-                                                <td>:</td>
-                                                <td>
-                                                    <div class="input-group">
-                                                        <select data-role="listview" data-inset="true" ng-options="apStatus as apStatus.name for apStatus in approvalStatus" ng-model="apStatus"></select>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div><!--/panel-->
-                        </div>
-                    </div>*@
-                @*<div class="row">
-                        <div class="dropdown col-xs-12">
-                            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" style="width:100%">
-                                Filter by applications
-                                <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu" style="width: 100%" aria-labelledby="dropdownMenu1">
-                                <li><a href="#">Car</a></li>
-                                <li><a href="#">Store</a></li>
-                                <li role="separator" class="divider"></li>
-                                <li>
-                                    <div>
-                                        Request Status:
-                                        <select data-role="listview" data-inset="true" ng-options="reqStatus as reqStatus.name for reqStatus in requestStatus" ng-model="backend.Frquency">
-                                            <option value="">--Select--</option>
-                                        </select>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div>
-                                        Approval Status:
-                                        <select data-role="listview" data-inset="true" ng-options="reqStatus as reqStatus.name for reqStatus in requestStatus" ng-model="backend.Frquency">
-                                            <option value="">--Select--</option>
-                                        </select>
-                                    </div>
-                                </li>
-                                <li role="separator" class="divider"></li>
-                                <li><a href="#">Remove Filters</a></li>
-                            </ul>
-                        </div>
-                    </div>*@
+            <div class="col-xs-12 text-align-center btn-save">
+                <div ng-click="update('true')">                    
+                    Force Update
+                </div>
             </div>
-            <!-- Container (Services Section) -->
-            <div id="services" class="container-fluid">
-                <div class="row">
-                    <div class="col-xs-12" ng-repeat="backend in backends" ng-class-odd="'odd'" ng-class-even="'even'"  ng-click="redirectToDetailsPage(backend.BackendID)">
-                        <div class="col-xs-2">
-                            <span class="glyphicon glyphicon-tasks themeImageSmall"></span>
+        </div>
+        <div class="main-section">
+            <div class="title-section">
+                <div class="title-text">Task Status</div>
+            </div>
+        </div>
+        <div class="bg-canvas">
+            <div class="synch-time">Last refresh : <span ng-bind="lastsynch | date:'dd.MM.yyyy hh:mm a'"></span></div>           
+            <div class="">
+                <div class="col-xs-7 pendingbox">
+                    <div class="canvas-wrap">
+                        <canvas id="canvaspending" width="180" height="180"></canvas>
+                        <span id="procentpending"></span>
+                    </div>                 
+                </div>
+                <div class="col-xs-5 TasksCount-section">                    
+                    <div class="row"><div class="col-xs-2"><span class="dot pending-dot"></span></div><div class="col-xs-9">Pending</div></div>
+                    <div class="row"><div class="col-xs-2"></div><div class="col-xs-9 pending-count" ng-bind="pending"></div></div>
+                    <div class="row completed-count-row"><div class="col-xs-2"><span class="dot completed-dot"></span></div><div class="col-xs-9">Completed</div></div>
+                    <div class="row"><div class="col-xs-2"></div><div class="col-xs-9 completed-count" ng-bind="completed"></div></div>                   
+                </div>
+            </div>            
+        </div>
+        <div class="main-section">            
+            <div class="details-section">
+                <div class="row bottom-border" ng-repeat="backend in backends" ng-click="redirectToDetailsPage(backend.BackendID)">
+                    <div class="col-xs-4 label-value">
+                        <div class="label-task-head" ng-bind="backend.BackendName"></div>
+                        <div class="backend-task-details-last">Tasks - <span ng-bind="backend.Pending+backend.Approved+backend.Rejected"></span></div>
+                    </div>
+                    <div class="col-xs-2 label-value">
+                        <div class="canvas-wrap-task" >
+                            <canvas id="canvaspending{{$index}}" width="155" height="155" ng-bind="drawbackendRequestCountCircles(backend.Pending+backend.Approved+backend.Rejected,backend.Pending,$index)"></canvas>                            
                         </div>
-                        <div class="col-xs-8" style="line-height: 20px">
-                            <h4 style="margin: 0">{{backend.BackendName}}</h4>
-                            <p>{{backend.Description }}</p>
-                        </div>
-                        <div class="col-xs-2">
-                            @*<a href="/Landing/ApprovalDetails?backend={{backend.BackendID}}" style="font-size: 25px; margin-bottom: 4px; margin-right: 10px; padding: 9px" class="badge badge-primary">{{backend.OpenApprovals}}</a>*@
-                            <span style="font-size: 25px; margin-bottom: 4px; margin-right: 10px; padding: 5px;padding-bottom: 8px;" class="badge badge-primary">{{backend.Count}}</span>
-                        </div>
+                    </div>
+                    <div class="col-xs-5 label-value">
+                        <div class="backend-task-details"><span class="backend-pending-count"></span>Pending: <span ng-bind="backend.Pending"></span></div>
+                        <div class="backend-task-details-last"><span class="backend-completed-count"></span>Completed: <span ng-bind="backend.Approved+backend.Rejected"></span></div>
+                    </div>
+                    <div class="col-xs-1 label-value arrow-next">
+                        <span class="glyphicon glyphicon-chevron-right"></span>
                     </div>
 
                 </div>
-            </div>
-            <!-- Container (Portfolio Section) -->
-            @*<div id="portfolio" class="container-fluid text-center" style="display:none;">
-                    <h2>Help Section</h2><br>
-                    <div class="row text-center slideanim">
-                        <div class="col-xs-4">
-                            <div class="thumbnail">
-                                <img src="../Images/paris.jpg" alt="Paris" width="400" height="300">
-                                <p><strong>Approve tasks</strong></p>
-                                <p>Lorem ipsum....</p>
-                            </div>
-                        </div>
-                        <div class="col-xs-4">
-                            <div class="thumbnail">
-                                <img src="../Images/newyork.jpg" alt="New York" width="400" height="300">
-                                <p><strong>Reject tasks</strong></p>
-                                <p>Lorem ipsum....</p>
-                            </div>
-                        </div>
-                        <div class="col-xs-4">
-                            <div class="thumbnail">
-                                <img src="../Images/sanfran.jpg" alt="San Francisco" width="400" height="300">
-                                <p><strong>Track tasks</strong></p>
-                                <p>Lorem ipsum....</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>*@
+            </div>            
         </div>
     </div>
 </div>
