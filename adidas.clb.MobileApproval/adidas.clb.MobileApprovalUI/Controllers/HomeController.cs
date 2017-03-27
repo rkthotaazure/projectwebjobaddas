@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using System.Security.Claims;
 using adidas.clb.MobileApprovalUI.Exceptions;
 using adidas.clb.MobileApprovalUI.Models.JSONHelper;
 using adidas.clb.MobileApprovalUI.Models;
@@ -18,7 +19,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
     /// <summary>
     /// The controller that will handle requests for the home page.
     /// </summary>
-    //[Authorize]
+    [Authorize]
     public class HomeController : Controller
     {
         /// <summary>
@@ -27,15 +28,8 @@ namespace adidas.clb.MobileApprovalUI.Controllers
         /// <returns>returns mobileHome view if authenticated or navigate to create new user </returns>
 
         // return CreateNewUser view 
-        string userid = SettingsHelper.UserId;
-        public static string Userid()
-        {
-            UserProfileController userProfileObj = new UserProfileController();
-            var user = userProfileObj.Index();            
-            return "radoadmin";
-        }
-        
-        
+        //string userid = SettingsHelper.UserId;        
+        string userid = System.Web.HttpContext.Current.User.Identity.Name.Split('@')[0];     
         public ActionResult CreateUser()
         {
             return View();
