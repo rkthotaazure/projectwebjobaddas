@@ -914,6 +914,7 @@ $primary-color: #703a6f;
             padding-left: 10px;
             padding-top: 3px;
             float: left;
+            width: calc(100% - 42px);
         }
     }
 
@@ -949,18 +950,7 @@ $primary-color: #703a6f;
     background-image: url(../../../Images/adidas-loading.gif);
 }
 
-[ng-cloak].splash1 {
-    display: block !important;
-    /*background-image: url(../../../Images/Adidas_Task_Management.jpg);*/
-}
-
-.splash1 {
-    display: none;
-}
-
-#splash {
-    /*background-size:cover;
-    background-image: url(../../../Images/Adidas_Task_Management.jpg);*/
+#splash {    
     position: fixed;
     z-index: 99999999;
     top: 0;
