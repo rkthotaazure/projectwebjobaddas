@@ -81,6 +81,7 @@ namespace adidas.clb.job.UpdateTriggering.Utility
             public const string UpdateTriggerInputQueue = "updatetriggerinputqueue";
             public const string GeneratePdfQueue = "generatepdfqueue";
             public const string UTQueue = "utQueue";
+            public const string UTMissedUpdatesQueue = "utMissingUpdatesQueue";
             public const string VIPQueue = "vipQueue";
             public const string PDFQueue = "pdfQueue";
         }

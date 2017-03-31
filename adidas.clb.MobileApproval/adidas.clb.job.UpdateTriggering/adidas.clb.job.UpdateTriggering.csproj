@@ -137,6 +137,7 @@
     <Compile Include="App_Data\BAL\GeneratePDF.cs" />
     <Compile Include="App_Data\BAL\UpdateTriggeringRules.cs" />
     <Compile Include="App_Data\BAL\Waiter.cs" />
+    <Compile Include="App_Data\DAL\BackgroundTaskRunner.cs" />
     <Compile Include="App_Data\DAL\DataProvider.cs" />
     <Compile Include="App_Data\DAL\GetCarPDFDetailsDAL.cs" />
     <Compile Include="App_Data\DAL\GetStorePDFDetailsDAL.cs" />

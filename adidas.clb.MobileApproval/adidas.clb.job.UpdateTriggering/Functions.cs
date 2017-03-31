@@ -117,6 +117,88 @@ namespace adidas.clb.job.UpdateTriggering
 
             }
         }
+        public static void ProcessMissingUpdates([QueueTrigger("%utMissingUpdatesQueue%")] string message, TextWriter log)
+        {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
+            try
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                string queueName = Convert.ToString(ConfigurationManager.AppSettings["UpdateTriggerMissedUpdatesInputQueue"]);
+                // InsightLogger.TrackStartEvent(callerMethodName);
+                //checking update triggering queue message null or empty
+                if (!string.IsNullOrEmpty(message))
+                {
+                    //log.WriteLine("adidas.clb.job.UpdateTriggering :: Processing update triggering queue message :: start()" + message);
+                    //write message into application insights
+                    InsightLogger.TrackEvent(queueName + " , Action :: UpdateTriggering input queue triggered : Start(), \n Response :: Message:" + message);
+                    //Deserializ input queue message into UpdateTriggeringMsg object
+                    UpdateTriggeringMsg objUTMsg = JsonConvert.DeserializeObject<UpdateTriggeringMsg>(message);
+                    //checking UpdateTriggeringMsg is null or not
+                    if (objUTMsg != null)
+                    {
+                        //get userupdateMsg list from UpdateTriggeringMsg
+                        List<UserUpdateMsg> lstUsers = null;
+                        //checking users list in UpdateTriggeringMsg null or not
+                        if (objUTMsg.Users != null)
+                        {
+                            lstUsers = objUTMsg.Users.ToList();
+                            InsightLogger.TrackEvent(queueName + " , Action :: Users Provided? , Response :: true ");
+                        }
+                        //get RequestUpdateMsg list from UpdateTriggeringMsg
+                        List<RequestUpdateMsg> lstRequests = null;
+                        //checking request list in UpdateTriggeringMsg null or not
+                        if (objUTMsg.Requests != null)
+                        {
+                            lstRequests = objUTMsg.Requests.ToList();
+                            InsightLogger.TrackEvent(queueName + " , Action :: Requests Provided? , Response :: true ");
+                        }
+                        //Declare a CancellationToken object, which indicates whether cancellation is requested
+                        var ctsut = new CancellationTokenSource();
+                        //create object for userbackend class for calling the Updateusers & updateRequest methods
+                        UserBackendDAL objUserbackendDAL = new UserBackendDAL();
+                        //Parallely update the user update and request update messages from UserUpdateMsg.
+                        Task[] tasksProcessQueueMsg = new Task[2];
+                        //Process users update messages
+                        tasksProcessQueueMsg[0] = Task.Factory.StartNew(() => objUserbackendDAL.UpdateUserBackends(lstUsers, objUTMsg.VIP, objUTMsg.GetPDFs, objUTMsg.ChangeAfter, queueName));
+                        //Process request update Messages
+                        tasksProcessQueueMsg[1] = Task.Factory.StartNew(() => objUserbackendDAL.UpdateRequests(lstRequests, objUTMsg.VIP, objUTMsg.GetPDFs, objUTMsg.ChangeAfter, queueName));
+                        //create processTimeoutperiod variable and assign the value from app.config file  
+                        int processTimeoutperiod = Convert.ToInt32(CloudConfigurationManager.GetSetting("timeoutperiod"));
+                        //if all the tasks which are not completed with in the timeout period then those task automatically canceled by CancellationToken object cancel method.
+                        if (!Task.WaitAll(tasksProcessQueueMsg, processTimeoutperiod, ctsut.Token))
+                        {
+                            //Communicates a request for cancellation
+                            ctsut.Cancel();
+                        }
+                        //log.WriteLine("adidas.clb.job.UpdateTriggering :: Processing update triggering queue message :: End()" + message);
+                        //write message into application insights
+                        InsightLogger.TrackEvent(queueName + " , Action :: UpdateTriggering input queue triggered : End()");
+                    }
+                    else
+                    {
+                        InsightLogger.TrackEvent(queueName + " , Action :: update triggering message is null");
+                    }
+                }
+            }
+            catch (DataAccessException dalexception)
+            {
+
+                //write exception message to web job dashboard logs
+                //log.WriteLine(dalexception.Message);
+                //write exception into application insights
+                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
+            }
+            catch (Exception exception)
+            {
+                //write exception message to web job dashboard logs
+                // log.WriteLine(exception.Message);
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+
+            }
+        }
         /// <summary>
         /// This method automatically triggered when ever a new message inserted into vipmessagesqueue.
         /// </summary>
