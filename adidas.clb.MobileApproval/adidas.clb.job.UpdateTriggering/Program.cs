@@ -73,6 +73,10 @@ namespace adidas.clb.job.UpdateTriggering
                     {
                         queueName = Convert.ToString(ConfigurationManager.AppSettings["VIPMessagesQueue"]);
                     }
+                    else if (name == CoreConstants.AzureQueues.UTMissedUpdatesQueue)
+                    {
+                        queueName = Convert.ToString(ConfigurationManager.AppSettings["UpdateTriggerMissedUpdatesInputQueue"]);
+                    }
                     return queueName;
                 }
                 catch (Exception exception)

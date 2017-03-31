@@ -76,6 +76,25 @@ namespace adidas.clb.job.UpdateTriggering.Helpers
                 throw new DataAccessException(innerexception.Message, innerexception.InnerException);
             }           
         }
+        public static CloudQueue GetMissedUpdatesInputQueue(CloudQueueClient queuePath)
+        {
+            string callerMethodName = string.Empty;
+            try
+            {
+
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                //read queue name from app.config :: AppSettings and return queue
+                CloudQueue queue = queuePath.GetQueueReference(ConfigurationManager.AppSettings["UpdateTriggerMissedUpdatesInputQueue"]);
+                return queue;
+
+            }
+
+            catch (Exception innerexception)
+            {
+                InsightLogger.Exception(innerexception.Message, innerexception, "Retrieveentity");
+                throw new DataAccessException(innerexception.Message, innerexception.InnerException);
+            }
+        }
         /// <summary>
         /// This method Retrieves a reference to a Request PDF Queue.
         /// </summary>
