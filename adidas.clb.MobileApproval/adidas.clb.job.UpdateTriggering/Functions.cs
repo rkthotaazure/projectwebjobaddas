@@ -451,7 +451,63 @@ namespace adidas.clb.job.UpdateTriggering
             }
 
         }
+        /// <summary>
+        /// This method Archival the data which is greater than two months old in azure table
+        /// </summary>
+        /// <param name="timerInfo"></param>
+        /// <param name="log"></param>
+        public static void ArchivalData([TimerTrigger(typeof(DailyScheduleForArchival))] TimerInfo timerInfo, TextWriter log)
+        {
+            string callerMethodName = string.Empty;
+            try
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                var timestamp = DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["ArchivalDayInterval"])).ToString("yyyy-MM-dd");
+                UserBackendDAL objdal = new UserBackendDAL();
+                List<BackendEntity> lstbackends = objdal.GetBackends();
+                //foreach backend  
+                DateTime currentTimestamp = DateTime.Now;
+                //foreach(BackendEntity backend in lstbackends)
+                Parallel.ForEach<BackendEntity>(lstbackends, backend =>
+                 {
+                     string backendID = backend.RowKey;
+                     InsightLogger.TrackEvent("UpdateTriggering, Action :: for each backend :: Archival historical data : start() , Response :: Backend Name : " + backendID);
+                     //Get all the userbackends associated with the backendS
+                     CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(azureTableUserDeviceConfiguration);
+                     TableQuery<UserBackendEntity> tquery = new TableQuery<UserBackendEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.RowKey, QueryComparisons.Equal, backend.RowKey));
+                     List<UserBackendEntity> allUserBackends = UserDeviceConfigurationTable.ExecuteQuery(tquery).ToList();
+                     foreach (UserBackendEntity user in allUserBackends)
+                     {
+                         string username = user.UserID;
+                         objdal.ArchivalRequestsData(username, timestamp);
+                     }
+                     InsightLogger.TrackEvent("UpdateTriggering, Action :: for each backend :: Archival historical data : End() , Response :: Backend Name : " + backendID);
+                 });
 
+
+            }
+            catch (BusinessLogicException balexception)
+            {
+                //write exception message to web job dashboard logs
+                //log.WriteLine(balexception.Message);
+                //write Business Logic Exception into application insights
+                InsightLogger.Exception(balexception.Message, balexception, callerMethodName);
+            }
+            catch (DataAccessException dalexception)
+            {
+                //write exception message to web job dashboard logs
+                //log.WriteLine(dalexception.Message);
+                //write Data layer logic Exception into application insights
+                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
+            }
+            catch (Exception exception)
+            {
+                // log.WriteLine("Error in adidas.clb.job.UpdateTriggering :: Functions :: RegularChecksforUserbackendLostsUpdate() :: Exception Message=" + exception.Message);
+                //write  Exception into application insights
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+            }
+        }
 
         /// <summary>
         /// This method generates time intervals based on given minutes time span
@@ -552,6 +608,18 @@ namespace adidas.clb.job.UpdateTriggering
 
             }
         }
+        /// <summary>
+        /// This Class constructs schedule time value for archiving the data from azure table
+        /// </summary>
+        public class DailyScheduleForArchival : DailySchedule
+        {
+            public DailyScheduleForArchival() : base(Convert.ToString(ConfigurationManager.AppSettings["DailyScheduleForArchival"]))
+            {
+
+            }
+        }
+
+
         /// <summary>
         /// This class generates the time schedule,based on this timeschedule  UpdateNextCollectingTime of the backend code will be triggered.
         /// </summary>
