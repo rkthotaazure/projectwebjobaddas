@@ -58,22 +58,23 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 CloudTable UserDeviceConfigurationTable = DataProvider.GetAzureTableInstance(azureTableUserDeviceConfiguration);
                 //Get all backends          
                 List<BackendEntity> lstbackends = objdal.GetBackends();
-                DateTime curTimestamp = DateTime.Now;           
+                DateTime curTimestamp = DateTime.Now;
                 //for each backend get minimum update frequency for all the userbackend's associated
-                Parallel.ForEach<BackendEntity>(lstbackends, backend=>                
+                //foreach(BackendEntity backend in lstbackends)
+                Parallel.ForEach<BackendEntity>(lstbackends, backend =>
                 {
                     InsightLogger.TrackEvent("UpdateTriggering, Action :: for each backend :: set next collecting time (Rule R1) :: start() , Response :: Backend Name : " + backend.BackendID);
-                    string backendID = backend.RowKey;                    
+                    string backendID = backend.RowKey;
                     //Get all the userbackends associated with the backend
                     TableQuery<UserBackendEntity> tquery = new TableQuery<UserBackendEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.RowKey, QueryComparisons.Equal, backend.RowKey));
                     List<UserBackendEntity> allUserBackends = UserDeviceConfigurationTable.ExecuteQuery(tquery).ToList();
-                    int minUpdateFrequency=0;
+                    int minUpdateFrequency = 0;
                     if (allUserBackends != null && allUserBackends.Count > 0)
                     {
                         minUpdateFrequency = allUserBackends.Min(r => r.DefaultUpdateFrequency);
                     }
                     //get minimum update frequency from User Backend list
-                    
+
                     //InsightLogger.TrackEvent("UpdateTriggering, Action :: Collecting the minimum Default Update Frequency of all the userbackends under the backend :" + backendID + " , Response :: Minimum Update Frquency :" + minUpdateFrequency );
                     //Get next collecting hours based on update Triggering Rule :: R1                    
                     int nextCollectingTimeInMinutes;
@@ -86,7 +87,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                         nextCollectingTimeInMinutes = minUpdateFrequency / nextCollectingTimeDividend;
                     }
                     //update backend next collecting time in refernecedata table
-                    this.InsertorUpdateBackendNextCollectingTime(backendID, nextCollectingTimeInMinutes, backend.AverageAllRequestsLatency, backend.LastAllRequestsLatency,IsFirstTime, curTimestamp);
+                    this.InsertorUpdateBackendNextCollectingTime(backendID, nextCollectingTimeInMinutes, backend.AverageAllRequestsLatency, backend.LastAllRequestsLatency, IsFirstTime, curTimestamp);
                     InsightLogger.TrackEvent("UpdateTriggering, Action :: for each backend :: Set next collecting time (Rule R1) :: End() , Response :: Success, Backend Name : " + backend.BackendID);
                     // this.objdal.CollectUsersNeedUpdateByBackend(backendID);
                 });
@@ -113,7 +114,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         /// </summary>
         /// <param name="backend"></param>
         /// <param name="minimumUpdateFrequency"></param>
-        public void InsertorUpdateBackendNextCollectingTime(string backendID, int minimumUpdateFrequency, int avgAllRequestsLatency, int lastAllRequestsLatency,bool isFirstTimePull,DateTime timestamp)
+        public void InsertorUpdateBackendNextCollectingTime(string backendID, int minimumUpdateFrequency, int avgAllRequestsLatency, int lastAllRequestsLatency, bool isFirstTimePull, DateTime timestamp)
         {
             string callerMethodName = string.Empty;
             try
@@ -147,7 +148,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             //call dataprovider method to update entity to azure table
                             DataProvider.UpdateEntity<NextUserCollectingTimeEntity>(azureTableReference, ObjNextCollectingTime);
                         }
-                        if (missedwaitingMins > (missedUpdatesWaitingTimeInMinutes + missedupdateFraction ))
+                        if (missedwaitingMins > (missedUpdatesWaitingTimeInMinutes + missedupdateFraction))
                         {
                             ObjNextCollectingTime.MissingUpdateLastCollectingTime = MissedUpdateLastCollectingTime;
                             //update Missing Update NextCollectingTime based on updatetriggering Rule R5
@@ -167,11 +168,11 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                         //update Missing Update NextCollectingTime based on updatetriggering Rule R5
                         ObjNextCollectingTime.MissingUpdateNextCollectingTime = utRules.GetNextMissingCollectingTime(MissedUpdateLastCollectingTime, avgAllRequestsLatency, lastAllRequestsLatency);
                         //update  MinimumUpdateFrequency
-                        ObjNextCollectingTime.MinimumUpdateFrequency = minimumUpdateFrequency;                      
+                        ObjNextCollectingTime.MinimumUpdateFrequency = minimumUpdateFrequency;
                         //call dataprovider method to update entity to azure table
                         DataProvider.UpdateEntity<NextUserCollectingTimeEntity>(azureTableReference, ObjNextCollectingTime);
-                    }                  
-                   
+                    }
+
                 }
                 else
                 {
@@ -248,7 +249,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         /// <param name="missingUpdateLastCollectingTime"></param>
         /// <param name="avgAllRequestsLatency"></param>
         /// <param name="lastAllRequestsLatency"></param>
-        public void UpdateMisseduserBackendNextCollectingTime(string backendID, DateTime missingUpdateLastCollectingTime,DateTime currTimestamp)
+        public void UpdateMisseduserBackendNextCollectingTime(string backendID, DateTime missingUpdateLastCollectingTime, DateTime currTimestamp)
         {
             string callerMethodName = string.Empty;
             try
@@ -300,7 +301,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                List<NextUserCollectingTimeEntity> allBackends = DataProvider.RetrieveEntities<NextUserCollectingTimeEntity>(azureTableReference,CoreConstants.AzureTables.UpdateTriggerNextCollectingTime);
+                List<NextUserCollectingTimeEntity> allBackends = DataProvider.RetrieveEntities<NextUserCollectingTimeEntity>(azureTableReference, CoreConstants.AzureTables.UpdateTriggerNextCollectingTime);
                 return allBackends;
             }
             catch (DataAccessException dalexception)

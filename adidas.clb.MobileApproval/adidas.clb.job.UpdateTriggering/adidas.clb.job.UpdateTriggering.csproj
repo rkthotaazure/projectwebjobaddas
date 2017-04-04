@@ -153,9 +153,12 @@
     <Compile Include="Helpers\AzCopyConfig.cs" />
     <Compile Include="Helpers\AzureQueues.cs" />
     <Compile Include="Helpers\UrlSettings.cs" />
+    <Compile Include="Models\ApprovalEntity.cs" />
+    <Compile Include="Models\ApproverEntity.cs" />
     <Compile Include="Models\BackendEntity.cs" />
     <Compile Include="Models\CarApprovalModel.cs" />
     <Compile Include="Models\Error.cs" />
+    <Compile Include="Models\FieldEntity.cs" />
     <Compile Include="Models\NextUserCollectingTimeEntity.cs" />
     <Compile Include="Models\RequestPDFAddress.cs" />
     <Compile Include="Models\RequestsUpdateAck.cs" />

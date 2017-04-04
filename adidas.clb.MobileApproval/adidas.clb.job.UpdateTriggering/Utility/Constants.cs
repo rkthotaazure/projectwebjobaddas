@@ -64,6 +64,7 @@ namespace adidas.clb.job.UpdateTriggering.Utility
             public const string UserDeviceConfiguration = "UserDeviceConfiguration";
             public const string AzureStorageConnectionString = "GenericMobileStorageConnectionString";
             public const string PartitionKey = "PartitionKey";
+            public const string Timestamp = "Timestamp";
             public const string RowKey = "RowKey";
             public const string Backend = "Backend";
             public const string User = "User";
@@ -72,9 +73,13 @@ namespace adidas.clb.job.UpdateTriggering.Utility
             public const string BackendSynchPK = "BS_";
             public const string RequestSynchPK = "RequestSynch";
             public const string RequestPK = "Requests_";
+            public const string ApprovalPK = "Approval_";
+            public const string FieldPK = "Field_";
+            public const string ApproverPK = "Approver_";            
             public const string UpdateTriggerNextCollectingTime = "B_NextCollectingTime";
             public const string BackendID = "BackendID";
             public const string Status = "Status";
+            public const string RequestID = "RequestId";
         }
         public struct AzureQueues
         {

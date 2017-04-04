@@ -50,6 +50,8 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         public static bool IsVIPFlag = Convert.ToBoolean(ConfigurationManager.AppSettings["VIPFlag"]);
         //RequestTransactions
         public static string azureTableRequestTransactions = ConfigurationManager.AppSettings["AzureTables.RequestTransactions"];
+        //RequestTxArchival
+        public static string azureTableRequestTxArchival = ConfigurationManager.AppSettings["AzureTables.RequestTxArchival"];
         //batchsize
         public static int batchsize = Convert.ToInt32(ConfigurationManager.AppSettings["ListBatchSize"]);
         //decalre UpdateTriggeringRules calss object 
@@ -673,10 +675,11 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 string rowfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.BackendID, QueryComparisons.Equal, backendID);
                 //TableQuery<RequestEntity> tquerymissedRequests = new TableQuery<RequestEntity>().Where(TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowfilter));
                 //status filter
-                string statusfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.Status, QueryComparisons.NotEqual, Convert.ToString(ConfigurationManager.AppSettings["RequestStatus"]));
+                string statusfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.Status, QueryComparisons.NotEqual, Convert.ToString(ConfigurationManager.AppSettings["MissedUpdatesRequestStatus"]));
                 string combinedFilter = string.Format("({0}) {1} ({2}) {3} ({4})", partitionFilter, TableOperators.And, rowfilter, TableOperators.And, statusfilter);
                 //combine all the filters with And operator
                 TableQuery<RequestEntity> tquerymissedRequests = new TableQuery<RequestEntity>().Where(combinedFilter);
+
                 //create task which will parallelly read & checks the Rules from azure table
                 Task[] taskRequestCollection = new Task[2];
                 var entityMissedupdateRequestsCollection = new BlockingCollection<List<RequestEntity>>();
@@ -703,6 +706,8 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 throw new DataAccessException(exception.Message, exception.InnerException);
             }
         }
+       
+      
         /// <summary>
         /// This method will return all the requests which have missed updates from azure table
         /// </summary>
@@ -773,24 +778,28 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     if (requestitem.ToList() != null)
                     {
                         List<string> lstrmsgFormat = new List<string>();
-                        List<RequestEntity> reqmissedUpdateslst = new List<Models.RequestEntity>();
+                        List<RequestEntity> reqmissedUpdateslst = new List<RequestEntity>();
                         foreach (RequestEntity requestDetails in requestitem.ToList())
                         {
+                            string reqID = requestDetails.RowKey;
+                            DateTime reqLastUpdate = requestDetails.LastUpdate;
+                            DateTime? reqExpectedUpdate = requestDetails.ExpectedUpdate;
+                            bool IsrequestTriggered = requestDetails.UpdateTriggered;
                             //checking is request  update missing or not with the help of Updatetriggering rule R6
-                            if (utRule.IsRequestUpdateMissing(requestDetails.UpdateTriggered, requestDetails.ExpectedUpdate, CurTimestamp))
+                            if (utRule.IsRequestUpdateMissing(requestDetails.UpdateTriggered, reqExpectedUpdate, CurTimestamp))
                             {
 
-                                InsightLogger.TrackEvent("UpdateTriggering, Action :: Is Request [ " + requestDetails.RowKey + " ] missed update based on UT Rule R6 , Response :: true");
+                                InsightLogger.TrackEvent("UpdateTriggering, Action :: Is Request [ " + reqID + " ] missed update based on UT Rule R6 , Response :: true, Current Timestamp :" + CurTimestamp + ", Request LastUpdate : " + Convert.ToString(reqLastUpdate) + " ,User Update Frequency : " + userUpdateFrequency + " ,Expected Update:" + Convert.ToString(reqExpectedUpdate) + " ,Is request Triggered :" + Convert.ToString(IsrequestTriggered));
                                 //add request details to RequestSynchEntity list
                                 reqmissedUpdateslst.Add(requestDetails);
 
 
                             }
                             //checking request is update or not based on Approval Sync Rule R5
-                            else if (!utRule.IsRequestUpdated(requestDetails.UpdateTriggered, requestDetails.LastUpdate, userUpdateFrequency, CurTimestamp))
+                            else if (!utRule.IsRequestUpdated(requestDetails.UpdateTriggered, reqLastUpdate, userUpdateFrequency, CurTimestamp))
                             {
 
-                                InsightLogger.TrackEvent("UpdateTriggering, Action :: Is Request [ " + requestDetails.RowKey + " ] needs update based on Approval Sync Rule R5  , Response :: true");
+                                InsightLogger.TrackEvent("UpdateTriggering, Action :: Is Request [ " + reqID + " ] needs update based on Approval Sync Rule R5  , Response :: true,Current Timestamp :" + CurTimestamp + ", Request LastUpdate : " + Convert.ToString(reqLastUpdate) + " ,User Update Frequency : " + userUpdateFrequency + " ,Expected Update:" + Convert.ToString(reqExpectedUpdate) + " ,Is request Triggered :" + Convert.ToString(IsrequestTriggered));
                                 //add request details to RequestSynchEntity list
                                 reqmissedUpdateslst.Add(requestDetails);
 
@@ -798,7 +807,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             }
                             else
                             {
-                                InsightLogger.TrackEvent("UpdateTriggering, Action :: Is Request [ " + requestDetails.RowKey + " ] needs update[Approval Sync Rule R5]/Missed update[UT Rule R6], Response :: false");
+                                InsightLogger.TrackEvent("UpdateTriggering, Action :: Is Request [ " + reqID + " ] needs update[Approval Sync Rule R5]/Missed update[UT Rule R6], Response :: false, Current Timestamp :" + CurTimestamp + ", Request LastUpdate : " + Convert.ToString(reqLastUpdate) + " ,User Update Frequency : " + userUpdateFrequency + " ,Expected Update:" + Convert.ToString(reqExpectedUpdate) + " ,Is request Triggered :" + Convert.ToString(IsrequestTriggered));
                             }
                         }
                         if (reqmissedUpdateslst.Count > 0)
@@ -1260,97 +1269,291 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 yield return lstreqs.GetRange(i, Math.Min(nSize, lstreqs.Count - i));
             }
         }
-        public void CallBackendAgent(string backendID, string UpdateTriggeringMessage, string messagecategory, string queueName)
+        /// <summary>
+        /// This method archive request data in request transaction table 
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <param name="timestamp"></param>
+        public void ArchivalRequestsData(string userName, string timestamp)
         {
             string callerMethodName = string.Empty;
             try
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                string acknowledgement = string.Empty;
-                // RequestsUpdateAck Objacknowledgement = null;
-                using (HttpClient client = new HttpClient())
+                InsightLogger.TrackEvent("UpdateTriggering, Action :: collecting the requests which needs to archival");
+
+                var ctsReqTasks = new CancellationTokenSource();
+                //get's azure table instance
+                CloudTable RequestsMissedDeviceConfigurationTable = DataProvider.GetAzureTableInstance(azureTableRequestTransactions);
+                ////Get all requests whose staus should be not equal to "In Progress".
+                //partition key
+                string partitionFilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, CoreConstants.AzureTables.RequestPK + userName);
+                //timestamp
+                string timestampFilter = TableQuery.GenerateFilterConditionForDate(CoreConstants.AzureTables.Timestamp, QueryComparisons.LessThanOrEqual, Convert.ToDateTime(timestamp));
+                //TableQuery<RequestEntity> tquerymissedRequests = new TableQuery<RequestEntity>().Where(TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowfilter));
+                //status filter
+                string statusfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.Status, QueryComparisons.NotEqual, Convert.ToString(ConfigurationManager.AppSettings["RequestStatus"]));
+                string combinedFilter = string.Format("({0}) {1} ({2}) {3} ({4})", partitionFilter, TableOperators.And, timestampFilter, TableOperators.And, statusfilter);
+                //combine all the filters with And operator
+                TableQuery<RequestEntity> tqueryrequests = new TableQuery<RequestEntity>().Where(combinedFilter);
+
+
+
+
+
+
+                //create task which will parallelly read & checks the Rules from azure table
+                Task[] reqtaskCollection = new Task[2];
+                var entityReqCollection = new BlockingCollection<List<RequestEntity>>();
+                reqtaskCollection[0] = Task.Factory.StartNew(() => ReadRequestsFromTransaction(RequestsMissedDeviceConfigurationTable, tqueryrequests, entityReqCollection), TaskCreationOptions.LongRunning);
+                reqtaskCollection[1] = Task.Factory.StartNew(() => WriteRequeststoArchivalTable(entityReqCollection, userName, timestamp), TaskCreationOptions.LongRunning);
+                int requestTimeoutperiod = Convert.ToInt32(CloudConfigurationManager.GetSetting("timeoutperiod"));
+                if (!Task.WaitAll(reqtaskCollection, requestTimeoutperiod, ctsReqTasks.Token))
                 {
-                    //access to backend agent required username & password(basic authentication)
-                    //get username from config and encode it
-                    string username = Convert.ToBase64String(Encoding.UTF8.GetBytes(UrlSettings.UserName));
-                    //get passwoed from config and encode
-                    string password = Convert.ToBase64String(Encoding.UTF8.GetBytes(UrlSettings.Password));
-                    //get authorization schema name from config
-                    string authSchema = UrlSettings.AuthSchema;
-                    //get API endpoint and format
-                    string backendApiEndpoint = UrlSettings.GetBackendAgentRequestApprovalAPI(backendID);
-                    //Post Triggers the pulling of updated requests data from a the given backend / given requests
-                    //Max Retry call from web.config
-                    int maxRetryCount = Convert.ToInt32(ConfigurationManager.AppSettings["MaxRetryCount"]);
-                    int maxThreadSleepInMilliSeconds = Convert.ToInt32(ConfigurationManager.AppSettings["MaxThreadSleepInMilliSeconds"]);
-                    int RetryAttemptCount = 0;
-                    bool IsSuccessful = false;
-                    InsightLogger.TrackEvent(queueName + " , Action :: Pass " + messagecategory + " message to agent (Invoking backend agent API) :: \n Response :: Success \n API Endpont : " + backendApiEndpoint + " \n RequestUpdateMessage: " + UpdateTriggeringMessage);
-                    //Implemented Use of retry / back-off logic
-                    do
-                    {
-                        try
-                        {
-                            //add authentication information to client header
-                            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(authSchema, username + ":" + password);
-                            var request = new HttpRequestMessage(HttpMethod.Post, backendApiEndpoint);
-                            request.Content = new StringContent(UpdateTriggeringMessage, Encoding.UTF8, "application/json");
-                            // InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Pass user message to agent (Invoking backend agent API) , Response :: Success");
-                            var result = client.SendAsync(request).Result;
-                            //if the api call returns successcode then return the result into string
-
-                            //if (result.IsSuccessStatusCode)
-                            //{
-                            //    string response = result.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                            //    if (!string.IsNullOrEmpty(response))
-                            //    {
-                            //        //request update acknowledgement
-                            //        Objacknowledgement = JsonConvert.DeserializeObject<RequestsUpdateAck>(response);
-                            //        //if request update acknowledgement error object is null means backend api successfully called
-                            //        if (Objacknowledgement.Error == null)
-                            //        {
-                            //            acknowledgement = "Backend API has been invoked successfully. ";
-                            //            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering :: updatetriggerinputqueue, Action :: Pass user message to agent (Invoking backend agent API) , Response :: Success");
-
-                            //        }
-                            //        else
-                            //        {
-                            //            InsightLogger.TrackEvent("adidas.clb.job.UpdateTriggering :: updatetriggerinputqueue, Action :: Pass user message to agent (Invoking backend agent API) , Response :: Backend API has thrown an error :: ErrorMessage=" + Objacknowledgement.Error.longtext);
-                            //        }
-                            //    }
-
-                            //}
-                            IsSuccessful = true;
-                        }
-                        catch (Exception serviceException)
-                        {
-                            //Increasing RetryAttemptCount variable
-                            RetryAttemptCount = RetryAttemptCount + 1;
-                            //Checking retry call count is eual to max retry count or not
-                            if (RetryAttemptCount == maxRetryCount)
-                            {
-                                InsightLogger.Exception("Error in " + queueName + ":: CallBackendAgent() method :: Retry attempt count: [ " + RetryAttemptCount + " ]", serviceException, callerMethodName);
-                                throw new ServiceLayerException(serviceException.Message, serviceException.InnerException);
-                            }
-                            else
-                            {
-                                InsightLogger.Exception("Error in " + queueName + ":: CallBackendAgent() method :: Retry attempt count: [ " + RetryAttemptCount + " ]", serviceException, callerMethodName);
-                                //Putting the thread into some milliseconds sleep  and again call the same method call.
-                                Thread.Sleep(maxThreadSleepInMilliSeconds);
-                            }
-                        }
-
-                    } while (!IsSuccessful);
-
+                    ctsReqTasks.Cancel();
                 }
-                //return acknowledgement;
+                else
+                {
+                    //dispose blocking collection
+                    entityReqCollection.Dispose();
+                }
+            }
+            catch (BusinessLogicException dalexception)
+            {
+                throw dalexception;
             }
             catch (Exception exception)
             {
                 InsightLogger.Exception(exception.Message, exception, callerMethodName);
-                throw new ServiceLayerException(exception.Message, exception.InnerException);
+                throw new DataAccessException(exception.Message, exception.InnerException);
             }
         }
+        /// <summary>
+        /// This method insert the requests into archival table and delte the same requests from transaction table
+        /// </summary>
+        /// <param name="rRequestslsts"></param>
+        /// <param name="userName"></param>
+        /// <param name="timestamp"></param>
+        private void WriteRequeststoArchivalTable(BlockingCollection<List<RequestEntity>> rRequestslsts, string userName, string timestamp)
+        {
+            string callerMethodName = string.Empty;
+            try
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                Parallel.ForEach(rRequestslsts.GetConsumingEnumerable(), requestitem =>
+                {
+                    if (requestitem.ToList() != null && requestitem.ToList().Count > 0)
+                    {
+                        // var results = requestitem.ToList().GroupBy(x => x.PartitionKey).Select(x => x).ToList();
+                        DataProvider.AddEntities<RequestEntity>(azureTableRequestTxArchival, requestitem.ToList());
+                        //delete entites from transaction table
+                        foreach (RequestEntity entity in requestitem.ToList())
+                        {
+                            //get requestid from entity
+                            string requestID = entity.RowKey;
+                            //delete request entity from transaction table
+                            DataProvider.DeleteEntity<RequestEntity>(azureTableRequestTransactions, entity);
+                            //archival related tasks for this request
+                            this.ArchivalTasksData(userName, requestID);
+                            //archival related fields for this request
+                            this.ArchivalFieldsData(requestID);
+                            //archival related approvers for this request
+                            this.ArchivalApproversData(requestID);
+
+                        }
+                    }
+
+                });
+            }
+            catch (BusinessLogicException dalexception)
+            {
+                throw dalexception;
+            }
+            catch (Exception exception)
+            {
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                throw new DataAccessException(exception.Message, exception.InnerException);
+            }
+
+        }
+        /// <summary>
+        ///  This method reads last one month old completed requests from table for archive
+        /// </summary>
+        /// <param name="requestTableReference"></param>
+        /// <param name="requeststq"></param>
+        /// <param name="requestsCollection"></param>
+        private void ReadRequestsFromTransaction(CloudTable requestTableReference, TableQuery<RequestEntity> requeststq, BlockingCollection<List<RequestEntity>> requestsCollection)
+        {
+            string callerMethodName = string.Empty;
+            try
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                double requestsRowcount = 0;
+                TableContinuationToken rrequestsContinuationToken = null;
+                TableQuerySegment<RequestEntity> requestsResponse;
+                List<RequestEntity> lstrequests = null;
+                //by defaylt azure ExecuteQuery will return 1000 records in single call, if reterival rows is more than 1000 then we need to use ExecuteQuerySegmented
+
+                do
+                {
+                    requestsResponse = requestTableReference.ExecuteQuerySegmented<RequestEntity>(requeststq, rrequestsContinuationToken, null, null);
+                    //rtaskResponse will fetch the rows from userbackend azure table untill tableContinuationToken is null 
+                    if (requestsResponse.ContinuationToken != null)
+                    {
+                        rrequestsContinuationToken = requestsResponse.ContinuationToken;
+                    }
+                    else
+                    {
+                        rrequestsContinuationToken = null;
+                    }
+
+                    requestsRowcount += requestsResponse.Results.Count;
+                    lstrequests = new List<RequestEntity>();
+                    //adding result set to List<UserBackendEntity>
+                    lstrequests.AddRange(requestsResponse.Results);
+                    //adding List<UserBackendEntity> to BlockingCollection<List<UserBackendEntity>>
+                    requestsCollection.Add(lstrequests);
+                    lstrequests = null;
+                } while (rrequestsContinuationToken != null);
+                requestsCollection.CompleteAdding();
+            }
+            catch (Exception exception)
+            {
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                throw new DataAccessException(exception.Message, exception.InnerException);
+            }
+
+
+        }
+        /// <summary>
+        /// This method deletes the task details from transaction table based on user & requestID and inserts the same records into archival table
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <param name="requestID"></param>
+        public void ArchivalTasksData(string userName, string requestID)
+        {
+            string callerMethodName = string.Empty;
+            try
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("UpdateTriggering, Action :: collecting the tasks which needs to archival");
+                //get's azure table instance
+                CloudTable tblRequestTransactions = DataProvider.GetAzureTableInstance(azureTableRequestTransactions);
+                //Get all the userbackends associated with the backend
+                //partition key
+                string partitionFilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, CoreConstants.AzureTables.ApprovalPK + userName);
+                //row filter
+                string rowfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.RequestID, QueryComparisons.Equal, requestID);
+                //timestamp
+                //string timestampFilter = TableQuery.GenerateFilterConditionForDate(CoreConstants.AzureTables.Timestamp, QueryComparisons.LessThanOrEqual, Convert.ToDateTime(timestamp));
+                //TableQuery<RequestEntity> tquerymissedRequests = new TableQuery<RequestEntity>().Where(TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowfilter));
+                //status filter
+                //string statusfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.Status, QueryComparisons.NotEqual, Convert.ToString(ConfigurationManager.AppSettings["TaskStatus"]));
+                string combinedFilter = string.Format("({0}) {1} ({2})", partitionFilter, TableOperators.And, rowfilter);
+                //combine all the filters with And operator
+                TableQuery<ApprovalEntity> tquerytasks = new TableQuery<ApprovalEntity>().Where(combinedFilter);
+                List<ApprovalEntity> lstApprovalEntites = tblRequestTransactions.ExecuteQuery(tquerytasks).ToList();
+                if (lstApprovalEntites != null && lstApprovalEntites.Count > 0)
+                {
+                    DataProvider.AddEntities<ApprovalEntity>(azureTableRequestTxArchival, lstApprovalEntites);
+                    //delete entites from transaction table
+                    foreach (ApprovalEntity entity in lstApprovalEntites)
+                    {
+                        DataProvider.DeleteEntity<ApprovalEntity>(azureTableRequestTransactions, entity);
+                    }
+                }
+
+            }
+            catch (BusinessLogicException dalexception)
+            {
+                throw dalexception;
+            }
+            catch (Exception exception)
+            {
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                throw new DataAccessException(exception.Message, exception.InnerException);
+            }
+        }
+        /// <summary>
+        /// This method deletes the Feilds details from transaction table based on requestID and inserts the same records into archival table
+        /// </summary>
+        /// <param name="requestID"></param>
+        public void ArchivalFieldsData(string requestID)
+        {
+            string callerMethodName = string.Empty;
+            try
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("UpdateTriggering, Action :: collecting the fields which needs to archival");
+                //get's azure table instance
+                CloudTable tblRequestTransactions = DataProvider.GetAzureTableInstance(azureTableRequestTransactions);
+                //Get all the fields associated with the request id              
+                TableQuery<FieldEntity> tquerytasks = new TableQuery<FieldEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, CoreConstants.AzureTables.FieldPK + requestID));
+                List<FieldEntity> lstFieldsEntites = tblRequestTransactions.ExecuteQuery(tquerytasks).ToList();
+                if (lstFieldsEntites != null && lstFieldsEntites.Count > 0)
+                {
+                    DataProvider.AddEntities<FieldEntity>(azureTableRequestTxArchival, lstFieldsEntites);
+                    //delete entites from transaction table
+                    foreach (FieldEntity entity in lstFieldsEntites)
+                    {
+                        DataProvider.DeleteEntity<FieldEntity>(azureTableRequestTransactions, entity);
+                    }
+                }
+
+            }
+            catch (BusinessLogicException dalexception)
+            {
+                throw dalexception;
+            }
+            catch (Exception exception)
+            {
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                throw new DataAccessException(exception.Message, exception.InnerException);
+            }
+        }
+        /// <summary>
+        /// This method deletes the approvers details from transaction table based on requestID and inserts the same records into archival table
+        /// </summary>
+        /// <param name="requestID"></param>
+        public void ArchivalApproversData(string requestID)
+        {
+            string callerMethodName = string.Empty;
+            try
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("UpdateTriggering, Action :: collecting the approvers which needs to archival");
+                //get's azure table instance
+                CloudTable tblRequestTransactions = DataProvider.GetAzureTableInstance(azureTableRequestTransactions);
+                //Get all the approvers associated with the request id              
+                TableQuery<ApproverEntity> tquerytasks = new TableQuery<ApproverEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, CoreConstants.AzureTables.ApproverPK + requestID));
+                List<ApproverEntity> lstApproversEntites = tblRequestTransactions.ExecuteQuery(tquerytasks).ToList();
+                if (lstApproversEntites != null && lstApproversEntites.Count > 0)
+                {
+                    DataProvider.AddEntities<ApproverEntity>(azureTableRequestTxArchival, lstApproversEntites);
+                    //delete entites from transaction table
+                    foreach (ApproverEntity entity in lstApproversEntites)
+                    {
+                        DataProvider.DeleteEntity<ApproverEntity>(azureTableRequestTransactions, entity);
+                    }
+                }
+
+            }
+            catch (BusinessLogicException dalexception)
+            {
+                throw dalexception;
+            }
+            catch (Exception exception)
+            {
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                throw new DataAccessException(exception.Message, exception.InnerException);
+            }
+        }
+        
     }
 }

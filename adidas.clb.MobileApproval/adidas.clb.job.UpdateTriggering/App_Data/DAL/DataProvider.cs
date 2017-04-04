@@ -37,7 +37,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
             string callerMethodName = string.Empty;
             try
             {
-                
+
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 // Retrieve the storage account from the connection string.
@@ -50,7 +50,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     RetryPolicy = new LinearRetry(TimeSpan.FromSeconds(5), 3)
                 };
                 // Create the CloudTable object that represents the table.
-                CloudTable table = tableClient.GetTableReference(TableName);               
+                CloudTable table = tableClient.GetTableReference(TableName);
                 return table;
 
             }
@@ -238,6 +238,56 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
 
 
         }
+        public static void DeleteEntity<T>(string tablename, T entity) where T : ITableEntity, new()
+        {
+            try
+            {
+
+                //Max Retry call from web.config             
+                int RetryAttemptCount = 0;
+                bool IsSuccessful = false;
+                do
+                {
+                    try
+                    {
+                        CloudTable ReferenceDataTable = GetAzureTableInstance(tablename);
+                        entity.ETag = "*";
+                        TableOperation deleteOperation = TableOperation.Delete(entity);
+                        ReferenceDataTable.Execute(deleteOperation);
+                        IsSuccessful = true;
+
+                    }
+                    catch (StorageException storageException)
+                    {
+                        //Increasing RetryAttemptCount variable
+                        RetryAttemptCount = RetryAttemptCount + 1;
+                        //Checking retry call count is eual to max retry count or not
+                        if (RetryAttemptCount == maxRetryCount)
+                        {
+                            InsightLogger.Exception("Error in DataProvider:: UpdateEntity() method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, "UpdateEntity");
+                            throw new DataAccessException(storageException.Message, storageException.InnerException);
+
+                        }
+                        else
+                        {
+                            InsightLogger.Exception("Error in DataProvider:: UpdateEntity() method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, "UpdateEntity");
+                            //Putting the thread into some milliseconds sleep  and again call the same method call.
+                            Thread.Sleep(maxThreadSleepInMilliSeconds);
+                        }
+                    }
+                } while (!IsSuccessful);
+
+
+            }
+
+            catch (Exception innerexception)
+            {
+                InsightLogger.Exception(innerexception.Message, innerexception, "UpdateEntity");
+                throw new DataAccessException(innerexception.Message, innerexception.InnerException);
+            }
+
+
+        }
         /// <summary>
         /// This method Inserts thenew entity in azure table
         /// </summary>
@@ -293,6 +343,64 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
 
 
         }
-
+        public static void RemoveEntities<T>(string tablename, List<T> entitieslist) where T : ITableEntity, new()
+        {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
+            try
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                //get's azure table instance
+                CloudTable transactionTable = GetAzureTableInstance(tablename);
+                TableBatchOperation batchOperation = new TableBatchOperation();
+                //insert list of entities into batch operation
+                foreach (T entity in entitieslist)
+                {
+                    batchOperation.Add(TableOperation.Delete(entity));
+                }
+                transactionTable.ExecuteBatch(batchOperation);
+            }
+            catch (Exception exception)
+            {
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error in DataProver while removing entity from " + tablename, exception, callerMethodName);
+                throw new Exception();
+            }
+        }
+        public static void AddEntities<T>(string tablename, List<T> entitieslist) where T : ITableEntity, new()
+        {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
+            try
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                //get's azure table instance
+                CloudTable ArchivalTable = GetAzureTableInstance(tablename);
+                TableBatchOperation batchOperation = new TableBatchOperation();
+                //insert list of entities into batch operation
+                foreach (T entity in entitieslist)
+                {
+                    batchOperation.InsertOrReplace(entity);
+                    if (batchOperation.Count == 100)
+                    {
+                        ArchivalTable.ExecuteBatch(batchOperation);
+                        batchOperation = new TableBatchOperation();
+                    }
+                }
+                if (batchOperation.Count > 0)
+                {
+                    ArchivalTable.ExecuteBatch(batchOperation);
+                }
+               
+            }
+            catch (Exception exception)
+            {
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error in DataProver while adding entities to " + tablename, exception, callerMethodName);
+                throw new Exception();
+            }
+        }
     }
 }

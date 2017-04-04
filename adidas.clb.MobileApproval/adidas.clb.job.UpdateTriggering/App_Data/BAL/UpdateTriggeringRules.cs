@@ -109,7 +109,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                 DateTime requestExpectedUpdateTime;
                 //Now + Max(Backend.AverageRequestsLatency;Backend.LastRequestLatency)*1.2
                 requestExpectedUpdateTime = DateTime.Now.AddSeconds((Math.Max(BackendAverageRequestLatency, Convert.ToDouble(BackendLastRequestLatency)) * Convert.ToDouble(System.Configuration.ConfigurationManager.AppSettings["ConstantFraction"])));
-                InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Compute and set Expected Updated Timestamp for Request(UT Rule :: R4) ,  Response : Expected Update Time ::" + Convert.ToString(requestExpectedUpdateTime));
+                InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Compute and set Expected Updated Timestamp for Request(UT Rule :: R4) ,  Response : Expected Update Time ::" + Convert.ToString(requestExpectedUpdateTime) + ",Backend LastRequestLatency:" + BackendLastRequestLatency + ",Backend AverageRequestLatency :" + BackendAverageRequestLatency);
                 return requestExpectedUpdateTime;
             }
             catch (Exception exception)
@@ -137,7 +137,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                 DateTime nextMissingCollectingTime;
                 //Now + Max(Backend.AverageRequestsLatency;Backend.LastRequestLatency)*1.2
                 nextMissingCollectingTime = MissedUpdateLastCollectingTime.AddSeconds((Math.Max(BackendAverageAllRequestsLatency, BackendLastAllRequestsLatency)) / 2);
-                InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Compute and set Next Missing Collecting TimeStamp for backend(UT Rule :: R5) ,  Response : Next missed collecting Time ::" + Convert.ToString(nextMissingCollectingTime));
+                InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Compute and set the Next Missing Collecting TimeStamp for backend(UT Rule :: R5) ,  Response : Next missed collecting Time ::" + Convert.ToString(nextMissingCollectingTime) + ", Current timestamp : " + Convert.ToString(MissedUpdateLastCollectingTime) + ", Backend AverageAllRequestsLatency: " + BackendAverageAllRequestsLatency + ", Backend LastAllRequestsLatency:" + BackendLastAllRequestsLatency);
                 return nextMissingCollectingTime;
             }
             catch (Exception exception)
