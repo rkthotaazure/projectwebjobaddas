@@ -145,8 +145,10 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                             }
                             else
                             {
-                                ServiceLayerApproval.Status = approver.Status;
+                                ServiceLayerApproval.Status = approver.Status;                                
                             }
+                            ServiceLayerApproval.DueDate = approver.DueDate;
+                            ServiceLayerApproval.DecisionDate = approver.DecisionDate;
                             //calling DAL method to add request entity
                             requestupdatedal.AddUpdateApproval(ServiceLayerApproval);
                         }
@@ -166,6 +168,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                             approvalentity.BackendID = backendId;
                             approvalentity.ServiceLayerTaskID = serviceLayerTaskID;
                             approvalentity.TaskTitle = requestTitle;
+                            approvalentity.DueDate = approver.DueDate;
                             //calling DAL method to add request entity
                             requestupdatedal.AddUpdateApproval(approvalentity);
                         }
@@ -449,10 +452,16 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                     backend.AverageRequestSize = GetAverage(backend.AverageRequestSize, backend.TotalRequestsCount, Totalrequestssize, requestscount);
                     backend.LastRequestSize = Convert.ToInt32(Totalrequestssize / requestscount);
                     //updating average, last request latencies for backend
+                    InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:caliculate backend tracking variables, existing AverageRequestLatency:"+ backend.AverageRequestLatency+ " TotalRequestsLatency: "+ TotalRequestlatency+" requsetcount: "+ requestscount);
                     backend.AverageRequestLatency = GetAverage(backend.AverageRequestLatency, backend.TotalRequestsCount, TotalRequestlatency, requestscount);
+                    InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:caliculate backend tracking variables, current AverageRequestLatency:" + backend.AverageRequestLatency);
+                    InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:caliculate backend tracking variables, existing AverageALLRequestLatency:" + backend.AverageAllRequestsLatency + " TotalBatchRequestsCount: " + backend.TotalBatchRequestsCount + " TotalRequestsLatency: " + TotalRequestlatency + " requsetcount: " + requestscount);
                     backend.AverageAllRequestsLatency = GetAverage(backend.AverageAllRequestsLatency, backend.TotalBatchRequestsCount, TotalRequestlatency, requestscount);
+                    InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:caliculate backend tracking variables, current AverageAllRequestsLatency:" + backend.AverageAllRequestsLatency);
                     backend.LastRequestLatency = Convert.ToInt32(TotalRequestlatency / requestscount);
+                    InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:caliculate backend tracking variables, current LastRequestLatency:" + backend.LastRequestLatency);
                     backend.LastAllRequestsLatency = TotalRequestlatency;
+                    InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:caliculate backend tracking variables, current LastAllRequestsLatency:" + backend.LastAllRequestsLatency);
                     //updaing total requests per userbackend and total request batches/messages per userbackend
                     backend.TotalRequestsCount = backend.TotalRequestsCount + requestscount;
                     backend.TotalBatchRequestsCount = backend.TotalBatchRequestsCount + 1;
