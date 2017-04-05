@@ -20,7 +20,7 @@ namespace adidas.clb.MobileApproval.Controllers
     /// <summary>
     /// The controller class which implements action methods for Synchapi
     /// </summary>
-    //[Authorize]   
+    [Authorize]   
     public class SyncAPIController : ApiController
     {
         //Application insights interface reference for logging the error details into Application Insight azure service.

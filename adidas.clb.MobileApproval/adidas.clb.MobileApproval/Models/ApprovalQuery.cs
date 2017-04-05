@@ -20,6 +20,7 @@ namespace adidas.clb.MobileApproval.Models
         [Required]
         public Decision ApprovalDecision { get; set; }
         public string DeviceID { get; set; }
+        public string ApproverOrder { get; set; }
         public ApprovalQuery()
         {
             _type = "approvalQuery";

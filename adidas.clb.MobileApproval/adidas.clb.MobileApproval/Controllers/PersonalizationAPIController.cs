@@ -19,7 +19,7 @@ namespace adidas.clb.MobileApproval.Controllers
     /// <summary>
     /// The controller class which implements action methods for personalization
     /// </summary> 
-   //[Authorize]
+   [Authorize]
     public class PersonalizationAPIController : ApiController
     {
         //Application insights interface reference for logging the error details into Application Insight azure service.
