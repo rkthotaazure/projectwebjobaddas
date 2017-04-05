@@ -15,7 +15,7 @@
     <header>
         <div id="ma-header" class="container">
             <div class="hamburger-button navbar-default col-xs-2">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar" ng-click="showSideMenu=true">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar" ng-click="sideMenuToggle();">
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
@@ -31,11 +31,11 @@
             <div class="menu-head">
                 <div class="profile"><span class="glyphicon glyphicon-user"></span></div>
                 <div class="userinfo">
-                    <div>Thota Siva</div><div class="mail">Thota.Siv@adidas.com</div>
+                    <div ng-bind="Fullname">Thota Siva</div><div class="mail" ng-bind="Email">Thota.Siv@adidas.com</div>
                     </div>
                 </div>
             <div class="menu-list">
-                <div class="menu-list-item bottom-border" ng-click="redirectcontrol('updateUser')"><span class="menu-list-item-text">Update Profile</span><span class="glyphicon glyphicon-menu-right menu-list-item-arrow"></span></div>                
+                <div class="menu-list-item bottom-border" ng-click="redirectcontrol('updateUser')" ng-show="showUpdateProfile"><span class="menu-list-item-text">Update Profile</span><span class="glyphicon glyphicon-menu-right menu-list-item-arrow"></span></div>                
                 <div class="menu-list-item bottom-border"><span class="menu-list-item-text">Terms & policies</span><span class="glyphicon glyphicon-menu-right menu-list-item-arrow"></span></div>                
             </div>
         </div>

@@ -29,7 +29,7 @@ namespace adidas.clb.MobileApprovalUI.Models
         public string BackendID { get; set; }
         public string Status { get; set; }
         private DateTime? dueDate = null;
-        public DateTime DueDate
+        public DateTime? DueDate
         {
             get
             {
@@ -39,11 +39,11 @@ namespace adidas.clb.MobileApprovalUI.Models
             set { this.dueDate = value; }
         }
         private DateTime? decisionDate = null;
-        public DateTime DecisionDate
+        public DateTime? DecisionDate
         {
             get
             {
-                return this.decisionDate.HasValue ? this.decisionDate.Value : DateTime.Now;
+                return this.decisionDate.HasValue ? this.decisionDate.Value : (DateTime?)null;
             }
 
             set { this.decisionDate = value; }

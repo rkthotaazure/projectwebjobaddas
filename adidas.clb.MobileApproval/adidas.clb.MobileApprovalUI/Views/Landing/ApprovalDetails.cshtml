@@ -17,11 +17,11 @@
     <div class="main-section">
         <div class="title-section">
             <div class="title-text tab-titles">
-                <div class="tab-pending" ng-class="{'tab-active': showpending}" ng-click="showpendingtasks();showpending=true;">Pending Tasks</div><div class="tab-completed" ng-class="{'tab-active': !showpending}" ng-click="showcompletedtasks();showpending=false;">Completed Tasks</div>
+                <div class="tab-pending" ng-class="{'tab-active': showpending}" ng-click="showpendingtasks();">Pending Tasks</div><div class="tab-completed" ng-class="{'tab-active': !showpending}" ng-click="showcompletedtasks();">Completed Tasks</div>
             </div>
         </div>
         <div class="details-section padding-top-none">
-            <div ng-repeat="approvaltask in approvalTasks" ng-init="$parent.selectedIndex = -1">
+            <div ng-repeat="approvaltask in approvalTasks | orderBy:sorttasks:true" ng-init="$parent.selectedIndex = -1">
                 <div class="row task-section bottom-border" ng-class="{'pendingtask': showpending}" ng-click="$parent.selectedIndex == $index?$parent.selectedIndex = -1:$parent.selectedIndex = $index;">
                     <div class="col-xs-11 task-content" ng-class="{'move-left': $parent.selectedIndex == $index}">
                         <div class="col-xs-5 label-task-head" ng-bind="approvaltask.RequestId"></div>
