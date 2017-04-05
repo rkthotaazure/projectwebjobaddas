@@ -50,7 +50,7 @@
                     </div>
                     <div class="col-xs-2 label-value">
                         <div class="canvas-wrap-task" >
-                            <canvas id="canvaspending{{$index}}" width="155" height="155" ng-bind="drawbackendRequestCountCircles(backend.Pending+backend.Approved+backend.Rejected,backend.Pending,$index)"></canvas>                            
+                            <canvas id="canvaspending{{$index}}" width="155" height="155" ng-init="drawbackendRequestCountCircles(backend.Pending+backend.Approved+backend.Rejected,backend.Pending,$index)"></canvas>                            
                         </div>
                     </div>
                     <div class="col-xs-5 label-value">

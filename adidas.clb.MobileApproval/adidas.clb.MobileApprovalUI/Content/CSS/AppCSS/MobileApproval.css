@@ -482,7 +482,8 @@ body, html, md-content {
   width: 85%;
   height: 100%; }
   .side-menu .mail {
-    padding-top: 10px; }
+    padding-top: 10px;
+    word-break: break-word; }
   .side-menu .menu-head {
     background-color: #703a6f;
     padding: 50px 15px 15px 15px;
