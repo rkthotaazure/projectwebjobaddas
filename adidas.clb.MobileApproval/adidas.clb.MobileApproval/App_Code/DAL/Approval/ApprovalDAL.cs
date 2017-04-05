@@ -51,6 +51,12 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Approval
                 string comment = objApprQry.ApprovalDecision.Comment;
                 DateTime decisionDate = objApprQry.ApprovalDecision.DecisionDate;
                 string requestID = string.Empty;
+                string approverOrder = string.Empty;
+                string[] taskIDArr = taskID.Split('_');
+                if (taskIDArr != null && (taskIDArr.Length == 2))
+                {
+                    approverOrder = Convert.ToString(taskIDArr[1]);
+                }
                 //get approvalrequest object from RequestTransactions azure table based on partitionkey and rowkey(requestID)
                 ApprovalEntity apprReqEntity = DataProvider.Retrieveentity<ApprovalEntity>(CoreConstants.AzureTables.RequestTransactions, string.Concat(CoreConstants.AzureTables.ApprovalPK, userID), taskID);
                 if (apprReqEntity != null)
@@ -72,6 +78,7 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Approval
                     objApprQry.Domain = domain;
                     objApprQry.BackendID = backendID;
                     objApprQry.ApprovalRequestID = requestID;
+                    objApprQry.ApproverOrder = approverOrder;
                     //call backend requestApproval/ api
                     var result = apiController.UpdateApprovalRequest(objApprQry, backendID, requestID);
                     //if (string.IsNullOrEmpty(result.ToString()))

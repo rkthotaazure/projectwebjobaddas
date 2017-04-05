@@ -20,7 +20,7 @@ using adidas.clb.MobileApproval.App_Code.BL.Approval;
 using Newtonsoft.Json;
 namespace adidas.clb.MobileApproval.Controllers
 {
-    //[Authorize]
+    [Authorize]
 
     public class ApprovalAPIController : ApiController
     {
