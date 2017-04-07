@@ -21,6 +21,7 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Approval
     {
         //Application insights interface reference for logging the error details into Application Insight azure service.
         static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
+        private static string taskApprovedComment = Convert.ToString(System.Configuration.ConfigurationManager.AppSettings["TaskApprovedComment"]);
         //create APIController varaible
         private APIController apiController;
         public ApprovalDAL()
@@ -48,7 +49,8 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Approval
                 string userID = objApprQry.UserID;
                 string taskID = objApprQry.ApprovalRequestID;
                 string status = objApprQry.ApprovalDecision.Status;
-                string comment = objApprQry.ApprovalDecision.Comment;
+                //string comment = objApprQry.ApprovalDecision.Comment;
+                string comment = string.Format(taskApprovedComment, objApprQry.DeviceID);
                 DateTime decisionDate = objApprQry.ApprovalDecision.DecisionDate;
                 string requestID = string.Empty;
                 string approverOrder = string.Empty;
