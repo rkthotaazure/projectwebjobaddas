@@ -40,7 +40,7 @@ namespace adidas.clb.MobileApproval.Controllers
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackEvent("ApprovalAPIController :: Endpoint : api/approval/requests/{apprReqID} , Action :: POST: Updates the status of a user approval request :: Start()");
+                InsightLogger.TrackEvent("ApprovalAPIController :: Endpoint : api/approval/requests/{apprReqID} , Action :: POST: Updates the status of a user approval request :: Start(), Query From UI:" + JsonConvert.SerializeObject(ObjApprovalQuery));
                 //Checking ApprovalQuery object is valid or not(User and decision status are the mandatory input data required)
                 if (!string.IsNullOrEmpty(ObjApprovalQuery.UserID) && !string.IsNullOrEmpty(ObjApprovalQuery.ApprovalDecision.Status))
                 {
