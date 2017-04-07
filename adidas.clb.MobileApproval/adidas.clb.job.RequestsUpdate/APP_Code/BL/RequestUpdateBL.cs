@@ -23,6 +23,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
     public class RequestUpdateBL
     {
         static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
+        private static string taskNotStartedStatus = Convert.ToString(System.Configuration.ConfigurationManager.AppSettings["TaskNotStartedStatus"]);
         /// <summary>
         /// BL method to add request entity into azure table
         /// </summary>
@@ -98,7 +99,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
 
                 //get the user tasks  from list of approvers got from backend
                 List<Approvers> lstapprover = (from apr in approverslist
-                                               where apr.User.UserID.Equals(UserID)
+                                               where apr.User.UserID.Equals(UserID) && (!string.IsNullOrEmpty(apr.Status) && apr.Status!= taskNotStartedStatus)
                                                select apr).ToList();
 
                 if (lstapprover != null && lstapprover.Count > 0)
@@ -160,10 +161,10 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                             approvalentity.RowKey = serviceLayerTaskID;
                             approvalentity.RequestId = requestid;
                             string status = approver.Status;
-                            if (string.IsNullOrEmpty(status))
-                            {
-                                status = CoreConstants.AzureTables.Waiting;
-                            }
+                            //if (string.IsNullOrEmpty(status))
+                            //{
+                            //    status = CoreConstants.AzureTables.Waiting;
+                            //}
                             approvalentity.Status = status;
                             approvalentity.BackendID = backendId;
                             approvalentity.ServiceLayerTaskID = serviceLayerTaskID;
