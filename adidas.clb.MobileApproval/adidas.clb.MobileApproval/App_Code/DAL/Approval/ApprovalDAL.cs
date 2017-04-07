@@ -81,6 +81,7 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Approval
                     objApprQry.BackendID = backendID;
                     objApprQry.ApprovalRequestID = requestID;
                     objApprQry.ApproverOrder = approverOrder;
+                    objApprQry.ApprovalDecision.Comment = comment;
                     //call backend requestApproval/ api
                     var result = apiController.UpdateApprovalRequest(objApprQry, backendID, requestID);
                     //if (string.IsNullOrEmpty(result.ToString()))
