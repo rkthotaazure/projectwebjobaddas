@@ -788,7 +788,7 @@ app.controller('ApprovalDetailsController', function ($scope, $http, $location, 
         var approvalDetails = {
             ApprovalRequestID: taskId,
             ApprovalDecision: approvalDecision,
-            DeviceID: ShareData.userDevices.DeviceID
+            DeviceID: ShareData.userDevices[0].device.DeviceID
         }
         var config = {
             headers: {
