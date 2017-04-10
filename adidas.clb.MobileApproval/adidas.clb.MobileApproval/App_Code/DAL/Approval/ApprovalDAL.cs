@@ -50,7 +50,7 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Approval
                 string taskID = objApprQry.ApprovalRequestID;
                 string status = objApprQry.ApprovalDecision.Status;
                 //string comment = objApprQry.ApprovalDecision.Comment;
-                string comment = string.Format(taskApprovedComment, objApprQry.DeviceID);
+                string comment = string.Format(taskApprovedComment, status, objApprQry.DeviceID);
                 DateTime decisionDate = objApprQry.ApprovalDecision.DecisionDate;
                 string requestID = string.Empty;
                 string approverOrder = string.Empty;
