@@ -21,7 +21,7 @@
         </div>
         <div class="main-section">
             <div class="title-section">
-                <div class="title-text">Task Status</div>
+                <div class="title-text">Request Status</div>
             </div>
         </div>
         <div class="bg-canvas">
@@ -46,7 +46,7 @@
                 <div class="row bottom-border" ng-repeat="backend in backends" ng-click="redirectToDetailsPage(backend.BackendID)">
                     <div class="col-xs-4 label-value">
                         <div class="label-task-head" ng-bind="backend.BackendName"></div>
-                        <div class="backend-task-details-last">Tasks - <span ng-bind="backend.Pending+backend.Approved+backend.Rejected"></span></div>
+                        <div class="backend-task-details-last">Requests - <span ng-bind="backend.Pending+backend.Approved+backend.Rejected"></span></div>
                     </div>
                     <div class="col-xs-2 label-value">
                         <div class="canvas-wrap-task" >
