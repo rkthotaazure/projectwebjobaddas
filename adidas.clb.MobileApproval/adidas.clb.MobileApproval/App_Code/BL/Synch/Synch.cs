@@ -65,7 +65,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
         /// method to add message to queue to trigger userbackend update
         /// </summary>
         /// <param name="userbackend">takes userbackend as input</param>
-        public void TriggerUserBackendUpdate(UserBackendEntity userbackend)
+        public void TriggerUserBackendUpdate(UserBackendEntity userbackend,bool isForceUpdate)
         {
             string callerMethodName = string.Empty;
             try
@@ -88,7 +88,15 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
                 updateTriggerMessage.Users = usermsglist;
                 //calling data access layer method to add message to queue
                 PersonalizationDAL personalizationdal = new PersonalizationDAL();
-                personalizationdal.AddUpdateTriggerMessageToQueue(updateTriggerMessage);
+                if (isForceUpdate)
+                {
+                    personalizationdal.ForceUpdate_AddUpdateTriggerMessageToQueue(updateTriggerMessage);
+                }
+                else
+                {
+                    personalizationdal.AddUpdateTriggerMessageToQueue(updateTriggerMessage);
+                }
+                
 
             }
             catch (DataAccessException DALexception)

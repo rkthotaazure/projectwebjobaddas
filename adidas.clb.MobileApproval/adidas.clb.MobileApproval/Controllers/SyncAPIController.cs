@@ -115,7 +115,7 @@ namespace adidas.clb.MobileApproval.Controllers
                                 {
                                     InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: check in-progress backend update, response: false");
                                     //if update is not in progress, trigger it
-                                    synch.TriggerUserBackendUpdate(userbackend);
+                                    synch.TriggerUserBackendUpdate(userbackend,true);
                                     InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: trigger a backend update, response: success");
                                     synchdto.retryAfter = Convert.ToInt32(Rules.BackendRetryTime(userbackend));
                                     InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: add backend retry time to response, response: success");
@@ -240,7 +240,7 @@ namespace adidas.clb.MobileApproval.Controllers
                         {
                             InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: check backend update in-progress, response: false");
                             //if update is not in progress, trigger it
-                            synch.TriggerUserBackendUpdate(userbackend);
+                            synch.TriggerUserBackendUpdate(userbackend,false);
                             InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: trigger a backend update, response: succses");
                             synchdto.retryAfter = Convert.ToInt32(Rules.BackendRetryTime(userbackend));
                             InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: add backend retry time to response, response: success");
@@ -617,7 +617,7 @@ namespace adidas.clb.MobileApproval.Controllers
                         {
                             InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: check backend update in-progress, response: false");
                             //if update is not in progress, trigger it
-                            synch.TriggerUserBackendUpdate(userbackend);
+                            synch.TriggerUserBackendUpdate(userbackend,false);
                             InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: trigger update backend, response: succses");
                             synchdto.retryAfter = Convert.ToInt32(Rules.BackendRetryTime(userbackend));
                             InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: add retry time to response, response: success");
@@ -719,7 +719,7 @@ namespace adidas.clb.MobileApproval.Controllers
                                 {
                                     InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: check backend update in-progress, response: false");
                                     //if update is not in progress, trigger it
-                                    synch.TriggerUserBackendUpdate(userbackend);
+                                    synch.TriggerUserBackendUpdate(userbackend,false);
                                     InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: trigger a backend update, response: success");
                                     synchdto.retryAfter = Convert.ToInt32(Rules.BackendRetryTime(userbackend));
                                     InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: add retry time to response, response: success");
