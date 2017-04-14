@@ -549,7 +549,7 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
                 c.clearRect(0, 0, can.width, can.height);
                 procent = deegres / oneProcent;
 
-                spanProcent.innerHTML = "<span class='spanTask'>Tasks</span><span class='spantaskcount'>" + Total + "</span>";
+                spanProcent.innerHTML = "<span class='spanTask'>Requests</span><span class='spantaskcount'>" + Total + "</span>";
 
                 c.beginPath();
                 c.arc(posX, posY, 70, (Math.PI / 180) * 270, (Math.PI / 180) * (270 + 360));
@@ -576,7 +576,7 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
             c.strokeStyle = '#b1b1b1';
             c.lineWidth = '10';
             c.stroke();
-            spanProcent.innerHTML = "<span class='spanTask'>Tasks</span><span class='spantaskcount'>0</span>";
+            spanProcent.innerHTML = "<span class='spanTask'>Requests</span><span class='spantaskcount'>0</span>";
         }
     }
     
