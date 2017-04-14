@@ -12,7 +12,7 @@ using adidas.clb.MobileApproval.Models;
 using adidas.clb.MobileApproval.Utility;
 using adidas.clb.MobileApproval.Exceptions;
 using Newtonsoft.Json;
-
+using System.Configuration;
 namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
 {
     /// <summary>
@@ -22,6 +22,7 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
     {
         //Application insights interface reference for logging the error details into Application Insight azure service.
         static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
+        public static string forceupdatequeue = Convert.ToString(ConfigurationManager.AppSettings["ForceUpdateQueue"]);
         /// <summary>
         /// method to get user entity with UserID
         /// </summary>
@@ -132,6 +133,29 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
                 string message = JsonConvert.SerializeObject(updateTriggeringMessage);
                 //call dataprovider method to add message to azure queue
                 DataProvider.AddMessagetoQueue(CoreConstants.AzureQueues.UpdateTriggerQueueName, message);
+            }
+            catch (Exception exception)
+            {
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error while adding message to updatetriggering queue in DAL : "
+                //+ exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new DataAccessException();
+            }
+        }
+        /// <summary>
+        /// method to add user to be updated into vip queue
+        /// </summary>
+        /// <param name="updateTriggeringMessage"></param>
+        public void ForceUpdate_AddUpdateTriggerMessageToQueue(UpdateTriggeringMessage updateTriggeringMessage)
+        {
+            string callerMethodName = string.Empty;
+            try
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                string message = JsonConvert.SerializeObject(updateTriggeringMessage);
+                //call dataprovider method to add message to azure queue
+                DataProvider.AddMessagetoQueue(forceupdatequeue, message);
             }
             catch (Exception exception)
             {
