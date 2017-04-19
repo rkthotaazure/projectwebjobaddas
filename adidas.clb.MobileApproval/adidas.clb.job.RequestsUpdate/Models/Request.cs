@@ -62,6 +62,7 @@ namespace adidas.clb.job.RequestsUpdate.Models
         public string Status { get; set; }
         public Nullable<DateTime> DueDate { get; set; }
         public Nullable<DateTime> DecisionDate { get; set; }
+        public string ApproverComment { get; set; }
 
     }
 

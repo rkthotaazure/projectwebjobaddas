@@ -213,6 +213,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                     approverentity.UserName = approver.User.UserName;
                     approverentity.PartitionKey = string.Concat(CoreConstants.AzureTables.ApproverPK, requsetid);
                     approverentity.RowKey = string.Concat(requsetid, CoreConstants.AzureTables.UnderScore, approver.Order);
+                    approverentity.Comment = approver.ApproverComment;
                     approversListEntity.Add(approverentity);
                 }
                 RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
