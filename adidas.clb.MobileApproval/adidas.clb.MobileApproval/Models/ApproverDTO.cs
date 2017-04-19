@@ -41,6 +41,7 @@ namespace adidas.clb.MobileApproval.Models
 
             set { this.decisionDate = value; }
         }
+        public string Comment { get; set; }
         public ApproverDTO() { _type = "approver"; }
     }
 }
