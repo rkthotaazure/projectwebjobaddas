@@ -484,7 +484,7 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
         $scope.start = function () {
             // stops any running interval to avoid two intervals running at the same time
             $scope.stop();
-            promice = $interval(myCall, 300000);
+            promice = $interval(myCall, 60000);
         };
         //to call method in every interval
         if (ShareData.reload) {
@@ -959,7 +959,7 @@ app.controller('ApprovalDetailstaskController', function ($scope, $http, $locati
         var approvalDetails = {
             ApprovalRequestID: taskid,
             ApprovalDecision: approvalDecision,
-            DeviceID: ShareData.userDevices.DeviceID
+            DeviceID: ShareData.userDevices[0].device.DeviceID
         }
         var config = {
             headers: {
