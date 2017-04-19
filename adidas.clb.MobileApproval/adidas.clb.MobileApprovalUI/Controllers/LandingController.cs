@@ -187,6 +187,8 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                                 userApprovaldetails.DueDate = userApprovalJsondetails.DueDate;
                                 //Get Approval Order DecisionDate
                                 userApprovaldetails.DecisionDate = userApprovalJsondetails.DecisionDate;
+                                //getting Approver Comment
+                                userApprovaldetails.Comment = userApprovalJsondetails.Comment;
                                 //Add to Approvers Model object for Approval details
                                 approverList.Add(userApprovaldetails);
                             }

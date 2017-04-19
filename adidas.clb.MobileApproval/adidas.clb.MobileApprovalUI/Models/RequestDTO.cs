@@ -47,6 +47,7 @@ namespace adidas.clb.MobileApprovalUI.Models
         public string Status { get; set; }
         public DateTime? DueDate { get; set; }
         public DateTime? DecisionDate { get; set; }
+        public string Comment { get; set; }
     }
    
     public class FieldDTO

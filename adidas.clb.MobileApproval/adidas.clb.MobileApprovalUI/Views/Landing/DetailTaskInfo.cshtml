@@ -118,6 +118,9 @@
                     <div class="col-xs-4 label-name">
                         Due Date
                     </div>
+                    <div class="col-xs-3 label-name">
+                        Comment
+                    </div>
                 </div>
                 <div class="row" ng-repeat="approver in approvers">
                     <div class="col-xs-5 label-value" ng-bind="approver.UserName">                       
@@ -125,6 +128,8 @@
                     <div class="col-xs-3 label-value" ng-bind="approver.Status">                       
                     </div>
                     <div class="col-xs-4 label-value" ng-bind='approver.DueDate | dateFilter | date: "dd.MM.yyyy"'>                        
+                    </div>
+                    <div class="col-xs-3 label-value" ng-bind="approver.Comment">
                     </div>
                 </div>
             </div>           
