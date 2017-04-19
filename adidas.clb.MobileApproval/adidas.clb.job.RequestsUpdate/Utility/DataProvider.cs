@@ -220,7 +220,7 @@ namespace adidas.clb.job.RequestsUpdate.Utility
                 //insert list of entities into batch operation
                 foreach (T entity in entitieslist)
                 {
-                    batchOperation.Insert(entity);
+                    batchOperation.InsertOrReplace(entity);
                 }
                 UserBackendConfigurationTable.ExecuteBatch(batchOperation);
             }

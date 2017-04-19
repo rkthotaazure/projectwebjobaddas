@@ -57,5 +57,6 @@ namespace adidas.clb.job.RequestsUpdate.Models
 
             set { this.decisionDate = value; }
         }
+        public string Comment { get; set; }
     }
 }
