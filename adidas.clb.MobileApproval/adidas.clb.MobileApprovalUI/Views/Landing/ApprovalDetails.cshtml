@@ -26,23 +26,37 @@
                     <div class="col-xs-11 task-content" ng-class="{'move-left': $parent.selectedIndex == $index}">
                         <div class="col-xs-5 label-task-head" ng-bind="approvaltask.RequestId"></div>
                         <div class="col-xs-7 label-task-date" ng-show="showpending">
-                            Due Date : <span ng-bind="approvaltask.DueDate | dateFilter | date: 'dd.MM.yyyy'"></span>
+                            <span class="text-bold">Due Date : </span>
+                            <span ng-bind="approvaltask.DueDate | dateFilter | date: 'dd.MM.yyyy'"></span>
                         </div>
-                        <div class="col-xs-7 label-task-date" ng-show="!showpending">                            
-                            Decision Date : <span ng-bind='approvaltask.DecisionDate | dateFilter | date: "dd.MM.yyyy"'></span>
+                        <div class="col-xs-7 label-task-date" ng-show="!showpending">
+                            <span class="text-bold">Decision Date : </span>                          
+                            <span ng-bind='approvaltask.DecisionDate | dateFilter | date: "dd.MM.yyyy"'></span>
                         </div>
                         <div class="col-xs-12 label-task-title">
-                        Name : <span ng-bind='approvaltask.TaskTitle'></span>
+                            <span class="text-bold">Name : </span>
+                            <span ng-bind='approvaltask.TaskTitle'></span>
                         </div>
                         <div class="col-xs-12 label-task-status">
-                        Status : <span ng-bind='approvaltask.Status'></span>
+                            <span class="text-bold">Status : </span>
+                            <span ng-bind='approvaltask.Status'></span>
                         </div>
                     </div>
                     <div class="col-xs-1 task-arrow"><span class="glyphicon glyphicon-menu-right"></span></div>
                     <div class="action-items" ng-class="{'move-right': $parent.selectedIndex == $index}">
-                        <div class="task-action action-reject" ng-show="showpending" ng-click="requestStatus('Rejected',approvaltask.RequestId, approvaltask.ServiceLayerTaskID)">Reject</div>
-                        <div class="task-action action-approve" ng-show="showpending" ng-click="requestStatus('Approved',approvaltask.RequestId, approvaltask.ServiceLayerTaskID)">Approve</div>
-                        <div class="task-action action-more" ng-click="showDetails(approvaltask.RequestId, approvaltask.ServiceLayerTaskID)">More<div>...</div></div>
+                        <div class="task-action action-reject" ng-show="showpending" ng-click="requestStatus('Rejected',approvaltask.RequestId, approvaltask.ServiceLayerTaskID)">
+                            Reject
+                            <span class="glyphicon glyphicon-remove"></span>
+                        </div>
+                        <div class="task-action action-approve" ng-show="showpending" ng-click="requestStatus('Approved',approvaltask.RequestId, approvaltask.ServiceLayerTaskID)">
+                            Approve
+                            <span class="glyphicon glyphicon-ok"></span>
+                        </div>
+                        <div class="task-action action-more" ng-click="showDetails(approvaltask.RequestId, approvaltask.ServiceLayerTaskID)">
+                            More
+                            <span class="glyphicon glyphicon-option-horizontal"></span>
+                            <!--<div>...</div>-->
+                        </div>
                     </div>
                 </div>
                 

@@ -251,7 +251,6 @@
     <Content Include="ApprovalDetails.html" />
     <Content Include="ApprovalTaskInfo.html" />
     <Content Include="Content\CSS\Packages\angular-material.min.css" />
-    <Content Include="Content\AppName.css" />
     <Content Include="Content\CSS\Packages\bootstrap-flex.css" />
     <Content Include="Content\CSS\Packages\bootstrap-flex.min.css" />
     <Content Include="Content\CSS\Packages\bootstrap-grid.css" />
@@ -371,7 +370,6 @@
     <Content Include="Scripts\app\Packages\ui-bootstrap-tpls-2.2.0.min.js" />
     <Content Include="Scripts\app\MobileApprovalConstants.js" />
     <Content Include="Scripts\app\services\GMService.js" />
-    <Content Include="Content\MobileApproval.css" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
