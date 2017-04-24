@@ -19,7 +19,18 @@ namespace adidas.clb.MobileApproval.Models
         public SynchRequestDTO query { get; set; }
         public List<T> result { get; set; }
         public ErrorDTO error { get; set; }
+        public int SyncTime { get; set; }
         public SynchResponseDTO()
+        {
+            _type = "synchResponse";
+        }
+    }
+    public class SynchTimeResponseDTO
+    {
+        public string _type { get; set; }           
+        public ErrorDTO error { get; set; }
+        public int SyncTime { get; set; }
+        public SynchTimeResponseDTO()
         {
             _type = "synchResponse";
         }

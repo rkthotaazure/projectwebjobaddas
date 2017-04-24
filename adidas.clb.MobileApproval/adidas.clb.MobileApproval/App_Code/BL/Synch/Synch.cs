@@ -755,5 +755,26 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
             }
         }
 
+        /// <summary>        
+        /// method to calculate sync waiting time      
+        /// </summary>
+        /// <param name="Backendtouser">takes backends associated to user</param>       
+        /// <returns>returns synch waiting time</returns>
+        public int CalcSynchTime(IEnumerable<UserBackendEntity> Userbackends)
+        {
+            UserBackendDAL userBackenddal = new UserBackendDAL();
+            //calling data access layer method to backend entities
+            IEnumerable<BackendEntity> Backendtouser = userBackenddal.GetRequiredBackends(Userbackends);
+            //calling rules to caliculate synch time 
+            if (Backendtouser != null)
+            {
+                return Rules.SynchWaitingTime(Backendtouser); ;
+            }
+            else
+            {
+                return 0;
+            }
+
+        }
     }
 }

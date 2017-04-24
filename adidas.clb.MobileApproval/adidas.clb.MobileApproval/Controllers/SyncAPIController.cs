@@ -20,7 +20,7 @@ namespace adidas.clb.MobileApproval.Controllers
     /// <summary>
     /// The controller class which implements action methods for Synchapi
     /// </summary>
-    [Authorize]   
+    [Authorize]
     public class SyncAPIController : ApiController
     {
         //Application insights interface reference for logging the error details into Application Insight azure service.
@@ -38,19 +38,21 @@ namespace adidas.clb.MobileApproval.Controllers
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: starting method");
+                int syncTime = 0;
                 //check null for input query
                 if (query != null)
                 {
                     Synch synch = new Synch();
-                    List<string> userbackends = query.parameters.filters.backends;                    
+                    List<string> userbackends = query.parameters.filters.backends;
                     //get userbackends associated to user
-                    List<UserBackendEntity> allUserBackends = synch.GetUserBackendsList(userID, userbackends);                    
+                    List<UserBackendEntity> allUserBackends = synch.GetUserBackendsList(userID, userbackends);
                     //get requests associated to user
                     //List<RequestEntity> requestslist = synch.GetUserRequests(userID, query.parameters.filters.reqStatus);
                     //get approvals associated to user based on approval status
                     List<ApprovalEntity> approvalslist = synch.GetUserApprovalsForCount(userID, query.parameters.filters.apprStatus);
                     Boolean requestsunfulfilled = false;
                     Boolean requestsfulfilled = false;
+                    bool IsForceUpdate = query.parameters.forceUpdate;
                     List<UserBackendDTO> userbackendlist = new List<UserBackendDTO>();
                     //check extended depth flag
                     if (Rules.ExtendedDepthperAllBackends(query, allUserBackends, Convert.ToInt32(ConfigurationManager.AppSettings[CoreConstants.Config.MaxSynchReplySize])))
@@ -70,7 +72,7 @@ namespace adidas.clb.MobileApproval.Controllers
                             InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: Adding approval count to response, response: success, backendID:" + userbackend.BackendID);
                             approvalcountdto.BackendID = userbackend.BackendID;
                             approvalcountdto.Status = query.parameters.filters.apprStatus;
-                           approvalcountdto.Count = userbackendapprovalslist.Count;
+                            approvalcountdto.Count = userbackendapprovalslist.Count;
                             userbackenddto.approvalsCount = approvalcountdto;
                             List<ApprovalRequestDTO> approvalrequestlist = new List<ApprovalRequestDTO>();
                             //get requests associated to each user backend
@@ -115,7 +117,15 @@ namespace adidas.clb.MobileApproval.Controllers
                                 {
                                     InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: check in-progress backend update, response: false");
                                     //if update is not in progress, trigger it
-                                    synch.TriggerUserBackendUpdate(userbackend,true);
+                                    if (IsForceUpdate)
+                                    {
+                                        synch.TriggerUserBackendUpdate(userbackend, true);
+                                    }
+                                    else
+                                    {
+                                        synch.TriggerUserBackendUpdate(userbackend, false);
+                                    }
+
                                     InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: trigger a backend update, response: success");
                                     synchdto.retryAfter = Convert.ToInt32(Rules.BackendRetryTime(userbackend));
                                     InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: add backend retry time to response, response: success");
@@ -123,16 +133,36 @@ namespace adidas.clb.MobileApproval.Controllers
                                 }
                                 //commented code related to adding requests and tasks to response
                                 //userbackenddto = synch.AddRequsetsTasksCountToSynchResponse(userbackendrequestslist, userbackendapprovalslist, userbackend, query, userbackenddto);
-                                
+
                             }
                             //add each userbackend to list
                             userbackendlist.Add(userbackenddto);
-                        }
+                        }                        
+                       
                     }
-                    SynchResponseDTO<UserBackendDTO> response = new SynchResponseDTO<UserBackendDTO>();
-                    response.result = userbackendlist;
-                    InsightLogger.TrackEvent("SyncAPIController ::" + callerMethodName + " method execution has been Completed.");
-                    return Request.CreateResponse(HttpStatusCode.OK, response);
+                    // if it is force update then need to calculate sync time
+                    if (IsForceUpdate)
+                    {
+                        //calculate sync time
+                        syncTime = synch.CalcSynchTime(allUserBackends);
+                        //add sync time value to SynchTimeResponseDTO object
+                        SynchTimeResponseDTO response = new SynchTimeResponseDTO();                        
+                        response.SyncTime = syncTime;
+                        //call missing update function
+
+                        InsightLogger.TrackEvent("SyncAPIController ::" + callerMethodName + " method execution has been Completed.");
+                        return Request.CreateResponse(HttpStatusCode.OK, response);
+                    }
+                    else
+                    {
+                        SynchResponseDTO<UserBackendDTO> response = new SynchResponseDTO<UserBackendDTO>();
+                        response.result = userbackendlist;
+                        response.SyncTime = syncTime;
+                        InsightLogger.TrackEvent("SyncAPIController ::" + callerMethodName + " method execution has been Completed.");
+                        return Request.CreateResponse(HttpStatusCode.OK, response);
+                    }
+                    
+                    
                 }
                 else
                 {
@@ -175,9 +205,9 @@ namespace adidas.clb.MobileApproval.Controllers
                 //check null for input query
                 if (query != null)
                 {
-                    Synch synch = new Synch();                    
+                    Synch synch = new Synch();
                     //get userbackend associated to user with backendid
-                    UserBackendEntity userbackend = synch.GetUserBackend(userID, usrBackendID);                    
+                    UserBackendEntity userbackend = synch.GetUserBackend(userID, usrBackendID);
                     //get requests associated to userbackend
                     List<RequestEntity> requestslist = synch.GetUserBackendRequests(userID, usrBackendID, query.parameters.filters.reqStatus);
                     //get approvals associated to userbackend
@@ -240,7 +270,7 @@ namespace adidas.clb.MobileApproval.Controllers
                         {
                             InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: check backend update in-progress, response: false");
                             //if update is not in progress, trigger it
-                            synch.TriggerUserBackendUpdate(userbackend,false);
+                            synch.TriggerUserBackendUpdate(userbackend, false);
                             InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: trigger a backend update, response: succses");
                             synchdto.retryAfter = Convert.ToInt32(Rules.BackendRetryTime(userbackend));
                             InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: add backend retry time to response, response: success");
@@ -617,7 +647,7 @@ namespace adidas.clb.MobileApproval.Controllers
                         {
                             InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: check backend update in-progress, response: false");
                             //if update is not in progress, trigger it
-                            synch.TriggerUserBackendUpdate(userbackend,false);
+                            synch.TriggerUserBackendUpdate(userbackend, false);
                             InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: trigger update backend, response: succses");
                             synchdto.retryAfter = Convert.ToInt32(Rules.BackendRetryTime(userbackend));
                             InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends/{usrBackendID}/requests, action: add retry time to response, response: success");
@@ -719,7 +749,7 @@ namespace adidas.clb.MobileApproval.Controllers
                                 {
                                     InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: check backend update in-progress, response: false");
                                     //if update is not in progress, trigger it
-                                    synch.TriggerUserBackendUpdate(userbackend,false);
+                                    synch.TriggerUserBackendUpdate(userbackend, false);
                                     InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: trigger a backend update, response: success");
                                     synchdto.retryAfter = Convert.ToInt32(Rules.BackendRetryTime(userbackend));
                                     InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: add retry time to response, response: success");

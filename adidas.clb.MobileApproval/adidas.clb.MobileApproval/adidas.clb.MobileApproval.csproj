@@ -296,6 +296,8 @@
     <None Include="Properties\PublishProfiles\mobileapproval - Web Deploy %283%29.pubxml" />
     <None Include="Properties\PublishProfiles\mobileapproval - Web Deploy.pubxml" />
     <Content Include="Service References\AzureAD\ConnectedService.json" />
+    <None Include="Properties\PublishProfiles\t-mobileapproval-api - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\t-mobileapproval-api - Web Deploy.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
