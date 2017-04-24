@@ -36,7 +36,7 @@
             </div>
             <div class="details-section">
                 <div class="row">
-                    <div class="col-xs-3 label-name">
+                    <div class="col-xs-3 label-name text-bold">
                         Request#
                     </div>
                     <div class="col-xs-1 label-name">
@@ -45,7 +45,7 @@
                     <div class="col-xs-8 label-value" ng-bind="id"></div>
                 </div>
                 <div class="row">
-                    <div class="col-xs-3 label-name">
+                    <div class="col-xs-3 label-name text-bold">
                         Title
                     </div>
                     <div class="col-xs-1 label-name">
@@ -55,7 +55,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-xs-3 label-name">
+                    <div class="col-xs-3 label-name text-bold">
                         Status
                     </div>
                     <div class="col-xs-1 label-name">
@@ -66,7 +66,7 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-xs-3 label-name">
+                    <div class="col-xs-3 label-name text-bold">
                         Created
                     </div>
                     <div class="col-xs-1 label-name">
@@ -76,7 +76,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-xs-3 label-name">
+                    <div class="col-xs-3 label-name text-bold">
                         Requester
                     </div>
                     <div class="col-xs-1 label-name">
@@ -93,7 +93,7 @@
             </div>
             <div class="details-section">
                 <div class="row" ng-repeat="field in fields">
-                    <div class="col-xs-3 label-name" ng-bind="field.Name">                        
+                    <div class="col-xs-3 label-name text-bold" ng-bind="field.Name">                        
                     </div>
                     <div class="col-xs-1 label-name">
                         :
@@ -109,27 +109,27 @@
             </div>
             <div class="details-section padding-bottom-none">
                 <div class="row bottom-border">
-                    <div class="col-xs-5 label-name">
+                    <div class="col-xs-3 label-name text-bold">
                         User
                     </div>
-                    <div class="col-xs-3 label-name">
+                    <div class="col-xs-2 label-name text-bold">
                         Status
                     </div>
-                    <div class="col-xs-4 label-name">
+                    <div class="col-xs-3 label-name text-bold">
                         Due Date
                     </div>
-                    <div class="col-xs-3 label-name">
-                        Comment
+                    <div class="col-xs-4 label-name text-bold">
+                        Comments
                     </div>
                 </div>
                 <div class="row" ng-repeat="approver in approvers">
-                    <div class="col-xs-5 label-value" ng-bind="approver.UserName">                       
+                    <div class="col-xs-3 label-value" ng-bind="approver.UserName">                       
                     </div>
-                    <div class="col-xs-3 label-value" ng-bind="approver.Status">                       
+                    <div class="col-xs-2 label-value" ng-bind="approver.Status">                       
                     </div>
-                    <div class="col-xs-4 label-value" ng-bind='approver.DueDate | dateFilter | date: "dd.MM.yyyy"'>                        
+                    <div class="col-xs-3 label-value" ng-bind='approver.DueDate | dateFilter | date: "dd.MM.yyyy"'>                        
                     </div>
-                    <div class="col-xs-3 label-value" ng-bind="approver.Comment">
+                    <div class="col-xs-4 label-value" ng-bind="approver.Comment">
                     </div>
                 </div>
             </div>           

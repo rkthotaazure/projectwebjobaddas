@@ -424,6 +424,10 @@ body, html, md-content {
     }
 }
 
+.text-bold {
+    font-weight: bold;
+}
+
 /*COMMON CSS - END*/
 /************************************************************************************/
 
@@ -514,7 +518,8 @@ $primary-color: #703a6f;
 
                     .glyphicon {
                         font-size: $primary-font-size-lg;
-                        color: #c3c3c3;
+                        /*color: #c3c3c3;*/
+                        color: $primary-background-color;
                     }
                 }
 
@@ -549,7 +554,8 @@ $primary-color: #703a6f;
 
                 .task-content {
                     padding-left: 0px;
-                    @include transition(all 1s ease-in);
+                    /*@include transition(all 1s ease-in);*/
+                    @include transition(all 0.5s ease);
                 }
 
                 .label-task-date {
@@ -561,7 +567,8 @@ $primary-color: #703a6f;
                     padding-top:20px;
                     .glyphicon {
                         float: right;
-                        color: #c3c3c3;
+                        /*color: #c3c3c3;*/
+                        color: $primary-background-color;
                         font-weight: bold;
                     }
                 }
@@ -573,7 +580,8 @@ $primary-color: #703a6f;
                     height: 100%; 
                     width:16.666%;
                     margin-right:-16.666%;
-                    @include transition(all 1s ease-in);                   
+                    /*@include transition(all 1s ease-in);*/
+                    @include transition(all 0.5s ease);
                     &.move-right{
                         margin-right:0px;                        
                     }
@@ -582,7 +590,8 @@ $primary-color: #703a6f;
                         text-align: center;
                         color: $headers-color;
                         float: right;
-                        padding-top: 35px;
+                        /*padding-top: 35px;*/
+                        padding-top: 22px;
                         width:100%;
                         &.action-more {
                             background-color: #c7c7cc;
@@ -597,6 +606,17 @@ $primary-color: #703a6f;
 
                         &.action-reject {
                             background-color: #fe3f35;
+                        }
+                        .glyphicon {
+                            font-size: 20px;
+                            margin-top: 5px;
+                            display: block;
+                            @include transition(all 0.3s ease);
+                        }
+                        &:hover {
+                            .glyphicon {
+                                text-shadow: 1px 1px 10px gray;
+                            }
                         }
                     }
                 }
@@ -703,7 +723,7 @@ $primary-color: #703a6f;
             padding: 5px 10px !important;
             box-shadow: 1px 1px 5px grey;
             width: auto;
-
+            @include transition(all 0.3s ease);
             span {
                 @include largeFont($headers-color);
                 font-weight: normal;
@@ -727,6 +747,7 @@ $primary-color: #703a6f;
 
         .btn-back {
             background-color: $primary-color;
+            cursor: pointer;
 
             .glyphicon {
                 font-size: $primary-font-size;
@@ -736,10 +757,12 @@ $primary-color: #703a6f;
 
         .btn-approve {
             background-color: #ff9501;
+            cursor: pointer;
         }
 
         .btn-reject {
             background-color: #fe3f35;
+            cursor: pointer;
         }
 
         .btn-save {

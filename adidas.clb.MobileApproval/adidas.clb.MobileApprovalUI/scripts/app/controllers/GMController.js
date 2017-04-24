@@ -505,6 +505,7 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
         $scope.requestsync.parameters.forceUpdate = 'true';        
         //Post request variable to update user method
         $http.post("/Landing/ForceUpdate", $scope.requestsync, $scope.config).success(function (data) {
+            console.log(data);
             window.setTimeout(function () {
                 $scope.$apply(function () {
                     $scope.showloader = false;
@@ -908,7 +909,7 @@ app.controller('ApprovalDetailstaskController', function ($scope, $http, $locati
             if (approvalStatus == "Completed") {
                 $scope.hidePendingButton = false;
                 $scope.hideCompletedButton = true;
-                $scope.TaskButtonText = "Completed Tasks";
+                $scope.TaskButtonText = "Completed Requests";
             }
             else {
                 $scope.hidePendingButton = true;

@@ -222,4 +222,14 @@ namespace adidas.clb.MobileApprovalUI.Models.JSONHelper
         public string DeviceModel { get; set; }
         public int maxSynchReplySize { get; set; }
     }
+    public class SynchTimeResponseDTO
+    {
+        public string _type { get; set; }
+        public ErrorDTO error { get; set; }
+        public int SyncTime { get; set; }
+        public SynchTimeResponseDTO()
+        {
+            _type = "synchResponse";
+        }
+    }
 }

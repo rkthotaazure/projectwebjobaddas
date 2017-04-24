@@ -162,6 +162,9 @@ body, html, md-content {
   color: #ffffff;
   background-color: #301831; }
 
+.text-bold {
+  font-weight: bold; }
+
 /*COMMON CSS - END*/
 /************************************************************************************/
 /************************************************************************************/
@@ -218,7 +221,8 @@ body, html, md-content {
         padding: 15px 0; }
         #mobile-home .main-section .details-section .row .arrow-next .glyphicon {
           font-size: 18px;
-          color: #c3c3c3; }
+          /*color: #c3c3c3;*/
+          color: #301831; }
       #mobile-home .main-section .details-section .row .canvas-wrap-task {
         position: relative;
         width: 100%;
@@ -241,11 +245,12 @@ body, html, md-content {
         padding-right: 0px; }
       #mobile-home .main-section .details-section .row .task-content {
         padding-left: 0px;
-        -webkit-transition: all 1s ease-in;
-        -moz-transition: all 1s ease-in;
-        -ms-transition: all 1s ease-in;
-        -o-transition: all 1s ease-in;
-        transition: all 1s ease-in; }
+        /*@include transition(all 1s ease-in);*/
+        -webkit-transition: all 0.5s ease;
+        -moz-transition: all 0.5s ease;
+        -ms-transition: all 0.5s ease;
+        -o-transition: all 0.5s ease;
+        transition: all 0.5s ease; }
       #mobile-home .main-section .details-section .row .label-task-date {
         padding-right: 0px; }
       #mobile-home .main-section .details-section .row .task-arrow {
@@ -253,7 +258,8 @@ body, html, md-content {
         padding-top: 20px; }
         #mobile-home .main-section .details-section .row .task-arrow .glyphicon {
           float: right;
-          color: #c3c3c3;
+          /*color: #c3c3c3;*/
+          color: #301831;
           font-weight: bold; }
       #mobile-home .main-section .details-section .row .action-items {
         position: absolute;
@@ -262,11 +268,12 @@ body, html, md-content {
         height: 100%;
         width: 16.666%;
         margin-right: -16.666%;
-        -webkit-transition: all 1s ease-in;
-        -moz-transition: all 1s ease-in;
-        -ms-transition: all 1s ease-in;
-        -o-transition: all 1s ease-in;
-        transition: all 1s ease-in; }
+        /*@include transition(all 1s ease-in);*/
+        -webkit-transition: all 0.5s ease;
+        -moz-transition: all 0.5s ease;
+        -ms-transition: all 0.5s ease;
+        -o-transition: all 0.5s ease;
+        transition: all 0.5s ease; }
         #mobile-home .main-section .details-section .row .action-items.move-right {
           margin-right: 0px; }
         #mobile-home .main-section .details-section .row .action-items .task-action {
@@ -274,7 +281,8 @@ body, html, md-content {
           text-align: center;
           color: #ffffff;
           float: right;
-          padding-top: 35px;
+          /*padding-top: 35px;*/
+          padding-top: 22px;
           width: 100%; }
           #mobile-home .main-section .details-section .row .action-items .task-action.action-more {
             background-color: #c7c7cc; }
@@ -284,6 +292,17 @@ body, html, md-content {
             background-color: #ff9500; }
           #mobile-home .main-section .details-section .row .action-items .task-action.action-reject {
             background-color: #fe3f35; }
+          #mobile-home .main-section .details-section .row .action-items .task-action .glyphicon {
+            font-size: 20px;
+            margin-top: 5px;
+            display: block;
+            -webkit-transition: all 0.3s ease;
+            -moz-transition: all 0.3s ease;
+            -ms-transition: all 0.3s ease;
+            -o-transition: all 0.3s ease;
+            transition: all 0.3s ease; }
+          #mobile-home .main-section .details-section .row .action-items .task-action:hover .glyphicon {
+            text-shadow: 1px 1px 10px gray; }
       #mobile-home .main-section .details-section .row.pendingtask .action-items {
         width: 50%;
         margin-right: -50%; }
@@ -346,7 +365,12 @@ body, html, md-content {
       background-color: #703a6f;
       padding: 5px 10px !important;
       box-shadow: 1px 1px 5px grey;
-      width: auto; }
+      width: auto;
+      -webkit-transition: all 0.3s ease;
+      -moz-transition: all 0.3s ease;
+      -ms-transition: all 0.3s ease;
+      -o-transition: all 0.3s ease;
+      transition: all 0.3s ease; }
       #mobile-home .btn-section .btn-pdf span {
         font-size: 18px;
         color: #ffffff;
@@ -363,14 +387,17 @@ body, html, md-content {
     color: #ffffff;
     font-size: 18px; }
     #mobile-home .btn-footer .btn-back {
-      background-color: #703a6f; }
+      background-color: #703a6f;
+      cursor: pointer; }
       #mobile-home .btn-footer .btn-back .glyphicon {
         font-size: 14px;
         font-weight: bold; }
     #mobile-home .btn-footer .btn-approve {
-      background-color: #ff9501; }
+      background-color: #ff9501;
+      cursor: pointer; }
     #mobile-home .btn-footer .btn-reject {
-      background-color: #fe3f35; }
+      background-color: #fe3f35;
+      cursor: pointer; }
     #mobile-home .btn-footer .btn-save {
       background-color: #703a6f; }
     #mobile-home .btn-footer .first-col {
