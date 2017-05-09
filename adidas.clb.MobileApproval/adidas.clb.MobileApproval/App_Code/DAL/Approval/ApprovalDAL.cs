@@ -50,6 +50,11 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Approval
                 string taskID = objApprQry.ApprovalRequestID;
                 string status = objApprQry.ApprovalDecision.Status;
                 string approverComment = objApprQry.ApprovalDecision.Comment;
+                //if approve comment is null send default comments i.e objApprQry.ApprovalDecision.Status
+                if (string.IsNullOrEmpty(approverComment))
+                {
+                    approverComment = objApprQry.ApprovalDecision.Status;
+                }
                 //string comment = objApprQry.ApprovalDecision.Comment;
                 string comment = approverComment + "  " + taskApprovedComment;
                 DateTime decisionDate = objApprQry.ApprovalDecision.DecisionDate;
