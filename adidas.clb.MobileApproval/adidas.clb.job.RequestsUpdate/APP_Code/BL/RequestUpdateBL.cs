@@ -149,6 +149,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                                 ServiceLayerApproval.Status = approver.Status;                                
                             }
                             ServiceLayerApproval.DueDate = approver.DueDate;
+                            ServiceLayerApproval.Created = approver.Created;
                             ServiceLayerApproval.DecisionDate = approver.DecisionDate;
                             //calling DAL method to add request entity
                             requestupdatedal.AddUpdateApproval(ServiceLayerApproval);
@@ -169,6 +170,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                             approvalentity.BackendID = backendId;
                             approvalentity.ServiceLayerTaskID = serviceLayerTaskID;
                             approvalentity.TaskTitle = requestTitle;
+                            approvalentity.Created = approver.Created;
                             approvalentity.DueDate = approver.DueDate;
                             //calling DAL method to add request entity
                             requestupdatedal.AddUpdateApproval(approvalentity);
