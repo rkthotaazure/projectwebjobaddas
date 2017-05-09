@@ -7,8 +7,11 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web.Http;
 using adidas.clb.MobileApproval.Exceptions;
 using adidas.clb.MobileApproval.Models;
@@ -25,6 +28,13 @@ namespace adidas.clb.MobileApproval.Controllers
     {
         //Application insights interface reference for logging the error details into Application Insight azure service.
         static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
+        public static string urgentTaskCalcColumnForCar = Convert.ToString(ConfigurationManager.AppSettings["UrgentTaskConditionForCAR_Column"]);
+        public static string urgentTaskCalcColumnForBPM = Convert.ToString(ConfigurationManager.AppSettings["UrgentTaskConditionForBPMOnline_Column"]);
+        public static string carDBName = Convert.ToString(ConfigurationManager.AppSettings["CARDBName"]);
+        public static string bpmDBName = Convert.ToString(ConfigurationManager.AppSettings["BPMDBName"]);
+        public static int urgentTaskCalcDaysForCAR = Convert.ToInt32(ConfigurationManager.AppSettings["UrgentTaskConditionForCAR_NumberOfDays"]);
+        public static int urgentTaskCalcDaysForBPM = Convert.ToInt32(ConfigurationManager.AppSettings["UrgentTaskConditionForBPMOnline_NumberOfDays"]);
+        public static int defaultCompletedTaskSyncDays = Convert.ToInt32(ConfigurationManager.AppSettings["DefaultCompletedTaskSyncDays"]);
         /// <summary>
         /// action method to get backends associated to user, each one indicating the count of current open requests
         /// </summary>
@@ -39,6 +49,7 @@ namespace adidas.clb.MobileApproval.Controllers
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: starting method");
                 int syncTime = 0;
+                DateTime curTimeStamp = DateTime.Now;
                 //check null for input query
                 if (query != null)
                 {
@@ -49,10 +60,25 @@ namespace adidas.clb.MobileApproval.Controllers
                     //get requests associated to user
                     //List<RequestEntity> requestslist = synch.GetUserRequests(userID, query.parameters.filters.reqStatus);
                     //get approvals associated to user based on approval status
-                    List<ApprovalEntity> approvalslist = synch.GetUserApprovalsForCount(userID, query.parameters.filters.apprStatus);
+                    int completedTaskSyncDays;
+                    //get completed Tasks configuration value from request
+                    //InsightLogger.TrackEvent(Convert.ToString(query.parameters.filters.CompletedRequestsSync));
+                    if (!string.IsNullOrEmpty(Convert.ToString(query.parameters.filters.CompletedRequestsSync)) && query.parameters.filters.CompletedRequestsSync != 0)
+                    {
+                        completedTaskSyncDays = query.parameters.filters.CompletedRequestsSync;
+                    }
+                    else
+                    {
+                        //if it is null get default value from configuration file
+                        completedTaskSyncDays = defaultCompletedTaskSyncDays;
+                    }
+                    string apprStatus = query.parameters.filters.apprStatus;
+                    List<ApprovalEntity> approvalslist = synch.GetUserApprovalsForCount(userID, apprStatus);
                     Boolean requestsunfulfilled = false;
                     Boolean requestsfulfilled = false;
                     bool IsForceUpdate = query.parameters.forceUpdate;
+                    bool IsUrgentTask = query.parameters.filters.IsUrgent;
+
                     List<UserBackendDTO> userbackendlist = new List<UserBackendDTO>();
                     //check extended depth flag
                     if (Rules.ExtendedDepthperAllBackends(query, allUserBackends, Convert.ToInt32(ConfigurationManager.AppSettings[CoreConstants.Config.MaxSynchReplySize])))
@@ -67,12 +93,50 @@ namespace adidas.clb.MobileApproval.Controllers
                             Backend backenddto = DataProvider.ResponseObjectMapper<Backend, UserBackendEntity>(userbackend);
                             userbackenddto.backend = backenddto;
                             //approvals list associated to userbackend
-                            List<ApprovalEntity> userbackendapprovalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID).ToList();
+                            List<ApprovalEntity> userbackendapprovalslist = new List<ApprovalEntity>();
+                            if (approvalslist != null && approvalslist.Count > 0)
+                            {
+                                //get urgent tasks based on condition
+                                if (IsUrgentTask && apprStatus == CoreConstants.AzureTables.Urgent)
+                                {
+                                    if (userbackend.BackendID == carDBName)
+                                    {
+                                        // if the backend is car then pull the urgent tasks based on createdDate + { No. of days fro config} <= DateTime.Now                           
+                                        userbackendapprovalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID && x.Created!=null &&  (x.Created.Value.Date.AddDays(urgentTaskCalcDaysForCAR).Date <= DateTime.Now.Date)).ToList();
+                                    }
+                                    else if (userbackend.BackendID == bpmDBName)
+                                    {
+                                        // if the backend is store then pull the urgent tasks based on Duedate + { No. of days fro config} <= DateTime.Now
+                                        userbackendapprovalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID && x.DueDate !=null && (x.DueDate.Value.Date.AddDays(urgentTaskCalcDaysForBPM).Date <= DateTime.Now.Date)).ToList();
+                                    }
+                                }
+                                else
+                                {
+                                    //pull completed tasks based on config value
+                                    if (apprStatus == CoreConstants.AzureTables.Approved || apprStatus == CoreConstants.AzureTables.Rejected)
+                                    {
+                                        // InsightLogger.TrackEvent("completedTaskSyncDays : " + completedTaskSyncDays);
+                                        userbackendapprovalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID && x.DecisionDate!=null && (x.DecisionDate.Value.Date >= DateTime.Now.AddDays(-(completedTaskSyncDays)).Date)).ToList();
+
+                                    }
+                                    else//pull pending tasks
+                                    {
+                                        userbackendapprovalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID).ToList();
+                                    }
+
+                                }
+                            }
+                            
+                            int requestsCount = 0;
+                            if (userbackendapprovalslist != null && userbackendapprovalslist.Count > 0)
+                            {
+                                requestsCount = userbackendapprovalslist.Count;
+                            }
                             ApprovalsCountDTO approvalcountdto = new ApprovalsCountDTO();
                             InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: Adding approval count to response, response: success, backendID:" + userbackend.BackendID);
                             approvalcountdto.BackendID = userbackend.BackendID;
                             approvalcountdto.Status = query.parameters.filters.apprStatus;
-                            approvalcountdto.Count = userbackendapprovalslist.Count;
+                            approvalcountdto.Count = requestsCount;
                             userbackenddto.approvalsCount = approvalcountdto;
                             List<ApprovalRequestDTO> approvalrequestlist = new List<ApprovalRequestDTO>();
                             //get requests associated to each user backend
@@ -120,6 +184,12 @@ namespace adidas.clb.MobileApproval.Controllers
                                     if (IsForceUpdate)
                                     {
                                         synch.TriggerUserBackendUpdate(userbackend, true);
+                                        //call missing update function in async
+                                        Task.Factory.StartNew(() =>
+                                        {
+                                            synch.CollectUsersMissedUpdatesByBackend(userbackend, curTimeStamp);
+                                        });
+
                                     }
                                     else
                                     {
@@ -137,8 +207,8 @@ namespace adidas.clb.MobileApproval.Controllers
                             }
                             //add each userbackend to list
                             userbackendlist.Add(userbackenddto);
-                        }                        
-                       
+                        }
+
                     }
                     // if it is force update then need to calculate sync time
                     if (IsForceUpdate)
@@ -146,7 +216,7 @@ namespace adidas.clb.MobileApproval.Controllers
                         //calculate sync time
                         syncTime = synch.CalcSynchTime(allUserBackends);
                         //add sync time value to SynchTimeResponseDTO object
-                        SynchTimeResponseDTO response = new SynchTimeResponseDTO();                        
+                        SynchTimeResponseDTO response = new SynchTimeResponseDTO();
                         response.SyncTime = syncTime;
                         //call missing update function
 
@@ -161,8 +231,8 @@ namespace adidas.clb.MobileApproval.Controllers
                         InsightLogger.TrackEvent("SyncAPIController ::" + callerMethodName + " method execution has been Completed.");
                         return Request.CreateResponse(HttpStatusCode.OK, response);
                     }
-                    
-                    
+
+
                 }
                 else
                 {
@@ -206,12 +276,35 @@ namespace adidas.clb.MobileApproval.Controllers
                 if (query != null)
                 {
                     Synch synch = new Synch();
+                    //get completed tasks sync count
+                    int completedTaskSyncDays;
+                    //get completed Tasks configuration value from request                    
+                    if (!string.IsNullOrEmpty(Convert.ToString(query.parameters.filters.CompletedRequestsSync)) && query.parameters.filters.CompletedRequestsSync != 0)
+                    {
+                        completedTaskSyncDays = query.parameters.filters.CompletedRequestsSync;
+                    }
+                    else
+                    {
+                        //if it is null get default value from configuration file
+                        completedTaskSyncDays = defaultCompletedTaskSyncDays;
+                    }
+                    //get approval status
+                    string apprStatus = query.parameters.filters.apprStatus;
                     //get userbackend associated to user with backendid
                     UserBackendEntity userbackend = synch.GetUserBackend(userID, usrBackendID);
                     //get requests associated to userbackend
                     List<RequestEntity> requestslist = synch.GetUserBackendRequests(userID, usrBackendID, query.parameters.filters.reqStatus);
                     //get approvals associated to userbackend
-                    List<ApprovalEntity> approvalslist = synch.GetUserBackendApprovals(userID, usrBackendID, query.parameters.filters.apprStatus);
+                    List<ApprovalEntity> approvalslist = synch.GetUserBackendApprovals(userID, usrBackendID, apprStatus);
+                    //filter approvalist based on completed task config value
+                    if (apprStatus == CoreConstants.AzureTables.Approved || apprStatus == CoreConstants.AzureTables.Rejected)
+                    {
+                        if (approvalslist != null && approvalslist.Count > 0)
+                        {
+                            approvalslist = approvalslist.Where(x => (x.DecisionDate!=null && x.DecisionDate.Value.Date >= DateTime.Now.AddDays(-(completedTaskSyncDays)).Date)).ToList();
+                        }
+                    }
+
                     //use mmapper to convert userbackend entity to userbackend data transfer object
                     UserBackendDTO userbackenddto = DataProvider.ResponseObjectMapper<UserBackendDTO, UserBackendEntity>(userbackend);
                     Backend backenddto = DataProvider.ResponseObjectMapper<Backend, UserBackendEntity>(userbackend);
@@ -707,11 +800,22 @@ namespace adidas.clb.MobileApproval.Controllers
                 {
                     Synch synch = new Synch();
                     List<string> userbackends = query.parameters.filters.backends;
-
+                    bool IsUrgentTask = query.parameters.filters.IsUrgent;
+                    string apprStatus = query.parameters.filters.apprStatus;
+                    int completedTaskSyncDays;
+                    if (!string.IsNullOrEmpty(Convert.ToString(query.parameters.filters.CompletedRequestsSync)) && query.parameters.filters.CompletedRequestsSync != 0)
+                    {
+                        completedTaskSyncDays = query.parameters.filters.CompletedRequestsSync;
+                    }
+                    else
+                    {
+                        //if it is null get default value from configuration file
+                        completedTaskSyncDays = defaultCompletedTaskSyncDays;
+                    }
                     //get userbackends associated to user
                     List<UserBackendEntity> allUserBackends = synch.GetUserBackendsList(userID, userbackends);
                     //get approvals associated to user absed on approval status
-                    List<ApprovalEntity> approvalslist = synch.GetUserApprovalsForCount(userID, query.parameters.filters.apprStatus);
+                    List<ApprovalEntity> approvalslist = synch.GetUserApprovalsForCount(userID, apprStatus);
                     List<ApprovalsCountDTO> approvalcountlist = new List<ApprovalsCountDTO>();
                     //check extended depth flag
                     if (Rules.ExtendedDepthperAllBackends(query, allUserBackends, Convert.ToInt32(ConfigurationManager.AppSettings[CoreConstants.Config.MaxSynchReplySize])))
@@ -725,12 +829,49 @@ namespace adidas.clb.MobileApproval.Controllers
                             //if (Rules.IsBackendUpdated(userbackend, query))
                             //{
                             InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: check backend update, response: true");
-                            List<ApprovalEntity> userbackendapprovalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID).ToList();
+                            List<ApprovalEntity> userbackendapprovalslist = new List<ApprovalEntity>();
+                            if (approvalslist != null && approvalslist.Count > 0)
+                            {
+                                if (IsUrgentTask && apprStatus == CoreConstants.AzureTables.Urgent)
+                                {
+
+                                    if (userbackend.BackendID == carDBName)
+                                    {
+                                        userbackendapprovalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID && x.Created != null && (x.Created.Value.Date.AddDays(urgentTaskCalcDaysForCAR).Date <= DateTime.Now.Date)).ToList();
+                                    }
+                                    else if (userbackend.BackendID == bpmDBName)
+                                    {
+                                        userbackendapprovalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID && x.DueDate != null && (x.DueDate.Value.Date.AddDays(urgentTaskCalcDaysForBPM).Date <= DateTime.Now.Date)).ToList();
+                                    }
+                                }
+                                else
+                                {
+                                    //pull completed tasks based on config value
+                                    if (apprStatus == CoreConstants.AzureTables.Approved || apprStatus == CoreConstants.AzureTables.Rejected)
+                                    {
+                                        //InsightLogger.TrackEvent("completedTaskSyncDays : " + completedTaskSyncDays);
+                                        userbackendapprovalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID && x.DecisionDate != null && (x.DecisionDate.Value.Date >= DateTime.Now.AddDays(-(completedTaskSyncDays)).Date)).ToList();
+
+                                    }
+                                    else//pull pending tasks
+                                    {
+                                        userbackendapprovalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID).ToList();
+                                    }
+
+                                }
+                            }
+
+                            int requestsCount = 0;
+                            if (userbackendapprovalslist != null && userbackendapprovalslist.Count > 0)
+                            {
+                                requestsCount = userbackendapprovalslist.Count;
+                            }
                             ApprovalsCountDTO approvalcountdto = new ApprovalsCountDTO();
                             InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: Adding approval count to response, response: success, backendID:" + userbackend.BackendID);
                             approvalcountdto.BackendID = userbackend.BackendID;
                             approvalcountdto.Status = query.parameters.filters.apprStatus;
-                            approvalcountdto.Count = userbackendapprovalslist.Count;
+
+                            approvalcountdto.Count = requestsCount;
                             approvalcountlist.Add(approvalcountdto);
                             //
                             if (!Rules.IsBackendUpdated(userbackend, query))
@@ -787,5 +928,31 @@ namespace adidas.clb.MobileApproval.Controllers
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
             }
         }
+
+        //public Expression<Func<ApprovalEntity, bool>> GetWhereLamda(string backendID,string dynamicColumn,DateTime? dateVal)
+        //{
+        //    ParameterExpression parExp = Expression.Parameter(typeof(ApprovalEntity), "app");
+        //    Expression backendExpr = GetEqualsExpr(parExp, "BackendID", backendID);
+        //    Expression DateExpr = GetLessthanEqualsExpr(parExp, dynamicColumn, dateVal);
+        //    Expression cond = Expression.And(backendExpr, DateExpr);
+        //    return Expression.Lambda<Func<ApprovalEntity, bool>>(cond, parExp);
+        //}
+        //private Expression GetEqualsExpr(ParameterExpression param,
+        //                         string property,
+        //                         string value)
+        //{
+        //    Expression prop = Expression.Property(param, property);
+        //    Expression val = Expression.Constant(value);
+        //    return Expression.Equal(prop, val);
+        //}
+        //private Expression GetLessthanEqualsExpr(ParameterExpression param,
+        //                         string property,
+        //                         DateTime? value)
+        //{
+        //    Expression column = Expression.PropertyOrField(param, property);
+        //   // Expression prop = Expression.Property(param, property);
+        //   // Expression val = Expression.Constant(value,typeof(DateTime ?));
+        //    return Expression.LessThanOrEqual(column, Expression.Constant(value, column.Type));
+        //}
     }
 }
