@@ -6,12 +6,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
+using Microsoft.WindowsAzure;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.RetryPolicies;
 using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.WindowsAzure.Storage.Queue;
 using adidas.clb.MobileApproval.Exceptions;
 using adidas.clb.MobileApproval.Models;
 using adidas.clb.MobileApproval.Utility;
-
+using System.Configuration;
 namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
 {
     /// <summary>
@@ -21,12 +27,14 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
     {
         //Application insights interface reference for logging the error details into Application Insight azure service.
         static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
+        public static int maxThreadSleepInMilliSeconds = Convert.ToInt32(ConfigurationManager.AppSettings["MaxThreadSleepInMilliSeconds"]);
+        public static int maxRetryCount = Convert.ToInt32(ConfigurationManager.AppSettings["MaxRetryCount"]);
         /// <summary>
         /// method to get all requests per user
         /// </summary>
         /// <param name="UserID">takes userid as input</param>
         /// <returns>returns list of requests associated to user</returns>
-        public List<RequestEntity> GetUserRequests(string UserID,string requeststatus)
+        public List<RequestEntity> GetUserRequests(string UserID, string requeststatus)
         {
             string callerMethodName = string.Empty;
             try
@@ -34,9 +42,9 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 //partionkey filter
-                string partitionkeyfilter=TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.RequestsPK, UserID));
+                string partitionkeyfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.RequestsPK, UserID));
                 //request status filter
-                string statusfilter=TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.Status, QueryComparisons.Equal, requeststatus);
+                string statusfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.Status, QueryComparisons.Equal, requeststatus);
                 //generate query to get all requests per user based on filter conditions
                 TableQuery<RequestEntity> query = new TableQuery<RequestEntity>().Where(partitionkeyfilter);
                 //call dataprovider method to get entities from azure table
@@ -68,7 +76,7 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
                 string partitionkeyfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.RequestsPK, UserID));
                 string backendfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.BackendId, QueryComparisons.Equal, backendID);
                 //combine partionkey filter with backend filter 
-                string combinefilter = TableQuery.CombineFilters(partitionkeyfilter,TableOperators.And,backendfilter);
+                string combinefilter = TableQuery.CombineFilters(partitionkeyfilter, TableOperators.And, backendfilter);
                 //request status filter
                 string statusfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.Status, QueryComparisons.Equal, requeststatus);
                 //final filter to get requests based on partitionkey, backendid, request status
@@ -322,7 +330,7 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
                 }
                 //generate query to get all user associated backends
                 TableQuery<UserBackendEntity> query = new TableQuery<UserBackendEntity>().Where(finalfilter);
-                List <UserBackendEntity> alluserbackends = DataProvider.GetEntitiesList<UserBackendEntity>(CoreConstants.AzureTables.UserDeviceConfiguration, query);
+                List<UserBackendEntity> alluserbackends = DataProvider.GetEntitiesList<UserBackendEntity>(CoreConstants.AzureTables.UserDeviceConfiguration, query);
                 return alluserbackends;
             }
             catch (Exception exception)
@@ -403,5 +411,125 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
                 throw new DataAccessException();
             }
         }
+
+        /// <summary>
+        /// Adding  message into update trigger input queue
+        /// </summary>
+        /// <param name="content"></param>
+        /// <param name="PartitionKey"></param>
+        public void AddMessagestoInputQueue(List<string> lstcontent)
+        {
+            string callerMethodName = string.Empty;
+            try
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                int RetryAttemptCount = 0;
+                bool IsSuccessful = false;
+                // Create the queue client.
+                CloudQueueClient cqdocClient = GetQueueClient();
+                // Retrieve a reference to a queue.
+                CloudQueue queuedoc= GetMissedUpdatesInputQueue(cqdocClient);                
+                // Async enqueue the message
+                AsyncCallback callBack = new AsyncCallback(AddMessageComplete);
+                int documentCount = 0;
+                //add each message from list
+                foreach (string content in lstcontent)
+                {
+
+                    string dMessage = string.Empty;
+                    dMessage = content;
+                    CloudQueueMessage message = new CloudQueueMessage(dMessage);
+                    do
+                    {
+                        try
+                        {
+                            queuedoc.BeginAddMessage(message, callBack, null);
+                            documentCount++;
+                            IsSuccessful = true;
+                           // InsightLogger.TrackEvent("UpdateTriggering, Action :: Put update message in queue , Response :: Success");
+                        }
+                        catch (StorageException storageException)
+                        {
+                            //Increasing RetryAttemptCount variable
+                            RetryAttemptCount = RetryAttemptCount + 1;
+                            //Checking retry call count is eual to max retry count or not
+                            if (RetryAttemptCount == maxRetryCount)
+                            {
+                               // InsightLogger.Exception("UpdateTriggering :: " + callerMethodName + " method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, callerMethodName);
+                                throw new DataAccessException(storageException.Message, storageException.InnerException);
+                            }
+                            else
+                            {
+                                //InsightLogger.Exception("UpdateTriggering :: " + callerMethodName + " method :: Retry attempt count: [ " + RetryAttemptCount + " ]", storageException, callerMethodName);
+                                //Putting the thread into some milliseconds sleep  and again call the same method call.
+                                Thread.Sleep(maxThreadSleepInMilliSeconds);
+                            }
+                        }
+                    } while (!IsSuccessful);
+
+                }
+
+            }
+            catch (Exception exception)
+            {
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                throw new DataAccessException(exception.Message, exception.InnerException);
+            }
+
+
+        }
+        static void AddMessageComplete(IAsyncResult ar)
+        {
+            // do something
+            string tmp = string.Empty;
+        }
+        public  static CloudQueueClient GetQueueClient()
+        {
+            string callerMethodName = string.Empty;
+            try
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                // Parse the connection string and return a reference to the storage account
+                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(ConfigurationManager.AppSettings["GenericMobileStorageConnectionString"]);
+
+                // Create the queue client.
+                CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
+                // set retry for the connection for transient failures
+                queueClient.DefaultRequestOptions = new QueueRequestOptions
+                {
+                    RetryPolicy = new LinearRetry(TimeSpan.FromSeconds(5), 3)
+                };
+                return queueClient;
+
+            }
+            catch (Exception innerexception)
+            {
+                InsightLogger.Exception(innerexception.Message, innerexception, callerMethodName);
+                throw new DataAccessException(innerexception.Message, innerexception.InnerException);
+            }
+
+        }
+        public static CloudQueue GetMissedUpdatesInputQueue(CloudQueueClient queuePath)
+        {
+            string callerMethodName = string.Empty;
+            try
+            {
+
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                //read queue name from app.config :: AppSettings and return queue
+                CloudQueue queue = queuePath.GetQueueReference(ConfigurationManager.AppSettings["VIPMessagesQueue"]);
+                return queue;
+
+            }
+
+            catch (Exception innerexception)
+            {
+                InsightLogger.Exception(innerexception.Message, innerexception, callerMethodName);
+                throw new DataAccessException(innerexception.Message, innerexception.InnerException);
+            }
+        }
+
     }
 }

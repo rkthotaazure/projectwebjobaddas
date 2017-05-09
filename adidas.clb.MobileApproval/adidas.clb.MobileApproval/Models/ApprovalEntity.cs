@@ -19,6 +19,16 @@ namespace adidas.clb.MobileApproval.Models
         public string BackendID { get; set; }        
         public string Domain { get; set; }
         public string Status { get; set; }
+        private DateTime? created;
+        public DateTime? Created
+        {
+            get
+            {
+                return this.created.HasValue ? this.created.Value == default(DateTime) ? (DateTime?)null : this.created.Value : (DateTime?)null;
+            }
+
+            set { this.created = value; }
+        }
         private DateTime? dueDate = null;
         public DateTime? DueDate
         {
@@ -53,6 +63,16 @@ namespace adidas.clb.MobileApproval.Models
         public string BackendID { get; set; }        
         public string Domain { get; set; }
         public string Status { get; set; }
+        private DateTime? created;
+        public DateTime? Created
+        {
+            get
+            {
+                return this.created.HasValue ? this.created.Value == default(DateTime) ? (DateTime?)null : this.created.Value : (DateTime?)null;
+            }
+
+            set { this.created = value; }
+        }
         private DateTime? dueDate = null;
         public DateTime? DueDate
         {

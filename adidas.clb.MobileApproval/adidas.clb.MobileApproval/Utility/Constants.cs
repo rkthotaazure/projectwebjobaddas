@@ -57,6 +57,10 @@ namespace adidas.clb.MobileApproval.Utility
             public const string Status = "Status";
             public const string InProgress = "In Progress";
             public const string Waiting = "Waiting";
+            public const string Urgent = "Urgent";
+            public const string Approved = "Approved";
+            public const string Rejected = "Rejected";
+
 
         }
         //Azure Queue constants
