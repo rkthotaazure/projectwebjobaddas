@@ -1,124 +1,176 @@
 ﻿<form name="UpdateUser" role="form">
-    <div id="mobile-home" ng-controller="UpdateUserController" ng-init="init()">        
+    <div id="mobile-home" ng-controller="UpdateUserController" ng-init="init()">
         <div id="spinner1" style="position:absolute;top:0;z-index:999999;width:100%;height:100vh;background-color:rgba(0,0,0,0.5)" ng-show="showloader">
             <img style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:100px" src="~/Images/adidas-loading.gif" />
         </div>
         <span class="notification-glyph glyphicon glyphicon-triangle-top" ng-if="cs.notificationActive"></span>
         <div class="notification-content alert alert-info" ng-class="cs.notificationActive?'enable':'disable'" ng-if="cs.notificationActive">
             <p ng-bind="cs.notificationText"></p>
-        </div>     
+        </div>
         <div class="btn-footer">
             <div class="col-xs-6 text-align-center first-col btn-approve">
                 <div ng-click="SendData()">
                     Save
                 </div>
             </div>
-            <div class="col-xs-6 text-align-center last-col btn-reject">                
-                <div ng-click="GotoLandingpage()">                    
+            <div class="col-xs-6 text-align-center last-col btn-reject">
+                <div ng-click="GotoLandingpage()">
                     Cancel
                 </div>
-            </div>            
+            </div>
         </div>
-        
-            <div class="main-section">
-                <div class="title-section">
-                    <div class="title-text">Personal Details</div>
-                </div>
-                <div class="details-section">
-                    <div class="row">
-                        <div class="col-xs-12 required label-value">
-                            <label for="Albert" class="control-label">First Name</label>
-                            <input type="text" class="form-control" id="FirstName" name="FirstName" ng-model="FirstName" ng-required="true"/>
-                        </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-xs-12 required label-value">
-                                <label for="Shine" class="control-label">Last Name</label>
-                                <input type="text" class="form-control" id="LastName" name="LastName" ng-model="LastName" ng-required="true"/>
-                            </div>
-                        </div>
-                    <div class="row">
-                        <div class="col-xs-12 required label-value">
-                            <label for="Albert" class="control-label">Full Name</label>
-                            <input type="text" class="form-control" id="FullName" name="Fullname" ng-model="Fullname" ng-required="true" />
 
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-xs-12 required label-value">
-                            <label for="Albert" class="control-label">Email</label>
-                            <input type="text" class="form-control" id="Email" name="Email" ng-model="Email" ng-required="true"/>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-xs-12 required label-value">
-                            <label for="Shine" class="control-label">Device Name</label>
-                            <input type="text" class="form-control" id="DeviceName" name="DeviceName" ng-model="DeviceName" ng-required="true"/>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-xs-12 required label-value">
-                            <label for="Shine" class="control-label">Device OS</label>
-                            <input type="text" class="form-control" id="DeviceOS" name="DeviceOS" ng-model="DeviceOS" ng-required="true" />
-                        </div>
-                    </div>
+        <div class="main-section">
+            <div class="title-section">
+                <div class="title-text">Personal Details</div>
+            </div>
+            <div class="details-section">
+                <div class="row">
+                    <div class="col-xs-12 required label-value">
+                        <label for="Albert" class="control-label">First Name</label>
+                        <input type="text" class="form-control" id="FirstName" name="FirstName" ng-model="FirstName" ng-required="true" />
                     </div>
                 </div>
-        
-        
-            <div class="main-section">
-                <div class="title-section">
-                    <div class="title-text">
-                        Applications
-                        <div class="add">
-                            <div ng-click="addNewBackend()"><span class="glyphicon glyphicon-plus backend-plus"></span></div>
+                <div class="row">
+                    <div class="col-xs-12 required label-value">
+                        <label for="Shine" class="control-label">Last Name</label>
+                        <input type="text" class="form-control" id="LastName" name="LastName" ng-model="LastName" ng-required="true" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 required label-value">
+                        <label for="Albert" class="control-label">Full Name</label>
+                        <input type="text" class="form-control" id="FullName" name="Fullname" ng-model="Fullname" ng-required="true" />
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 required label-value">
+                        <label for="Albert" class="control-label">Email</label>
+                        <input type="text" class="form-control" id="Email" name="Email" ng-model="Email" ng-required="true" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 required label-value">
+                        <label for="Shine" class="control-label">Device Name</label>
+                        <input type="text" class="form-control" id="DeviceName" name="DeviceName" ng-model="DeviceName" ng-required="true" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 required label-value">
+                        <label for="Shine" class="control-label">Device OS</label>
+                        <input type="text" class="form-control" id="DeviceOS" name="DeviceOS" ng-model="DeviceOS" ng-required="true" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="main-section">
+            <div class="title-section">
+                <div class="title-text">
+                    Applications
+                    <div class="add">
+                        <div ng-click="addNewBackend()"><span class="glyphicon glyphicon-plus backend-plus"></span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="details-section">
+                <div class="row">
+                    <div class="col-xs-6 label-value">Name</div>
+                    <div class="col-xs-6 label-value">Refresh Schedule</div>
+                </div>
+                <div class="row" ng-repeat="backend in backends">
+                    <div class="col-xs-6 label-value">
+                        <input class="form-control text-box single-line" id="BackendID" name="BackendID" placeholder="Enter Name" ng-model="backend.BackendName" type="text" />
+                    </div>
+                    <div class="col-xs-2 label-value">
+                        <input class="form-control text-box single-line" id="DefaultUpdateFrequency" name="DefaultUpdateFrequency" placeholder="Enter Refresh Schedule" ng-model="backend.DefaultUpdateFrequency" type="text" numbers-only />
+                    </div>
+                    <div class="col-xs-2 label-value" style="padding-top: 14px">
+                        minutes
+                    </div>
+                    <div class="col-xs-2">
+                        <div ng-click="removeBackend(backend)"><span class="glyphicon glyphicon-remove backend-remove"></span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="main-section">
+            <div class="title-section">
+                <div class="title-text">
+                    Personal Preferences
+                </div>
+            </div>
+            <div class="details-section">
+                <div class="row">
+                    <div class="col-xs-12 label-value">Show completed tasks from the last</div>
+                    <div class="col-xs-12 label-value">
+                        <div class="col-xs-4 completed-option" ng-repeat="option in completedTaskOptions" ng-class="option.classText">
+                            <div ng-click="selectCompletedTaskOption(option)" ng-bind="option.text"></div>
                         </div>
                     </div>
                 </div>
-                <div class="details-section">
-                    <div class="row">
-                        <div class="col-xs-6 label-value">Name</div>
-                        <div class="col-xs-6 label-value">Refresh Schedule</div>
-                    </div>
-                    <div class="row" ng-repeat="backend in backends">
-                        <div class="col-xs-6 label-value">
-                            <input class="form-control text-box single-line" id="BackendID" name="BackendID" placeholder="Enter Name" ng-model="backend.BackendName" type="text" />
-                        </div>
-                        <div class="col-xs-4 label-value">
-                            <input class="form-control text-box single-line" id="DefaultUpdateFrequency" name="DefaultUpdateFrequency" placeholder="Enter Refresh Schedule" ng-model="backend.DefaultUpdateFrequency" type="text" numbers-only />
-                        </div>
-                        <div class="col-xs-2">
-                            <div ng-click="removeBackend(backend)"><span class="glyphicon glyphicon-remove backend-remove"></span></div>
-                        </div>
-                    </div>                    
-                </div>
-        </div>        
-            <div class="main-section">
-                <div class="title-section">
-                    <div class="title-text">
-                        My Devices
-                        <div class="add">
-                            <div ng-click="addNewdevices()"><span class="glyphicon glyphicon-plus device-plus"></span></div>
-                        </div>
+                <div class="row">
+                    <div class="col-xs-6 label-value">Auto refresh screen</div>
+                    <div class="col-xs-6 label-value auto-refresh-section">
+                        <span uib-dropdown on-toggle="isAutoRefreshOpen = !isAutoRefreshOpen">
+                            <a href class="selected-option" id="auto-refresh-options" uib-dropdown-toggle>
+                                <span ng-bind="selectedAutoRefreshOption.text"></span>
+                                <span class="glyphicon glyphicon-menu-down" ng-class="isAutoRefreshOpen?'active':''"></span>
+                            </a>
+                            <ul class="dropdown-menu" uib-dropdown-menu aria-labelledby="auto-refresh-options">
+                                <li ng-repeat="autoRefreshOption in autoRefreshOptions">
+                                    <a ng-click="changeAutoRefreshOption(autoRefreshOption)" ng-bind="autoRefreshOption.text" href></a>
+                                </li>
+                            </ul>
+                        </span>
                     </div>
                 </div>
-                <div class="details-section">
-                    <div class="row">
-                        <div class="col-xs-6 label-value">Name</div>
-                        <div class="col-xs-6 label-value">OS</div>
-                    </div>
-                    <div class="row" ng-repeat="device in devices">
-                        <div class="col-xs-6 label-value">
-                            <input class="form-control text-box single-line" id="DeviceName" name="DeviceName" placeholder="Enter Name" ng-model="device.DeviceName" type="text" />
-                        </div>
-                        <div class="col-xs-4 label-value">
-                            <input class="form-control text-box single-line" id="DeviceBrand" name="DeviceBrand" placeholder="Enter OS" ng-model="device.DeviceBrand" type="text" />
-                        </div>
-                        <div class="col-xs-2">
-                            <div ng-click="removedevices(device)"><span class="glyphicon glyphicon-remove device-remove"></span></div>
-                        </div>
-                    </div>                    
+            </div>
+        </div>
+        <!--<div class="main-section">
+            <div class="title-section">
+                <div class="title-text">
+                    Show Completed Tasks
                 </div>
+            </div>
+            <div class="details-section">
+                <div class="row">
+                    <div class="col-xs-12 label-value">
+                        <div class="col-xs-4 completed-option" ng-repeat="option in completedTaskOptions" ng-class="option.classText">
+                            <div ng-click="selectCompletedTaskOption(option)" ng-bind="option.text"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>-->
+        <div class="main-section">
+            <div class="title-section">
+                <div class="title-text">
+                    My Devices
+                    <div class="add">
+                        <div ng-click="addNewdevices()"><span class="glyphicon glyphicon-plus device-plus"></span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="details-section">
+                <div class="row">
+                    <div class="col-xs-6 label-value">Name</div>
+                    <div class="col-xs-6 label-value">OS</div>
+                </div>
+                <div class="row" ng-repeat="device in devices">
+                    <div class="col-xs-6 label-value">
+                        <input class="form-control text-box single-line" id="DeviceName" name="DeviceName" placeholder="Enter Name" ng-model="device.DeviceName" type="text" />
+                    </div>
+                    <div class="col-xs-4 label-value">
+                        <input class="form-control text-box single-line" id="DeviceBrand" name="DeviceBrand" placeholder="Enter OS" ng-model="device.DeviceBrand" type="text" />
+                    </div>
+                    <div class="col-xs-2">
+                        <div ng-click="removedevices(device)"><span class="glyphicon glyphicon-remove device-remove"></span></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </form>

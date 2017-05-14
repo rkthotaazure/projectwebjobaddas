@@ -37,7 +37,11 @@ ADIDAS.GM.CONSTANTS = {
     CONFIG: function (name) {
         var constants = {
             //API Url
-            "WebAPIUrl": "http://mobileapproval.azurewebsites.net"
+            "WebAPIUrl": "http://mobileapproval.azurewebsites.net",
+            "MobileIconKeyword": "[ Mobile ]",
+            "MobileIconClass": "glyphicon-phone",
+            "BackendIconKeyword": "[ Backend ]",
+            "BackendIconClass": "glyphicon-blackboard"
          };
         return constants[name];
     },

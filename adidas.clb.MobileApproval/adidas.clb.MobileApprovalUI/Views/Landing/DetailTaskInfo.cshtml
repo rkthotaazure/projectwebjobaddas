@@ -1,6 +1,6 @@
 ﻿<form name="DetailTask" role="form">
     <div id="mobile-home" class="detail-task" ng-controller="ApprovalDetailstaskController" ng-init="init()">       
-        <div id="spinner1" style="position:absolute;top:0;z-index:999999;width:100%;height:100vh;background-color:rgba(0,0,0,0.7)" ng-show="showloader">
+        <div id="spinner1" style="position:absolute;top:0;bottom:0;left:0;right:0;z-index:999999;background-color:rgba(0,0,0,0.7)" ng-show="showloader">
             <img style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:100px" src="~/Images/adidas-loading.gif" />
         </div>
         <span class="notification-glyph glyphicon glyphicon-triangle-top" ng-if="cs.notificationActive"></span>
@@ -8,18 +8,35 @@
             <p ng-bind="cs.notificationText"></p>
         </div>    
         <div class="btn-footer" >            
-            <div class="col-xs-2 text-align-center first-col btn-back" ng-show="hidePendingButton">
+            <div class="col-xs-1 text-align-center first-col btn-back padding-right-none padding-left-none" ng-show="hidePendingButton">
                 <div ng-click="redirect()">
                     <span class="glyphicon glyphicon-menu-left"></span>
                 </div>
-            </div>           
-            <div class="col-xs-5 text-align-center mid-col btn-approve" ng-show="hidePendingButton">
+            </div>
+            <div class="col-xs-4 text-align-center mid-col btn-approve padding-right-none padding-left-none" ng-show="hidePendingButton">
                 <div ng-click="requestStatus('Approved',id,TaskID)">
+                    Quick Approve
+                </div>
+            </div>
+            <div class="col-xs-7 text-align-center padding-left-none padding-right-none" ng-show="hidePendingButton">
+                <div class="col-xs-6 text-align-center mid-col btn-approve" ng-show="hidePendingButton">
+                    <div ng-click="openComment('Approved',id,TaskID)">
+                        Approve
+                    </div>
+                </div>
+                <div class="col-xs-6 text-align-center last-col btn-reject" ng-show="hidePendingButton">
+                    <div ng-click="openComment('Rejected',id,TaskID)">
+                        Reject
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-4 text-align-center mid-col btn-approve hidden-section" ng-show="hidePendingButton">
+                <div ng-click="openComment('Approved',id,TaskID)">
                     Approve
                 </div>
             </div>
-            <div class="col-xs-5 text-align-center last-col btn-reject" ng-show="hidePendingButton">
-                <div ng-click="requestStatus('Rejected',id,TaskID)">
+            <div class="col-xs-3 text-align-center last-col btn-reject hidden-section" ng-show="hidePendingButton">
+                <div ng-click="openComment('Rejected',id,TaskID)">
                     Reject
                 </div>
             </div>
@@ -92,7 +109,7 @@
                 <div class="title-text">Request Overview</div>
             </div>
             <div class="details-section">
-                <div class="row" ng-repeat="field in fields">
+                <div class="row" ng-repeat="field in fields" ng-if="field.Name != 'Comments'">
                     <div class="col-xs-3 label-name text-bold" ng-bind="field.Name">                        
                     </div>
                     <div class="col-xs-1 label-name">
@@ -123,19 +140,41 @@
                     </div>
                 </div>
                 <div class="row" ng-repeat="approver in approvers">
-                    <div class="col-xs-3 label-value" ng-bind="approver.UserName">                       
+                    <div class="col-xs-3 label-value padding-right-none" ng-bind="approver.UserName">                       
                     </div>
-                    <div class="col-xs-2 label-value" ng-bind="approver.Status">                       
+                    <div class="col-xs-2 label-value padding-right-none" ng-bind="approver.Status">                       
                     </div>
-                    <div class="col-xs-3 label-value" ng-bind='approver.DueDate | dateFilter | date: "dd.MM.yyyy"'>                        
+                    <div class="col-xs-3 label-value padding-right-none" ng-bind='approver.DueDate | dateFilter | date: "dd.MM.yyyy"'>                        
                     </div>
-                    <div class="col-xs-4 label-value" ng-bind="approver.Comment">
+                    <div class="col-xs-4 label-value wrap-word">
+                        <span ng-bind="approver.Comment"></span>
+                        <span ng-if="approver.iconClass" class="glyphicon" ng-class="approver.iconClass"></span>
                     </div>
                 </div>
             </div>           
         </div>
         <div class="btn-section text-align-center">
             <button type="button" style="" class="btn btn-primary btn-pdf" data-toggle="tooltip" title="Download Request" data-placement="top"><span style="" ng-click="openpdf();">Download Request</span></button>            
+        </div>
+        <div class="comment-section-bg" ng-class="comment.commentActive ? 'active' : ''">
+            <div class="comment-section">
+                <div class="comment-header">
+                    Comments
+                </div>
+                <div class="comment-area">
+                    <div class="comments" ng-class="comment.errorClass">
+                        <textarea ng-model="comment.text" id="comments" name="comments" cols="50" rows="10" placeholder="Add comments here..."></textarea>
+                    </div>
+                    <div class="confirm">
+                        <div class="col-xs-6 comment-confirm" ng-click="confirmComment()">
+                            Confirm
+                        </div>
+                        <div class="col-xs-6 comment-cancel" ng-click="closeComment()">
+                            Cancel
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </form>

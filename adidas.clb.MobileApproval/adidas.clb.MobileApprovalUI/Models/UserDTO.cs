@@ -25,6 +25,8 @@ namespace adidas.clb.MobileApprovalUI.Models
         public string Domain { get; set; }
         public string DeviceName { get; set; }
         public string DeviceOS { get; set; }
+        public int CompletedRequestsSync { get; set; }
+        public int AutoRefreshValue { get; set; }
         public UserDTO() { _type = "user"; }
         public IEnumerable<UserBackendDTO> userbackends { get; set; }
         public IEnumerable<UserDeviceDTO> userdevices { get; set; }
