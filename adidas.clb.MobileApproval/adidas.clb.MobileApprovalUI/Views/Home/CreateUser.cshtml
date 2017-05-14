@@ -70,21 +70,73 @@
             <div class="details-section">
                 <div class="row">
                     <div class="col-xs-6 label-value">Name</div>
-                    <div class="col-xs-6 label-value">Refresh Schedule</div>
+                    <div class="col-xs-6 label-value">Refresh Schedule (minutes)</div>
                 </div>
                 <div class="row" ng-repeat="backend in backends">
                     <div class="col-xs-6 label-value">
                         <input class="form-control text-box single-line" id="BackendID" name="BackendID"  placeholder="Enter Name" ng-model="backend.BackendName" type="text" />
                     </div>
-                    <div class="col-xs-4 label-value">
-                        <input class="form-control text-box single-line" id="DefaultUpdateFrequency" name="DefaultUpdateFrequency"  placeholder="Enter Refresh Schedule" ng-model="backend.DefaultUpdateFrequency" type="text" numbers-only />
+                    <div class="col-xs-2 label-value">
+                        <input class="form-control text-box single-line text-align-center" id="DefaultUpdateFrequency" name="DefaultUpdateFrequency"  placeholder="Enter Refresh Schedule" ng-model="backend.DefaultUpdateFrequency" type="text" numbers-only />
+                    </div>
+                    <div class="col-xs-2 label-value" style="padding-top: 14px">
+                        minutes
                     </div>
                     <div class="col-xs-2">
                         <div ng-click="removeBackend(backend)"><span class="glyphicon glyphicon-remove backend-remove"></span></div>
                     </div>
                 </div>
-                </div>          
+            </div>          
         </div>
+        <div class="main-section">
+            <div class="title-section">
+                <div class="title-text">
+                    Personal Preferences
+                </div>
+            </div>
+            <div class="details-section">
+                <div class="row">
+                    <div class="col-xs-12 label-value">Show completed tasks from the last</div>
+                    <div class="col-xs-12 label-value">
+                        <div class="col-xs-4 completed-option" ng-repeat="option in completedTaskOptions" ng-class="option.classText">
+                            <div ng-click="selectCompletedTaskOption(option)" ng-bind="option.text"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-6 label-value">Auto refresh screen</div>
+                    <div class="col-xs-6 label-value auto-refresh-section">
+                        <span uib-dropdown on-toggle="isAutoRefreshOpen = !isAutoRefreshOpen">
+                            <a href class="selected-option" id="auto-refresh-options" uib-dropdown-toggle>
+                                <span ng-bind="selectedAutoRefreshOption.text"></span>
+                                <span class="glyphicon glyphicon-menu-down" ng-class="isAutoRefreshOpen?'active':''"></span>
+                            </a>
+                            <ul class="dropdown-menu" uib-dropdown-menu aria-labelledby="auto-refresh-options">
+                                <li ng-repeat="autoRefreshOption in autoRefreshOptions">
+                                    <a ng-click="changeAutoRefreshOption(autoRefreshOption)" ng-bind="autoRefreshOption.text" href></a>
+                                </li>
+                            </ul>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--<div class="main-section">
+            <div class="title-section">
+                <div class="title-text">
+                    Show Completed Tasks
+                </div>
+            </div>
+            <div class="details-section">
+                <div class="row">
+                    <div class="col-xs-12 label-value">
+                        <div class="col-xs-4 completed-option" ng-repeat="option in completedTaskOptions" ng-class="option.classText">
+                            <div ng-click="selectCompletedTaskOption(option)" ng-bind="option.text"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>-->
         <div class="main-section">
             <div class="title-section">
                 <div class="title-text">

@@ -1,5 +1,5 @@
 ﻿<div id="mobile-home" class="approval-details" ng-controller="ApprovalDetailsController" ng-init="init()">    
-    <div id="spinner1" style="position:absolute;top:0;z-index:999999;width:100%;height:100vh;background-color:rgba(0,0,0,0.5)" ng-show="loading">
+    <div id="spinner1" style="position:absolute;top:0;bottom:0;left:0;right:0;z-index:999999;background-color:rgba(0,0,0,0.7)" ng-show="loading">
         <img style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:100px" src="~/Images/adidas-loading.gif" />
     </div>
     <span class="notification-glyph glyphicon glyphicon-triangle-top" ng-if="cs.notificationActive"></span>
@@ -10,17 +10,20 @@
         <div class="col-xs-12 text-align-center btn-back">
             <div ng-click="redirect()">
                 <span class="glyphicon glyphicon-menu-left"></span>
-                Dashboard
+                My Approvals
             </div>
         </div>
     </div>
     <div class="main-section">
         <div class="title-section">
             <div class="title-text tab-titles">
-                <div class="tab-pending" ng-class="{'tab-active': showpending}" ng-click="showpendingtasks();">Pending Requests</div><div class="tab-completed" ng-class="{'tab-active': !showpending}" ng-click="showcompletedtasks();">Completed Requests</div>
+                <div class="tab-pending" ng-class="{'tab-active': showpending}" ng-click="showpendingtasks();">Pending</div><div class="tab-completed" ng-class="{'tab-active': !showpending}" ng-click="showcompletedtasks();">Completed</div>
             </div>
         </div>
         <div class="details-section padding-top-none">
+            <div ng-if="emptyRecord" class="no-records">
+                No requests to display.
+            </div>
             <div ng-repeat="approvaltask in approvalTasks | orderBy:sorttasks:true" ng-init="$parent.selectedIndex = -1">
                 <div class="row task-section bottom-border" ng-class="{'pendingtask': showpending}" ng-click="$parent.selectedIndex == $index?$parent.selectedIndex = -1:$parent.selectedIndex = $index;">
                     <div class="col-xs-11 task-content" ng-class="{'move-left': $parent.selectedIndex == $index}">
@@ -44,7 +47,7 @@
                     </div>
                     <div class="col-xs-1 task-arrow"><span class="glyphicon glyphicon-menu-right"></span></div>
                     <div class="action-items" ng-class="{'move-right': $parent.selectedIndex == $index}">
-                        <div class="task-action action-reject" ng-show="showpending" ng-click="requestStatus('Rejected',approvaltask.RequestId, approvaltask.ServiceLayerTaskID)">
+                        <div class="task-action action-reject" ng-show="showpending" ng-click="openComment('Rejected',approvaltask.RequestId, approvaltask.ServiceLayerTaskID)" ng-click1="requestStatus('Rejected',approvaltask.RequestId, approvaltask.ServiceLayerTaskID)">
                             Reject
                             <span class="glyphicon glyphicon-remove"></span>
                         </div>
@@ -62,7 +65,26 @@
                 
             </div>
         </div>     
-          
+        <div class="comment-section-bg" ng-class="comment.commentActive ? 'active' : ''">
+            <div class="comment-section">
+                <div class="comment-header">
+                    Comments
+                </div>
+                <div class="comment-area">
+                    <div class="comments" ng-class="comment.errorClass">
+                        <textarea ng-model="comment.text" id="comments" name="comments" cols="50" rows="10" placeholder="Add comments here..."></textarea>
+                    </div>
+                    <div class="confirm">
+                        <div class="col-xs-6 comment-confirm" ng-click="confirmComment()">
+                            Confirm
+                        </div>
+                        <div class="col-xs-6 comment-cancel" ng-click="closeComment()">
+                            Cancel
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

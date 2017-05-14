@@ -123,7 +123,7 @@ body, html, md-content {
   box-sizing: border-box;
   min-width: 285px;
   height: auto;
-  min-height: 100vh;
+  min-height: calc(100vh - 50px);
   line-height: 1em;
   font-family: 'AdiHausPS-Reg'; }
 
@@ -201,10 +201,224 @@ body, html, md-content {
     #ma-header .notification-icon span {
       cursor: pointer; }
 
+/*Saurabh - Start*/
+.urgent-theme {
+  color: #fd83aa;
+  color: #ff5722;
+  color: #f0ab00;
+  color: #d8abbc; }
+
+.pending-theme {
+  color: #effe3f;
+  color: #fd83aa;
+  color: #b35b7c; }
+
+.completed-theme {
+  color: #67f0ac;
+  color: #331d33; }
+
+.urgent-theme-dot {
+  /*border: 2px #fd83aa solid;
+  border: 2px #ff5722 solid;*/
+  border-radius: 5px;
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  margin-top: 6px;
+  background-color: #d8abbc; }
+
+.pending-theme-dot {
+  /*border: 2px #fd83aa solid;
+  border: 2px #effe3f solid;*/
+  border-radius: 5px;
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  margin-top: 6px;
+  background-color: #b35b7c; }
+
+.completed-theme-dot {
+  /*border: 2px #67f0ac solid;*/
+  border-radius: 5px;
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  margin-top: 6px;
+  background-color: #331d33; }
+
+.wrap-word {
+  word-wrap: break-word; }
+
+.procent-section {
+  position: absolute;
+  top: 0;
+  color: #2a2a2a;
+  font-size: 14px;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  padding-right: 10px; }
+  .procent-section .spanTask {
+    display: none; }
+  .procent-section .spanTaskCount {
+    transform: translate(-50%, -50%);
+    position: absolute;
+    top: 50%;
+    padding-bottom: 3px; }
+
+.vertical-align-section {
+  min-height: 65px;
+  display: table; }
+  .vertical-align-section .label-task-head, .vertical-align-section span {
+    display: table-cell;
+    vertical-align: middle; }
+
+.line-height-24 {
+  line-height: 24px; }
+
+.completed-option div {
+  background-color: #f0f0f0;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding: 8px;
+  text-align: center;
+  color: #999999;
+  font-size: 14px;
+  -webkit-transition: all 0.3s ease;
+  -moz-transition: all 0.3s ease;
+  -ms-transition: all 0.3s ease;
+  -o-transition: all 0.3s ease;
+  transition: all 0.3s ease; }
+  .completed-option div:hover {
+    background-color: #301831;
+    color: white; }
+.completed-option.active div {
+  background-color: #301831;
+  color: white; }
+
+.comment-section-bg {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 999;
+  -webkit-transition: all 0.3s ease;
+  -moz-transition: all 0.3s ease;
+  -ms-transition: all 0.3s ease;
+  -o-transition: all 0.3s ease;
+  transition: all 0.3s ease; }
+  .comment-section-bg.active {
+    bottom: 0;
+    height: 100%; }
+    .comment-section-bg.active .comment-section {
+      top: 30%; }
+  .comment-section-bg .comment-section {
+    position: fixed;
+    top: -100vh;
+    left: 50%;
+    width: 75%;
+    /* Safari */
+    -webkit-transform: translateX(-50%);
+    /* Firefox */
+    -moz-transform: translateX(-50%);
+    /* IE */
+    -ms-transform: translateX(-50%);
+    /* Opera */
+    -o-transform: translateX(-50%);
+    /* Internet Explorer */
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    -ms-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+    background-color: white;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px; }
+    .comment-section-bg .comment-section .comment-header {
+      line-height: 40px;
+      padding: 0px 15px;
+      font-size: 18px;
+      color: #ffffff;
+      background-color: #301831;
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px; }
+    .comment-section-bg .comment-section .comment-area .comments {
+      overflow: hidden;
+      padding-left: 14px; }
+      .comment-section-bg .comment-section .comment-area .comments.error {
+        border-right: 2px red solid;
+        border-left: 2px red solid; }
+      .comment-section-bg .comment-section .comment-area .comments textarea {
+        width: 100%;
+        height: 125px;
+        border-style: none; }
+    .comment-section-bg .comment-section .comment-area .comment-confirm, .comment-section-bg .comment-section .comment-area .comment-cancel {
+      background-color: #ff9501;
+      text-align: center;
+      color: white;
+      font-size: 16px;
+      line-height: 35px;
+      cursor: pointer; }
+    .comment-section-bg .comment-section .comment-area .comment-cancel {
+      background-color: #fe3f35; }
+
+.auto-refresh-section {
+  padding-bottom: 16px !important; }
+  .auto-refresh-section .dropdown-menu {
+    margin: 7px 0 0; }
+  .auto-refresh-section .selected-option {
+    background-color: #301831;
+    color: white;
+    padding: 8px;
+    text-decoration: none;
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    -ms-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    transition: all 0.3s ease; }
+    .auto-refresh-section .selected-option .glyphicon {
+      -webkit-transition: all 0.3s ease;
+      -moz-transition: all 0.3s ease;
+      -ms-transition: all 0.3s ease;
+      -o-transition: all 0.3s ease;
+      transition: all 0.3s ease;
+      vertical-align: text-bottom;
+      padding-bottom: 1px; }
+      .auto-refresh-section .selected-option .glyphicon.active {
+        /* Safari */
+        -webkit-transform: rotate(180deg);
+        /* Firefox */
+        -moz-transform: rotate(180deg);
+        /* IE */
+        -ms-transform: rotate(180deg);
+        /* Opera */
+        -o-transform: rotate(180deg);
+        /* Internet Explorer */
+        filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3); }
+    .auto-refresh-section .selected-option:hover {
+      background-color: #703a6f; }
+
+.synch-time {
+  color: #703a6f;
+  text-align: right;
+  font-size: 12px;
+  line-height: 20px;
+  background: white;
+  z-index: 9999; }
+
+/*Saurabh - End*/
 #mobile-home {
   margin-bottom: 49px !important; }
   #mobile-home .main-section .details-section {
-    padding: 5px 15px 5px 15px; }
+    /*padding: 5px 15px 5px 15px;*/
+    padding: 0 15px; }
+    #mobile-home .main-section .details-section .no-records {
+      font-size: 18px;
+      padding: 20px;
+      text-align: center; }
     #mobile-home .main-section .details-section .row {
       cursor: pointer; }
       #mobile-home .main-section .details-section .row .label-name {
@@ -216,7 +430,8 @@ body, html, md-content {
         font-size: 14px;
         color: #666666;
         padding-top: 10px;
-        padding-bottom: 10px; }
+        padding-bottom: 10px;
+        /*word-break: break-word;*/ }
       #mobile-home .main-section .details-section .row .arrow-next {
         padding: 15px 0; }
         #mobile-home .main-section .details-section .row .arrow-next .glyphicon {
@@ -227,6 +442,7 @@ body, html, md-content {
         position: relative;
         width: 100%;
         height: auto;
+        padding-right: 10px;
         /*width: 155px;
         height: 155px;*/
         /*@include transform(scale(.2));*/ }
@@ -400,6 +616,8 @@ body, html, md-content {
       cursor: pointer; }
     #mobile-home .btn-footer .btn-save {
       background-color: #703a6f; }
+      #mobile-home .btn-footer .btn-save div {
+        cursor: pointer; }
     #mobile-home .btn-footer .first-col {
       border-right: 1px #fff solid; }
     #mobile-home .btn-footer .last-col {
@@ -418,19 +636,29 @@ body, html, md-content {
       text-align: right;
       font-size: 13px; }
     #mobile-home .bg-canvas .pendingbox {
-      padding-left: 30px; }
+      /*padding-left: 28px;*/ }
     #mobile-home .bg-canvas .TasksCount-section {
-      padding-top: 30px; }
+      padding-top: 4px; }
+      #mobile-home .bg-canvas .TasksCount-section .glyphicon {
+        font-size: 34px;
+        padding-top: 4px; }
     #mobile-home .bg-canvas .completed-count-row {
-      padding-top: 20px; }
+      padding-top: 20px;
+      padding-top: 10px; }
+    #mobile-home .bg-canvas .urgent-count {
+      font-size: 24px;
+      padding-top: 10px;
+      padding-top: 5px; }
     #mobile-home .bg-canvas .pending-count {
-      color: #b85c7d;
+      /*color: #b85c7d;*/
       font-size: 24px;
-      padding-top: 10px; }
+      padding-top: 10px;
+      padding-top: 5px; }
     #mobile-home .bg-canvas .completed-count {
-      color: #301831;
+      /*color: #301831;*/
       font-size: 24px;
-      padding-top: 10px; }
+      padding-top: 10px;
+      padding-top: 5px; }
     #mobile-home .bg-canvas .dot {
       width: 10px;
       height: 10px;
@@ -454,7 +682,7 @@ body, html, md-content {
       -o-transform: scale(1);
       /* Internet Explorer */
       filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3); }
-    #mobile-home .bg-canvas span#procentpending {
+    #mobile-home .bg-canvas span#procentpending, #mobile-home .bg-canvas span#procenturgent {
       display: block;
       position: absolute;
       left: 50%;
@@ -463,17 +691,46 @@ body, html, md-content {
       color: #ffffff;
       font-size: 14px;
       text-align: center; }
-      #mobile-home .bg-canvas span#procentpending .spanTask {
+      #mobile-home .bg-canvas span#procentpending .spanTask, #mobile-home .bg-canvas span#procenturgent .spanTask {
         display: block;
         padding-bottom: 15px;
         font-size: 14px; }
-      #mobile-home .bg-canvas span#procentpending .spantaskcount {
+      #mobile-home .bg-canvas span#procentpending .spanTaskCount, #mobile-home .bg-canvas span#procenturgent .spanTaskCount {
         font-size: 40px; }
 
 .backend-task-details {
-  font-size: 12px; }
+  font-size: 12px;
+  /*color: #fff;
+  padding-top: 3px;*/
+  /*padding: 18px 5px 0 0;
+  display: inline-block;*/
+  min-width: 44px;
+  line-height: 22px; }
   .backend-task-details span {
-    font-size: 14px; }
+    font-size: 14px;
+    font-size: 15px;
+    display: block;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 4px; }
+  .backend-task-details .glyphicon {
+    /*background-color: #703a6f;
+    border-radius: 2px;
+    padding: 8px;*/ }
+    .backend-task-details .glyphicon span {
+      position: absolute;
+      background: #fff;
+      color: #000;
+      top: -18px;
+      left: 27px;
+      border-radius: 20px;
+      border-bottom-left-radius: 0;
+      padding: 1px 5px 0 5px;
+      min-width: 20px;
+      height: 20px;
+      text-align: center;
+      box-shadow: 1px 1px 5px #555555; }
 
 .backend-task-details-last {
   padding-top: 5px;
@@ -615,7 +872,8 @@ body, html, md-content {
     -moz-transition: all 5s ease;
     -ms-transition: all 5s ease;
     -o-transition: all 5s ease;
-    transition: all 5s ease; }
+    transition: all 5s ease;
+    z-index: 9; }
   .notification-content.disable {
     /*margin-top: 0;*/ }
 

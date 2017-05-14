@@ -1,5 +1,5 @@
 ﻿<div id="mobile-home" class="approval-landing" ng-controller="ApprovalLandingController" ng-init="init()">   
-    <div id="spinner1" style="position:absolute;top:0;z-index:999999;width:100%;height:100vh;background-color:rgba(0,0,0,0.5)" ng-show="showloader" >
+    <div id="spinner1" style="position:fixed;top:0;bottom:0;left:0;right:0;z-index:999999;background-color:rgba(0,0,0,0.7)" ng-show="showloader" >
         <img style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:100px" src="~/Images/adidas-loading.gif" />        
    </div>
     <div ng-show="showcontent">
@@ -13,6 +13,7 @@
                     Sync Request
                 </div>
             </div>*@
+            <div class="synch-time col-xs-12">Last refresh : <span ng-bind="lastsynch | date:'dd.MM.yyyy hh:mm a'"></span></div>
             <div class="col-xs-12 text-align-center btn-save">
                 <div ng-click="update('true')">                    
                     Force Update
@@ -20,44 +21,117 @@
             </div>
         </div>
         <div class="main-section">
-            <div class="title-section">
+            <div class="title-section hidden-section">
                 <div class="title-text">Request Status</div>
             </div>
         </div>
+        <!--<div style="background-image:url('https://t-mobileapproval.azurewebsites.net/Images/Adidas_Task_Management.jpg');background-position:center;background-size:cover">-->
+        <div>
         <div class="bg-canvas">
-            <div class="synch-time">Last refresh : <span ng-bind="lastsynch | date:'dd.MM.yyyy hh:mm a'"></span></div>           
             <div class="">
                 <div class="col-xs-7 pendingbox">
                     <div class="canvas-wrap">
-                        <canvas id="canvaspending" width="180" height="180"></canvas>
+                        <canvas id="canvas" width="180" height="180"></canvas>
                         <span id="procentpending"></span>
+                        <!--<span id="procenturgent"></span>-->
                     </div>                 
                 </div>
-                <div class="col-xs-5 TasksCount-section">                    
-                    <div class="row"><div class="col-xs-2"><span class="dot pending-dot"></span></div><div class="col-xs-9">Pending</div></div>
-                    <div class="row"><div class="col-xs-2"></div><div class="col-xs-9 pending-count" ng-bind="pending"></div></div>
-                    <div class="row completed-count-row"><div class="col-xs-2"><span class="dot completed-dot"></span></div><div class="col-xs-9">Completed</div></div>
-                    <div class="row"><div class="col-xs-2"></div><div class="col-xs-9 completed-count" ng-bind="completed"></div></div>                   
+                <div class="col-xs-5 TasksCount-section">
+                    <div class="row">
+                        <div class="col-xs-3 padding-right-none padding-left-none text-align-right">
+                            <!--<span class="glyphicon glyphicon-flag urgent-theme"></span>-->
+                            <span class="urgent-theme-dot"></span>
+                        </div>
+                        <div class="col-xs-9 line-height-24">
+                            Urgent
+                            <br/>
+                            <span class="urgent-count urgent-theme" ng-bind="urgent"></span>
+                        </div>
+                    </div>
+                    <div class="row hidden-section">
+                        <div class="col-xs-2"></div>
+                        <div class="col-xs-9 urgent-count urgent-theme">
+                            <span ng-bind="urgent"></span>
+                        </div>
+                    </div>
+                    <div class="row completed-count-row">
+                        <div class="col-xs-3 padding-right-none padding-left-none text-align-right">
+                            <!--<span class="glyphicon glyphicon-tasks pending-theme"></span>-->
+                            <span class="pending-theme-dot"></span>
+                        </div>
+                        <div class="col-xs-9 line-height-24">
+                            Pending
+                            <br/>
+                            <span class="pending-theme pending-count" ng-bind="pending"></span>
+                        </div>
+                    </div>
+                    <div class="row hidden-section">
+                        <div class="col-xs-2"></div>
+                        <div class="col-xs-9 pending-count pending-theme">
+                            <span ng-bind="pending"></span>
+                        </div>
+                    </div>
+                    <div class="row completed-count-row">
+                        <div class="col-xs-3 padding-right-none padding-left-none text-align-right">
+                            <!--<span class="glyphicon glyphicon-ok completed-theme"></span>-->
+                            <span class="completed-theme-dot"></span>
+                        </div>
+                        <div class="col-xs-9 line-height-24">
+                            Completed
+                            <br/>
+                            <span class="completed-theme completed-count" ng-bind="completed"></span>
+                        </div>
+                    </div>
+                    <div class="row hidden-section">
+                        <div class="col-xs-2"></div>
+                        <div class="col-xs-9 completed-count completed-theme">
+                            <span ng-bind="completed"></span>
+                        </div>
+                    </div>                   
                 </div>
             </div>            
         </div>
+        </div>
         <div class="main-section">            
             <div class="details-section">
+                <div class="row" ng-if="backends.length == 0">
+                    No projects to display.
+                </div>
                 <div class="row bottom-border" ng-repeat="backend in backends" ng-click="redirectToDetailsPage(backend.BackendID)">
-                    <div class="col-xs-4 label-value">
+                    <div class="col-xs-4 label-value vertical-align-section">
                         <div class="label-task-head" ng-bind="backend.BackendName"></div>
-                        <div class="backend-task-details-last">Requests - <span ng-bind="backend.Pending+backend.Approved+backend.Rejected"></span></div>
+                        <div class="backend-task-details-last hidden-section">Requests - <span ng-bind="backend.Urgent+backend.Pending+backend.Approved+backend.Rejected"></span></div>
                     </div>
-                    <div class="col-xs-2 label-value">
-                        <div class="canvas-wrap-task" >
-                            <canvas id="canvaspending{{$index}}" width="155" height="155" ng-init="drawbackendRequestCountCircles(backend.Pending+backend.Approved+backend.Rejected,backend.Pending,$index)"></canvas>                            
+                    <div class="col-xs-2 padding-left-none padding-right-none" style="padding-top: 7px">
+                        <div class="canvas-wrap-task">
+                            <canvas id="canvas{{$index}}" width="85" height="85" ng-init="drawRequestCountCirclesPostRender(backend.Pending+backend.Approved+backend.Rejected+backend.Urgent, backend.Urgent, backend.Pending, backend.Approved+backend.Rejected, 'canvas' + $index, 'procentpending' + $index)"></canvas>
+                            <span class="procent-section" id="procentpending{{$index}}"></span>
                         </div>
                     </div>
-                    <div class="col-xs-5 label-value">
-                        <div class="backend-task-details"><span class="backend-pending-count"></span>Pending: <span ng-bind="backend.Pending"></span></div>
-                        <div class="backend-task-details-last"><span class="backend-completed-count"></span>Completed: <span ng-bind="backend.Approved+backend.Rejected"></span></div>
+                    <div class="col-xs-5 label-value padding-right-none padding-left-none" style="display:table;min-height:65px">
+                        <div class="backend-task-details" style="display:table-cell;vertical-align:middle"><span class="urgent-theme-dot"></span><span class="hidden-section glyphicon glyphicon-flag urgent-theme"></span> <span ng-bind="backend.Urgent"></span></div>
+                        <div class="backend-task-details" style="display:table-cell;vertical-align:middle"><span class="pending-theme-dot"></span><span class="hidden-section glyphicon glyphicon-tasks pending-theme"></span> <span ng-bind="backend.Pending"></span></div>
+                        <div class="backend-task-details" style="display:table-cell;vertical-align:middle"><span class="completed-theme-dot"></span><span class="hidden-section glyphicon glyphicon-ok completed-theme"></span> <span ng-bind="backend.Approved+backend.Rejected"></span></div>
+                        <!--<div class="backend-task-details"><span class="urgent-theme-dot"></span>Urgent: <span ng-bind="backend.Urgent"></span></div>
+                        <div class="backend-task-details"><span class="pending-theme-dot"></span>Pending: <span ng-bind="backend.Pending"></span></div>
+                        <div class="backend-task-details"><span class="completed-theme-dot"></span>Completed: <span ng-bind="backend.Approved+backend.Rejected"></span></div>
+                        <div class="backend-task-details col-xs-4">
+                            <span class="glyphicon glyphicon-flag">
+                                <span ng-bind="backend.Urgent"></span>
+                            </span>
+                        </div>
+                        <div class="backend-task-details col-xs-4">
+                            <span class="glyphicon glyphicon-flag">
+                                <span ng-bind="backend.Pending"></span>
+                            </span>
+                        </div>
+                        <div class="backend-task-details col-xs-4">
+                            <span class="glyphicon glyphicon-ok">
+                                <span ng-bind="backend.Completed"></span>
+                            </span>
+                        </div>-->
                     </div>
-                    <div class="col-xs-1 label-value arrow-next">
+                    <div class="col-xs-1 label-value arrow-next vertical-align-section">
                         <span class="glyphicon glyphicon-menu-right"></span>
                     </div>
 

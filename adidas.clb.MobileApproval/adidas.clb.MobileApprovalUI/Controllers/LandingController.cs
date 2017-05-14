@@ -370,10 +370,15 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                 // Get Rejected count details from API
                 syncRequest.parameters.filters.apprStatus = "Rejected";
                 string stApprovalRejectedCount = await apiControllerObj.GetApprovalcompletedcount(syncRequest, userid);
+                //Get Urgent Pending approval count from Synch API
+                syncRequest.parameters.filters.IsUrgent = true;
+                syncRequest.parameters.filters.apprStatus = "Urgent";
+                string stApprovalUrgentPendingCount = await apiControllerObj.GetApprovalcompletedcount(syncRequest, userid);
                 //Deseralize the result returned by the API
                 UserBackendrequestJsonData userTaskPendingResponse = JsonConvert.DeserializeObject<UserBackendrequestJsonData>(stApprovalPendingCount);
                 UserBackendrequestJsonData userTaskApprovedResponse = JsonConvert.DeserializeObject<UserBackendrequestJsonData>(stApprovalApprovedCount);
                 UserBackendrequestJsonData userTaskRejectedResponse = JsonConvert.DeserializeObject<UserBackendrequestJsonData>(stApprovalRejectedCount);
+                UserBackendrequestJsonData userTaskUrgentPendingResponse = JsonConvert.DeserializeObject<UserBackendrequestJsonData>(stApprovalUrgentPendingCount);
                 //creates list Backend model object
                 List<string> userBackends = new List<string>();
                 userBackends = syncRequest.parameters.filters.backends;
@@ -382,6 +387,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                 UserBackendRequestJsonResult[] userBackendwithTaskPendingCount = userTaskPendingResponse.userBackendRequestResults;
                 UserBackendRequestJsonResult[] userBackendwithTaskApprovedCount = userTaskApprovedResponse.userBackendRequestResults;
                 UserBackendRequestJsonResult[] userBackendwithTaskRejectedCount = userTaskRejectedResponse.userBackendRequestResults;
+                UserBackendRequestJsonResult[] userBackendwithTaskUrgentPendingCount = userTaskUrgentPendingResponse.userBackendRequestResults;
                 List<ApprovalCountDTO> approvalCountobj = new List<ApprovalCountDTO>();
                 //Checks whether the JSON response is not null
                 if (userTaskPendingResponse != null && userBackends != null)
@@ -396,13 +402,25 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                         approvalCount.BackendID = backendID;
                         //Get approval backend Name
                         approvalCount.BackendName = userBackendName[i];
+
+                        int urgentPendingCount = 0;
+                        //Get urgent Pending approval count
+                        if (userBackendwithTaskUrgentPendingCount != null)
+                        {
+                            UserBackendRequestJsonResult taskcountlist = userBackendwithTaskUrgentPendingCount.ToList().Find(x => x.userBackend.BackendID == backendID);
+                            if (taskcountlist != null)
+                            {
+                                urgentPendingCount = taskcountlist.userTaskcountJsonResult.Count;
+                                approvalCount.UrgentPendingCount = urgentPendingCount;
+                            }
+                        }
                         //Get Pending approval count
                         if (userBackendwithTaskPendingCount != null)
                         {
                             UserBackendRequestJsonResult taskcountlist = userBackendwithTaskPendingCount.ToList().Find(x => x.userBackend.BackendID == backendID);
                             if (taskcountlist != null)
                             {
-                                approvalCount.WaitingCount = taskcountlist.userTaskcountJsonResult.Count;
+                                approvalCount.WaitingCount = (taskcountlist.userTaskcountJsonResult.Count- urgentPendingCount);
                             }
                         }
                         //Get Approved approval count

@@ -356,6 +356,8 @@
     <None Include="Properties\PublishProfiles\mobileapprovalclient - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\mobileapprovalclient - Web Deploy %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\mobileapprovalclient - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\t-mobileapproval - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\t-mobileapproval - Web Deploy.pubxml" />
     <None Include="Scripts\app\Packages\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\app\Packages\jquery-1.10.2.js" />
     <Content Include="Scripts\app\Packages\jquery-1.10.2.min.js" />

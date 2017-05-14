@@ -29,7 +29,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
 
         // return CreateNewUser view 
         //string userid = SettingsHelper.UserId;        
-        string userid = System.Web.HttpContext.Current.User.Identity.Name.Split('@')[0];     
+        string userid = System.Web.HttpContext.Current.User.Identity.Name.Split('@')[0];
         public ActionResult CreateUser()
         {
             return View();
@@ -48,14 +48,14 @@ namespace adidas.clb.MobileApprovalUI.Controllers
         //Check user exisits or not
         [HttpGet]
         public async Task<ActionResult> CheckUserExisits()
-        {            
+        {
             UserDTO userdetails = new UserDTO();
             try
-            {                
+            {
                 // Get user details as list
                 userdetails = await Getuserdetails();
                 // Return Json Formate object and pass to UI
-                return Json(userdetails, JsonRequestBehavior.AllowGet);                
+                return Json(userdetails, JsonRequestBehavior.AllowGet);
             }
             catch (Exception exception)
             {
@@ -165,15 +165,25 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                             userdetails.Domain = newuserjsonResponse.userResults.Domain;
                             userdetails.DeviceName = newuserjsonResponse.userResults.DeviceName;
                             userdetails.DeviceOS = newuserjsonResponse.userResults.DeviceOS;
+                            //get Completed Request Sync Configuration value from USERDTO
+                            if (!string.IsNullOrEmpty(Convert.ToString(newuserjsonResponse.userResults.CompletedRequestsSync)))
+                            {
+                                userdetails.CompletedRequestsSync = newuserjsonResponse.userResults.CompletedRequestsSync;
+                            }
+                            //get screen refresh in minutes value from USERDTO
+                            if (!string.IsNullOrEmpty(Convert.ToString(newuserjsonResponse.userResults.AutoRefreshValue)))
+                            {
+                                userdetails.AutoRefreshValue = newuserjsonResponse.userResults.AutoRefreshValue;
+                            }
                         }
                         //Checks whether the JSON response is not null
-                        if (userBackendjsonResponse != null && userBackendjsonResponse.userBackendResults.userBackenddetails!=null)
+                        if (userBackendjsonResponse != null && userBackendjsonResponse.userBackendResults.userBackenddetails != null)
                         {
                             //Iterate user backend json format result and bind to Model
                             foreach (userBackenddetails UserbackendInfo in userBackendjsonResponse.userBackendResults.userBackenddetails)
                             {
-                               //Create Model object
-                               UserBackendDTO BackendObj = new UserBackendDTO();
+                                //Create Model object
+                                UserBackendDTO BackendObj = new UserBackendDTO();
                                 BackendObj.UserID = UserbackendInfo.UserID;
                                 BackendObj.backend = new BackendDTO();
                                 //setting the properties of Model
@@ -185,7 +195,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                                 BackendObj.backend.AverageRequestLatency = UserbackendInfo.userBackend.AverageRequestLatency;
                                 BackendObj.backend.AverageRequestSize = UserbackendInfo.userBackend.AverageRequestSize;
                                 BackendObj.backend.ExpectedLatency = UserbackendInfo.userBackend.ExpectedLatency;
-                                DateTime? expdate= UserbackendInfo.userBackend.ExpectedUpdate;
+                                DateTime? expdate = UserbackendInfo.userBackend.ExpectedUpdate;
                                 if (expdate != null)
                                 {
                                     BackendObj.backend.ExpectedUpdate = expdate.Value;
@@ -198,14 +208,14 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                                 if (lstdate != null)
                                 {
                                     BackendObj.backend.LastUpdate = lstdate.Value;
-                                }                                 
+                                }
                                 BackendObj.backend.OpenApprovals = UserbackendInfo.userBackend.OpenApprovals;
                                 BackendObj.backend.OpenRequests = UserbackendInfo.userBackend.OpenRequests;
                                 BackendObj.backend.TotalBatchRequestsCount = UserbackendInfo.userBackend.TotalBatchRequestsCount;
                                 BackendObj.backend.TotalRequestsCount = UserbackendInfo.userBackend.TotalRequestsCount;
                                 BackendObj.backend.UpdateTriggered = UserbackendInfo.userBackend.UpdateTriggered;
                                 BackendObj.backend.UrgentApprovals = UserbackendInfo.userBackend.UrgentApprovals;
-                               
+
                                 // BackendObj.backend.MissingConfirmationsLimit = UserbackendInfo.userBackend.MissingConfirmationsLimit;
                                 //Adding the Model object to the list
                                 userBackend.Add(BackendObj);
@@ -213,7 +223,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                             }
                         }
                         //Checks whether the JSON response is not null
-                        if (userDevicejsonResponse != null && userDevicejsonResponse.userDevicesResults.userDevicedetails!=null)
+                        if (userDevicejsonResponse != null && userDevicejsonResponse.userDevicesResults.userDevicedetails != null)
                         {
                             //Iterate user devices json format result and bind to Model
                             foreach (userDevicedetails userDeviceInfo in userDevicejsonResponse.userDevicesResults.userDevicedetails)
@@ -336,7 +346,8 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                 //string ModelSerialize = JsonConvert.SerializeObject(userinfo);
                 var updateResponse = await apiControllerObj.SaveUserinfo(Personalization, userid);
                 if (updateResponse != "OK")
-                { LoggerHelper.WriteToLog(" Error while creating client context in UpdateUser method");
+                {
+                    LoggerHelper.WriteToLog(" Error while creating client context in UpdateUser method");
                     return View("Error");
                 }
                 // Return Json Formate object and pass to UI
@@ -347,7 +358,7 @@ namespace adidas.clb.MobileApprovalUI.Controllers
                 LoggerHelper.WriteToLog(exception + " - Error while creating client context : "
                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 return View("Error");
-            }  
+            }
         }
     }
 }
