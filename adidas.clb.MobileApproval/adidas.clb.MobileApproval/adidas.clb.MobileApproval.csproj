@@ -245,6 +245,7 @@
     <Compile Include="Helpers\APIController.cs" />
     <Compile Include="Helpers\AzureQueues.cs" />
     <Compile Include="Helpers\UrlSettings.cs" />
+    <Compile Include="Models\ApprovalCountDTO.cs" />
     <Compile Include="Models\ApprovalEntity.cs" />
     <Compile Include="Models\ApprovalQuery.cs" />
     <Compile Include="Models\ApprovalRequestDTO.cs" />
@@ -279,6 +280,7 @@
     <Compile Include="Utility\IAppInsight.cs" />
     <Compile Include="Utility\LoggerHelper.cs" />
     <Compile Include="Utility\Rules.cs" />
+    <Compile Include="Utility\SharedData.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\web.config" />

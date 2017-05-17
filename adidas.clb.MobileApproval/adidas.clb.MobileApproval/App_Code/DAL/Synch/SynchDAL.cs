@@ -411,6 +411,32 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
                 throw new DataAccessException();
             }
         }
+        public List<ApprovalEntity> GetAllUserApprovalsForCount(string UserID)
+        {
+            string callerMethodName = string.Empty;
+            try
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                //partionkey filter
+                string partitionkeyfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.PartitionKey, QueryComparisons.Equal, string.Concat(CoreConstants.AzureTables.ApprovalPK, UserID));
+               
+                //final filter to get approvals based on partitionkey, status
+                //string finalfilter = TableQuery.CombineFilters(partitionkeyfilter, TableOperators.And, statusfilter);
+                //generate query to get all approvals per user based on status                
+                TableQuery<ApprovalEntity> query = new TableQuery<ApprovalEntity>().Where(partitionkeyfilter);
+                //call dataprovider method to get entities from azure table
+                List<ApprovalEntity> allapprovals = DataProvider.GetEntitiesList<ApprovalEntity>(CoreConstants.AzureTables.RequestTransactions, query);
+                return allapprovals;
+            }
+            catch (Exception exception)
+            {
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error while retrieving approvals count per user from RequestTransactions azure table in DAL : "
+                //+ exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new DataAccessException();
+            }
+        }
 
         /// <summary>
         /// Adding  message into update trigger input queue

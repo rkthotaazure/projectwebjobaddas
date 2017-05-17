@@ -35,6 +35,17 @@ namespace adidas.clb.MobileApproval.Controllers
         public static int urgentTaskCalcDaysForCAR = Convert.ToInt32(ConfigurationManager.AppSettings["UrgentTaskConditionForCAR_NumberOfDays"]);
         public static int urgentTaskCalcDaysForBPM = Convert.ToInt32(ConfigurationManager.AppSettings["UrgentTaskConditionForBPMOnline_NumberOfDays"]);
         public static int defaultCompletedTaskSyncDays = Convert.ToInt32(ConfigurationManager.AppSettings["DefaultCompletedTaskSyncDays"]);
+        public static string taskArrStr = Convert.ToString(ConfigurationManager.AppSettings["TaskStatusArr"]);        //
+        public static string requestStatusArr = Convert.ToString(ConfigurationManager.AppSettings["RequestStatusArr"]);
+        public static int timeoutperiod = Convert.ToInt32(ConfigurationManager.AppSettings["timeoutperiod"]);
+        private static string approvedTaskStatus = Convert.ToString(ConfigurationManager.AppSettings["ApprovedTaskStatus"]);
+        private static string rejectedTaskStatus = Convert.ToString(ConfigurationManager.AppSettings["RejectedTaskStatus"]);
+        private static string waitingTaskStatus = Convert.ToString(ConfigurationManager.AppSettings["WaitingTaskStatus"]);
+        private static string urgentTaskStatus = Convert.ToString(ConfigurationManager.AppSettings["UrgentTaskStatus"]);
+        private static string completedTaskStatus = Convert.ToString(ConfigurationManager.AppSettings["CompletedTaskStatus"]);
+        private static string pendingTaskStatus = Convert.ToString(ConfigurationManager.AppSettings["PendingTaskStatus"]);
+
+        public static List<string> lstTaskStatus = SharedData.ReturnTaskStatus(taskArrStr);
         /// <summary>
         /// action method to get backends associated to user, each one indicating the count of current open requests
         /// </summary>
@@ -102,12 +113,12 @@ namespace adidas.clb.MobileApproval.Controllers
                                     if (userbackend.BackendID == carDBName)
                                     {
                                         // if the backend is car then pull the urgent tasks based on createdDate + { No. of days fro config} <= DateTime.Now                           
-                                        userbackendapprovalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID && x.Created!=null &&  (x.Created.Value.Date.AddDays(urgentTaskCalcDaysForCAR).Date <= DateTime.Now.Date)).ToList();
+                                        userbackendapprovalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID && x.Created != null && (x.Created.Value.Date.AddDays(urgentTaskCalcDaysForCAR).Date < DateTime.Now.Date)).ToList();
                                     }
                                     else if (userbackend.BackendID == bpmDBName)
                                     {
                                         // if the backend is store then pull the urgent tasks based on Duedate + { No. of days fro config} <= DateTime.Now
-                                        userbackendapprovalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID && x.DueDate !=null && (x.DueDate.Value.Date.AddDays(urgentTaskCalcDaysForBPM).Date <= DateTime.Now.Date)).ToList();
+                                        userbackendapprovalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID && x.DueDate != null && (x.DueDate.Value.Date.AddDays(urgentTaskCalcDaysForBPM).Date < DateTime.Now.Date)).ToList();
                                     }
                                 }
                                 else
@@ -116,7 +127,7 @@ namespace adidas.clb.MobileApproval.Controllers
                                     if (apprStatus == CoreConstants.AzureTables.Approved || apprStatus == CoreConstants.AzureTables.Rejected)
                                     {
                                         // InsightLogger.TrackEvent("completedTaskSyncDays : " + completedTaskSyncDays);
-                                        userbackendapprovalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID && x.DecisionDate!=null && (x.DecisionDate.Value.Date >= DateTime.Now.AddDays(-(completedTaskSyncDays)).Date)).ToList();
+                                        userbackendapprovalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID && x.DecisionDate != null && (x.DecisionDate.Value.Date >= DateTime.Now.AddDays(-(completedTaskSyncDays)).Date)).ToList();
 
                                     }
                                     else//pull pending tasks
@@ -126,7 +137,7 @@ namespace adidas.clb.MobileApproval.Controllers
 
                                 }
                             }
-                            
+
                             int requestsCount = 0;
                             if (userbackendapprovalslist != null && userbackendapprovalslist.Count > 0)
                             {
@@ -138,7 +149,7 @@ namespace adidas.clb.MobileApproval.Controllers
                             approvalcountdto.Status = query.parameters.filters.apprStatus;
                             approvalcountdto.Count = requestsCount;
                             userbackenddto.approvalsCount = approvalcountdto;
-                            List<ApprovalRequestDTO> approvalrequestlist = new List<ApprovalRequestDTO>();
+                            // List<ApprovalRequestDTO> approvalrequestlist = new List<ApprovalRequestDTO>();
                             //get requests associated to each user backend
                             //List<RequestEntity> userbackendrequestslist = requestslist.Where(x => x.BackendID == userbackend.BackendID).ToList();
                             //check if backend updated
@@ -293,18 +304,56 @@ namespace adidas.clb.MobileApproval.Controllers
                     //get userbackend associated to user with backendid
                     UserBackendEntity userbackend = synch.GetUserBackend(userID, usrBackendID);
                     //get requests associated to userbackend
-                    List<RequestEntity> requestslist = synch.GetUserBackendRequests(userID, usrBackendID, query.parameters.filters.reqStatus);
+                    // List<RequestEntity> requestslist = synch.GetUserBackendRequests(userID, usrBackendID, query.parameters.filters.reqStatus);
                     //get approvals associated to userbackend
                     List<ApprovalEntity> approvalslist = synch.GetUserBackendApprovals(userID, usrBackendID, apprStatus);
-                    //filter approvalist based on completed task config value
-                    if (apprStatus == CoreConstants.AzureTables.Approved || apprStatus == CoreConstants.AzureTables.Rejected)
+
+                    if (approvalslist != null && approvalslist.Count > 0)
                     {
-                        if (approvalslist != null && approvalslist.Count > 0)
+                        //filter approvalist based on status
+                        //Completed tasks(either approved or rejected)
+                        if (apprStatus == approvedTaskStatus || apprStatus == rejectedTaskStatus)
                         {
-                            approvalslist = approvalslist.Where(x => (x.DecisionDate!=null && x.DecisionDate.Value.Date >= DateTime.Now.AddDays(-(completedTaskSyncDays)).Date)).ToList();
+
+                            approvalslist = approvalslist.Where(x => (x.DecisionDate != null && x.DecisionDate.Value.Date >= DateTime.Now.AddDays(-(completedTaskSyncDays)).Date)).ToList();
+                            //update task status property as compelted
+                            approvalslist.ForEach(apptask => apptask.TaskStatus = completedTaskStatus);
+
+                        }
+                        //urgent tasks
+                        else if (apprStatus == urgentTaskStatus)
+                        {
+                            if (userbackend.BackendID == carDBName)
+                            {
+                                // if the backend is car then pull the urgent tasks based on createdDate + { No. of days fro config} <= DateTime.Now                           
+                                approvalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID && x.Created != null && (x.Created.Value.Date.AddDays(urgentTaskCalcDaysForCAR).Date < DateTime.Now.Date)).ToList();
+
+                            }
+                            else if (userbackend.BackendID == bpmDBName)
+                            {
+                                // if the backend is store then pull the urgent tasks based on Duedate + { No. of days fro config} <= DateTime.Now
+                                approvalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID && x.DueDate != null && (x.DueDate.Value.Date.AddDays(urgentTaskCalcDaysForBPM).Date < DateTime.Now.Date)).ToList();
+                            }
+                            //update task status property as Urgent
+                            approvalslist.ForEach(apptask => apptask.TaskStatus = urgentTaskStatus);
+                        }
+                        //pending tasks
+                        else if (apprStatus == waitingTaskStatus)
+                        {
+                            if (userbackend.BackendID == carDBName)
+                            {
+                                // if the backend is car then pull the pending tasks based on createdDate + { No. of days fro config} >= DateTime.Now                           
+                                approvalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID && x.Created != null && (x.Created.Value.Date.AddDays(urgentTaskCalcDaysForCAR).Date >= DateTime.Now.Date)).ToList();
+                            }
+                            else if (userbackend.BackendID == bpmDBName)
+                            {
+                                // if the backend is store then pull the pending tasks based on Duedate + { No. of days fro config} >= DateTime.Now
+                                approvalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID && x.DueDate != null && (x.DueDate.Value.Date.AddDays(urgentTaskCalcDaysForBPM).Date >= DateTime.Now.Date)).ToList();
+                            }
+                            //update task status property as Pending
+                            approvalslist.ForEach(apptask => apptask.TaskStatus = pendingTaskStatus);
                         }
                     }
-
                     //use mmapper to convert userbackend entity to userbackend data transfer object
                     UserBackendDTO userbackenddto = DataProvider.ResponseObjectMapper<UserBackendDTO, UserBackendEntity>(userbackend);
                     Backend backenddto = DataProvider.ResponseObjectMapper<Backend, UserBackendEntity>(userbackend);
@@ -837,11 +886,11 @@ namespace adidas.clb.MobileApproval.Controllers
 
                                     if (userbackend.BackendID == carDBName)
                                     {
-                                        userbackendapprovalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID && x.Created != null && (x.Created.Value.Date.AddDays(urgentTaskCalcDaysForCAR).Date <= DateTime.Now.Date)).ToList();
+                                        userbackendapprovalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID && x.Created != null && (x.Created.Value.Date.AddDays(urgentTaskCalcDaysForCAR).Date < DateTime.Now.Date)).ToList();
                                     }
                                     else if (userbackend.BackendID == bpmDBName)
                                     {
-                                        userbackendapprovalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID && x.DueDate != null && (x.DueDate.Value.Date.AddDays(urgentTaskCalcDaysForBPM).Date <= DateTime.Now.Date)).ToList();
+                                        userbackendapprovalslist = approvalslist.Where(x => x.BackendID == userbackend.BackendID && x.DueDate != null && (x.DueDate.Value.Date.AddDays(urgentTaskCalcDaysForBPM).Date < DateTime.Now.Date)).ToList();
                                     }
                                 }
                                 else
@@ -924,6 +973,255 @@ namespace adidas.clb.MobileApproval.Controllers
             {
                 InsightLogger.Exception(exception.Message, exception, callerMethodName);
                 //LoggerHelper.WriteToLog(exception + " - exception in controller action while retrieving approval count associated user backends : "
+                //      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
+            }
+        }
+
+        [Route("api/synch/users/{userID}/backendscount")]
+        public HttpResponseMessage PostBackendsCount(SynchRequestDTO query, string userID)
+        {
+            string callerMethodName = string.Empty;
+            try
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{" +  userID +  "}/backendscount, action: starting method");
+                int syncTime = 0;
+                DateTime curTimeStamp = DateTime.Now;
+                //check null for input query
+                if (query != null)
+                {
+                    Synch synch = new Synch();
+                    List<string> userbackends = query.parameters.filters.backends;
+                    //get userbackends associated to user
+                    List<UserBackendEntity> allUserBackends = synch.GetUserBackendsList(userID, userbackends);
+                    //get requests associated to user
+                    //List<RequestEntity> requestslist = synch.GetUserRequests(userID, query.parameters.filters.reqStatus);
+                    //get approvals associated to user based on approval status
+                    int completedTaskSyncDays;
+                    //get completed Tasks configuration value from request
+                    //InsightLogger.TrackEvent(Convert.ToString(query.parameters.filters.CompletedRequestsSync));
+                    if (!string.IsNullOrEmpty(Convert.ToString(query.parameters.filters.CompletedRequestsSync)) && query.parameters.filters.CompletedRequestsSync != 0)
+                    {
+                        completedTaskSyncDays = query.parameters.filters.CompletedRequestsSync;
+                    }
+                    else
+                    {
+                        //if it is null get default value from configuration file
+                        completedTaskSyncDays = defaultCompletedTaskSyncDays;
+                    }
+                    string apprStatus = query.parameters.filters.apprStatus;
+                    //get all the approval tasks from service layer
+                    List<ApprovalEntity> approvalslist = synch.GetAllUserApprovals(userID);
+                    Boolean requestsunfulfilled = false;
+                    Boolean requestsfulfilled = false;
+                    bool IsForceUpdate = query.parameters.forceUpdate;
+                    bool IsUrgentTask = query.parameters.filters.IsUrgent;
+                    List<ApprovalEntity> pendingApprovalslist = null;
+                    List<ApprovalEntity> approvedApprovalslist = null;
+                    List<ApprovalEntity> rejectedApprovalslist = null;
+                    int pendingTaskCount = 0;
+                    int urgentTaskCount = 0;
+                    int approvedTaskCount = 0;
+                    int rejectedTaskCount = 0;
+                    //get tasks based on status
+                    if (approvalslist != null && approvalslist.Count > 0)
+                    {
+                        //get pending tasks
+                        pendingApprovalslist = approvalslist.Where(x => x.Status == waitingTaskStatus).ToList();
+                        //get Approved tasks
+                        approvedApprovalslist = approvalslist.Where(x => x.Status == approvedTaskStatus).ToList();
+                        //get rejected tasks                       
+                        rejectedApprovalslist = approvalslist.Where(x => x.Status == rejectedTaskStatus).ToList();
+                    }
+                    List<UserBackendDTO> userbackendlist = new List<UserBackendDTO>();
+                    List<ApprovalCountDTO> lstapprovalCounts = new List<ApprovalCountDTO>();
+                    //check extended depth flag
+                    if (Rules.ExtendedDepthperAllBackends(query, allUserBackends, Convert.ToInt32(ConfigurationManager.AppSettings[CoreConstants.Config.MaxSynchReplySize])))
+                    {
+                        InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{" + userID + "}/backendscount, action: check extended Depth, response: true");
+                        InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{" + userID + "}/backendscount, action:looping through backends");
+                        //loop all backends to check updated or not for synch
+                        foreach (UserBackendEntity userbackend in allUserBackends)
+                        {
+                            pendingTaskCount = 0;
+                            urgentTaskCount = 0;
+                            approvedTaskCount = 0;
+                            rejectedTaskCount = 0;
+                            //convert userbackend entity response userbackend dto object
+                            UserBackendDTO userbackenddto = DataProvider.ResponseObjectMapper<UserBackendDTO, UserBackendEntity>(userbackend);
+                            Backend backenddto = DataProvider.ResponseObjectMapper<Backend, UserBackendEntity>(userbackend);
+                            userbackenddto.backend = backenddto;
+                            //approvals list associated to userbackend
+                            List<ApprovalEntity> userbackendapprovalslist = new List<ApprovalEntity>();
+                            if (approvalslist != null && approvalslist.Count > 0)
+                            {
+                                //get urgent tasks based on condition
+                                if (pendingApprovalslist != null && pendingApprovalslist.Count > 0)
+                                {
+                                    if (userbackend.BackendID == carDBName)
+                                    {
+                                        // if the backend is car then pull the urgent tasks based on createdDate + { No. of days fro config} <= DateTime.Now                           
+                                        urgentTaskCount = pendingApprovalslist.Where(x => x.BackendID == userbackend.BackendID && x.Created != null && (x.Created.Value.Date.AddDays(urgentTaskCalcDaysForCAR).Date < DateTime.Now.Date)).Count();
+                                        pendingTaskCount = pendingApprovalslist.Where(x => x.BackendID == userbackend.BackendID && x.Created != null && (x.Created.Value.Date.AddDays(urgentTaskCalcDaysForCAR).Date >= DateTime.Now.Date)).Count();
+                                    }
+                                    else if (userbackend.BackendID == bpmDBName)
+                                    {
+                                        // if the backend is store then pull the urgent tasks based on Duedate + { No. of days fro config} <= DateTime.Now
+                                        urgentTaskCount = pendingApprovalslist.Where(x => x.BackendID == userbackend.BackendID && x.DueDate != null && (x.DueDate.Value.Date.AddDays(urgentTaskCalcDaysForBPM).Date < DateTime.Now.Date)).Count();
+                                        pendingTaskCount = pendingApprovalslist.Where(x => x.BackendID == userbackend.BackendID && x.DueDate != null && (x.DueDate.Value.Date.AddDays(urgentTaskCalcDaysForBPM).Date >= DateTime.Now.Date)).Count();
+                                    }
+                                }
+                                if (approvedApprovalslist != null && approvedApprovalslist.Count > 0)
+                                {
+                                    //pull approved tasks based on config value                                   
+                                    approvedTaskCount = approvedApprovalslist.Where(x => x.BackendID == userbackend.BackendID && x.DecisionDate != null && (x.DecisionDate.Value.Date >= DateTime.Now.AddDays(-(completedTaskSyncDays)).Date)).Count();
+                                }
+                                if (rejectedApprovalslist != null && rejectedApprovalslist.Count > 0)
+                                {
+                                    //pull approved tasks based on config value                                   
+                                    rejectedTaskCount = rejectedApprovalslist.Where(x => x.BackendID == userbackend.BackendID && x.DecisionDate != null && (x.DecisionDate.Value.Date >= DateTime.Now.AddDays(-(completedTaskSyncDays)).Date)).Count();
+                                }
+                            }
+                            ApprovalCountDTO approvalcount = new Models.ApprovalCountDTO();
+                            approvalcount.BackendID = userbackend.BackendID;
+                            approvalcount.BackendName = userbackend.BackendName;
+                            approvalcount.WaitingCount = pendingTaskCount;
+                            approvalcount.UrgentPendingCount = urgentTaskCount;
+                            approvalcount.ApprovedCount = approvedTaskCount;
+                            approvalcount.RejectedCount = rejectedTaskCount;
+                            lstapprovalCounts.Add(approvalcount);
+                            int requestsCount = 0;
+                            if (userbackendapprovalslist != null && userbackendapprovalslist.Count > 0)
+                            {
+                                requestsCount = userbackendapprovalslist.Count;
+                            }
+
+                            ApprovalsCountDTO approvalcountdto = new ApprovalsCountDTO();
+                            InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{" + userID + "}/backendscount, action: Adding approval count to response, response: success, backendID:" + userbackend.BackendID);
+                            approvalcountdto.BackendID = userbackend.BackendID;
+                            approvalcountdto.Status = query.parameters.filters.apprStatus;
+                            approvalcountdto.Count = requestsCount;
+                            userbackenddto.approvalsCount = approvalcountdto;
+                            // List<ApprovalRequestDTO> approvalrequestlist = new List<ApprovalRequestDTO>();
+                            //get requests associated to each user backend
+                            //List<RequestEntity> userbackendrequestslist = requestslist.Where(x => x.BackendID == userbackend.BackendID).ToList();
+                            //check if backend updated
+                            if (Rules.IsBackendUpdated(userbackend, query))
+                            {
+                                InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{" + userID + "}/backendscount, action: check backend update, response: true");
+                                //if extended depth is userbackend level
+                                if (Rules.ExtendedDepthperBackend(userbackend, Convert.ToInt32(ConfigurationManager.AppSettings[CoreConstants.Config.MaxSynchReplySize])))
+                                {
+                                    InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{" + userID + "}/backendscount, action: check extended depth, response: true");
+                                    //commented code related to adding requests and tasks to response
+                                    //userbackenddto = synch.AddRequsetsTasksCountToSynchResponse(userbackendrequestslist, userbackendapprovalslist, userbackend, query, userbackenddto);
+
+                                }
+                                //check requestsfullfilled flag
+                                if (!requestsfulfilled)
+                                {
+                                    //code to clear extended depth flags
+                                }
+                                //check requestsunfullfilled flag
+                                if (!requestsunfulfilled)
+                                {
+                                    //code to update backend synch timestamp                                    ;
+                                }
+                                synch.AddUpdateBackendSynch(userbackend);
+                            }
+                            else
+                            {
+                                InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{" + userID + "}/backendscount, action: check backend update, response: false");
+                                SynchDTO synchdto = new SynchDTO();
+                                //check if backend update is in progress in service layer then send the latency in response
+                                if (Rules.IsBackendUpdateInProgress(userbackend))
+                                {
+                                    InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{" + userID + "}/backendscount, action: check in-progress backend update, response: true");
+                                    synchdto.retryAfter = userbackend.ExpectedLatency;
+                                    InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{" + userID + "}/backendscount, action: add expected backend latency to response as retry time, response: success");
+                                    userbackenddto.synch = synchdto;
+                                }
+                                else
+                                {
+                                    InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{" + userID + "}/backendscount, action: check in-progress backend update, response: false");
+                                    //if update is not in progress, trigger it
+                                    if (IsForceUpdate)
+                                    {
+                                        synch.TriggerUserBackendUpdate(userbackend, true);
+                                        //call missing update function in async
+                                        Task.Factory.StartNew(() =>
+                                        {
+                                            synch.CollectUsersMissedUpdatesByBackend(userbackend, curTimeStamp);
+                                        });
+
+                                    }
+                                    else
+                                    {
+                                        synch.TriggerUserBackendUpdate(userbackend, false);
+                                    }
+
+                                    InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{" + userID + "}/backendscount, action: trigger a backend update, response: success");
+                                    synchdto.retryAfter = Convert.ToInt32(Rules.BackendRetryTime(userbackend));
+                                    InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{" + userID + "}/backendscount, action: add backend retry time to response, response: success");
+                                    userbackenddto.synch = synchdto;
+                                }
+                                //commented code related to adding requests and tasks to response
+                                //userbackenddto = synch.AddRequsetsTasksCountToSynchResponse(userbackendrequestslist, userbackendapprovalslist, userbackend, query, userbackenddto);
+
+                            }
+                            //add each userbackend to list
+                            userbackendlist.Add(userbackenddto);
+                        }
+
+                    }
+                    // if it is force update then need to calculate sync time
+                    if (IsForceUpdate)
+                    {
+                        //calculate sync time
+                        syncTime = synch.CalcSynchTime(allUserBackends);
+                        //add sync time value to SynchTimeResponseDTO object
+                        SynchTimeResponseDTO response = new SynchTimeResponseDTO();
+                        response.SyncTime = syncTime;                      
+
+                        InsightLogger.TrackEvent("SyncAPIController ::" + callerMethodName + " method execution has been Completed.");
+                        return Request.CreateResponse(HttpStatusCode.OK, response);
+                    }
+                    else
+                    {
+                        //SynchResponseDTO<UserBackendDTO> response = new SynchResponseDTO<UserBackendDTO>();
+                        //response.result = userbackendlist;
+                        //response.SyncTime = syncTime;
+                        SyncResponseResultDTO<ApprovalCountDTO> response = new SyncResponseResultDTO<ApprovalCountDTO>();
+                        response.result = lstapprovalCounts;
+                        response.SyncTime = syncTime;
+                        InsightLogger.TrackEvent("SyncAPIController ::" + callerMethodName + " method execution has been Completed.");
+                        return Request.CreateResponse(HttpStatusCode.OK, response);
+                    }
+
+
+                }
+                else
+                {
+                    InsightLogger.TrackEvent("SyncAPIController ::" + callerMethodName + " method execution has been Completed.");
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.SynchResponseError<UserBackendDTO>("400", "input query is not sent to get user associated backends", ""));
+                }
+            }
+            catch (DataAccessException dalexception)
+            {
+                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", dalexception.Message, dalexception.Message));
+            }
+            catch (BusinessLogicException blexception)
+            {
+                InsightLogger.Exception(blexception.Message, blexception, callerMethodName);
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", blexception.Message, blexception.Message));
+            }
+            catch (Exception exception)
+            {
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - exception in controller action while retrieving associated user backends : "
                 //      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
             }

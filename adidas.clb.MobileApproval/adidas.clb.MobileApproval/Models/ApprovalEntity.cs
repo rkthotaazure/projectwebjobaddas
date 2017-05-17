@@ -16,7 +16,7 @@ namespace adidas.clb.MobileApproval.Models
         public ApprovalEntity() { }
         public string RequestId { get; set; }
         public string TaskTitle { get; set; }
-        public string BackendID { get; set; }        
+        public string BackendID { get; set; }
         public string Domain { get; set; }
         public string Status { get; set; }
         private DateTime? created;
@@ -54,13 +54,14 @@ namespace adidas.clb.MobileApproval.Models
         public Boolean Backendoverwritten { get; set; }
         public string ServiceLayerTaskID { get; set; }
         public string Comment { get; set; }
+        public string TaskStatus { get; set; }
     }
 
     public class ApprovalDTO
     {
         public string RequestId { get; set; }
         public string TaskTitle { get; set; }
-        public string BackendID { get; set; }        
+        public string BackendID { get; set; }
         public string Domain { get; set; }
         public string Status { get; set; }
         private DateTime? created;
@@ -98,12 +99,13 @@ namespace adidas.clb.MobileApproval.Models
         public Boolean Backendoverwritten { get; set; }
         public string ServiceLayerTaskID { get; set; }
         public string Comment { get; set; }
+        public string TaskStatus { get; set; }
     }
 
     public class ApprovalsCountDTO
-    {        
+    {
         public string BackendID { get; set; }
         public string Status { get; set; }
-        public int Count { get; set; }        
+        public int Count { get; set; }
     }
 }
