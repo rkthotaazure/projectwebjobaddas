@@ -7,17 +7,17 @@
         <p ng-bind="cs.notificationText"></p>
     </div>  
     <div class="btn-footer">
-        <div class="col-xs-12 text-align-center btn-back">
+        <div class="btn-left-float btn-left-float-home">
             <div ng-click="redirect()">
-                <span class="glyphicon glyphicon-menu-left"></span>
-                My Approvals
+                <!--<span class="glyphicon glyphicon-menu-left"></span>-->
+                <span class="glyphicon glyphicon-home"></span>
             </div>
         </div>
     </div>
     <div class="main-section">
         <div class="title-section">
             <div class="title-text tab-titles">
-                <div class="tab-pending" ng-class="{'tab-active': showpending}" ng-click="showpendingtasks();">Pending</div><div class="tab-completed" ng-class="{'tab-active': !showpending}" ng-click="showcompletedtasks();">Completed</div>
+                <div class="tab-urgent" ng-class="{'tab-active': tabs.showUrgent}" ng-click="showTasksTab('urgent');">Urgent</div><div class="tab-pending" ng-class="{'tab-active': showpending}" ng-click="showpendingtasks();">Pending</div><div class="tab-completed" ng-class="{'tab-active': !showpending}" ng-click="showcompletedtasks();">Completed</div>
             </div>
         </div>
         <div class="details-section padding-top-none">
@@ -27,7 +27,7 @@
             <div ng-repeat="approvaltask in approvalTasks | orderBy:sorttasks:true" ng-init="$parent.selectedIndex = -1">
                 <div class="row task-section bottom-border" ng-class="{'pendingtask': showpending}" ng-click="$parent.selectedIndex == $index?$parent.selectedIndex = -1:$parent.selectedIndex = $index;">
                     <div class="col-xs-11 task-content" ng-class="{'move-left': $parent.selectedIndex == $index}">
-                        <div class="col-xs-5 label-task-head" ng-bind="approvaltask.RequestId"></div>
+                        <div class="col-xs-5 label-task-head" ng-bind="approvaltask.RequestId" ng-click="showDetails(approvaltask.RequestId, approvaltask.ServiceLayerTaskID)"></div>
                         <div class="col-xs-7 label-task-date" ng-show="showpending">
                             <span class="text-bold">Due Date : </span>
                             <span ng-bind="approvaltask.DueDate | dateFilter | date: 'dd.MM.yyyy'"></span>
