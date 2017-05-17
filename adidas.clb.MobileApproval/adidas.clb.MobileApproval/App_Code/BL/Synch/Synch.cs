@@ -40,7 +40,8 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
         public static bool IsGeneratePdfsForRequest = Convert.ToBoolean(ConfigurationManager.AppSettings["GetPDFsForRequest"]);
         //read VIP Flag  value from configuration
         public static bool IsVIPFlag = Convert.ToBoolean(ConfigurationManager.AppSettings["VIPFlag"]);
-
+        private static string urgentTaskStatus = Convert.ToString(ConfigurationManager.AppSettings["UrgentTaskStatus"]);
+        private static string waitingTaskStatus = Convert.ToString(ConfigurationManager.AppSettings["WaitingTaskStatus"]);
         /// <summary>
         /// method to get list of backends associated to user
         /// </summary>
@@ -551,7 +552,12 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
                 //if requeststatus is null, get approvals with defaultstatus inprogress.
                 if (string.IsNullOrEmpty(approvalstatus))
                 {
-                    approvalstatus = CoreConstants.AzureTables.Waiting;
+                    approvalstatus = waitingTaskStatus;
+
+                }
+                if (!string.IsNullOrEmpty(approvalstatus) && approvalstatus== urgentTaskStatus)
+                {
+                    approvalstatus = waitingTaskStatus;
                 }
                 SynchDAL synchDAL = new SynchDAL();
                 //calling data access layer method                
@@ -585,13 +591,13 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
                 //if requeststatus is null, get requests with defaultstatus inprogress.
                 if (string.IsNullOrEmpty(approvalstatus))
                 {
-                    approvalstatus = CoreConstants.AzureTables.Waiting;
+                    approvalstatus = waitingTaskStatus;
                 }
                 else
                 {
-                    if (approvalstatus == CoreConstants.AzureTables.Urgent)
+                    if (approvalstatus == urgentTaskStatus)
                     {
-                        approvalstatus = CoreConstants.AzureTables.Waiting;
+                        approvalstatus = waitingTaskStatus;
                     }
                 }
                 
@@ -599,6 +605,33 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
                 //calling data access layer method      
 
                 return synchDAL.GetUserApprovalsForCount(userID, approvalstatus);
+
+
+            }
+            catch (DataAccessException DALexception)
+            {
+                throw DALexception;
+            }
+            catch (Exception exception)
+            {
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error in BL while getting all approvals count per user  : "
+                //+ exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new BusinessLogicException();
+            }
+        }
+        public List<ApprovalEntity> GetAllUserApprovals(string userID)
+        {
+            string callerMethodName = string.Empty;
+            try
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();               
+
+                SynchDAL synchDAL = new SynchDAL();
+                //calling data access layer method      
+
+                return synchDAL.GetAllUserApprovalsForCount(userID);
 
 
             }
