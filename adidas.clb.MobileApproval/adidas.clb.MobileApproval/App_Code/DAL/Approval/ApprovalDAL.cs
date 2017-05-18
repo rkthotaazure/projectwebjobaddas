@@ -80,6 +80,13 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Approval
                     apprReqEntity.BackendConfirmed = false;
                     //call dataprovider method to update entity to azure table
                     DataProvider.UpdateEntity<ApprovalEntity>(CoreConstants.AzureTables.RequestTransactions, apprReqEntity);
+                    ApproverEntity approverReqEntity = DataProvider.Retrieveentity<ApproverEntity>(CoreConstants.AzureTables.RequestTransactions, string.Concat(CoreConstants.AzureTables.ApproverPK, requestID), taskID);
+                    if (approverReqEntity != null)
+                    {
+                        approverReqEntity.Status = status;
+                        approverReqEntity.Comment = comment;
+                        DataProvider.UpdateEntity<ApproverEntity>(CoreConstants.AzureTables.RequestTransactions, approverReqEntity);
+                    }
                     InsightLogger.TrackEvent("ApprovalAPIController :: Endpoint : api/approval/requests/{ " + requestID + "} , Action :: Update Approval object data in Azure table, Response :: Success ,Details are ApprovalRequestID=" + requestID + " Approver:" + userID + " status:" + status);
                     InsightLogger.TrackEvent("ApprovalAPIController :: Endpoint : api/approval/requests/{ " + requestID + "} , Action :: Cleared Backend-Confirmed flag(set Backend-Confirmed value to false), Response :: Success ");
                     //get domain,backendid details from service layer
