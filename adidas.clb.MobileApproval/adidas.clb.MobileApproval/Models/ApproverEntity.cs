@@ -26,14 +26,24 @@ namespace adidas.clb.MobileApproval.Models
         public int Order { get; set; }
         public string UserID { get; set; }
         public string UserName { get; set; }
-        public DateTime Created { get; set; }
+        private DateTime? created = null;
+
+        public DateTime? Created
+        {
+            get
+            {
+                return this.created.HasValue ? this.created.Value == default(DateTime) ? (DateTime?)null : this.created.Value : (DateTime?)null;
+            }
+
+            set { this.created = value; }
+        }
         public string Status { get; set; }
         private DateTime? dueDate = null;
         public DateTime? DueDate
         {
             get
             {
-                return this.dueDate.HasValue ? this.dueDate.Value : (DateTime?)null;
+                return this.dueDate.HasValue ? this.dueDate.Value == default(DateTime) ? (DateTime?)null : this.dueDate.Value : (DateTime?)null;
             }
 
             set { this.dueDate = value; }
@@ -43,7 +53,7 @@ namespace adidas.clb.MobileApproval.Models
         {
             get
             {
-                return this.decisionDate.HasValue ? this.decisionDate.Value : (DateTime?)null;
+                return this.decisionDate.HasValue ? this.decisionDate.Value == default(DateTime) ? (DateTime?)null : this.decisionDate.Value : (DateTime?)null;
             }
 
             set { this.decisionDate = value; }
