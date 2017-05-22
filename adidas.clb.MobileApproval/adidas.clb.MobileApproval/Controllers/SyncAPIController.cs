@@ -45,6 +45,8 @@ namespace adidas.clb.MobileApproval.Controllers
         private static string completedTaskStatus = Convert.ToString(ConfigurationManager.AppSettings["CompletedTaskStatus"]);
         private static string pendingTaskStatus = Convert.ToString(ConfigurationManager.AppSettings["PendingTaskStatus"]);
 
+        private static string taskReadStatus = Convert.ToString(System.Configuration.ConfigurationManager.AppSettings["TaskReadStatus"]);
+
         public static List<string> lstTaskStatus = SharedData.ReturnTaskStatus(taskArrStr);
         /// <summary>
         /// action method to get backends associated to user, each one indicating the count of current open requests
@@ -474,6 +476,12 @@ namespace adidas.clb.MobileApproval.Controllers
                     Synch synch = new Synch();
                     //get requests with requestid
                     RequestEntity requestentity = synch.GetRequest(query.userId, apprReqID);
+                    string taskViewStatus = query.parameters.filters.taskViewStatus;
+                    // if approval task view status is not read then update it as read
+                    if (!string.IsNullOrEmpty(taskViewStatus) && taskViewStatus != taskReadStatus)
+                    {
+                        synch.UpdateTaskViewStatus(query.userId, query.parameters.filters.taskID);
+                    }                   
                     //get fileds associated to request
                     List<FieldDTO> fields = synch.GetFields(apprReqID);
                     ApprovalRequestDTO approvalrequest = new ApprovalRequestDTO();

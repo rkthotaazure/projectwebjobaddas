@@ -55,6 +55,7 @@ namespace adidas.clb.MobileApproval.Models
         public string ServiceLayerTaskID { get; set; }
         public string Comment { get; set; }
         public string TaskStatus { get; set; }
+        public string TaskViewStatus { get; set; }
     }
 
     public class ApprovalDTO
@@ -100,6 +101,7 @@ namespace adidas.clb.MobileApproval.Models
         public string ServiceLayerTaskID { get; set; }
         public string Comment { get; set; }
         public string TaskStatus { get; set; }
+        public string TaskViewStatus { get; set; }
     }
 
     public class ApprovalsCountDTO

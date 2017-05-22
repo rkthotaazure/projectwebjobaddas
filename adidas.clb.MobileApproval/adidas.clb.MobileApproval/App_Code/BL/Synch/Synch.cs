@@ -42,6 +42,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
         public static bool IsVIPFlag = Convert.ToBoolean(ConfigurationManager.AppSettings["VIPFlag"]);
         private static string urgentTaskStatus = Convert.ToString(ConfigurationManager.AppSettings["UrgentTaskStatus"]);
         private static string waitingTaskStatus = Convert.ToString(ConfigurationManager.AppSettings["WaitingTaskStatus"]);
+        private static string taskReadStatus = Convert.ToString(System.Configuration.ConfigurationManager.AppSettings["TaskReadStatus"]);
         /// <summary>
         /// method to get list of backends associated to user
         /// </summary>
@@ -305,6 +306,44 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
                 throw new BusinessLogicException();
             }
         }
+        /// <summary>
+        /// This method update the approval task view status fields as Read
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <param name="taskID"></param>
+        public void UpdateTaskViewStatus(string userID, string taskID)
+        {
+            string callerMethodName = string.Empty;
+            try
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                if (!string.IsNullOrEmpty(taskID))
+                {
+                    SynchDAL synchDAL = new SynchDAL();
+                    //get approvalrequest object from RequestTransactions azure table based on partitionkey and rowkey(requestID)
+                    ApprovalEntity apprReqEnt = DataProvider.Retrieveentity<ApprovalEntity>(CoreConstants.AzureTables.RequestTransactions, string.Concat(CoreConstants.AzureTables.ApprovalPK, userID), taskID);
+                    if (apprReqEnt != null)
+                    {
+                        apprReqEnt.TaskViewStatus = taskReadStatus;
+                        //call dataprovider method to update entity to azure table
+                        DataProvider.UpdateEntity<ApprovalEntity>(CoreConstants.AzureTables.RequestTransactions, apprReqEnt);
+                    }
+                }
+               
+            }
+            catch (DataAccessException DALexception)
+            {
+                throw DALexception;
+            }
+            catch (Exception exception)
+            {
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error in BL while getting request : "
+                //+ exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new BusinessLogicException();
+            }
+        }
 
         /// <summary>
         /// method to get shared access service pdf uri with id
@@ -555,7 +594,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
                     approvalstatus = waitingTaskStatus;
 
                 }
-                if (!string.IsNullOrEmpty(approvalstatus) && approvalstatus== urgentTaskStatus)
+                if (!string.IsNullOrEmpty(approvalstatus) && approvalstatus == urgentTaskStatus)
                 {
                     approvalstatus = waitingTaskStatus;
                 }
@@ -600,7 +639,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
                         approvalstatus = waitingTaskStatus;
                     }
                 }
-                
+
                 SynchDAL synchDAL = new SynchDAL();
                 //calling data access layer method      
 
@@ -626,7 +665,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
             try
             {
                 //Get Caller Method name from CallerInformation class
-                callerMethodName = CallerInformation.TrackCallerMethodName();               
+                callerMethodName = CallerInformation.TrackCallerMethodName();
 
                 SynchDAL synchDAL = new SynchDAL();
                 //calling data access layer method      
@@ -860,7 +899,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
                     // InsightLogger.TrackEvent("UpdateTriggering, Action :: Is User [ " + muserBackend.UserID + " ] missed updates for the backend:[" + muserBackend.BackendID + " ] based on UT Rule R6 , Response :: true");
                     //parse data to UpdateTriggeringMsg class and seralize UpdateTriggeringMsg object into json string                           
                     this.TriggerUserBackendUpdate(muserBackend, true);
-                    
+
                 }
                 //check for requests ::
                 this.CollectsRequestsMissedUpdateByBackendID(backendId, userID, currentTimestamp, userUpdateFrequency);
@@ -1061,7 +1100,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
                             //put json string into update triggering input queue
                             SynchDAL sdal = new SynchDAL();
                             sdal.AddMessagestoInputQueue(lstrmsgFormat);
-                            
+
                         }
                     }
 
@@ -1226,6 +1265,6 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
             return TimeSpan.FromMinutes(minutes).TotalSeconds;
         }
 
-        
+
     }
 }

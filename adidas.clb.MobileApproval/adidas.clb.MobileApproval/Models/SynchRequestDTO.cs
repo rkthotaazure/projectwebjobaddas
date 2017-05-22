@@ -42,6 +42,8 @@ namespace adidas.clb.MobileApproval.Models
         public Boolean onlyChangedReq{ get; set; }
         public Boolean IsUrgent { get; set; }
         public int CompletedRequestsSync { get; set; }
+        public string taskID { get; set; }
+        public string taskViewStatus { get; set; }
     }
     /// <summary>
     /// class which implements model for synchapi requset.
