@@ -22,6 +22,8 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Approval
         //Application insights interface reference for logging the error details into Application Insight azure service.
         static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
         private static string taskApprovedComment = Convert.ToString(System.Configuration.ConfigurationManager.AppSettings["TaskApprovedComment"]);
+        private static string taskReadStatus = Convert.ToString(System.Configuration.ConfigurationManager.AppSettings["TaskReadStatus"]);
+
         //create APIController varaible
         private APIController apiController;
         public ApprovalDAL()
@@ -42,7 +44,7 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Approval
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 //ApprovalResponse objApprovalResponse = null;  
-                string acknowledgement=string.Empty;
+                string acknowledgement = string.Empty;
                 string backendID = string.Empty;
                 string domain = string.Empty;
                 //reading ApprovalQuery request object properties and assign the values to below variables.
@@ -78,6 +80,7 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Approval
                     apprReqEntity.Comment = comment;
                     //updating the backend confirmed flag set to false
                     apprReqEntity.BackendConfirmed = false;
+                    apprReqEntity.TaskViewStatus = taskReadStatus;
                     //call dataprovider method to update entity to azure table
                     DataProvider.UpdateEntity<ApprovalEntity>(CoreConstants.AzureTables.RequestTransactions, apprReqEntity);
                     ApproverEntity approverReqEntity = DataProvider.Retrieveentity<ApproverEntity>(CoreConstants.AzureTables.RequestTransactions, string.Concat(CoreConstants.AzureTables.ApproverPK, requestID), taskID);
@@ -121,6 +124,6 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Approval
                 //throw new DataAccessException("Error while updating the approval object staus in ApprovalDAL :: UpdateApprovalObjectStatus() method,Error Message : " + exception.Message, exception.InnerException);
             }
         }
-       
+
     }
 }
