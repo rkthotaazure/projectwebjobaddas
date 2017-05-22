@@ -62,5 +62,6 @@ namespace adidas.clb.job.RequestsUpdate.Models
         public string ServiceLayerTaskID { get; set; }
         public string TaskTitle { get; set; }
         public Boolean Backendoverwritten { get; set; }
+        public string TaskViewStatus { get; set; }
     }
 }

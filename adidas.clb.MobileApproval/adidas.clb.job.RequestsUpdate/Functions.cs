@@ -40,10 +40,11 @@ namespace adidas.clb.job.RequestsUpdate
                 BackendEntity backend = requsetupdatebl.Getbackend(requestsdata.BackendID);
                 int TotalRequestsize = 0;
                 int TotalRequestlatency = 0;
-                int requestcount = backendrequestslist.Count;
+                int requestcount = 0;
                 //check if requests were available
                 if (backendrequestslist != null && backendrequestslist.Count>0)
                 {
+                    requestcount = backendrequestslist.Count;
                     //looping through each backendrequest to add requests , approvers and fields for each requet
                     InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:looping all requests");
                     foreach (BackendRequest backendrequest in backendrequestslist)
