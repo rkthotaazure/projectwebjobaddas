@@ -24,6 +24,8 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
     {
         static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
         private static string taskNotStartedStatus = Convert.ToString(System.Configuration.ConfigurationManager.AppSettings["TaskNotStartedStatus"]);
+        private static string taskUnreadStatus = Convert.ToString(System.Configuration.ConfigurationManager.AppSettings["TaskUnreadStatus"]);
+        private static string taskreadStatus = Convert.ToString(System.Configuration.ConfigurationManager.AppSettings["TaskReadStatus"]);
         /// <summary>
         /// BL method to add request entity into azure table
         /// </summary>
@@ -151,8 +153,15 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                             ServiceLayerApproval.DueDate = approver.DueDate;
                             ServiceLayerApproval.Created = approver.Created;
                             ServiceLayerApproval.DecisionDate = approver.DecisionDate;
+
+                            //temp
+                            if (ServiceLayerApproval.Status == CoreConstants.AzureTables.Waiting && string.IsNullOrEmpty(ServiceLayerApproval.TaskViewStatus))
+                            {
+                                ServiceLayerApproval.TaskViewStatus = taskUnreadStatus;
+                            }
                             //calling DAL method to add request entity
                             requestupdatedal.AddUpdateApproval(ServiceLayerApproval);
+
                         }
                         else
                         {
@@ -174,7 +183,9 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                             approvalentity.DueDate = approver.DueDate;
                             //calling DAL method to add request entity
                             requestupdatedal.AddUpdateApproval(approvalentity);
-                        }
+                            //if it is new task then set task view status as "New"
+                            approvalentity.TaskViewStatus = taskUnreadStatus;
+    }
                     }
                 }
 
