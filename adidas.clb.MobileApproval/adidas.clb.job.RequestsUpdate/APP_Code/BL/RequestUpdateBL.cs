@@ -89,7 +89,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
         /// BL method to add approval entity into azure table
         /// </summary>
         /// <param name="request">takes request as input</param>
-        public void AddUpdateApproval(List<Approvers> approverslist, string requestid, string UserID, string backendId, int missingconfirmationlimit,string requestTitle)
+        public void AddUpdateApproval(List<Approvers> approverslist, string requestid, string UserID, string backendId, int missingconfirmationlimit, string requestTitle)
         {
             //Get Caller Method name
             string callerMethodName = string.Empty;
@@ -101,14 +101,14 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
 
                 //get the user tasks  from list of approvers got from backend
                 List<Approvers> lstapprover = (from apr in approverslist
-                                               where apr.User.UserID.Equals(UserID) && (!string.IsNullOrEmpty(apr.Status) && apr.Status!= taskNotStartedStatus)
+                                               where apr.User.UserID.Equals(UserID) && (!string.IsNullOrEmpty(apr.Status) && apr.Status != taskNotStartedStatus)
                                                select apr).ToList();
 
                 if (lstapprover != null && lstapprover.Count > 0)
                 {
 
                     foreach (Approvers approver in lstapprover)
-                    {                        
+                    {
                         string partitionkey = string.Concat(CoreConstants.AzureTables.ApprovalPK, UserID);
                         string approverOrder = Convert.ToString(approver.Order);
                         string serviceLayerTaskID = requestid + "_" + approverOrder;
@@ -148,17 +148,17 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                             }
                             else
                             {
-                                ServiceLayerApproval.Status = approver.Status;                                
+                                ServiceLayerApproval.Status = approver.Status;
                             }
                             ServiceLayerApproval.DueDate = approver.DueDate;
                             ServiceLayerApproval.Created = approver.Created;
                             ServiceLayerApproval.DecisionDate = approver.DecisionDate;
 
-                            //temp
-                            if (ServiceLayerApproval.Status == CoreConstants.AzureTables.Waiting && string.IsNullOrEmpty(ServiceLayerApproval.TaskViewStatus))
-                            {
-                                ServiceLayerApproval.TaskViewStatus = taskUnreadStatus;
-                            }
+                            ////temp
+                            //if (ServiceLayerApproval.Status == CoreConstants.AzureTables.Waiting && string.IsNullOrEmpty(ServiceLayerApproval.TaskViewStatus))
+                            //{
+                            //    ServiceLayerApproval.TaskViewStatus = taskUnreadStatus;
+                            //}
                             //calling DAL method to add request entity
                             requestupdatedal.AddUpdateApproval(ServiceLayerApproval);
 
@@ -181,11 +181,12 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                             approvalentity.TaskTitle = requestTitle;
                             approvalentity.Created = approver.Created;
                             approvalentity.DueDate = approver.DueDate;
-                            //calling DAL method to add request entity
-                            requestupdatedal.AddUpdateApproval(approvalentity);
                             //if it is new task then set task view status as "New"
                             approvalentity.TaskViewStatus = taskUnreadStatus;
-    }
+                            //calling DAL method to add request entity
+                            requestupdatedal.AddUpdateApproval(approvalentity);
+                            
+                        }
                     }
                 }
 
@@ -467,7 +468,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                     backend.AverageRequestSize = GetAverage(backend.AverageRequestSize, backend.TotalRequestsCount, Totalrequestssize, requestscount);
                     backend.LastRequestSize = Convert.ToInt32(Totalrequestssize / requestscount);
                     //updating average, last request latencies for backend
-                    InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:caliculate backend tracking variables, existing AverageRequestLatency:"+ backend.AverageRequestLatency+ " TotalRequestsLatency: "+ TotalRequestlatency+" requsetcount: "+ requestscount);
+                    InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:caliculate backend tracking variables, existing AverageRequestLatency:" + backend.AverageRequestLatency + " TotalRequestsLatency: " + TotalRequestlatency + " requsetcount: " + requestscount);
                     backend.AverageRequestLatency = GetAverage(backend.AverageRequestLatency, backend.TotalRequestsCount, TotalRequestlatency, requestscount);
                     InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:caliculate backend tracking variables, current AverageRequestLatency:" + backend.AverageRequestLatency);
                     InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:caliculate backend tracking variables, existing AverageALLRequestLatency:" + backend.AverageAllRequestsLatency + " TotalBatchRequestsCount: " + backend.TotalBatchRequestsCount + " TotalRequestsLatency: " + TotalRequestlatency + " requsetcount: " + requestscount);
