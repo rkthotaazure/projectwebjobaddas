@@ -476,9 +476,10 @@ namespace adidas.clb.MobileApproval.Controllers
                     Synch synch = new Synch();
                     //get requests with requestid
                     RequestEntity requestentity = synch.GetRequest(query.userId, apprReqID);
-                    string taskViewStatus = query.parameters.filters.taskViewStatus;
+                    //string taskViewStatus = query.parameters.filters.taskViewStatus;
+                    string taskApprStatus = query.parameters.filters.apprStatus;
                     // if approval task view status is not read then update it as read
-                    if (!string.IsNullOrEmpty(taskViewStatus) && taskViewStatus != taskReadStatus)
+                    if (!string.IsNullOrEmpty(taskApprStatus) && (taskApprStatus != approvedTaskStatus || taskApprStatus !=rejectedTaskStatus))
                     {
                         synch.UpdateTaskViewStatus(query.userId, query.parameters.filters.taskID);
                     }                   
@@ -1230,6 +1231,54 @@ namespace adidas.clb.MobileApproval.Controllers
             {
                 InsightLogger.Exception(exception.Message, exception, callerMethodName);
                 //LoggerHelper.WriteToLog(exception + " - exception in controller action while retrieving associated user backends : "
+                //      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
+            }
+        }
+
+        /// <summary>
+        /// This api will return user's new(unread) requests count
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <returns></returns>
+        [Route("api/synch/users/{userID}/UnReadRequestsCount")]
+        public HttpResponseMessage PostGetUnreadRequestsCount(SynchRequestDTO query,string userID)
+        {
+            string callerMethodName = string.Empty;
+            try
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                InsightLogger.TrackEvent("SyncAPIController :: endpoint - api/synch/users/{userID}/backends, action: starting method");
+                //check null for input query
+                if (userID != null)
+                {
+                    Synch synch = new Synch();                   
+                    SyncNewRequestsCountDTO response = new SyncNewRequestsCountDTO();
+                    //get bl method to get new requests count based on userid
+                    response.UnReadRequestsCount = synch.GetUserUnReadRequestsCount(userID);
+                    return Request.CreateResponse(HttpStatusCode.OK, response);
+                }
+                else
+                {
+                    InsightLogger.TrackEvent("SyncAPIController :: input query is null");
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, DataProvider.SynchResponseError<UserBackendDTO>("400", "userID is null", ""));
+                }
+            }
+            catch (DataAccessException dalexception)
+            {
+                InsightLogger.Exception(dalexception.Message, dalexception, callerMethodName);
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", dalexception.Message, dalexception.Message));
+            }
+            catch (BusinessLogicException blexception)
+            {
+                InsightLogger.Exception(blexception.Message, blexception, callerMethodName);
+                return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", blexception.Message, blexception.Message));
+            }
+            catch (Exception exception)
+            {
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - exception in controller action while retrieving approval count associated user backends : "
                 //      + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 return Request.CreateResponse(HttpStatusCode.NotFound, DataProvider.SynchResponseError<UserBackendDTO>("400", exception.Message, exception.StackTrace));
             }
