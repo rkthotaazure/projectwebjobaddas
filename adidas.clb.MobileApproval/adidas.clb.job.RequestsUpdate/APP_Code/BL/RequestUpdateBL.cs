@@ -461,7 +461,9 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                //if request count more than one.
+                //declare int local variable for getting avg Request Latency
+                int avgRequestLatency = 0;
+                //if request count greathan zero.
                 if (requestscount > 0)
                 {
                     //updating average, last request sizes for backend
@@ -469,7 +471,9 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                     backend.LastRequestSize = Convert.ToInt32(Totalrequestssize / requestscount);
                     //updating average, last request latencies for backend
                     InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:caliculate backend tracking variables, existing AverageRequestLatency:" + backend.AverageRequestLatency + " TotalRequestsLatency: " + TotalRequestlatency + " requsetcount: " + requestscount);
-                    backend.AverageRequestLatency = GetAverage(backend.AverageRequestLatency, backend.TotalRequestsCount, TotalRequestlatency, requestscount);
+                    avgRequestLatency= GetAverage(backend.AverageRequestLatency, backend.TotalRequestsCount, TotalRequestlatency, requestscount);
+                    //if avgRequestLatency is lessthan or equal to zero then set current Request Latency value to AverageRequestLatency
+                    backend.AverageRequestLatency = (avgRequestLatency > 0) ? avgRequestLatency : TotalRequestlatency;
                     InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:caliculate backend tracking variables, current AverageRequestLatency:" + backend.AverageRequestLatency);
                     InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:caliculate backend tracking variables, existing AverageALLRequestLatency:" + backend.AverageAllRequestsLatency + " TotalBatchRequestsCount: " + backend.TotalBatchRequestsCount + " TotalRequestsLatency: " + TotalRequestlatency + " requsetcount: " + requestscount);
                     backend.AverageAllRequestsLatency = GetAverage(backend.AverageAllRequestsLatency, backend.TotalBatchRequestsCount, TotalRequestlatency, requestscount);
