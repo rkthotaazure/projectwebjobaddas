@@ -463,17 +463,25 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 SynchDAL synchDAL = new SynchDAL();
                 SynchEntity backendsynch = synchDAL.GetUserBackendSynch(userbackend.UserID, userbackend.BackendID);
+                //declare local int variable for last Synch frequency
+                int lastSynchFrequency = 0;
+                //declare local int variable for avg Synch frequency
+                int avgSynchFrequency = 0;
                 //backend synch available then update
                 if (backendsynch != null)
                 {
                     //last synch frequency
-                    backendsynch.lastSynchFreq = (backendsynch.LastSynch.Value - DateTime.Now).Days;
+                    //updated on 07/06/2017 : update From days to seconds                   
+                    lastSynchFrequency= (backendsynch.LastSynch.Value - DateTime.Now).Seconds;
+                    backendsynch.lastSynchFreq = lastSynchFrequency;
                     //update best synch frequency
                     if (backendsynch.lastSynchFreq < backendsynch.bestSynchFreq)
                     {
                         backendsynch.bestSynchFreq = backendsynch.lastSynchFreq;
                     }
-                    backendsynch.avgSynchFreq = (backendsynch.lastSynchFreq + (backendsynch.SynchCount * backendsynch.avgSynchFreq)) / (backendsynch.SynchCount + 1);
+                    avgSynchFrequency=(backendsynch.lastSynchFreq + (backendsynch.SynchCount * backendsynch.avgSynchFreq)) / (backendsynch.SynchCount + 1);
+                    //if avgSynchFrequency is zero then take lastSynchFrequency value as avgSynchFrequency value
+                    backendsynch.avgSynchFreq = (avgSynchFrequency > 0) ? avgSynchFrequency : lastSynchFrequency;
                     backendsynch.SynchCount = backendsynch.SynchCount + 1;
                     backendsynch.LastSynch = DateTime.Now;
                     //calling data access layer method                
