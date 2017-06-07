@@ -43,6 +43,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
         private static string urgentTaskStatus = Convert.ToString(ConfigurationManager.AppSettings["UrgentTaskStatus"]);
         private static string waitingTaskStatus = Convert.ToString(ConfigurationManager.AppSettings["WaitingTaskStatus"]);
         private static string taskReadStatus = Convert.ToString(System.Configuration.ConfigurationManager.AppSettings["TaskReadStatus"]);
+       
         /// <summary>
         /// method to get list of backends associated to user
         /// </summary>
@@ -330,7 +331,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
                         DataProvider.UpdateEntity<ApprovalEntity>(CoreConstants.AzureTables.RequestTransactions, apprReqEnt);
                     }
                 }
-               
+
             }
             catch (DataAccessException DALexception)
             {
@@ -644,6 +645,51 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
                 //calling data access layer method      
 
                 return synchDAL.GetUserApprovalsForCount(userID, approvalstatus);
+
+
+            }
+            catch (DataAccessException DALexception)
+            {
+                throw DALexception;
+            }
+            catch (Exception exception)
+            {
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                //LoggerHelper.WriteToLog(exception + " - Error in BL while getting all approvals count per user  : "
+                //+ exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+                throw new BusinessLogicException();
+            }
+        }
+        /// <summary>
+        /// This method returns the unread requests 
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <returns></returns>
+        public int GetUserUnReadRequestsCount(string userID)
+        {
+            string callerMethodName = string.Empty;
+            try
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                //declare int variable which will return un read requests count
+                int newRequests = 0;
+                //get all pending tasks from backend
+                SynchDAL synchDAL = new SynchDAL();
+                //calling data access layer method     
+                List<ApprovalEntity> lstNewRequests = synchDAL.GetUserApprovalsForCount(userID, waitingTaskStatus);
+                if (lstNewRequests != null && lstNewRequests.Count > 0)
+                {
+                    //get new tasks from pending tasks
+                    var lstFilter = lstNewRequests.Where(x => x.TaskViewStatus != taskReadStatus && !string.IsNullOrEmpty(x.TaskViewStatus)).ToList();
+                    if (lstFilter != null && lstFilter.Count > 0)
+                    {
+                        //assign new requests count 
+                        newRequests = lstFilter.Count;
+                    }
+                   
+                }
+                return newRequests;
 
 
             }

@@ -264,6 +264,7 @@
     <Compile Include="Models\SynchEntity.cs" />
     <Compile Include="Models\SynchRequestDTO.cs" />
     <Compile Include="Models\SynchResponseDTO.cs" />
+    <Compile Include="Models\SyncResponseCountDTO.cs" />
     <Compile Include="Models\UpdateTriggeringMessage.cs" />
     <Compile Include="Models\UserBackendDTO.cs" />
     <Compile Include="Models\UserDeviceDTO.cs" />
