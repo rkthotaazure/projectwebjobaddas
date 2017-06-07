@@ -472,7 +472,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
                 {
                     //last synch frequency
                     //updated on 07/06/2017 : update From days to seconds                   
-                    lastSynchFrequency= (backendsynch.LastSynch.Value - DateTime.Now).Seconds;
+                    lastSynchFrequency= (DateTime.Now - backendsynch.LastSynch.Value).Seconds;
                     backendsynch.lastSynchFreq = lastSynchFrequency;
                     //update best synch frequency
                     if (backendsynch.lastSynchFreq < backendsynch.bestSynchFreq)
