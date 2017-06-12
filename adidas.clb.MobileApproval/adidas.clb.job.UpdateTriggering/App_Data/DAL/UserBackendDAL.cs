@@ -177,7 +177,19 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
 
                                 InsightLogger.TrackEvent("UpdateTriggering, Action :: Is User [ " + userBackend.UserID + " ] need update for backend:[" + userBackend.BackendID + " ] based on UT Rule R2 , Response :: true");
                                 //parse data to UpdateTriggeringMsg class and seralize UpdateTriggeringMsg object into json string
-                                msgFormat.Add(this.ConvertUserUpdateMsgToUpdateTriggeringMsg(userBackend, BackendID));
+                                string utMessage = string.Empty;
+                                utMessage = this.ConvertUserUpdateMsgToUpdateTriggeringMsg(userBackend, BackendID);
+                                //add message to queue
+                                if (!string.IsNullOrEmpty(utMessage))
+                                {
+                                    this.AddMessagestoInputQueue(utMessage, true);
+                                    //update userbackend queue message entry time stamp
+                                    userBackend.QueueMsgEntryTimestamp = DateTime.Now;
+                                    //call update entity method
+                                    DataProvider.UpdateEntity<UserBackend>(azureTableUserDeviceConfiguration, userBackend);
+                                }
+                               
+                                // msgFormat.Add(this.ConvertUserUpdateMsgToUpdateTriggeringMsg(userBackend, BackendID));
 
                             }
                             else
@@ -185,11 +197,11 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                                 InsightLogger.TrackEvent("UpdateTriggering, Action :: Is User [ " + userBackend.UserID + " ] need update for backend:[" + userBackend.BackendID + " ] based on UT Rule R2 , Response :: false");
                             }
                         }
-                        //put json string into update triggering input queue
-                        if (msgFormat.Count > 0)
-                        {
-                            this.AddMessagestoInputQueue(msgFormat, true);
-                        }
+                        ////put json string into update triggering input queue
+                        //if (msgFormat.Count > 0)
+                        //{
+                        //    this.AddMessagestoInputQueue(msgFormat, true);
+                        //}
 
                     }
 
@@ -281,6 +293,43 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
             }
 
 
+        }
+        /// <summary>
+        /// Adding  message into update trigger input queue
+        /// </summary>
+        /// <param name="content"></param>
+        private void AddMessagestoInputQueue(string content, bool IsregularQueue)
+        {
+            try
+            {
+                // Create the queue client.
+                CloudQueueClient cqdocClient = AzureQueues.GetQueueClient();
+                // Retrieve a reference to a queue.
+                CloudQueue queuedoc;
+                //regular queue
+                if (IsregularQueue)
+                {
+                    queuedoc = AzureQueues.GetInputQueue(cqdocClient);
+                }
+                else
+                {
+                    //get reference from missed updates queue
+                    queuedoc = AzureQueues.GetMissedUpdatesInputQueue(cqdocClient);
+                }               
+                //create cloud msg object
+                CloudQueueMessage message = new CloudQueueMessage(content);
+                //call add message method for insert message into queue
+                queuedoc.AddMessage(message);
+              
+
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error while Adding  message into update trigger input queue "
+                  + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+
+                throw new DataAccessException(exception.Message, exception.InnerException);
+            }
         }
         /// <summary>
         /// Prepare UpdateTriggeringMsg json string
@@ -510,7 +559,18 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             {
                                 InsightLogger.TrackEvent("UpdateTriggering, Action :: Is User [ " + muserBackend.UserID + " ] missed updates for the backend:[" + muserBackend.BackendID + " ] based on UT Rule R6 , Response :: true");
                                 //parse data to UpdateTriggeringMsg class and seralize UpdateTriggeringMsg object into json string                           
-                                lstmsgFormat.Add(this.ConvertUserUpdateMsgToUpdateTriggeringMsg(muserBackend, mBackendID));
+                               // lstmsgFormat.Add(this.ConvertUserUpdateMsgToUpdateTriggeringMsg(muserBackend, mBackendID));
+                                string utMsg = string.Empty;
+                                utMsg = this.ConvertUserUpdateMsgToUpdateTriggeringMsg(muserBackend, mBackendID);
+                                //add message to queue
+                                if (!string.IsNullOrEmpty(utMsg))
+                                {
+                                    this.AddMessagestoInputQueue(utMsg, false);
+                                    //update userbackend queue message entry time stamp
+                                    muserBackend.QueueMsgEntryTimestamp = DateTime.Now;
+                                    //call update entity method
+                                    DataProvider.UpdateEntity<UserBackend>(azureTableUserDeviceConfiguration, muserBackend);
+                                }
 
                             }
                             else
@@ -522,11 +582,11 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             this.CollectsRequestsMissedUpdateByBackendID(muserBackend.BackendID, userID, curtime, updateFrequency);
 
                         }
-                        //put json string into update triggering input queue
-                        if (lstmsgFormat.Count > 0)
-                        {
-                            this.AddMessagestoInputQueue(lstmsgFormat, false);
-                        }
+                        ////put json string into update triggering input queue
+                        //if (lstmsgFormat.Count > 0)
+                        //{
+                        //    this.AddMessagestoInputQueue(lstmsgFormat, false);
+                        //}
 
                     }
 
@@ -548,7 +608,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
         /// </summary>
         /// <param name="backendID"></param>
         /// <param name="userName"></param>
-        public void UpdateUserBackendExpectedUpdateTime(string backendID, string userName, string QueueName)
+        public void UpdateUserBackendExpectedUpdateTime(string backendID, string userName, string QueueName,DateTime queueTriggerTimeStamp,DateTime backendInvokeTimestamp)
         {
             string callerMethodName = string.Empty;
             try
@@ -565,6 +625,10 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     BackendEntity backendDetails = GetBackendDetailsByBackendID(backendID);
                     if (backendDetails != null)
                     {
+                        //update userbackend queueTriggerTimeStamp value
+                        updateEntity.QueueTriggerTimestamp = queueTriggerTimeStamp;
+                        //update userbackend Backend API Invoke Timestamp value
+                        updateEntity.BackendInvokeTimestamp = backendInvokeTimestamp;
                         // update userbackend ExpectedUpdate value  by using update triggering rule :: R3
                         updateEntity.ExpectedUpdate = utRule.GetUserBackendExpectedUpdate(backendDetails.AverageAllRequestsLatency, backendDetails.LastAllRequestsLatency);
                         //update userbackend UpdateTriggered
@@ -933,6 +997,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     //foreach users in  UserUpdateMsg            
                     foreach (UserUpdateMsg users in lstUsers)
                     {
+                        DateTime queueTriggerTimestamp = DateTime.Now;
                         //getting list of backends in each user
                         lstbackends = users.Backends.ToList();
                         userID = users.UserID;
@@ -945,7 +1010,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                         };
 
                         foreach (Backend backend in lstbackends)
-                        {
+                        {                            
                             //Creating request update query which is input for backend agent requestupdateretrival api
                             InsightLogger.TrackEvent(queueName + " , Action :: For each backend in user, Response :: Backend: " + backend.BackendID + " ,User ::" + userID);
                             RequestsUpdateQuery objReqQuery = new RequestsUpdateQuery()
@@ -963,21 +1028,17 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             acknowledgment = string.Empty;
                             //initalize object for api service provider for callingt the web api
                             APIServiceProvider ObjserviceProvider = new APIServiceProvider();
+                           
                             //call backend agent api with backendID and input queue message and getting the acknowledgment from API
                             Task.Factory.StartNew(() =>
                             {
                                 ObjserviceProvider.CallBackendAgent(backend.BackendID, backendUserQuery, CoreConstants.Category.User, queueName);
                             });
-                            //BackgroundTaskRunner.FireAndForgetTask(() =>
-                            //{
-                            //    this.CallBackendAgent(backend.BackendID, backendUserQuery, CoreConstants.Category.User, queueName);
-                            //});                           
-                            //if acknowledgment is not null or not empty then update the userbackend expected updatetime
-                            //if (!string.IsNullOrEmpty(acknowledgment))
-                            //{
+                            //update userbackend BackendInvokeTimestamp value
+                            DateTime backendInvokeTimestamp = DateTime.Now;
                             //update ExpectedUpdateTime  with the help of update trigger Rule :: R3
-                            this.UpdateUserBackendExpectedUpdateTime(backend.BackendID, userID, queueName);
-                            //}
+                            this.UpdateUserBackendExpectedUpdateTime(backend.BackendID, userID, queueName, queueTriggerTimestamp, backendInvokeTimestamp);
+                           
 
                         }
                         //clear the RequestsUpdateQuery message
