@@ -5,6 +5,7 @@
 //-----------------------------------------------------------
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -21,6 +22,8 @@ namespace adidas.clb.job.RequestsUpdate
     public class Functions
     {
         static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
+        //read userbackend entity azure table reference from config
+        public static string azureTableUserDeviceConfiguration = ConfigurationManager.AppSettings["AzureTables.UserDeviceConfiguration"];
         // This function will get triggered/executed when a new message is written 
         // on an Azure Queue called RequsetUpdate.
         public static void ProcessRequsetQueueMessage([QueueTrigger(CoreConstants.AzureQueues.RequsetUpdateQueue)] string message, TextWriter log)
@@ -31,9 +34,12 @@ namespace adidas.clb.job.RequestsUpdate
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
-                InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:Reading queue message, response:succuess, message: "+message);
+                InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:Reading queue message, response:succuess, message: " + message);
+                //note down Request update queue message trigger timestamp
+                DateTime requestUpdateMsgTriggerTimestamp = DateTime.Now;
                 //deserialize Queue message to Requests 
                 RequestsUpdateData requestsdata = JsonConvert.DeserializeObject<RequestsUpdateData>(message);
+               
                 List<BackendRequest> backendrequestslist = requestsdata.Requests;
                 RequestUpdateBL requsetupdatebl = new RequestUpdateBL();
                 //get backend to get missingconfirmationlimit for backend and also to update flags
@@ -42,7 +48,7 @@ namespace adidas.clb.job.RequestsUpdate
                 int TotalRequestlatency = 0;
                 int requestcount = 0;
                 //check if requests were available
-                if (backendrequestslist != null && backendrequestslist.Count>0)
+                if (backendrequestslist != null && backendrequestslist.Count > 0)
                 {
                     requestcount = backendrequestslist.Count;
                     //looping through each backendrequest to add requests , approvers and fields for each requet
@@ -55,30 +61,33 @@ namespace adidas.clb.job.RequestsUpdate
                         List<Field> overviewFields = backendrequest.RequestsList.Fields.Overview;
                         Request request = backendrequest.RequestsList;
                         //calling BL methods to add request , approval, approvers and fields
-                        if(!string.IsNullOrEmpty(request.UserID))
+                        if (!string.IsNullOrEmpty(request.UserID))
                         {
                             InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:clearing request waiting flag, response:success");
                             requsetupdatebl.AddUpdateRequest(backendrequest, request.UserID, requestsdata.BackendID);
-                            InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:update request object, response:success, requestID:"+request.ID);
-                            requsetupdatebl.AddUpdateApproval(approvers, request.ID, backendrequest.RequestsList.UserID, requestsdata.BackendID,backend.MissingConfirmationsLimit,request.Title);
+                            InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:update request object, response:success, requestID:" + request.ID);
+                            requsetupdatebl.AddUpdateApproval(approvers, request.ID, backendrequest.RequestsList.UserID, requestsdata.BackendID, backend.MissingConfirmationsLimit, request.Title);
                             InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:update/remove/create approval object, response:success");
-                            requsetupdatebl.AddUpdateApprovers(approvers, request.ID);                            
-                            requsetupdatebl.AddUpdateFields(genericInfoFields, overviewFields, request.ID);                            
+                            requsetupdatebl.AddUpdateApprovers(approvers, request.ID);
+                            requsetupdatebl.AddUpdateFields(genericInfoFields, overviewFields, request.ID);
                             //caliculating request size                        
                             int requestsize = requsetupdatebl.CalculateRequestSize(backendrequest);
                             //caliculating total of size for all requests
                             TotalRequestsize = TotalRequestsize + requestsize;
                             //caliculating total of latency for all requests
                             TotalRequestlatency = TotalRequestlatency + request.Latency;
-                        }            
+                        }
                     }
+                   
                 }
+                //note down timestamp value once response sit into service layer
+                DateTime responseInsertIntostorageTimestamp = DateTime.Now;
                 InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:looping all requests end");
                 //calling BL methods to update average sizes and latencies for userbackend and backend
                 if (!string.IsNullOrEmpty(requestsdata.UserId))
                 {
                     InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:check user or request, response:user");
-                    requsetupdatebl.UpdateUserBackend(requestsdata.UserId, requestsdata.BackendID, TotalRequestsize, TotalRequestlatency, requestcount);
+                    requsetupdatebl.UpdateUserBackend(requestsdata.UserId, requestsdata.BackendID, TotalRequestsize, TotalRequestlatency, requestcount, requestUpdateMsgTriggerTimestamp, responseInsertIntostorageTimestamp);
                     InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:update userbackend tracking variables, response:success");
                 }
                 InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:update backend tracking variables, response:success, backendID:" + requestsdata.BackendID);
@@ -114,7 +123,7 @@ namespace adidas.clb.job.RequestsUpdate
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 System.Threading.Thread.Sleep(5000);
-                InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestpdfuri queue trigger, action:reading queue message, response:success, message:"+message);
+                InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestpdfuri queue trigger, action:reading queue message, response:success, message:" + message);
                 //deserialize Queue message to get PDF uri 
                 RequestPDF requestPDFdata = JsonConvert.DeserializeObject<RequestPDF>(message);
                 RequestUpdateBL requestupdatebl = new RequestUpdateBL();
@@ -122,7 +131,7 @@ namespace adidas.clb.job.RequestsUpdate
                 InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestpdfuri queue trigger, action:getting pdfuri from message, response:success");
                 //updating request entity with pdf uri
                 requestupdatebl.AddPDFUriToRequest(PDFuri, requestPDFdata.UserId, requestPDFdata.RequestID);
-                InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestpdfuri queue trigger, action:updating request object with pdf uri, response:success, requsetID:"+requestPDFdata.RequestID);
+                InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestpdfuri queue trigger, action:updating request object with pdf uri, response:success, requsetID:" + requestPDFdata.RequestID);
             }
             catch (DataAccessException dalexception)
             {
