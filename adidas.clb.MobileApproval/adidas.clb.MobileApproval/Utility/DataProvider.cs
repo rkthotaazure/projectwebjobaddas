@@ -14,12 +14,14 @@ using Microsoft.WindowsAzure.Storage.Table;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Microsoft.WindowsAzure.Storage.Blob;
 using adidas.clb.MobileApproval.Models;
-
+using adidas.clb.MobileApproval.Exceptions;
 namespace adidas.clb.MobileApproval.Utility
 {
     /// The class that contains the methods realted to connecting azure table storage.
     public static class DataProvider
     {
+        //Application insights interface reference for logging the error details into Application Insight azure service.
+        static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
         /// <summary>
         /// method to get azure table storage object instance
         /// </summary>
@@ -37,7 +39,7 @@ namespace adidas.clb.MobileApproval.Utility
                 // set retry for the connection for transient failures
                 tableClient.DefaultRequestOptions = new TableRequestOptions
                 {
-                    RetryPolicy = new LinearRetry(TimeSpan.FromSeconds(5),3)                   
+                    RetryPolicy = new LinearRetry(TimeSpan.FromSeconds(5), 3)
                 };
                 // Create the CloudTable object that represents the table.
                 CloudTable table = tableClient.GetTableReference(TableName);
@@ -66,7 +68,7 @@ namespace adidas.clb.MobileApproval.Utility
                 // Create the queue client.
                 CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
                 // set retry for the connection for transient failures
-                queueClient.DefaultRequestOptions=new QueueRequestOptions
+                queueClient.DefaultRequestOptions = new QueueRequestOptions
                 {
                     RetryPolicy = new LinearRetry(TimeSpan.FromSeconds(5), 3)
                 };
@@ -155,7 +157,7 @@ namespace adidas.clb.MobileApproval.Utility
                 //retrieve entity based on partitionkey and rowkey
                 TableOperation RetrieveUser = TableOperation.Retrieve<T>(partitionkey, rowkey);
                 TableResult RetrievedResultUser = ReferenceDataTable.Execute(RetrieveUser);
-                
+
                 return (T)RetrievedResultUser.Result;
             }
             catch (Exception exception)
@@ -447,10 +449,10 @@ namespace adidas.clb.MobileApproval.Utility
                 {
                     Permissions = SharedAccessBlobPermissions.Read,
                     SharedAccessExpiryTime = DateTime.UtcNow + TimeSpan.FromMinutes(5)
-                };              
+                };
                 CloudBlockBlob blob = new CloudBlockBlob(new Uri(BlobUri), storageAccount.Credentials);
                 Uri saspdfuri = new Uri(blob.Uri.AbsoluteUri + blob.GetSharedAccessSignature(readPolicy));
-                
+
                 return saspdfuri;
             }
             catch (Exception exception)
@@ -459,6 +461,37 @@ namespace adidas.clb.MobileApproval.Utility
                       + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
                 throw new Exception();
             }
+        }
+        /// <summary>
+        /// This method retrieves the azure table entity information
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="tablename"></param>
+        /// <param name="partitionkey"></param>
+        /// <param name="rowkey"></param>
+        /// <returns></returns>
+        public static T RetrieveEntity<T>(string tablename, string partitionkey, string rowkey) where T : ITableEntity, new()
+        {
+            try
+            {
+                TableResult RetrievedResultUser = null;
+
+                //get's azure table instance
+                CloudTable ReferenceDataTable = GetAzureTableInstance(tablename);
+                // Create a retrieve operation that takes a T entity.
+                TableOperation RetrieveUser = TableOperation.Retrieve<T>(partitionkey, rowkey);
+                // Execute the operation.
+                RetrievedResultUser = ReferenceDataTable.Execute(RetrieveUser);
+                return (T)RetrievedResultUser.Result;
+
+            }
+
+            catch (Exception innerexception)
+            {
+                InsightLogger.Exception(innerexception.Message, innerexception, "Retrieveentity");
+                throw new DataAccessException(innerexception.Message, innerexception.InnerException);
+            }
+
         }
     }
 }
