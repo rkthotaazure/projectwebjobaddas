@@ -367,7 +367,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
         /// <param name="Totalrequestssize">takes totalrequestsize as input</param>
         /// <param name="TotalRequestlatency">takes total request latency as input</param>
         /// <param name="requestscount">takes request count as input</param>
-        public void UpdateUserBackend(string userId, string BackendId, int Totalrequestssize, int TotalRequestlatency, int requestscount)
+        public void UpdateUserBackend(string userId, string BackendId, int Totalrequestssize, int TotalRequestlatency, int requestscount,DateTime reqUpdateMsgTriggerTimestamp,DateTime serviceLayerUpdateTimestamp)
         {
             //Get Caller Method name
             string callerMethodName = string.Empty;
@@ -380,6 +380,10 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                 UserBackendEntity userbackend = requestupdatedal.GetUserBackend(userId, BackendId);
                 if (userbackend != null)
                 {
+                    //set Request Update Message Trigger Timestamp value
+                    userbackend.RequestUpdateMsgTriggerTimestamp = reqUpdateMsgTriggerTimestamp;
+                    //set Response Insert Into storage Timestamp value
+                    userbackend.ResponseInsertIntostorageTimestamp = serviceLayerUpdateTimestamp;
                     //calling methods to update Open requests, open approvals and urgent approvals
                     userbackend.OpenRequests = requestupdatedal.GetOpenRequestsCount(userId, BackendId);
                     userbackend.OpenApprovals = requestupdatedal.GetOpenApprovalsCount(userId, BackendId);
