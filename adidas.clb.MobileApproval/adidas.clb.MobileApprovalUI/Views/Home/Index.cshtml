@@ -9,6 +9,9 @@
 <link href="~/Content/bootstrap.min.css" rel="stylesheet" type="text/css" />
 <link href="~/Content/MobileApproval.css" rel="stylesheet" type="text/css" />
 <link href="~/Content/CSS/Packages/angular-material.min.css" rel="stylesheet" type="text/css" />
+<link href="~/Content/CSS/Packages/ngDialog.css" rel="stylesheet" type="text/css" />
+<link href="~/Content/CSS/Packages/ngDialog-theme-default.css" rel="stylesheet" type="text/css" />
+<link href="~/Content/CSS/Packages/fabric.min.css" rel="stylesheet" type="text/css" />
 <link rel="stylesheet" href="~/Content/AppName.css" type="text/css" />
 <link rel="stylesheet" href="~/Content/CSS/AppCSS/MobileApproval.css" type="text/css" />
 <div ng-app="ApplicationModule" ng-controller="HomeController" ng-init="init()">
@@ -23,6 +26,7 @@
             </div>
             <div ng-bind="cs.pageTitle" class="page-title col-xs-8 text-align-center"></div>
             <div class="notification-icon col-xs-2 text-align-right">
+                <span class="badge notification-badge" ng-if="cs.newTasks > 0" ng-bind="cs.newTasks"></span>
                 <img src="~/Images/notification.png" ng-if="!cs.notificationActive" />
                 <span class="glyphicon glyphicon-remove" ng-if="cs.notificationActive" ng-click="cs.hideNotifications()"></span>
             </div>
@@ -53,6 +57,7 @@
 <script src="~/Scripts/app/Packages/bootstrap.min.js"></script>
 <script type="text/javascript" src="~/Scripts/app/Packages/jquery.validate.js"></script>
 <script type="text/javascript" src="~/Scripts/app/Packages/jquery.validate.unobtrusive.js"></script>
+<script src="~/Scripts/app/Packages/ngDialog.js"></script>
 <script src="~/Scripts/app/Packages/ui-bootstrap-tpls-2.2.0.min.js"></script>
 <script src="~/Scripts/app/MobileApprovalConstants.js"></script>
 <script src="~/Scripts/app/App.js"></script>

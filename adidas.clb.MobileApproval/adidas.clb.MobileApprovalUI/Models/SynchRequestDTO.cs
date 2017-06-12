@@ -43,6 +43,8 @@ namespace adidas.clb.MobileApprovalUI.Models
         public Boolean onlyChangedReq{ get; set; }
         public Boolean IsUrgent { get; set; }
         public int CompletedRequestsSync { get; set; }
+        public string taskID { get; set; }
+        public string taskViewStatus { get; set; }
     }
     /// <summary>
     /// class which implements model for synchapi requset.
@@ -52,5 +54,17 @@ namespace adidas.clb.MobileApprovalUI.Models
         public Boolean overview { get; set; }
         public Boolean genericInfo { get; set; }
         public Boolean approvers { get; set; }
+    }
+    public class SyncNewRequestsCountDTO
+    {
+
+        public string _type { get; set; }
+        public SynchRequestDTO query { get; set; }
+        public ErrorDTO error { get; set; }
+        public int UnReadRequestsCount { get; set; }
+        public SyncNewRequestsCountDTO()
+        {
+            _type = "syncnewrequestscount";
+        }
     }
 }

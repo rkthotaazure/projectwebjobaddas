@@ -13,12 +13,15 @@
                     Sync Request
                 </div>
             </div>*@
-            <div class="synch-time col-xs-12">Last refresh : <span ng-bind="lastsynch | date:'dd.MM.yyyy hh:mm a'"></span></div>
-            <div class="col-xs-12 text-align-center btn-save">
-                <div ng-click="update('true')">                    
-                    Force Update
+            <div class="btn-left-float col-xs-1 padding-right-none padding-left-none text-align-center" ng-class="forceUpdateObj.class">
+                <div ng-click="update('true')">
+                    <span class="force-update-text hidden-section" ng-bind="forceUpdateObj.text"></span>
+                    <span class="glyphicon glyphicon-refresh"></span>
                 </div>
             </div>
+            <div class="synch-time col-xs-11">
+                Last refresh
+                <span ng-bind="lastsynch | date:'dd.MM.yyyy hh:mm a'"></span></div>
         </div>
         <div class="main-section">
             <div class="title-section hidden-section">
@@ -29,7 +32,7 @@
         <div>
         <div class="bg-canvas">
             <div class="">
-                <div class="col-xs-7 pendingbox">
+                <div class="col-xs-7 pendingbox padding-right-none">
                     <div class="canvas-wrap">
                         <canvas id="canvas" width="180" height="180"></canvas>
                         <span id="procentpending"></span>
@@ -45,12 +48,12 @@
                         <div class="col-xs-9 line-height-24">
                             Urgent
                             <br/>
-                            <span class="urgent-count urgent-theme" ng-bind="urgent"></span>
+                            <span class="urgent-count" ng-bind="urgent"></span>
                         </div>
                     </div>
                     <div class="row hidden-section">
                         <div class="col-xs-2"></div>
-                        <div class="col-xs-9 urgent-count urgent-theme">
+                        <div class="col-xs-9 urgent-count">
                             <span ng-bind="urgent"></span>
                         </div>
                     </div>
@@ -62,12 +65,12 @@
                         <div class="col-xs-9 line-height-24">
                             Pending
                             <br/>
-                            <span class="pending-theme pending-count" ng-bind="pending"></span>
+                            <span class="pending-count" ng-bind="pending"></span>
                         </div>
                     </div>
                     <div class="row hidden-section">
                         <div class="col-xs-2"></div>
-                        <div class="col-xs-9 pending-count pending-theme">
+                        <div class="col-xs-9 pending-count">
                             <span ng-bind="pending"></span>
                         </div>
                     </div>
@@ -79,12 +82,12 @@
                         <div class="col-xs-9 line-height-24">
                             Completed
                             <br/>
-                            <span class="completed-theme completed-count" ng-bind="completed"></span>
+                            <span class="completed-count" ng-bind="completed"></span>
                         </div>
                     </div>
                     <div class="row hidden-section">
                         <div class="col-xs-2"></div>
-                        <div class="col-xs-9 completed-count completed-theme">
+                        <div class="col-xs-9 completed-count">
                             <span ng-bind="completed"></span>
                         </div>
                     </div>                   
@@ -97,7 +100,7 @@
                 <div class="row" ng-if="backends.length == 0">
                     No projects to display.
                 </div>
-                <div class="row bottom-border" ng-repeat="backend in backends" ng-click="redirectToDetailsPage(backend.BackendID)">
+                <div class="row bottom-border" ng-repeat="backend in backends" ng-click="redirectToDetailsPage(backend)">
                     <div class="col-xs-4 label-value vertical-align-section">
                         <div class="label-task-head" ng-bind="backend.BackendName"></div>
                         <div class="backend-task-details-last hidden-section">Requests - <span ng-bind="backend.Urgent+backend.Pending+backend.Approved+backend.Rejected"></span></div>

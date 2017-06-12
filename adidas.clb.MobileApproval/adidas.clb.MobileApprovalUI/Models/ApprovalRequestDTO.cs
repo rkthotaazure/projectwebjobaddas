@@ -63,5 +63,7 @@ namespace adidas.clb.MobileApprovalUI.Models
         public Boolean Backendoverwritten { get; set; }
         public string TaskTitle { get; set; }
         public string ServiceLayerTaskID { get; set; }
+        public string TaskStatus { get; set; }
+        public string TaskViewStatus { get; set; }
     }
 }

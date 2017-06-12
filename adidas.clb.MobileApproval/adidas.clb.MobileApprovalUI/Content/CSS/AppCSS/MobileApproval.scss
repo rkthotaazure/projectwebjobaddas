@@ -446,6 +446,7 @@ $primary-color: #703a6f;
     height: 60px;
     padding-top: 10px;
     width: 100%;
+    overflow: hidden;
 
     .navbar-default {
         background-color: transparent !important;
@@ -469,7 +470,8 @@ $primary-color: #703a6f;
 
 
     .page-title {
-        @include headingFont($headers-color);
+        font-size: 20px;
+        color: #fff;
         line-height: 46px;
     }
 
@@ -491,48 +493,55 @@ $primary-color: #703a6f;
 }
 /*Saurabh - Start*/
 .urgent-theme {
-    color: #fd83aa;
-    color: #ff5722;
-    color: #f0ab00;
-    color: #d8abbc;
+    color: #331d33;
+    color: #cb4141;
 }
 .pending-theme {
-    color: #effe3f;
-    color: #fd83aa;
     color: #b35b7c;
-}
-.completed-theme {
-    color: #67f0ac;
     color: #331d33;
 }
+.completed-theme {
+    color: #d8abbc;
+    color: #b35b7c;
+}
 .urgent-theme-dot {
-    /*border: 2px #fd83aa solid;
-    border: 2px #ff5722 solid;*/
-    border-radius: 5px;
-    width: 10px;
-    height: 10px;
-    display: inline-block;
-    margin-top: 6px;
-    background-color: #d8abbc;
-}
-.pending-theme-dot {
-    /*border: 2px #fd83aa solid;
-    border: 2px #effe3f solid;*/
-    border-radius: 5px;
-    width: 10px;
-    height: 10px;
-    display: inline-block;
-    margin-top: 6px;
-    background-color: #b35b7c;
-}
-.completed-theme-dot {
-    /*border: 2px #67f0ac solid;*/
     border-radius: 5px;
     width: 10px;
     height: 10px;
     display: inline-block;
     margin-top: 6px;
     background-color: #331d33;
+    background-color: #cb4141;
+}
+.pending-theme-dot {
+    border-radius: 5px;
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    margin-top: 6px;
+    background-color: #b35b7c;
+    background-color: #331d33;
+}
+.completed-theme-dot {
+    border-radius: 5px;
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    margin-top: 6px;
+    background-color: #d8abbc;
+    background-color: #b35b7c;
+}
+.urgent-theme-bg {
+    background-color: #331d33;
+    background-color: #cb4141;
+}
+.pending-theme-bg {
+    background-color: #b35b7c;
+    background-color: #331d33;
+}
+.completed-theme-bg {
+    background-color: #d8abbc;
+    background-color: #b35b7c;
 }
 .wrap-word {
     word-wrap: break-word;
@@ -639,7 +648,8 @@ $primary-color: #703a6f;
                 }
             }
             .comment-confirm, .comment-cancel {
-                background-color: #ff9501;
+                /*background-color: #ff9501;*/
+                background-color: $primary-color;
                 text-align: center;
                 color: white;
                 font-size: 16px;
@@ -647,7 +657,9 @@ $primary-color: #703a6f;
                 cursor: pointer;
             }
             .comment-cancel {
-                background-color: #fe3f35;
+                /*background-color: #fe3f35;
+                background-color: $primary-color;*/
+                border-left: 2px white solid;
             }
         }
     }
@@ -677,12 +689,93 @@ $primary-color: #703a6f;
     }
 }
 .synch-time {
-    color: #703a6f;
-    text-align: right;
-    font-size: 12px;
-    line-height: 20px;
-    background: white;
+    color: $primary-color;
+    text-align: center;
+    line-height: 49px;
     z-index: 9999;
+    font-size: 15px;
+    border-top: 1px #e2e2e2 solid;
+    background-color: #fff;
+}
+.btn-left-float {
+    /*position: fixed;
+    bottom: 50px;
+    left: -160px;
+    font-size: 18px;
+    padding: 8px 15px;
+    line-height: 18px;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+        */
+    background-color: $primary-color;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 49px;
+    @include transition(all 0.3s ease);
+    .force-update-text1 {
+        padding-right: 15px;
+        width: 155px;
+        display: inline-block;
+    }
+    &.active {
+        left: 0;
+        @include keyframes(rotateIcon) {
+            from { @include transform(rotate(0deg)); }
+            to { @include transform(rotate(360deg)); }
+        }
+        .glyphicon-refresh {
+            @include animation('rotateIcon 1s linear infinite');
+        }
+    }
+    &.btn-left-float-home1 {
+        left: -5px;
+    }
+}
+.ngdialog-theme-default {
+    padding-left: 30px;
+    padding-right: 30px;
+}
+.ngdialog.ngdialog-theme-default .ngdialog-content {
+    text-align: center;
+}
+#scroll_to_top {
+    position: fixed;
+    bottom: 0;
+    right: -100px;
+    background-color: $primary-color;
+    font-size: 18px;
+    padding: 15px 7px;
+    /*border-radius: 20px;*/
+    cursor: pointer;
+    color: #fff;
+    z-index: 999;
+    @include transition(all 0.3s ease);
+    &.active {
+        right: 0;
+    }
+}
+.badge {
+    display: inline-block;
+    min-width: 10px;
+    padding: 3px 5px;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    background-color: #777;
+    border-radius: 10px;
+    margin-right: 0;
+    &.notification-badge {
+        cursor: default;
+        position: absolute;
+        right: 16px;
+        top: 1px;
+        background: white;
+        color: #331d33;
+    }
 }
 /*Saurabh - End*/
 
@@ -796,20 +889,22 @@ $primary-color: #703a6f;
                         color: $headers-color;
                         float: right;
                         /*padding-top: 35px;*/
+                        border-right: 1px white solid;
                         padding-top: 22px;
                         width:100%;
+                        background-color: $primary-color;
                         &.action-more {
-                            background-color: #c7c7cc;
+                            /*background-color: #c7c7cc;*/
                             div{
                                 font-size:20px;
                             }
                         }
 
-                        &.action-approve {
+                        &.action-approve1 {
                             background-color: #ff9500;
                         }
 
-                        &.action-reject {
+                        &.action-reject1 {
                             background-color: #fe3f35;
                         }
                         .glyphicon {
@@ -895,20 +990,16 @@ $primary-color: #703a6f;
         .tab-titles {
             padding: 0px;
             overflow: hidden;
+            width: 100%;
         }
 
         .tab-pending {
-            width: 50%;
-            float: left;
-            padding-left: 15px;
             text-align: center;
             cursor: pointer;
         }
 
         .tab-completed {
-            width: 50%;
             overflow: hidden;
-            padding-right: 15px;
             text-align: center;
             cursor: pointer;
         }
@@ -949,6 +1040,8 @@ $primary-color: #703a6f;
         left: 0;
         color: #ffffff;
         font-size: $primary-font-size-lg;
+        background-color: white;
+        border-top: 1px #c2c2c2 solid;
 
         .btn-back {
             background-color: $primary-color;
@@ -958,15 +1051,21 @@ $primary-color: #703a6f;
                 font-size: $primary-font-size;
                 font-weight: bold;
             }
+            .glyphicon-home {
+                font-size: 22px;
+                vertical-align: text-bottom;
+            }
         }
 
         .btn-approve {
-            background-color: #ff9501;
+            /*background-color: #ff9501;*/
+            background-color: $primary-color;
             cursor: pointer;
         }
 
         .btn-reject {
-            background-color: #fe3f35;
+            /*background-color: #fe3f35;*/
+            background-color: $primary-color;
             cursor: pointer;
         }
 
@@ -1058,6 +1157,8 @@ $primary-color: #703a6f;
 
         .canvas-wrap {
             position: relative;
+            margin-left: auto;
+            margin-right: auto;
             width: 180px;
             height: 180px;
             @include transform(scale(1));

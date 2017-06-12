@@ -56,7 +56,12 @@ namespace adidas.clb.MobileApprovalUI.Models.JSONHelper
         public int Count { get; set; }
 
     }
-        public class UserBackendrequestJsonData
+    public class JsonDataTaskStatusCountResult
+    {
+        [JsonProperty(PropertyName = "result")]
+        public List<ApprovalCountDTO> userBackendRequestResults { get; set; }
+    }
+    public class UserBackendrequestJsonData
     {
         [JsonProperty(PropertyName = "result")]
         public UserBackendRequestJsonResult[] userBackendRequestResults { get; set; }
@@ -122,6 +127,8 @@ namespace adidas.clb.MobileApprovalUI.Models.JSONHelper
         public int Missingconfirmations { get; set; }
         public Boolean Backendoverwritten { get; set; }
         public string ServiceLayerTaskID { get; set; }
+        public string TaskStatus { get; set; }
+        public string TaskViewStatus { get; set; }
     }
     public class Requester
     {
@@ -234,4 +241,5 @@ namespace adidas.clb.MobileApprovalUI.Models.JSONHelper
             _type = "synchResponse";
         }
     }
+   
 }
