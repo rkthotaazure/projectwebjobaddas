@@ -1,4 +1,4 @@
-﻿var app = angular.module('ApplicationModule', ['ngRoute', 'ngResource', 'ui.bootstrap']);
+﻿var app = angular.module('ApplicationModule', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ngDialog']);
 setTimeout(function () {
     document.getElementById('splash').className = "active";
 }, 1000);

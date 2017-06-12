@@ -9,6 +9,8 @@ namespace adidas.clb.MobileApprovalUI.Models
     {
         public SynchRequestDTO syncRequest { get; set; }
         public string requestID { get; set; }
+        public string taskID { get; set; }
+        public string taskViewStatus { get; set; }
 
     }
 }

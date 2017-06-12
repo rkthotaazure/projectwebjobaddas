@@ -7,18 +7,35 @@
         <div class="notification-content alert alert-info" ng-class="cs.notificationActive?'enable':'disable'" ng-if="cs.notificationActive">
             <p ng-bind="cs.notificationText"></p>
         </div>    
-        <div class="btn-footer" >            
-            <div class="col-xs-1 text-align-center first-col btn-back padding-right-none padding-left-none" ng-show="hidePendingButton">
+        <div class="btn-footer">
+            <div class="btn-left-float btn-left-float-home hidden-section" ng-show="hideCompletedButton">
                 <div ng-click="redirect()">
                     <span class="glyphicon glyphicon-menu-left"></span>
                 </div>
             </div>
-            <div class="col-xs-4 text-align-center mid-col btn-approve padding-right-none padding-left-none" ng-show="hidePendingButton">
+            <div class="col-xs-1 text-align-center first-col btn-back padding-right-none padding-left-none">
+                <div ng-click="redirect()">
+                    <span class="glyphicon glyphicon-menu-left"></span>
+                </div>
+            </div>
+            <div class="col-xs-4 text-align-center mid-col btn-approve padding-right-none padding-left-none" ng-show="hidePendingButton || hideUrgentButton">
                 <div ng-click="requestStatus('Approved',id,TaskID)">
                     Quick Approve
                 </div>
             </div>
-            <div class="col-xs-7 text-align-center padding-left-none padding-right-none" ng-show="hidePendingButton">
+            <div class="col-xs-7 text-align-center padding-left-none padding-right-none" ng-show="hidePendingButton || hideUrgentButton">
+                <div class="col-xs-6 text-align-center mid-col btn-approve">
+                    <div ng-click="openComment('Approved',id,TaskID)">
+                        Approve
+                    </div>
+                </div>
+                <div class="col-xs-6 text-align-center last-col btn-reject pending-theme-bg">
+                    <div ng-click="openComment('Rejected',id,TaskID)">
+                        Reject
+                    </div>
+                </div>
+            </div>
+            <!--<div class="col-xs-7 text-align-center padding-left-none padding-right-none" ng-show="hidePendingButton">
                 <div class="col-xs-6 text-align-center mid-col btn-approve" ng-show="hidePendingButton">
                     <div ng-click="openComment('Approved',id,TaskID)">
                         Approve
@@ -40,12 +57,12 @@
                     Reject
                 </div>
             </div>
-            <div class="col-xs-12 text-align-center btn-back" ng-show="hideCompletedButton">
+            <div class="btn-left-float btn-left-float-home" ng-show="hideCompletedButton">
                 <div ng-click="redirect()">
                     <span class="glyphicon glyphicon-menu-left"></span>
                     <span ng-bind="TaskButtonText"></span>
                 </div>
-            </div>
+            </div>-->
         </div>
         <div class="main-section">
             <div class="title-section">
@@ -115,7 +132,7 @@
                     <div class="col-xs-1 label-name">
                         :
                     </div>
-                    <div class="col-xs-8 label-value" ng-bind="field.Value">                        
+                    <div class="col-xs-8 label-value" ng-bind="field.Value">
                     </div>
                 </div>
             </div>
@@ -126,7 +143,7 @@
             </div>
             <div class="details-section padding-bottom-none">
                 <div class="row bottom-border">
-                    <div class="col-xs-3 label-name text-bold">
+                    <div class="col-xs-4 label-name text-bold">
                         User
                     </div>
                     <div class="col-xs-2 label-name text-bold">
@@ -135,20 +152,21 @@
                     <div class="col-xs-3 label-name text-bold">
                         Due Date
                     </div>
-                    <div class="col-xs-4 label-name text-bold">
+                    <div class="col-xs-3 label-name text-bold">
                         Comments
                     </div>
                 </div>
                 <div class="row" ng-repeat="approver in approvers">
-                    <div class="col-xs-3 label-value padding-right-none" ng-bind="approver.UserName">                       
+                    <div class="col-xs-4 label-value padding-right-none" ng-bind="approver.UserName">                       
                     </div>
                     <div class="col-xs-2 label-value padding-right-none" ng-bind="approver.Status">                       
                     </div>
                     <div class="col-xs-3 label-value padding-right-none" ng-bind='approver.DueDate | dateFilter | date: "dd.MM.yyyy"'>                        
                     </div>
-                    <div class="col-xs-4 label-value wrap-word">
-                        <span ng-bind="approver.Comment"></span>
+                    <div class="col-xs-3 label-value wrap-word">
+                        <!--<span ng-bind="approver.Comment"></span>-->
                         <span ng-if="approver.iconClass" class="glyphicon" ng-class="approver.iconClass"></span>
+                        <span ng-if="approver.Comment.length > 0" class="glyphicon glyphicon-option-horizontal" ng-click="openCommentDialog(approver.Comment)"></span>
                     </div>
                 </div>
             </div>           
@@ -166,11 +184,11 @@
                         <textarea ng-model="comment.text" id="comments" name="comments" cols="50" rows="10" placeholder="Add comments here..."></textarea>
                     </div>
                     <div class="confirm">
-                        <div class="col-xs-6 comment-confirm" ng-click="confirmComment()">
-                            Confirm
+                        <div class="col-xs-6 comment-confirm completed-theme-bg" ng-click="confirmComment()">
+                            <span class="glyphicon glyphicon-ok"></span>
                         </div>
-                        <div class="col-xs-6 comment-cancel" ng-click="closeComment()">
-                            Cancel
+                        <div class="col-xs-6 comment-cancel pending-theme-bg" ng-click="closeComment()">
+                            <span class="glyphicon glyphicon-remove"></span>
                         </div>
                     </div>
                 </div>

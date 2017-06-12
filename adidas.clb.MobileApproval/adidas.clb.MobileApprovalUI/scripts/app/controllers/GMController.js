@@ -1,18 +1,18 @@
 ﻿//AngularJS controller to check user is eisits or not
 app.controller('HomeController', function ($scope, $http, $location, $route, ShareData, CommonService) {
     $scope.cs = CommonService;
-    $scope.showSideMenu = false;    
+    $scope.showSideMenu = false;
     //On page load check user is exisits or not 
     $scope.init = function () {
         $scope.userResults = "";
-        $http.get("/UserProfile/LogedinUser").success(function (data) {            
+        $http.get("/UserProfile/LogedinUser").success(function (data) {
             $scope.Email = data.Mail;
-                $scope.Fullname = data.DisplayName;
-                }).error(function (data, status) {
+            $scope.Fullname = data.DisplayName;
+        }).error(function (data, status) {
             console.log(data);
-                });
+        });
         //Getting user exisits or not from Personalization API redirect to create/update page
-        $http.get("/Home/CheckUserExisits").success(function (data) {            
+        $http.get("/Home/CheckUserExisits").success(function (data) {
             if (data.UserID != null) {
                 //Getting Loged in user details from Azure AD ADAL
                 var userbackends = [];
@@ -30,11 +30,11 @@ app.controller('HomeController', function ($scope, $http, $location, $route, Sha
                 ShareData.userBackends = data.userbackends;
                 ShareData.CompletedRequestsSync = data.CompletedRequestsSync;
                 ShareData.AutoRefreshValue = data.AutoRefreshValue;
-                ShareData.ShowwaitingMessage = false;                
+                ShareData.ShowwaitingMessage = false;
                 //if update user stay in that page to update user, otherwise redirect to approvallanding page
                 if ($location.$$path != '/updateUser') {
                     //Redirect to landing page
-                    if ($location.$$path == '/approvalLanding') {                        
+                    if ($location.$$path == '/approvalLanding') {
                         $route.reload('/approvalLanding');
                     }
                     else {
@@ -97,18 +97,18 @@ app.controller('CreateUserController', function ($scope, $http, $location, Share
         $scope.autoRefreshOptions[0].text = "1 minute";
 
         //Getting backends from Personalization API 
-        $http.get("/Home/GetBackends").success(function (data) {            
+        $http.get("/Home/GetBackends").success(function (data) {
             $scope.backends = [];
             $scope.devices = [];
             //Iterate backends details getting from Personalization API and bind the backends object
             angular.forEach(data, function (backendItems) {
                 $scope.backends.push(backendItems.backend);
-            });            
+            });
         }).error(function (data, status) {
             console.log(data);
         });
         //Getting Loged in user details from Azure AD ADAL 
-        $http.get("/UserProfile/LogedinUser").success(function (data) {            
+        $http.get("/UserProfile/LogedinUser").success(function (data) {
             $scope.Email = data.Mail;
             $scope.Fullname = data.DisplayName;
         }).error(function (data, status) {
@@ -138,7 +138,7 @@ app.controller('CreateUserController', function ($scope, $http, $location, Share
             'DefaultUpdateFrequency': ""
         });
     };
-    
+
     //Add New row in My Devices section on click
     $scope.addNewdevices = function () {
         $scope.devices.push({
@@ -215,7 +215,7 @@ app.controller('CreateUserController', function ($scope, $http, $location, Share
             headers: {
                 'Content-Type': 'application/json'
             }
-        }        
+        }
         //post Submited data to HomeController CreateNew action and redirect to Approval Landing page
         $http.post("/Home/CreateNew", (request), config)
             .success(function (data, status, headers, config) {
@@ -223,7 +223,7 @@ app.controller('CreateUserController', function ($scope, $http, $location, Share
                     $scope.$apply(function () {
                         $scope.showloader = false;
                     });
-                }, 1500);                
+                }, 1500);
                 $scope.cs.showNotifications("Profile Craeted Successfully.", "");
                 ShareData.reload = true;
                 window.setTimeout(function () {
@@ -241,7 +241,7 @@ app.controller('CreateUserController', function ($scope, $http, $location, Share
 app.controller('UpdateUserController', function ($scope, $http, $location, ShareData, CommonService) {
     $scope.cs = CommonService;
     $scope.completedTaskOptions = [];
-    $scope.selectedAutoRefreshOption = { };
+    $scope.selectedAutoRefreshOption = {};
     $scope.autoRefreshOptions = [];
     // Bind the User deatils in UpdateUser page load
     $scope.init = function () {
@@ -270,7 +270,7 @@ app.controller('UpdateUserController', function ($scope, $http, $location, Share
                 $scope.$apply(function () {
                     $scope.showloader = false;
                 });
-            }, 1500);          
+            }, 1500);
             $scope.FirstName = data.FirstName;
             $scope.LastName = data.LastName;
             $scope.Fullname = data.Fullname;
@@ -387,7 +387,7 @@ app.controller('UpdateUserController', function ($scope, $http, $location, Share
             userdevices.push({ device: device });
         });
         var completedTaskOption = 14;
-        $scope.completedTaskOptions.forEach(function(option) {
+        $scope.completedTaskOptions.forEach(function (option) {
             if (option.classText === "active") {
                 completedTaskOption = option.value;
             }
@@ -418,13 +418,13 @@ app.controller('UpdateUserController', function ($scope, $http, $location, Share
         }
         //Post request variable to update user method
         $http.post("/Home/UpdateUser", JSON.stringify(request), config)
-            .success(function (data, status, headers, config) {                
+            .success(function (data, status, headers, config) {
                 //Redirect to approval landing page
                 window.setTimeout(function () {
                     $scope.$apply(function () {
                         $scope.showloader = false;
                     });
-                }, 1500);               
+                }, 1500);
                 $scope.cs.showNotifications("Profile Updated Successfully.", "");
                 window.setTimeout(function () {
                     $scope.$apply(function () {
@@ -483,8 +483,11 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
     $scope.tasksuccess = ShareData.ShowwaitingMessage;
     $scope.showloader = true;
     $scope.showcontent = false;
+
+    $scope.forceUpdateObj = { text: "Sync started...", class: "" };
+
     // Bind the User Backend deatils in approavl landing page load
-    $scope.init = function () {        
+    $scope.init = function () {
         $scope.cs.pageTitle = "My Approvals";
         $scope.requestStatus = [
             { id: 1, name: 'In Progress' },
@@ -497,7 +500,8 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
            { id: 2, name: 'OnHold' },
            { id: 3, name: 'Approved' },
            { id: 4, name: 'Rejected' },
-           { id: 4, name: 'Removed' }
+           { id: 5, name: 'Removed' },
+           { id: 6, name: 'Urgent' }
         ];
         $scope.rqStatus = $scope.requestStatus[0];
         $scope.apStatus = $scope.approvalStatus[0];
@@ -508,7 +512,7 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
         $scope.openApproval = [];
         $scope.userBackendid = [];
         var userDevices = ShareData.userDevices;
-        var userbackends = ShareData.userBackends;        
+        var userbackends = ShareData.userBackends;
         $scope.userBackendid = [];
         $scope.userBackendName = [];
         angular.forEach(userbackends, function (BackendItems) {
@@ -539,12 +543,12 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
             filters: filtersinfo,
             depth: depthInfo
         }
-        
+
         var requestsync = {
             client: userDevices[0],
             parameters: params
         }
-        $scope.requestsync = requestsync;        
+        $scope.requestsync = requestsync;
         var config = {
             headers: {
                 'Content-Type': 'application/json'
@@ -558,12 +562,12 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
                 console.log(data);
                 $scope.backends = [];
                 if (ShareData.ShowwaitingMessage) {
-                    $scope.cs.showNotifications("Please try after sometime. Your requests are being synched.", "");                    
+                    $scope.cs.showNotifications("Please try after sometime. Your requests are being synched.", "");
                     ShareData.ShowwaitingMessage = false;
                 }
                 else {
                     $scope.tasksuccess = false;
-                }               
+                }
                 $scope.ShowMessage = false;
                 $scope.lastsynch = new Date();
                 window.setTimeout(function () {
@@ -572,11 +576,14 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
                     });
                 }, 1000);
                 $scope.showcontent = true;
-                angular.forEach(data, function (BackendItems) {                    
-                    if (ShareData.aprStatus == "Waiting") {                        
+                angular.forEach(data, function (BackendItems) {
+                    if (BackendItems == "<") {
+                        window.location.reload();
+                    }
+                    if (ShareData.aprStatus == "Waiting") {
                         $scope.backends.push({ BackendID: BackendItems.BackendID, BackendName: BackendItems.BackendName, Count: BackendItems.WaitingCount, Pending: BackendItems.WaitingCount, Approved: BackendItems.ApprovedCount, Rejected: BackendItems.RejectedCount, Urgent: BackendItems.UrgentPendingCount });
                     }
-                    else {                        
+                    else {
                         $scope.backends.push({ BackendID: BackendItems.BackendID, BackendName: BackendItems.BackendName, Count: BackendItems.ApprovedCount + BackendItems.RejectedCount, Pending: BackendItems.WaitingCount, Approved: BackendItems.ApprovedCount, Rejected: BackendItems.RejectedCount, Urgent: BackendItems.UrgentPendingCount });
                     }
 
@@ -588,10 +595,12 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
                 $scope.completed = Approved + Rejected;
                 $scope.drawRequestCountCirclesNew($scope.urgent + $scope.pending + $scope.completed, $scope.urgent, $scope.pending, $scope.completed, 'canvas', 'procentpending', '20', 70);
                 //$scope.drawRequestCountCircles($scope.urgent + $scope.pending + $scope.completed, $scope.pending, 'canvaspending', 'procenturgent');
-                ShareData.backendCount = $scope.backends;                               
+                ShareData.backendCount = $scope.backends;
             }).error(function (data, status) {
                 console.log(data);
             });
+
+            $scope.cs.updateRequestCount();
         }
         var myCall = function () {
             if (ShareData.reload) {
@@ -636,30 +645,42 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
     //};
     //$scope.forceUpdate = 'false';
     $scope.update = function () {
-        $scope.showloader = true;
-        $scope.requestsync.parameters.forceUpdate = 'true';        
+        //$scope.showloader = true;
+        $scope.requestsync.parameters.forceUpdate = 'true';
+        $scope.forceUpdateObj.class = "active";
         //Post request variable to update user method
         //2017-04-25
         $http.post("/Landing/ForceUpdate", $scope.requestsync, $scope.config).success(function (data) {
             console.log(data);
+            var millis = parseInt(data.SyncTime);
+            var minutes = Math.floor(millis / 60000);
+            var seconds = ((millis % 60000) / 1000).toFixed(0);
+            $scope.forceUpdateObj.text = "Sync time: " + (seconds == 60 ? (minutes + 1) + ":00" : minutes + ":" + (seconds < 10 ? "0" : "") + seconds) + " mins";
             window.setTimeout(function () {
                 $scope.$apply(function () {
-                    $scope.showloader = false;
+                    //$scope.showloader = false;
                 });
             }, 2000);
-                      
-            $scope.cs.showNotifications("We are trying to check if you have any requests. Please wait for some time !", "");                          
-            $scope.start();            
+            window.setTimeout(function () {
+                $scope.$apply(function () {
+                    $scope.forceUpdateObj.class = "";
+                    $scope.forceUpdateObj.text = "Sync started...";
+                });
+            }, 5000);
+
+            $scope.cs.showNotifications("We are trying to check if you have any requests. Please wait for some time !", "");
+            $scope.start();
             $scope.requestsync.parameters.forceUpdate = 'false';
         }).error(function (data, status) {
             console.log(data);
             $scope.requestsync.parameters.forceUpdate = 'false';
         });
     };
-    
+
     //On click backend count
-    $scope.redirectToDetailsPage = function (backendid) {
-        ShareData.backendId = backendid;
+    $scope.redirectToDetailsPage = function (backend) {
+        ShareData.backendId = backend.BackendID;
+        ShareData.backendName = backend.BackendName;
         $scope.stop();
         $location.path('/approvalDetails');
     };
@@ -735,7 +756,7 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
         }, fps);
     };
 
-    $scope.degreesToRadians = function(degrees) {
+    $scope.degreesToRadians = function (degrees) {
         return degrees * (Math.PI / 180);
     }
 
@@ -748,8 +769,7 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
         //Canvas context
         var canvas = document.getElementById(canvasId);
         //RK
-        if (canvas != null)
-        {
+        if (canvas != null) {
             var c = canvas.getContext('2d');
             //c.lineCap = 'round';
 
@@ -809,12 +829,12 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
                 }
             }, fps);
         }
-        
+
     };
 
     $scope.drawRequestCountCirclesPostRender = function (total, urgent, pending, completed, canvasId, circleMessageId) {
         $timeout(function () {
-            $scope.drawRequestCountCirclesNew(total, urgent, pending, completed, canvasId, circleMessageId, "12", 30);
+            $scope.drawRequestCountCirclesNew(total, urgent, pending, completed, canvasId, circleMessageId, "8", 30);
         });
     };
 
@@ -827,17 +847,20 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
             var urgent = {
                 start: 0,
                 end: (360 / total) * urgent,
-                color: "#d8abbc"
+                //color: "#331d33"
+                color: "#cb4141"
             };
             var pending = {
                 start: urgent.end,
                 end: ((360 / total) * pending) + urgent.end,
-                color: "#b35b7c"
+                //color: "#b35b7c"
+                color: "#331d33"
             };
             var completed = {
                 start: pending.end,
                 end: ((360 / total) * completed) + pending.end,
-                color: "#331d33"
+                //color: "#d8abbc"
+                color: "#b35b7c"
             };
             var coordinates = {
                 urgent: urgent,
@@ -958,8 +981,8 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
             spanProcent.innerHTML = "<span class='spanTask'>Requests</span><span class='spantaskcount'>0</span>";
         }
     }
-    
-    $scope.drawbackendRequestCountCircles = function (Total, Current, canvasid) {       
+
+    $scope.drawbackendRequestCountCircles = function (Total, Current, canvasid) {
         var id = 'canvaspending' + canvasid;
         $timeout(function () {
             var can = document.getElementById(id),
@@ -1000,7 +1023,7 @@ app.controller('ApprovalLandingController', function ($scope, $http, $location, 
                 c.stroke();
             }
         })
-                       
+
     }
 });
 //AngularJS controller to get pending approval details
@@ -1017,9 +1040,14 @@ app.controller('ApprovalDetailsController', function ($scope, $http, $location, 
     };
 
     $scope.init = function () {
+        if (ShareData.backendId == "") {
+            $scope.redirect();
+            return false;
+        }
         $scope.cs.pageTitle = "Requests List";
+        $scope.cs.pageTitle = ShareData.backendName + " Requests";
         $scope.loading = true;
-        $scope.showpending = true;
+        $scope.showUrgent = true;
         $scope.hideButton = true;
         var backendid = ShareData.backendId;
         var userDevices = ShareData.userDevices;
@@ -1059,11 +1087,11 @@ app.controller('ApprovalDetailsController', function ($scope, $http, $location, 
         $scope.config = config;
         if (ShareData.aprStatus == "Completed") {
             $scope.showcompletedtasks();
-            $scope.showpending = false;
             $scope.showaction = false;
         }
         else {
             ShareData.aprStatus = "Waiting";
+            $scope.requestsync.parameters.filters.apprStatus = "Urgent";
             //Post request variable to GetApprovalDetails method
             $http.post("/Landing/GetApprovalDetails", requestsync, config).success(function (data) {
                 if (approvalStatus == "Completed") {
@@ -1076,8 +1104,11 @@ app.controller('ApprovalDetailsController', function ($scope, $http, $location, 
                 ShareData.pendingtasks = {};
                 angular.forEach(data, function (approvalItems) {
                     //if (approvalItems.approval.Status == "Waiting") {
-                        $scope.approvalTasks.push(approvalItems.approval);
-                   // }
+                    //if (approvalItems.approval.TaskStatus.toString().toLowerCase() == 'urgent') {
+                    $scope.approvalTasks.push(approvalItems.approval);
+                    //}
+                    //$scope.approvalTasks.push(approvalItems.approval);
+                    // }
                 });
                 if ($scope.approvalTasks.length === 0) {
                     $scope.emptyRecord = true;
@@ -1100,8 +1131,10 @@ app.controller('ApprovalDetailsController', function ($scope, $http, $location, 
                     });
                 }, 1500);
             });
+
+            $scope.cs.updateRequestCount();
         }
-               
+
     };
     $scope.sorttasks = function () {
         if ($scope.showpending) {
@@ -1111,25 +1144,49 @@ app.controller('ApprovalDetailsController', function ($scope, $http, $location, 
             return 'DecisionDate';
         }
     }
-    $scope.showpendingtasks = function () {
+    $scope.showpendingtasks = function (tabName) {
         $scope.loading = true;
-        $scope.requestsync.parameters.filters.apprStatus = "Waiting";
-        $http.post("/Landing/GetApprovalDetails", $scope.requestsync, $scope.config).success(function (data) {            
+        if (tabName == 'Urgent') {
+            $scope.requestsync.parameters.filters.apprStatus = "Urgent";
+        }
+        else {
+            $scope.requestsync.parameters.filters.apprStatus = "Waiting";
+        }
+
+        $http.post("/Landing/GetApprovalDetails", $scope.requestsync, $scope.config).success(function (data) {
             ShareData.pendingtasks = data;
             $scope.approvalTasks = [];
-            ShareData.aprStatus = "Waiting";
+            ShareData.aprStatus = $scope.requestsync.parameters.filters.apprStatus;
             angular.forEach(ShareData.pendingtasks, function (approvalItems) {
-                //if (approvalItems.approval.Status == "Waiting") {
-                    $scope.approvalTasks.push(approvalItems.approval);
+                $scope.approvalTasks.push(approvalItems.approval);
+                ////if (approvalItems.approval.Status == "Waiting") {
+                //if (tabName == 'urgent') {
+                //    if (approvalItems.approval.TaskStatus.toString().toLowerCase() == 'urgent') {
+                //        $scope.approvalTasks.push(approvalItems.approval);
+                //    }
+                //}
+                //else {
+                //    if (approvalItems.approval.TaskStatus.toString().toLowerCase() == 'pending') {
+                //        $scope.approvalTasks.push(approvalItems.approval);
+                //    }
+                //}
                 //}
             });
+            if (tabName == 'Urgent') {
+                $scope.showUrgent = true;
+                $scope.showpending = false;
+            }
+            else {
+                $scope.showUrgent = false;
+                $scope.showpending = true;
+            }
+            $scope.showcompleted = false;
             if ($scope.approvalTasks.length === 0) {
                 $scope.emptyRecord = true;
             }
             else {
                 $scope.emptyRecord = false;
             }
-            $scope.showpending = true;
             window.setTimeout(function () {
                 $scope.$apply(function () {
                     $scope.loading = false;
@@ -1143,27 +1200,30 @@ app.controller('ApprovalDetailsController', function ($scope, $http, $location, 
                 });
             }, 1500);
         });
-        
+
     }
     $scope.showcompletedtasks = function () {
         $scope.loading = true;
         $scope.requestsync.parameters.filters.apprStatus = "Completed";
-        $http.post("/Landing/GetApprovalDetails", $scope.requestsync, $scope.config).success(function (data) {            
+        $http.post("/Landing/GetApprovalDetails", $scope.requestsync, $scope.config).success(function (data) {
             ShareData.pendingtasks = data;
             $scope.approvalTasks = [];
             ShareData.aprStatus = "Completed";
             angular.forEach(ShareData.pendingtasks, function (approvalItems) {
                 //if (approvalItems.approval.Status != "Waiting") {
-                    $scope.approvalTasks.push(approvalItems.approval);
+                $scope.approvalTasks.push(approvalItems.approval);
                 //}
             });
+            $scope.showUrgent = false;
+            $scope.showpending = false;
+            $scope.showcompleted = true;
             if ($scope.approvalTasks.length === 0) {
                 $scope.emptyRecord = true;
             }
             else {
                 $scope.emptyRecord = false;
             }
-            $scope.showpending = false;
+            //$scope.showpending = false;
             window.setTimeout(function () {
                 $scope.$apply(function () {
                     $scope.loading = false;
@@ -1177,7 +1237,7 @@ app.controller('ApprovalDetailsController', function ($scope, $http, $location, 
                 });
             }, 1500);
         });
-        
+
 
     }
     // Show pendind task request information
@@ -1217,6 +1277,7 @@ app.controller('ApprovalDetailsController', function ($scope, $http, $location, 
 
         //Post request variable to SendApprovalstatus method
         $http.post("/Landing/SendApprovalstatus", approvalDetails, config).success(function (data) {
+            $scope.cs.updateRequestCount();
             $scope.closeComment();
             for (var i = 0; i < $scope.approvalTasks.length; i++) {
                 if ($scope.approvalTasks[i].ServiceLayerTaskID === taskId) {
@@ -1232,7 +1293,7 @@ app.controller('ApprovalDetailsController', function ($scope, $http, $location, 
                 });
             }, 1500);
             $scope.taskrequestid = requestId;
-            $scope.taskrequeststatus = status;            
+            $scope.taskrequeststatus = status;
             var notificationText = 'Request ' + requestId + ' ' + status + ' successfully!';
             $scope.cs.showNotifications(notificationText, "");
         }).error(function (data, status) {
@@ -1283,8 +1344,11 @@ app.controller('ApprovalDetailsController', function ($scope, $http, $location, 
     };
 });
 //AngularJS controller to get details request information 
-app.controller('ApprovalDetailstaskController', function ($scope, $http, $location, $filter, $window, ShareData, CommonService) {
+app.controller('ApprovalDetailstaskController', function ($scope, $http, $location, $filter, $window, ShareData, CommonService, ngDialog) {
+    //Variable - START
+    $scope.ngDialog = ngDialog;
     $scope.cs = CommonService;
+    //Variable - END
     $scope.comment = {
         text: "",
         commentActive: false,
@@ -1295,7 +1359,7 @@ app.controller('ApprovalDetailstaskController', function ($scope, $http, $locati
     };
 
     $scope.init = function () {
-        $scope.cs.pageTitle = "Request Details";        
+        $scope.cs.pageTitle = "Request Details";
         $scope.showloader = true;
         var requestId = ShareData.detailTaskinfo;
         var taskId = ShareData.detailTaskId;
@@ -1311,7 +1375,7 @@ app.controller('ApprovalDetailstaskController', function ($scope, $http, $locati
             {
                 backends: $scope.backend,
                 reqStatus: requestStatus.name,
-                apprStatus: approvalStatus.name,
+                apprStatus: approvalStatus,
                 isChanged: 'false',
                 onlyChangedReq: 'false',
                 CompletedRequestsSync: ShareData.CompletedRequestsSync
@@ -1327,7 +1391,10 @@ app.controller('ApprovalDetailstaskController', function ($scope, $http, $locati
         }
         var requestDetails = {
             syncRequest: requestsync,
-            requestID: requestId
+            requestID: requestId,
+            taskID: taskId
+            //need to send request present view status (read /new)
+            //taskViewStatus=
         }
         var config = {
             headers: {
@@ -1336,11 +1403,12 @@ app.controller('ApprovalDetailstaskController', function ($scope, $http, $locati
         }
         $scope.requestDetails = requestDetails;
         $scope.TaskID = taskId;
-        $scope.config = config;        
+        $scope.config = config;
         $scope.fields = [];
         $scope.approvers = [];
         //Post request variable to GetRequestDetails method
-        $http.post("/Landing/GetRequestDetails", requestDetails, config).success(function (data) {            
+        $http.post("/Landing/GetRequestDetails", requestDetails, config).success(function (data) {
+            $scope.cs.updateRequestCount();
             window.setTimeout(function () {
                 $scope.$apply(function () {
                     $scope.showloader = false;
@@ -1375,12 +1443,19 @@ app.controller('ApprovalDetailstaskController', function ($scope, $http, $locati
 
             });
             if (approvalStatus == "Completed") {
+                $scope.hideUrgentButton = false;
                 $scope.hidePendingButton = false;
                 $scope.hideCompletedButton = true;
                 $scope.TaskButtonText = "Completed";
             }
-            else {
+            else if (approvalStatus == "Pending") {
+                $scope.hideUrgentButton = false;
                 $scope.hidePendingButton = true;
+                $scope.hideCompletedButton = false;
+            }
+            else {
+                $scope.hideUrgentButton = true;
+                $scope.hidePendingButton = false;
                 $scope.hideCompletedButton = false;
             }
         }).error(function (data, status) {
@@ -1394,13 +1469,29 @@ app.controller('ApprovalDetailstaskController', function ($scope, $http, $locati
         });
     };
 
+    $scope.openCommentDialog = function (comment) {
+        try {
+            if (comment.length > 0) {
+                ngDialog.open({
+                    template: "<div>" + comment + "</div>",
+                    plain: true
+                });
+            }
+        }
+        catch (err) { }
+    };
+
+    $scope.closeCommentDialog = function () {
+        ngDialog.close();
+    };
+
     $scope.openpdf = function () {
         //Post request variable to GetRequestDetails method   
         var newwindow = $window.open();
         $http.post("/Landing/GetRequestPDF", $scope.requestDetails)
-        .success(function (data) {            
+        .success(function (data) {
             if (data == null || data == "") {
-                newwindow.close();                
+                newwindow.close();
                 $scope.cs.showNotifications("PDF is not available for this Request.", "");
             }
             else {
@@ -1451,7 +1542,7 @@ app.controller('ApprovalDetailstaskController', function ($scope, $http, $locati
     };
 
     $scope.requestStatus = function (status, requestId, taskid) {
-       //No idea where the comment will go. Comment is saved in $scope.comment.text property. To set the $scope.comment.text to empty string once the record is saved
+        //No idea where the comment will go. Comment is saved in $scope.comment.text property. To set the $scope.comment.text to empty string once the record is saved
         $scope.showloader = true;
         var appComment = "";
         if (typeof $scope.comment === 'undefined' || $scope.comment.length === 0) {
@@ -1476,15 +1567,23 @@ app.controller('ApprovalDetailstaskController', function ($scope, $http, $locati
             headers: {
                 'Content-Type': 'application/json'
             }
-        }       
+        }
         $http.post("/Landing/SendApprovalstatus", approvalDetails, config).success(function (data) {
-            $scope.closeComment();
-            var notificationtext='Request '+ status+ ' successfully!';
+            $scope.cs.updateRequestCount();
+            var notificationtext = 'Request ' + status + ' successfully!';
             $scope.cs.showNotifications(notificationtext, "");
             $scope.hideButton = false;
+            $scope.hideUrgentButton = false;
             $scope.hidePendingButton = false;
             $scope.hideCompletedButton = true;
             $scope.TaskButtonText = "Pending Tasks";
+            //update the status of the request
+            var taskIndex = taskid.substring(taskid.indexOf('_') + 1, taskid.length);
+            $scope.approvers[taskIndex].Status = status;
+            $scope.approvers[taskIndex].Comment = $scope.comment.text;
+            $scope.approvers[taskIndex].iconClass = ADIDAS.GM.CONSTANTS.CONFIG("MobileIconClass");
+
+            $scope.closeComment();
             window.setTimeout(function () {
                 $scope.$apply(function () {
                     $scope.showloader = false;
@@ -1505,4 +1604,15 @@ app.filter("dateFilter", function () {
         }
         return "";
     };
+});
+
+
+jQuery(document).ready(function() {
+    jQuery(window).scroll(function() {
+        if (jQuery(this).scrollTop() > 100) {
+            jQuery('#scroll_to_top').addClass("active");
+        } else {
+            jQuery('#scroll_to_top').removeClass("active");
+        }
+    })
 });

@@ -260,6 +260,9 @@
     <Content Include="Content\CSS\Packages\bootstrap.css" />
     <Content Include="Content\CSS\Packages\bootstrap.min.css" />
     <Content Include="Content\CSS\AppCSS\MobileApproval.css" />
+    <Content Include="Content\CSS\Packages\fabric.min.css" />
+    <Content Include="Content\CSS\Packages\ngDialog-theme-default.css" />
+    <Content Include="Content\CSS\Packages\ngDialog.css" />
     <Content Include="Fonts\AdiHausDin\AdihausDIN-Bold.svg" />
     <Content Include="Fonts\AdiHausDin\AdihausDIN-Cn.svg" />
     <Content Include="Fonts\AdiHausDin\AdihausDIN-CnBold.svg" />
@@ -369,6 +372,7 @@
     <Content Include="Scripts\app\Packages\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\app\Packages\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\app\Packages\modernizr-2.6.2.js" />
+    <Content Include="Scripts\app\Packages\ngDialog.js" />
     <Content Include="Scripts\app\Packages\ui-bootstrap-tpls-2.2.0.min.js" />
     <Content Include="Scripts\app\MobileApprovalConstants.js" />
     <Content Include="Scripts\app\services\GMService.js" />

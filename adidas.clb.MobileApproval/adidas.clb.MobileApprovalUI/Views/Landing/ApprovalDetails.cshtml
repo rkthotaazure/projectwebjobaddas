@@ -7,17 +7,20 @@
         <p ng-bind="cs.notificationText"></p>
     </div>  
     <div class="btn-footer">
-        <div class="btn-left-float btn-left-float-home">
+        <div class="btn-left-float btn-left-float-home col-xs-1 padding-right-none padding-left-none text-align-center">
             <div ng-click="redirect()">
                 <!--<span class="glyphicon glyphicon-menu-left"></span>-->
                 <span class="glyphicon glyphicon-home"></span>
             </div>
         </div>
+        <div class="col-xs-11"></div>
     </div>
     <div class="main-section">
         <div class="title-section">
             <div class="title-text tab-titles">
-                <div class="tab-urgent" ng-class="{'tab-active': tabs.showUrgent}" ng-click="showTasksTab('urgent');">Urgent</div><div class="tab-pending" ng-class="{'tab-active': showpending}" ng-click="showpendingtasks();">Pending</div><div class="tab-completed" ng-class="{'tab-active': !showpending}" ng-click="showcompletedtasks();">Completed</div>
+                <div class="tab-pending col-xs-4" ng-class="{'tab-active': showUrgent}" ng-click="showpendingtasks('Urgent');">Urgent</div>
+                <div class="tab-pending col-xs-4" ng-class="{'tab-active': showpending}" ng-click="showpendingtasks('Pending');">Pending</div>
+                <div class="tab-completed col-xs-4" ng-class="{'tab-active': showcompleted}" ng-click="showcompletedtasks();">Completed</div>
             </div>
         </div>
         <div class="details-section padding-top-none">
@@ -25,14 +28,17 @@
                 No requests to display.
             </div>
             <div ng-repeat="approvaltask in approvalTasks | orderBy:sorttasks:true" ng-init="$parent.selectedIndex = -1">
-                <div class="row task-section bottom-border" ng-class="{'pendingtask': showpending}" ng-click="$parent.selectedIndex == $index?$parent.selectedIndex = -1:$parent.selectedIndex = $index;">
+                <div class="row task-section bottom-border" ng-class="{'pendingtask': showpending || showUrgent}" ng-click="$parent.selectedIndex == $index?$parent.selectedIndex = -1:$parent.selectedIndex = $index;">
                     <div class="col-xs-11 task-content" ng-class="{'move-left': $parent.selectedIndex == $index}">
-                        <div class="col-xs-5 label-task-head" ng-bind="approvaltask.RequestId" ng-click="showDetails(approvaltask.RequestId, approvaltask.ServiceLayerTaskID)"></div>
-                        <div class="col-xs-7 label-task-date" ng-show="showpending">
+                        <div class="col-xs-5 label-task-head" ng-click="showDetails(approvaltask.RequestId, approvaltask.ServiceLayerTaskID)">
+                            <span ng-bind="approvaltask.RequestId"></span>
+                            <span class="badge" ng-if="approvaltask.TaskViewStatus == 'New'">new</span>
+                        </div>
+                        <div class="col-xs-7 label-task-date" ng-show="!showcompleted">
                             <span class="text-bold">Due Date : </span>
                             <span ng-bind="approvaltask.DueDate | dateFilter | date: 'dd.MM.yyyy'"></span>
                         </div>
-                        <div class="col-xs-7 label-task-date" ng-show="!showpending">
+                        <div class="col-xs-7 label-task-date" ng-show="showcompleted">
                             <span class="text-bold">Decision Date : </span>                          
                             <span ng-bind='approvaltask.DecisionDate | dateFilter | date: "dd.MM.yyyy"'></span>
                         </div>
@@ -47,11 +53,11 @@
                     </div>
                     <div class="col-xs-1 task-arrow"><span class="glyphicon glyphicon-menu-right"></span></div>
                     <div class="action-items" ng-class="{'move-right': $parent.selectedIndex == $index}">
-                        <div class="task-action action-reject" ng-show="showpending" ng-click="openComment('Rejected',approvaltask.RequestId, approvaltask.ServiceLayerTaskID)" ng-click1="requestStatus('Rejected',approvaltask.RequestId, approvaltask.ServiceLayerTaskID)">
+                        <div class="task-action action-reject" ng-show="showpending || showUrgent" ng-click="openComment('Rejected',approvaltask.RequestId, approvaltask.ServiceLayerTaskID)" ng-click1="requestStatus('Rejected',approvaltask.RequestId, approvaltask.ServiceLayerTaskID)">
                             Reject
                             <span class="glyphicon glyphicon-remove"></span>
                         </div>
-                        <div class="task-action action-approve" ng-show="showpending" ng-click="requestStatus('Approved',approvaltask.RequestId, approvaltask.ServiceLayerTaskID)">
+                        <div class="task-action action-approve" ng-show="showpending || showUrgent" ng-click="requestStatus('Approved',approvaltask.RequestId, approvaltask.ServiceLayerTaskID)">
                             Approve
                             <span class="glyphicon glyphicon-ok"></span>
                         </div>
@@ -75,16 +81,19 @@
                         <textarea ng-model="comment.text" id="comments" name="comments" cols="50" rows="10" placeholder="Add comments here..."></textarea>
                     </div>
                     <div class="confirm">
-                        <div class="col-xs-6 comment-confirm" ng-click="confirmComment()">
-                            Confirm
+                        <div class="col-xs-6 comment-confirm completed-theme-bg" ng-click="confirmComment()">
+                            <span class="glyphicon glyphicon-ok"></span>
                         </div>
-                        <div class="col-xs-6 comment-cancel" ng-click="closeComment()">
-                            Cancel
+                        <div class="col-xs-6 comment-cancel pending-theme-bg" ng-click="closeComment()">
+                            <span class="glyphicon glyphicon-remove"></span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+    <div id="scroll_to_top" class="col-xs-1" ng-click="cs.scrollToTop()">
+        <span class="glyphicon glyphicon-menu-up"></span>
     </div>
 </div>
 

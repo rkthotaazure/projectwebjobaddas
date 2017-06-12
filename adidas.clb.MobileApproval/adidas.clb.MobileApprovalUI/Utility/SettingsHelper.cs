@@ -164,7 +164,14 @@ namespace adidas.clb.MobileApprovalUI.Utility
         {
             get { return ConfigurationManager.AppSettings["SyncAPIUserBackendReqCompleted"]; }
         }
-        
+        public static string SyncAPIUserBackendTasksCount
+        {
+            get { return ConfigurationManager.AppSettings["SyncAPIUserBackendTasksCount"]; }
+        }
+        public static string SyncAPIUserNewRequestsCount
+        {
+            get { return ConfigurationManager.AppSettings["SyncAPIUserNewTasksCount"]; }
+        }
 
     }
 }
