@@ -21,6 +21,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
     {
         //Application insights interface reference for logging the error details into Application Insight azure service.
         static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
+        public static string azureTableUserDeviceConfiguration = ConfigurationManager.AppSettings["AzureTables.UserDeviceConfiguration"];
         /// <summary>
         /// method to check user availability
         /// </summary>
@@ -144,6 +145,21 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
                 //calling data access layer method to add message to queue
                 PersonalizationDAL personalizationdal = new PersonalizationDAL();
                 personalizationdal.AddUpdateTriggerMessageToQueue(updateTriggerMessage);
+                DateTime entryTimestamp = DateTime.Now;
+                //update userbackend's queue message entry time stamp
+                foreach (UserBackendDTO userbackend in userbackendslist)
+                {
+                    //reterive usebackend entity
+                    UserBackendEntity userbackendEntity = DataProvider.RetrieveEntity<UserBackendEntity>(azureTableUserDeviceConfiguration, string.Concat(CoreConstants.AzureTables.UserBackendPK, userID), userbackend.backend.BackendID);
+                    if (userbackendEntity != null)
+                    {
+                        //set timestamp
+                        userbackendEntity.QueueMsgEntryTimestamp = entryTimestamp;
+                        //call update entity method
+                        DataProvider.UpdateEntity<UserBackendEntity>(azureTableUserDeviceConfiguration, userbackendEntity);
+                    }
+                     
+                }
             }
             catch (DataAccessException DALexception)
             {
