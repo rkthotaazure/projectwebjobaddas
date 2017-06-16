@@ -123,16 +123,19 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         /// method to add user to be updated into updatetrigger queue
         /// </summary>
         /// <param name="updateTriggeringMessage">takes message object as input</param>
-        public void AddUpdateTriggerMessageToQueue(UpdateTriggeringMessage updateTriggeringMessage)
+        public bool AddUpdateTriggerMessageToQueue(UpdateTriggeringMessage updateTriggeringMessage)
         {
             string callerMethodName = string.Empty;
             try
             {
+                bool isAddedSuccessfully = false;
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 string message = JsonConvert.SerializeObject(updateTriggeringMessage);
                 //call dataprovider method to add message to azure queue
                 DataProvider.AddMessagetoQueue(CoreConstants.AzureQueues.UpdateTriggerQueueName, message);
+                isAddedSuccessfully = true;
+                return isAddedSuccessfully;
             }
             catch (Exception exception)
             {
@@ -146,16 +149,19 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Personalization
         /// method to add user to be updated into vip queue
         /// </summary>
         /// <param name="updateTriggeringMessage"></param>
-        public void ForceUpdate_AddUpdateTriggerMessageToQueue(UpdateTriggeringMessage updateTriggeringMessage)
+        public bool ForceUpdate_AddUpdateTriggerMessageToQueue(UpdateTriggeringMessage updateTriggeringMessage)
         {
             string callerMethodName = string.Empty;
             try
             {
+                bool isSuccess = false;
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 string message = JsonConvert.SerializeObject(updateTriggeringMessage);
                 //call dataprovider method to add message to azure queue
                 DataProvider.AddMessagetoQueue(forceupdatequeue, message);
+                isSuccess = true;
+                return isSuccess;
             }
             catch (Exception exception)
             {

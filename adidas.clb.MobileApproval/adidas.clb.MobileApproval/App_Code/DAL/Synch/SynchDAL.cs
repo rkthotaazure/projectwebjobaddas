@@ -505,6 +505,35 @@ namespace adidas.clb.MobileApproval.App_Code.DAL.Synch
 
 
         }
+        /// <summary>
+        /// Adding  message into update trigger input queue
+        /// </summary>
+        /// <param name="content"></param>
+        public bool AddMessagestoInputQueue(string content)
+        {
+            try
+            {
+                bool isCompleted = false;
+                // Create the queue client.
+                CloudQueueClient cqdocClient = GetQueueClient();
+                // Retrieve a reference to a queue.
+                CloudQueue queuedoc = GetMissedUpdatesInputQueue(cqdocClient);
+                //create cloud msg object
+                CloudQueueMessage message = new CloudQueueMessage(content);
+                //call add message method for insert message into queue
+                queuedoc.AddMessage(message);
+                isCompleted = true;
+                return isCompleted;
+
+            }
+            catch (Exception exception)
+            {
+                LoggerHelper.WriteToLog(exception + " - Error while Adding  message into update trigger input queue "
+                  + exception.ToString(), CoreConstants.Priority.High, CoreConstants.Category.Error);
+
+                throw new DataAccessException(exception.Message, exception.InnerException);
+            }
+        }
         static void AddMessageComplete(IAsyncResult ar)
         {
             // do something
