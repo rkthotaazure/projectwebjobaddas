@@ -414,6 +414,8 @@ namespace adidas.clb.job.UpdateTriggering
                     //if minutes difference is with in RegularChecksWaitingTimeInMinutes(>=-8 and <=0) then invoke MissedUpdatesWaitingTimeInMinutes method()
                     if (waitingMinutes >= -(Convert.ToInt32(ConfigurationManager.AppSettings["MissedUpdatesWaitingTimeInMinutes"])) && waitingMinutes <= 0)
                     {
+                        //update backend next missing collecting update trigger value as true
+                        objnextcollectingTime.UpdaterBackendMissedUpdateTrigger(backend.BackendID);
                         UserBackendDAL objUserBackendDAL = new UserBackendDAL();
                         //collects the missed update userbackends,Requests and convert into update trigger message format and put into UT input queue
                         objUserBackendDAL.CollectUsersMissedUpdatesByBackend(backend.BackendID, currentTimestampForMissedUpdates);

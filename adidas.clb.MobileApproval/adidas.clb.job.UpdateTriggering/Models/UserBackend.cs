@@ -33,6 +33,16 @@ namespace adidas.clb.job.UpdateTriggering.Models
         public bool UpdateTriggered { get; set; }
         public int ExpectedLatency { get; set; }
         public DateTime LastUpdate { get; set; }
+        private DateTime? userbackendLastUpdate = null;
+        public DateTime? UserBackendLastUpdate
+        {
+            get
+            {
+                return this.userbackendLastUpdate.HasValue ? this.userbackendLastUpdate.Value : (DateTime?)null;
+            }
+
+            set { this.userbackendLastUpdate = value; }
+        }
         public int OpenRequests { get; set; }
         public int UrgentApprovals { get; set; }
         public int AverageRequestSize { get; set; }
@@ -88,5 +98,6 @@ namespace adidas.clb.job.UpdateTriggering.Models
             get { return this._responseInsertIntostorageTimestamp.HasValue ? this._responseInsertIntostorageTimestamp : (DateTime?)null; }
             set { this._responseInsertIntostorageTimestamp = value; }
         }
+        public int LastPullLatency { get; set; }
     }
 }

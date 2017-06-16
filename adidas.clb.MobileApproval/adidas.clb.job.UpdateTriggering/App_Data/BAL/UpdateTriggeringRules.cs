@@ -83,7 +83,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 DateTime expectedUpdateTime;
                 //Now + Max(Backend.AverageAllRequestsLatency;Backend.LastALLRequestLatency)*1.2
-                expectedUpdateTime = DateTime.Now.AddSeconds((Math.Max(BackendAverageALLRequestLatency, Convert.ToDouble(BackendLastALLRequestLatency)) * Convert.ToDouble(System.Configuration.ConfigurationManager.AppSettings["ConstantFraction"])));
+                expectedUpdateTime = DateTime.Now.AddMilliseconds((Math.Max(BackendAverageALLRequestLatency, Convert.ToDouble(BackendLastALLRequestLatency)) * Convert.ToDouble(System.Configuration.ConfigurationManager.AppSettings["ConstantFraction"])));
                 InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Compute and set Expected Updated Timestamp for Userbackend(UT Rule :: R3) ,  Response : Expected Update Time ::" + Convert.ToString(expectedUpdateTime));
                 return expectedUpdateTime;
             }
@@ -108,7 +108,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 DateTime requestExpectedUpdateTime;
                 //Now + Max(Backend.AverageRequestsLatency;Backend.LastRequestLatency)*1.2
-                requestExpectedUpdateTime = DateTime.Now.AddSeconds((Math.Max(BackendAverageRequestLatency, Convert.ToDouble(BackendLastRequestLatency)) * Convert.ToDouble(System.Configuration.ConfigurationManager.AppSettings["ConstantFraction"])));
+                requestExpectedUpdateTime = DateTime.Now.AddMilliseconds((Math.Max(BackendAverageRequestLatency, Convert.ToDouble(BackendLastRequestLatency)) * Convert.ToDouble(System.Configuration.ConfigurationManager.AppSettings["ConstantFraction"])));
                 InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Compute and set Expected Updated Timestamp for Request(UT Rule :: R4) ,  Response : Expected Update Time ::" + Convert.ToString(requestExpectedUpdateTime) + ",Backend LastRequestLatency:" + BackendLastRequestLatency + ",Backend AverageRequestLatency :" + BackendAverageRequestLatency);
                 return requestExpectedUpdateTime;
             }
@@ -136,7 +136,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 DateTime nextMissingCollectingTime;
                 //Now + Max(Backend.AverageRequestsLatency;Backend.LastRequestLatency)*1.2
-                nextMissingCollectingTime = MissedUpdateLastCollectingTime.AddSeconds((Math.Max(BackendAverageAllRequestsLatency, BackendLastAllRequestsLatency)) / 2);
+                nextMissingCollectingTime = MissedUpdateLastCollectingTime.AddMilliseconds((Math.Max(BackendAverageAllRequestsLatency, BackendLastAllRequestsLatency)) / 2);
                 InsightLogger.TrackEvent("updatetriggerinputqueue, Action :: Compute and set the Next Missing Collecting TimeStamp for backend(UT Rule :: R5) ,  Response : Next missed collecting Time ::" + Convert.ToString(nextMissingCollectingTime) + ", Current timestamp : " + Convert.ToString(MissedUpdateLastCollectingTime) + ", Backend AverageAllRequestsLatency: " + BackendAverageAllRequestsLatency + ", Backend LastAllRequestsLatency:" + BackendLastAllRequestsLatency);
                 return nextMissingCollectingTime;
             }

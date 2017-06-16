@@ -21,6 +21,7 @@ namespace adidas.clb.job.UpdateTriggering.Models
         public DateTime RegularUpdateNextCollectingTime { get; set; }
         public DateTime MissingUpdateLastCollectingTime { get; set; }
         public DateTime MissingUpdateNextCollectingTime { get; set; }
+        public bool MissingUpdateTrigger { get; set; }
 
     }
 }
