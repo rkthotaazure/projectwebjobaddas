@@ -46,6 +46,16 @@ namespace adidas.clb.job.RequestsUpdate.Models
 
             set { this.lastUpdate = value; }
         }
+        private DateTime? userbackendLastUpdate = null;
+        public DateTime? UserBackendLastUpdate
+        {
+            get
+            {
+                return this.userbackendLastUpdate.HasValue ? this.userbackendLastUpdate.Value : (DateTime?)null;
+            }
+
+            set { this.userbackendLastUpdate = value; }
+        }
         public Int32 OpenRequests { get; set; }        
         public Int32 AverageRequestSize { get; set; }
         public Int32 LastRequestSize { get; set; }
@@ -55,6 +65,7 @@ namespace adidas.clb.job.RequestsUpdate.Models
         public Int32 LastAllRequestsLatency { get; set; }
         public Int32 AverageRequestLatency { get; set; }
         public Int32 LastRequestLatency { get; set; }
+
         private DateTime? expectedUpdate = null;
         public DateTime? ExpectedUpdate
         {
@@ -107,5 +118,6 @@ namespace adidas.clb.job.RequestsUpdate.Models
             get { return this._responseInsertIntostorageTimestamp.HasValue ? this._responseInsertIntostorageTimestamp : (DateTime?)null; }
             set { this._responseInsertIntostorageTimestamp = value; }
         }
+        public int LastPullLatency { get; set; }
     }
 }

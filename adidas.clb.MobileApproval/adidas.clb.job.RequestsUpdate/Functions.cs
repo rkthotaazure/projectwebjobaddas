@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Newtonsoft.Json;
 using adidas.clb.job.RequestsUpdate.APP_Code.BL;
+using adidas.clb.job.RequestsUpdate.APP_Code.DAL;
 using adidas.clb.job.RequestsUpdate.Exceptions;
 using adidas.clb.job.RequestsUpdate.Models;
 using adidas.clb.job.RequestsUpdate.Utility;
@@ -39,18 +40,34 @@ namespace adidas.clb.job.RequestsUpdate
                 DateTime requestUpdateMsgTriggerTimestamp = DateTime.Now;
                 //deserialize Queue message to Requests 
                 RequestsUpdateData requestsdata = JsonConvert.DeserializeObject<RequestsUpdateData>(message);
-               
+
                 List<BackendRequest> backendrequestslist = requestsdata.Requests;
                 RequestUpdateBL requsetupdatebl = new RequestUpdateBL();
                 //get backend to get missingconfirmationlimit for backend and also to update flags
                 BackendEntity backend = requsetupdatebl.Getbackend(requestsdata.BackendID);
+                //declare int variable for get total request size from backend response
                 int TotalRequestsize = 0;
+                //declare int variable for get total request latency from backend response
                 int TotalRequestlatency = 0;
+                //declare int variable for get total request count from backend response
                 int requestcount = 0;
+                DateTime? utQueueEntryTimestamp = null;
                 //check if requests were available
                 if (backendrequestslist != null && backendrequestslist.Count > 0)
                 {
-                    requestcount = backendrequestslist.Count;
+                    //get request count in backend response
+                    requestcount = backendrequestslist.Count;                   
+                    if (!string.IsNullOrEmpty(requestsdata.UserId) && !string.IsNullOrEmpty(requestsdata.BackendID))
+                    {
+                        //calling DAL method for getting userbackend entity details
+                        RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
+                        UserBackendEntity userbackend = requestupdatedal.GetUserBackend(requestsdata.UserId, requestsdata.BackendID);
+                        if (userbackend != null)
+                        {
+                            //if userbackend is not null then get userbackend UT queue message entry timestamp 
+                            utQueueEntryTimestamp = userbackend.QueueMsgEntryTimestamp;
+                        }
+                    }
                     //looping through each backendrequest to add requests , approvers and fields for each requet
                     InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:looping all requests");
                     foreach (BackendRequest backendrequest in backendrequestslist)
@@ -60,11 +77,13 @@ namespace adidas.clb.job.RequestsUpdate
                         List<Field> genericInfoFields = backendrequest.RequestsList.Fields.GenericInfo;
                         List<Field> overviewFields = backendrequest.RequestsList.Fields.Overview;
                         Request request = backendrequest.RequestsList;
+                        int reqLatency = 0;
                         //calling BL methods to add request , approval, approvers and fields
                         if (!string.IsNullOrEmpty(request.UserID))
                         {
+                            reqLatency = 0;
                             InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:clearing request waiting flag, response:success");
-                            requsetupdatebl.AddUpdateRequest(backendrequest, request.UserID, requestsdata.BackendID);
+                            reqLatency = requsetupdatebl.AddUpdateRequest(backendrequest, request.UserID, requestsdata.BackendID, requestUpdateMsgTriggerTimestamp, utQueueEntryTimestamp);
                             InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:update request object, response:success, requestID:" + request.ID);
                             requsetupdatebl.AddUpdateApproval(approvers, request.ID, backendrequest.RequestsList.UserID, requestsdata.BackendID, backend.MissingConfirmationsLimit, request.Title);
                             InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:update/remove/create approval object, response:success");
@@ -75,10 +94,20 @@ namespace adidas.clb.job.RequestsUpdate
                             //caliculating total of size for all requests
                             TotalRequestsize = TotalRequestsize + requestsize;
                             //caliculating total of latency for all requests
-                            TotalRequestlatency = TotalRequestlatency + request.Latency;
+                            if (reqLatency > 0)
+                            {
+                                //this is exisiting request in azure storage
+                                TotalRequestlatency = TotalRequestlatency + reqLatency;
+                            }
+                            else
+                            { //this is new request 
+                                TotalRequestlatency = TotalRequestlatency + request.Latency;
+
+                            }
+
                         }
                     }
-                   
+
                 }
                 //note down timestamp value once response sit into service layer
                 DateTime responseInsertIntostorageTimestamp = DateTime.Now;
