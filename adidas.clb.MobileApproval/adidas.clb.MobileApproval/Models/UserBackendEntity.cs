@@ -42,7 +42,17 @@ namespace adidas.clb.MobileApproval.Models
             }
 
             set { this.lastUpdate = value; }
-        }    
+        }
+        private DateTime? userbackendLastUpdate = null;
+        public DateTime? UserBackendLastUpdate
+        {
+            get
+            {
+                return this.userbackendLastUpdate.HasValue ? this.userbackendLastUpdate.Value : (DateTime?)null;
+            }
+
+            set { this.userbackendLastUpdate = value; }
+        }
         public Int32 OpenRequests { get; set; }        
         public Int32 UrgentApprovals { get; set; }
         public Int32 AverageRequestSize { get; set; }
@@ -107,6 +117,7 @@ namespace adidas.clb.MobileApproval.Models
             get { return this._responseInsertIntostorageTimestamp.HasValue ? this._responseInsertIntostorageTimestamp : (DateTime?)null; }
             set { this._responseInsertIntostorageTimestamp = value; }
         }
+        public int LastPullLatency { get; set; }
 
     }
 }

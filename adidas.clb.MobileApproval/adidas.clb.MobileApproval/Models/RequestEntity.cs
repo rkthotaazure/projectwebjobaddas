@@ -56,5 +56,47 @@ namespace adidas.clb.MobileApproval.Models
 
             set { this.expectedupdate = value; }
         }
+        private DateTime? _queueMsgEntryTimestamp = null;
+        //This Property repersents  timestamp when message insert into update triggering queue
+        public DateTime? Request_QueueMsgEntryTimestamp
+        {
+            get { return this._queueMsgEntryTimestamp.HasValue ? this._queueMsgEntryTimestamp : (DateTime?)null; }
+            set { this._queueMsgEntryTimestamp = value; }
+        }
+        private DateTime? _queueTriggerTimestamp = null;
+        //This Property repersents  timestamp when message trigger by update triggering queue
+        public DateTime? Request_QueueMsgTriggerTimestamp
+        {
+            get { return this._queueTriggerTimestamp.HasValue ? this._queueTriggerTimestamp : (DateTime?)null; }
+            set { this._queueTriggerTimestamp = value; }
+        }
+        private DateTime? _backendInvokeTimestamp = null;
+        //This Property repersents  timestamp when backend invoked by update triggering queue with message
+        public DateTime? Request_BackendInvokeTimestamp
+        {
+            get { return this._backendInvokeTimestamp.HasValue ? this._backendInvokeTimestamp : (DateTime?)null; }
+            set { this._backendInvokeTimestamp = value; }
+        }
+        private DateTime? _requestUpdateMsgEntryTimestamp = null;
+        //This Property repersents  timestamp when backend response inserte into request update queue
+        public DateTime? Request_ReqUpdateQueueMsgEntryTimestamp
+        {
+            get { return this._requestUpdateMsgEntryTimestamp.HasValue ? this._requestUpdateMsgEntryTimestamp : (DateTime?)null; }
+            set { this._requestUpdateMsgEntryTimestamp = value; }
+        }
+        private DateTime? _requestUpdateMsgTriggerTimestamp = null;
+        //This Property repersents  timestamp when request update message triggered by request update module
+        public DateTime? Request_ReqUpdateQueueMsgTriggerTimestamp
+        {
+            get { return this._requestUpdateMsgTriggerTimestamp.HasValue ? this._requestUpdateMsgTriggerTimestamp : (DateTime?)null; }
+            set { this._requestUpdateMsgTriggerTimestamp = value; }
+        }
+        private DateTime? _responseInsertIntostorageTimestamp = null;
+        //This Property repersents  timestamp when response inser into table storage
+        public DateTime? Request_ResponseInsertIntostorageTimestamp
+        {
+            get { return this._responseInsertIntostorageTimestamp.HasValue ? this._responseInsertIntostorageTimestamp : (DateTime?)null; }
+            set { this._responseInsertIntostorageTimestamp = value; }
+        }
     }
 }

@@ -144,22 +144,26 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Personalization
                 updateTriggerMessage.GetPDFs = Convert.ToBoolean(ConfigurationManager.AppSettings[CoreConstants.Config.GetPDFs]);
                 //calling data access layer method to add message to queue
                 PersonalizationDAL personalizationdal = new PersonalizationDAL();
-                personalizationdal.AddUpdateTriggerMessageToQueue(updateTriggerMessage);
-                DateTime entryTimestamp = DateTime.Now;
-                //update userbackend's queue message entry time stamp
-                foreach (UserBackendDTO userbackend in userbackendslist)
+                //if msg successfully added  to queue then update userbackend queue message entry time stamp
+                if (personalizationdal.AddUpdateTriggerMessageToQueue(updateTriggerMessage))
                 {
-                    //reterive usebackend entity
-                    UserBackendEntity userbackendEntity = DataProvider.RetrieveEntity<UserBackendEntity>(azureTableUserDeviceConfiguration, string.Concat(CoreConstants.AzureTables.UserBackendPK, userID), userbackend.backend.BackendID);
-                    if (userbackendEntity != null)
+                    DateTime entryTimestamp = DateTime.Now;
+                    //update userbackend's queue message entry time stamp
+                    foreach (UserBackendDTO userbackend in userbackendslist)
                     {
-                        //set timestamp
-                        userbackendEntity.QueueMsgEntryTimestamp = entryTimestamp;
-                        //call update entity method
-                        DataProvider.UpdateEntity<UserBackendEntity>(azureTableUserDeviceConfiguration, userbackendEntity);
+                        //reterive usebackend entity
+                        UserBackendEntity userbackendEntity = DataProvider.RetrieveEntity<UserBackendEntity>(azureTableUserDeviceConfiguration, string.Concat(CoreConstants.AzureTables.UserBackendPK, userID), userbackend.backend.BackendID);
+                        if (userbackendEntity != null)
+                        {
+                            //set timestamp
+                            userbackendEntity.QueueMsgEntryTimestamp = entryTimestamp;
+                            //call update entity method
+                            DataProvider.UpdateEntity<UserBackendEntity>(azureTableUserDeviceConfiguration, userbackendEntity);
+                        }
+
                     }
-                     
                 }
+                
             }
             catch (DataAccessException DALexception)
             {

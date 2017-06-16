@@ -101,7 +101,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
                 //adding backend to message object
                 UpdateTriggerBackend triggerbackend = new UpdateTriggerBackend();
                 triggerbackend.BackendID = userbackend.BackendID;
-                updateTriggerMessage.ChangeAfter = userbackend.LastUpdate;
+                updateTriggerMessage.ChangeAfter = userbackend.UserBackendLastUpdate;
                 updatetriggerbackendlist.Add(triggerbackend);
                 usermsg.Backends = updatetriggerbackendlist;
                 //creating list to add users                
@@ -110,13 +110,32 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
                 updateTriggerMessage.Users = usermsglist;
                 //calling data access layer method to add message to queue
                 PersonalizationDAL personalizationdal = new PersonalizationDAL();
+                //if it is force update
                 if (isForceUpdate)
                 {
-                    personalizationdal.ForceUpdate_AddUpdateTriggerMessageToQueue(updateTriggerMessage);
+                    //add message to vip queue
+                    //if msg successfully added  to queue then update userbackend queue message entry time stamp
+                    if (personalizationdal.ForceUpdate_AddUpdateTriggerMessageToQueue(updateTriggerMessage))
+                    {
+                        //update userbackend queue message entry time stamp
+                        userbackend.QueueMsgEntryTimestamp = DateTime.Now;
+                        //call update entity method , which updates userbackend ut message queue entry timestamp value
+                        DataProvider.UpdateEntity<UserBackendEntity>(azureTableUserDeviceConfiguration, userbackend);
+
+                    }
                 }
+                //if it is regular update
                 else
                 {
-                    personalizationdal.AddUpdateTriggerMessageToQueue(updateTriggerMessage);
+                    //add message to regular queue
+                    //if msg successfully added  to queue then update userbackend queue message entry time stamp
+                    if (personalizationdal.AddUpdateTriggerMessageToQueue(updateTriggerMessage))
+                    {
+                        //update userbackend queue message entry time stamp
+                        userbackend.QueueMsgEntryTimestamp = DateTime.Now;
+                        //call update entity method , which updates userbackend ut message queue entry timestamp value
+                        DataProvider.UpdateEntity<UserBackendEntity>(azureTableUserDeviceConfiguration, userbackend);
+                    }
                 }
 
 
@@ -1150,10 +1169,10 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
                         if (reqmissedUpdateslst.Count > 0)
                         {
                             //parse data to UpdateTriggeringMsg class and seralize UpdateTriggeringMsg object into json string 
-                            lstrmsgFormat = this.ConvertRequestUpdateMsgToUpdateTriggeringMsg(reqmissedUpdateslst, rBackendID, rUserID);
+                            this.ConvertRequestUpdateMsgToUpdateTriggeringMsg(reqmissedUpdateslst, rBackendID, rUserID);
                             //put json string into update triggering input queue
-                            SynchDAL sdal = new SynchDAL();
-                            sdal.AddMessagestoInputQueue(lstrmsgFormat);
+                            //SynchDAL sdal = new SynchDAL();
+                            //sdal.AddMessagestoInputQueue(lstrmsgFormat);
 
                         }
                     }
@@ -1228,7 +1247,7 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
         /// <param name="objrequestSynch"></param>
         /// <param name="rBackendName"></param>
         /// <returns></returns>
-        private List<string> ConvertRequestUpdateMsgToUpdateTriggeringMsg(List<RequestEntity> reqlst, string rBackendName, string userID)
+        private void ConvertRequestUpdateMsgToUpdateTriggeringMsg(List<RequestEntity> reqlst, string rBackendName, string userID)
         {
             string callerMethodName = string.Empty;
             try
@@ -1286,12 +1305,26 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
                     };
                     //Serialize UpdateTriggeringMsg Object into json string
                     requpdatetriggeringmsg = JsonConvert.SerializeObject(ObjUTMsg);
-                    //add json msg to string list
-                    lstUtMsgs.Add(requpdatetriggeringmsg);
+                    ////add json msg to string list
+                    //lstUtMsgs.Add(requpdatetriggeringmsg);
+                    //add json msg to queue
+                    if (!string.IsNullOrEmpty(requpdatetriggeringmsg))
+                    {
+                        //put json string into update triggering missed updates input queue
+                        SynchDAL sObj = new DAL.Synch.SynchDAL();
+                        if (sObj.AddMessagestoInputQueue(requpdatetriggeringmsg))
+                        {
+                            DateTime curEntryTimestamp = DateTime.Now;
+                            //update request entity queue message entry timestamp                        
+                            this.UpdateRequestQueueMessageEntryTimestamp(lstentites, curEntryTimestamp);
+                        }
+
+                    }
+
                 }
 
 
-                return lstUtMsgs;
+                //return lstUtMsgs;
             }
             catch (Exception exception)
             {
@@ -1318,7 +1351,35 @@ namespace adidas.clb.MobileApproval.App_Code.BL.Synch
         {
             return TimeSpan.FromMinutes(minutes).TotalSeconds;
         }
-
+        /// <summary>
+        /// This method updates the Request QueueMsg Entry Timestamp value
+        /// </summary>
+        /// <param name="lstrequests"></param>
+        /// <param name="entryTimestamp"></param>
+        public void UpdateRequestQueueMessageEntryTimestamp(List<RequestEntity> lstrequests, DateTime entryTimestamp)
+        {
+            string callerMethodName = string.Empty;
+            try
+            {
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                foreach (RequestEntity reqEnt in lstrequests)
+                {
+                    // update request Request_QueueMsgEntryTimestamp value 
+                    reqEnt.Request_QueueMsgEntryTimestamp = entryTimestamp;
+                    DataProvider.UpdateEntity<RequestEntity>(azureTableRequestTransactions, reqEnt);
+                }
+            }
+            catch (BusinessLogicException dalexception)
+            {
+                throw dalexception;
+            }
+            catch (Exception exception)
+            {
+                InsightLogger.Exception(exception.Message, exception, callerMethodName);
+                throw new DataAccessException(exception.Message, exception.InnerException);
+            }
+        }
 
     }
 }
