@@ -308,6 +308,7 @@ namespace adidas.clb.job.RequestsUpdate.Utility
                 //insert list of entities into batch operation
                 foreach (T entity in entitieslist)
                 {
+                    entity.ETag = "*";
                     batchOperation.Add(TableOperation.Delete(entity));
                 }
                 UserBackendConfigurationTable.ExecuteBatch(batchOperation);                
