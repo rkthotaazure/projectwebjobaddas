@@ -25,23 +25,23 @@ namespace adidas.clb.job.UpdateTriggering
     // To learn more about Microsoft Azure WebJobs SDK, please see http://go.microsoft.com/fwlink/?LinkID=320976
     public class Program
     {
+        //Application insights interface reference for logging the error/ custom events details into Application Insight azure service.
         static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
         // Please set the following connection strings in app.config for this WebJob to run:
         // AzureWebJobsDashboard and AzureWebJobsStorage
         static void Main()
         {
             try
-            {             
-                
+            {
+                //The JobHostConfiguration sets the configurable values for jobHost object
                 JobHostConfiguration config = new JobHostConfiguration();
                 //QueueTrigger function runs singleton on a single instance
                 config.Queues.BatchSize = Convert.ToInt32(ConfigurationManager.AppSettings["QueueBatchSize"]);
                 // Add Triggers and Binders for Timer Trigger.               
                 config.UseTimers();
                 config.NameResolver = new MyResolver();
-                JobHost host = new JobHost(config);
-
-                // This method inserts/updates the next collecting time(Regular/Missed) in Azure ReferenceData Table
+                //The JobHost object is a container for a set of background functions
+                JobHost host = new JobHost(config);             
                 // This method should not run continuously,it runs only when the web job has started.
                 host.Call(typeof(Program).GetMethod("UpdateNextCollectingTime"));
                 // The following code ensures that the WebJob will be running continuously
@@ -64,7 +64,7 @@ namespace adidas.clb.job.UpdateTriggering
                 try
                 {
                     string queueName = string.Empty;
-                    //if updatetriggering queue method has triggered then send ut queue name to method call
+                    //if updatetriggering queue method has triggered then send ut queue name to method call based on queue trigger
                     if (name == CoreConstants.AzureQueues.UTQueue)
                     {
                         queueName = Convert.ToString(ConfigurationManager.AppSettings["UpdateTriggerInputQueue"]);
@@ -88,7 +88,7 @@ namespace adidas.clb.job.UpdateTriggering
         }
         /// <summary>
         /// This method inserts/updates the next collecting time(Regular/Missed) in Azure ReferenceData Table
-        /// This method should not run continuously,it runs only when the web job has started
+        /// This method should not run continuously,it should run only once when the web job has started.
         /// </summary>
         [NoAutomaticTrigger]
         public static void UpdateNextCollectingTime()

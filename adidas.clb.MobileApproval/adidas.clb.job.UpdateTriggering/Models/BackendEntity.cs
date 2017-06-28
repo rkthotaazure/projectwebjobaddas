@@ -13,7 +13,7 @@ using Microsoft.WindowsAzure.Storage.Table;
 namespace adidas.clb.job.UpdateTriggering.Models
 {
     /// <summary>
-    /// class which implements model for backendentity.
+    /// This class defines  model for backendentity.
     /// </summary>
     public class BackendEntity : TableEntity
     {

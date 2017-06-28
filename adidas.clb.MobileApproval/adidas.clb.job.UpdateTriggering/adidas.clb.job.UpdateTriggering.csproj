@@ -134,29 +134,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App_Data\BAL\GeneratePDF.cs" />
     <Compile Include="App_Data\BAL\UpdateTriggeringRules.cs" />
-    <Compile Include="App_Data\BAL\Waiter.cs" />
-    <Compile Include="App_Data\DAL\BackgroundTaskRunner.cs" />
     <Compile Include="App_Data\DAL\DataProvider.cs" />
-    <Compile Include="App_Data\DAL\GetCarPDFDetailsDAL.cs" />
-    <Compile Include="App_Data\DAL\GetStorePDFDetailsDAL.cs" />
     <Compile Include="App_Data\DAL\NextUserCollectingTimeDAL.cs" />
-    <Compile Include="App_Data\DAL\RequestSynchDAL.cs" />
-    <Compile Include="App_Data\DAL\SQLDataProvider.cs" />
     <Compile Include="App_Data\DAL\UserBackendDAL.cs" />
     <Compile Include="Exceptions\BusinessLogicException.cs" />
     <Compile Include="Exceptions\CoreException.cs" />
     <Compile Include="Exceptions\DataAccessException.cs" />
     <Compile Include="Exceptions\ServiceLayerException.cs" />
     <Compile Include="Helpers\APIServiceProvider.cs" />
-    <Compile Include="Helpers\AzCopyConfig.cs" />
     <Compile Include="Helpers\AzureQueues.cs" />
     <Compile Include="Helpers\UrlSettings.cs" />
     <Compile Include="Models\ApprovalEntity.cs" />
     <Compile Include="Models\ApproverEntity.cs" />
     <Compile Include="Models\BackendEntity.cs" />
-    <Compile Include="Models\CarApprovalModel.cs" />
     <Compile Include="Models\Error.cs" />
     <Compile Include="Models\FieldEntity.cs" />
     <Compile Include="Models\NextUserCollectingTimeEntity.cs" />
@@ -165,7 +156,6 @@
     <Compile Include="Models\RequestsUpdateQuery.cs" />
     <Compile Include="Models\RequestSynchEntity.cs" />
     <Compile Include="Models\RequestEntity.cs" />
-    <Compile Include="Models\StoreApprovalModel.cs" />
     <Compile Include="Models\UpdateTriggeringMsg.cs" />
     <Compile Include="Models\UserBackend.cs" />
     <Compile Include="Models\UserBackendEntity.cs" />
@@ -173,7 +163,6 @@
     <Compile Include="Functions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility\AppInsightLogger.cs" />
-    <Compile Include="Utility\AzureWebJobPath.cs" />
     <Compile Include="Utility\CallerInformation.cs" />
     <Compile Include="Utility\Constants.cs" />
     <Compile Include="Utility\IAppInsight.cs" />

@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace adidas.clb.job.UpdateTriggering.Models
 {
     /// <summary>
-    /// class which implements model for UpdateTriggeringMsg  obj.
+    /// This class defines model for Update Triggering message
     /// </summary>
     public class UpdateTriggeringMsg
     {

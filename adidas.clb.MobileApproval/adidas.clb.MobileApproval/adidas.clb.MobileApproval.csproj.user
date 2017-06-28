@@ -8,8 +8,8 @@
     <WebStackScaffolding_IsReferencingScriptLibrariesSelected>True</WebStackScaffolding_IsReferencingScriptLibrariesSelected>
     <WebStackScaffolding_LayoutPageFile />
     <WebStackScaffolding_IsAsyncSelected>False</WebStackScaffolding_IsAsyncSelected>
-    <ProjectView>ShowAllFiles</ProjectView>
-    <NameOfLastUsedPublishProfile>mobileapproval - Web Deploy %283%29</NameOfLastUsedPublishProfile>
+    <ProjectView>ProjectFiles</ProjectView>
+    <NameOfLastUsedPublishProfile>t-mobileapproval-api - Web Deploy %282%29</NameOfLastUsedPublishProfile>
     <IISExpressSSLPort>44344</IISExpressSSLPort>
   </PropertyGroup>
   <ProjectExtensions>

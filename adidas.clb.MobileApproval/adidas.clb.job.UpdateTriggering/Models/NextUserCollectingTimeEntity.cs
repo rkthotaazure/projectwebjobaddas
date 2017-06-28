@@ -1,4 +1,9 @@
-﻿using System;
+﻿//-----------------------------------------------------------
+// <copyright file="FieldEntity.cs" company="adidas AG">
+// Copyright (C) 2016 adidas AG.
+// </copyright>
+//-----------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +12,10 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 namespace adidas.clb.job.UpdateTriggering.Models
 {
-    class NextUserCollectingTimeEntity : TableEntity
+    /// <summary>
+    /// This class defines model for Next Collecting Time of the user entity
+    /// </summary>
+    public class NextUserCollectingTimeEntity : TableEntity
     {
         public NextUserCollectingTimeEntity(string partitionkey, string rowkey)
         {

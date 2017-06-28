@@ -25,6 +25,8 @@ namespace adidas.clb.job.RequestsUpdate.Utility
         bool IsTraceEnabledForExceptions = Convert.ToBoolean(ConfigurationManager.AppSettings["AppInsightTraceForExceptions"]);
         //Read IsTraceEnabledForEvents value from app.config
         bool IsTraceEnabledForEvents = Convert.ToBoolean(ConfigurationManager.AppSettings["AppInsightTraceForCustomEvents"]);
+        //Read IsTraceEnabledForEvents value from app.config
+        bool IsTraceEnabledForSpecificEvents = Convert.ToBoolean(ConfigurationManager.AppSettings["AppInsightTraceForSpecificCustomEvents"]);
         //Read IsTraceEnabledForMetrics value from app.config
         bool IsTraceEnabledForMetrics = Convert.ToBoolean(ConfigurationManager.AppSettings["AppInsightTraceForMetrics"]);
         private AppInsightLogger() { }
@@ -50,8 +52,23 @@ namespace adidas.clb.job.RequestsUpdate.Utility
                 //flush the buffer data
                 client.Flush();
             }
-        }      
-      
+        }
+        /// <summary>
+        /// This method logs specific events into app insights
+        /// </summary>
+        /// <param name="message"></param>
+        public void TrackSpecificEvent(string message)
+        {
+            if (IsTraceEnabledForSpecificEvents)
+            {
+                //assign Instrumentation Key to TelemetryClient object            
+                client.InstrumentationKey = InstrumentationKey;
+                client.TrackEvent(message);
+                //flush the buffer data
+                client.Flush();
+            }
+        }
+
         /// <summary>
         /// This method logs Performance measurements such as queue lengths...etc.
         /// </summary>

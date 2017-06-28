@@ -1,4 +1,9 @@
-﻿using System;
+﻿//-----------------------------------------------------------
+// <copyright file="Program.cs" company="adidas AG">
+// Copyright (C) 2016 adidas AG.
+// </copyright>
+//-----------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
@@ -16,6 +21,9 @@ using Newtonsoft.Json;
 
 namespace adidas.clb.job.UpdateTriggering.Helpers
 {
+    /// <summary>
+    /// This class provides the methods for calling the backend API for requests update  based on UseriD /Request(id's)
+    /// </summary>
     class APIServiceProvider
     {
         //Application insights interface reference for logging the error details into Application Insight azure service.

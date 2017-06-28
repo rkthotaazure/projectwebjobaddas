@@ -31,28 +31,33 @@ using System.Net.Http.Headers;
 namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
 {
     /// <summary>
-    /// Implements UserBackendDAL Class
+    /// This class provides methods for preparing update triggering message into queue /
+    /// Processing the  Update triggering message and invoke the backend API
+    /// Insert / update of userbackend next collecting time
+    /// Verify missing updates & update request details
     /// </summary>
-    class UserBackendDAL
+   public class UserBackendDAL
     {
 
         //Application insights interface reference for logging the error details into Application Insight azure service.
         static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
-        //getting Max Retry count,MaxThreadSleepInMilliSeconds from web.config
+        //getting Max Retry count,MaxThreadSleepInMilliSeconds from configuration file
         public static int maxThreadSleepInMilliSeconds = Convert.ToInt32(ConfigurationManager.AppSettings["MaxThreadSleepInMilliSeconds"]);
         public static int maxRetryCount = Convert.ToInt32(ConfigurationManager.AppSettings["MaxRetryCount"]);
+        //get Reference data azure table name from configuration file
         public static string azureTableReference = ConfigurationManager.AppSettings["AzureTables.ReferenceData"];
+        //get UserDeviceConfiguration azure table name from configuration file
         public static string azureTableUserDeviceConfiguration = ConfigurationManager.AppSettings["AzureTables.UserDeviceConfiguration"];
-        //read GetPDFs value from configuration
+        //read GetPDFs boolean values from configuration
         public static bool IsGeneratePdfs = Convert.ToBoolean(ConfigurationManager.AppSettings["GetPDFs"]);
         public static bool IsGeneratePdfsForRequest = Convert.ToBoolean(ConfigurationManager.AppSettings["GetPDFsForRequest"]);
         //read VIP Flag  value from configuration
         public static bool IsVIPFlag = Convert.ToBoolean(ConfigurationManager.AppSettings["VIPFlag"]);
-        //RequestTransactions
+        // get RequestTransactions azure table name from configuration file
         public static string azureTableRequestTransactions = ConfigurationManager.AppSettings["AzureTables.RequestTransactions"];
-        //RequestTxArchival
+        //get RequestTxArchival azure table name from configuration file
         public static string azureTableRequestTxArchival = ConfigurationManager.AppSettings["AzureTables.RequestTxArchival"];
-        //batchsize
+        //get batchsize from configuration file
         public static int batchsize = Convert.ToInt32(ConfigurationManager.AppSettings["ListBatchSize"]);
         //decalre UpdateTriggeringRules calss object 
         private UpdateTriggeringRules utRule;
@@ -84,6 +89,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 tasks[0] = Task.Factory.StartNew(() => this.ReadUsrBackendsDataFromAzureTable(UserDeviceConfigurationTable, tquery, entityCollection), TaskCreationOptions.LongRunning);
                 //write update trigger messages into input queue
                 tasks[1] = Task.Factory.StartNew(() => this.WriteMessagesIntoInputQueue(entityCollection, BackendID, currentTime), TaskCreationOptions.LongRunning);
+                //get task timeout period from web.config
                 int timeoutperiod = Convert.ToInt32(CloudConfigurationManager.GetSetting("timeoutperiod"));
                 if (!Task.WaitAll(tasks, timeoutperiod, cts.Token))
                 {
@@ -133,7 +139,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     {
                         tableContinuationToken = null;
                     }
-
+                    //update row count
                     rowcount += queryResponse.Results.Count;
                     lstUserBackends = new List<UserBackend>();
                     //adding result set to List<UserBackendEntity>
@@ -190,21 +196,14 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                                         DataProvider.UpdateEntity<UserBackend>(azureTableUserDeviceConfiguration, userBackend);
                                     }
                                     
-                                }
-
-                                // msgFormat.Add(this.ConvertUserUpdateMsgToUpdateTriggeringMsg(userBackend, BackendID));
+                                }                                
 
                             }
                             else
                             {
                                 InsightLogger.TrackEvent("UpdateTriggering, Action :: Is User [ " + userBackend.UserID + " ] need update for backend:[" + userBackend.BackendID + " ] based on UT Rule R2 , Response :: false");
                             }
-                        }
-                        ////put json string into update triggering input queue
-                        //if (msgFormat.Count > 0)
-                        //{
-                        //    this.AddMessagestoInputQueue(msgFormat, true);
-                        //}
+                        }                       
 
                     }
 
@@ -239,12 +238,15 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 CloudQueueClient cqdocClient = AzureQueues.GetQueueClient();
                 // Retrieve a reference to a queue.
                 CloudQueue queuedoc;
+                //check is it regular update / missed update?
                 if (IsregularQueue)
                 {
+                    //if it regular get update triggering queue reference
                     queuedoc = AzureQueues.GetInputQueue(cqdocClient);
                 }
                 else
                 {
+                    //else  get reference from missed updates queue
                     queuedoc = AzureQueues.GetMissedUpdatesInputQueue(cqdocClient);
                 }
 
@@ -257,6 +259,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
 
                     string dMessage = string.Empty;
                     dMessage = content;
+                    //create cloud message
                     CloudQueueMessage message = new CloudQueueMessage(dMessage);
                     do
                     {
@@ -311,9 +314,10 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 CloudQueueClient cqdocClient = AzureQueues.GetQueueClient();
                 // Retrieve a reference to a queue.
                 CloudQueue queuedoc;
-                //regular queue
+                //check is it regular update / missed update?
                 if (IsregularQueue)
                 {
+                    //if it regular get update triggering queue reference
                     queuedoc = AzureQueues.GetInputQueue(cqdocClient);
                 }
                 else
@@ -464,7 +468,10 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
 
                 Task[] tasks = new Task[2];
                 var entityUserMissedupdateCollection = new BlockingCollection<List<UserBackend>>();
+                //first task reads user backends from table
                 tasks[0] = Task.Factory.StartNew(() => this.ReadMissedUpdatesFromUsrBackendsDataFromAzureTable(UserMissedDeviceConfigurationTable, tquerymissedupdate, entityUserMissedupdateCollection), TaskCreationOptions.LongRunning);
+                //second task checks userbackend and corresponding requests missed update or not and if any missed update then write those userbackends and requests into 
+                //update triggering missed updates queue in UpdateTriggering / Request Update Object json format
                 tasks[1] = Task.Factory.StartNew(() => this.WriteMissedUpdatesMessagesIntoInputQueue(entityUserMissedupdateCollection, BackendID, currentTimestamp), TaskCreationOptions.LongRunning);
                 int timeoutperiod = Convert.ToInt32(CloudConfigurationManager.GetSetting("timeoutperiod"));
                 if (!Task.WaitAll(tasks, timeoutperiod, cts.Token))
@@ -590,12 +597,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                             //Checking is any request missed update for this userbackend
                             this.CollectsRequestsMissedUpdateByBackendID(muserBackend.BackendID, userID, curtime, updateFrequency);
 
-                        }
-                        ////put json string into update triggering input queue
-                        //if (lstmsgFormat.Count > 0)
-                        //{
-                        //    this.AddMessagestoInputQueue(lstmsgFormat, false);
-                        //}
+                        }                      
 
                     }
 
@@ -789,8 +791,12 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 //create task which will parallelly read & checks the Rules from azure table
                 Task[] taskRequestCollection = new Task[2];
                 var entityMissedupdateRequestsCollection = new BlockingCollection<List<RequestEntity>>();
+                //read all the request associated to user 
                 taskRequestCollection[0] = Task.Factory.StartNew(() => ReadMissedUpdatesRequestsByBackend(RequestsMissedDeviceConfigurationTable, tquerymissedRequests, entityMissedupdateRequestsCollection), TaskCreationOptions.LongRunning);
+                //verify is any request missed update, 
+                //if any request missed update then write those request's into update triggering missed update queue in request update class json format
                 taskRequestCollection[1] = Task.Factory.StartNew(() => WriteMissedUpdatesRequestsIntoInputQueue(entityMissedupdateRequestsCollection, backendID, userID, timestamp, userUpdateFrequency), TaskCreationOptions.LongRunning);
+                //get task timeoutperiod from web.config
                 int requestTimeoutperiod = Convert.ToInt32(CloudConfigurationManager.GetSetting("timeoutperiod"));
                 if (!Task.WaitAll(taskRequestCollection, requestTimeoutperiod, ctsRequests.Token))
                 {
@@ -1243,17 +1249,13 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                 string statusfilter = TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.Status, QueryComparisons.NotEqual, Convert.ToString(ConfigurationManager.AppSettings["RequestStatus"]));
                 string combinedFilter = string.Format("({0}) {1} ({2}) {3} ({4})", partitionFilter, TableOperators.And, timestampFilter, TableOperators.And, statusfilter);
                 //combine all the filters with And operator
-                TableQuery<RequestEntity> tqueryrequests = new TableQuery<RequestEntity>().Where(combinedFilter);
-
-
-
-
-
-
+                TableQuery<RequestEntity> tqueryrequests = new TableQuery<RequestEntity>().Where(combinedFilter);                
                 //create task which will parallelly read & checks the Rules from azure table
                 Task[] reqtaskCollection = new Task[2];
                 var entityReqCollection = new BlockingCollection<List<RequestEntity>>();
+                //Read all the requests and associated approval tasks,approvers,fileds data from azure table
                 reqtaskCollection[0] = Task.Factory.StartNew(() => ReadRequestsFromTransaction(RequestsMissedDeviceConfigurationTable, tqueryrequests, entityReqCollection), TaskCreationOptions.LongRunning);
+                //archive requests 
                 reqtaskCollection[1] = Task.Factory.StartNew(() => WriteRequeststoArchivalTable(entityReqCollection, userName, timestamp), TaskCreationOptions.LongRunning);
                 int requestTimeoutperiod = Convert.ToInt32(CloudConfigurationManager.GetSetting("timeoutperiod"));
                 if (!Task.WaitAll(reqtaskCollection, requestTimeoutperiod, ctsReqTasks.Token))

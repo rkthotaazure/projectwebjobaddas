@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace adidas.clb.job.UpdateTriggering.Models
 {
     /// <summary>
-    /// class which implements model for RequestsUpdateQuery  obj.
+    /// This class defines model for Request Update Query.
     /// </summary>
     public class RequestsUpdateQuery
     {

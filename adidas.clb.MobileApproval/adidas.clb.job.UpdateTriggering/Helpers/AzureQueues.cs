@@ -1,4 +1,9 @@
-﻿using System;
+﻿//-----------------------------------------------------------
+// <copyright file="Program.cs" company="adidas AG">
+// Copyright (C) 2016 adidas AG.
+// </copyright>
+//-----------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +19,9 @@ using adidas.clb.job.UpdateTriggering.Exceptions;
 using adidas.clb.job.UpdateTriggering.Utility;
 namespace adidas.clb.job.UpdateTriggering.Helpers
 {
+    /// <summary>
+    /// This class provides the methods for getting a cloud queue reference,insert message into queue
+    /// </summary>
     public class AzureQueues
     {
         //Application insights interface reference for logging the error details into Application Insight azure service.

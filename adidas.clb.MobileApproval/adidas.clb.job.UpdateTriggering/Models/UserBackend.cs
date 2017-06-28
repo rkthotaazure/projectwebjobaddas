@@ -15,7 +15,7 @@ namespace adidas.clb.job.UpdateTriggering.Models
     public class UserBackend : TableEntity
     {
         /// <summary>
-        /// class which implements model for userbackendentity.
+        /// This class defines model for user backend entity.
         /// </summary>
         public UserBackend(string UserRowKey, string BackendRowKey)
         {

@@ -22,10 +22,16 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
     /// </summary>
     public class RequestUpdateBL
     {
+        //Application insights interface reference for logging the error/ custom events details into Application Insight azure service.
         static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
+        //Get TaskNotStartedStatus value from configuration file
         private static string taskNotStartedStatus = Convert.ToString(System.Configuration.ConfigurationManager.AppSettings["TaskNotStartedStatus"]);
+        //Get TaskUnreadStatus value from configuration file
         private static string taskUnreadStatus = Convert.ToString(System.Configuration.ConfigurationManager.AppSettings["TaskUnreadStatus"]);
+        //Get TaskReadStatus value from configuration file
         private static string taskreadStatus = Convert.ToString(System.Configuration.ConfigurationManager.AppSettings["TaskReadStatus"]);
+        //Get  task waiting status value from configuration file
+        private static string WaitingStatus = Convert.ToString(System.Configuration.ConfigurationManager.AppSettings["WaitingTaskStatusValue"]);
         /// <summary>
         /// BL method to add request entity into azure table
         /// </summary>
@@ -36,36 +42,36 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
             string callerMethodName = string.Empty;
             try
             {
-                //get request latency in milliseconds
-                int requestLatency = 0;
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
+                int requestLatency = 0;
                 //get the request to update
-                RequsetEntity existingrequest = requestupdatedal.GetRequest(string.Concat(CoreConstants.AzureTables.RequestsPK, UserID), backendrequest.RequestsList.ID);
+                RequsetEntity requestentity = null;
+                requestentity = requestupdatedal.GetRequest(string.Concat(CoreConstants.AzureTables.RequestsPK, UserID), backendrequest.RequestsList.ID);
                 //if request exists update otherwise craete new request
-                if (existingrequest != null)
+                if (requestentity != null)
                 {
-                    existingrequest.Created = backendrequest.RequestsList.Created;
-                    existingrequest.LastUpdate = DateTime.Now;
-                    existingrequest.Status = backendrequest.RequestsList.Status;
-                    existingrequest.Title = backendrequest.RequestsList.Title;
-                    existingrequest.UpdateTriggered = false;
+                    requestentity.Created = backendrequest.RequestsList.Created;
+                    requestentity.LastUpdate = DateTime.Now;
+                    requestentity.Status = backendrequest.RequestsList.Status;
+                    requestentity.Title = backendrequest.RequestsList.Title;
+                    requestentity.UpdateTriggered = false;
                     //set requestUpdateMsgTriggerTimestamp
-                    existingrequest.Request_ReqUpdateQueueMsgTriggerTimestamp = requestUpdateMsgTriggerTimestamp;
+                    requestentity.Request_ReqUpdateQueueMsgTriggerTimestamp = requestUpdateMsgTriggerTimestamp;
                     //set ResponseInsertIntostorageTimestamp
                     DateTime responseInsertIntostorageTimestamp = DateTime.Now;
-                    existingrequest.Request_ResponseInsertIntostorageTimestamp = responseInsertIntostorageTimestamp;
+                    requestentity.Request_ResponseInsertIntostorageTimestamp = responseInsertIntostorageTimestamp;
                     //calling DAL method to update request entity
-                    requestupdatedal.AddUpdateRequest(existingrequest);
-                    //calculate request latency 
-                    TimeSpan timeDiff = responseInsertIntostorageTimestamp - Convert.ToDateTime(existingrequest.Request_QueueMsgEntryTimestamp);
-                    requestLatency = timeDiff.Milliseconds;
+                    requestupdatedal.AddUpdateRequest(requestentity);
+                    //calculate request latency from Queue Entry to response inser into azure table storage
+                    TimeSpan timeDiff = responseInsertIntostorageTimestamp - Convert.ToDateTime(requestentity.Request_QueueMsgEntryTimestamp);
+                    requestLatency = (int)timeDiff.TotalMilliseconds;
                 }
                 else
                 {
                     //generating request entity from input request obj by adding partitionkey and rowkey
-                    RequsetEntity requestentity = DataProvider.ResponseObjectMapper<RequsetEntity, Request>(backendrequest.RequestsList);
+                    requestentity = DataProvider.ResponseObjectMapper<RequsetEntity, Request>(backendrequest.RequestsList);
                     requestentity.PartitionKey = string.Concat(CoreConstants.AzureTables.RequestsPK, UserID);
                     requestentity.RowKey = backendrequest.RequestsList.ID;
                     //adding service layer requestid to entity                
@@ -73,7 +79,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                     requestentity.BackendID = backendId;
                     requestentity.UpdateTriggered = false;
                     requestentity.LastUpdate = DateTime.Now;
-                    //set requestUpdateMsgTriggerTimestamp
+                    //set requestUpdate Message Trigger Timestamp value
                     requestentity.Request_ReqUpdateQueueMsgTriggerTimestamp = requestUpdateMsgTriggerTimestamp;
                     //set ResponseInsertIntostorageTimestamp
                     DateTime responseInsertIntostorageTimestamp = DateTime.Now;
@@ -83,12 +89,12 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                     {
                         requestentity.RequesterID = backendrequest.RequestsList.Requester.UserID;
                         requestentity.RequesterName = backendrequest.RequestsList.Requester.Name;
-                    }                   
+                    }
                     //calling DAL method to add request entity
                     requestupdatedal.AddUpdateRequest(requestentity);
                     //calculate request latency 
                     TimeSpan timeDiff = responseInsertIntostorageTimestamp - Convert.ToDateTime(utQueueEntryTimestamp);
-                    requestLatency = timeDiff.Milliseconds;
+                    requestLatency = (int)timeDiff.TotalMilliseconds;
                 }
                 return requestLatency;
             }
@@ -103,7 +109,58 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                 throw new BusinessLogicException();
             }
         }
+        /// <summary>
+        /// This method calculates the request latency
+        /// </summary>
+        /// <param name="reqEntity"></param>
+        /// <param name="utQueueEntryTimestamp"></param>
+        /// <returns></returns>
+        public int AddUpdateRequestServiceLayerTimestamp(RequsetEntity reqEntity, DateTime? utQueueEntryTimestamp)
+        {
+            //Get Caller Method name
+            string callerMethodName = string.Empty;
+            try
+            {
+                //get request latency in milliseconds
+                int requestLatency = 0;
+                //Get Caller Method name from CallerInformation class
+                callerMethodName = CallerInformation.TrackCallerMethodName();
+                DateTime? responseInsertIntostorageTimestamp = null;
+                DateTime? msgEntryTimeStamp = null;
+                RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
+                //get the request to update
+                RequsetEntity existingrequest = requestupdatedal.GetRequest(reqEntity.PartitionKey, reqEntity.RowKey);
+                //if request exists update otherwise craete new request
+                if (existingrequest != null)
+                {
+                    //set ResponseInsertIntostorageTimestamp
+                    responseInsertIntostorageTimestamp = DateTime.Now;
+                    msgEntryTimeStamp = existingrequest.Request_QueueMsgEntryTimestamp;
+                    existingrequest.Request_ResponseInsertIntostorageTimestamp = responseInsertIntostorageTimestamp;
+                    //calling DAL method to add request entity
+                    requestupdatedal.AddUpdateRequest(existingrequest);
+                }
+                else
+                {
+                    msgEntryTimeStamp = utQueueEntryTimestamp;
+                }
 
+                //calculate request latency 
+                TimeSpan timeDiff = Convert.ToDateTime(responseInsertIntostorageTimestamp) - Convert.ToDateTime(msgEntryTimeStamp);
+                requestLatency = timeDiff.Milliseconds;
+                return requestLatency;
+            }
+            catch (DataAccessException DALexception)
+            {
+                throw DALexception;
+            }
+            catch (Exception exception)
+            {
+                //write exception into application insights
+                InsightLogger.Exception(exception.Message + " - Error in BL while inserting request", exception, callerMethodName);
+                throw new BusinessLogicException();
+            }
+        }
         /// <summary>
         /// BL method to add approval entity into azure table
         /// </summary>
@@ -153,8 +210,10 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                                     ServiceLayerApproval.Missingconfirmations = ServiceLayerApproval.Missingconfirmations + 1;
                                     ServiceLayerApproval.Backendoverwritten = false;
                                     ServiceLayerApproval.BackendConfirmed = false;
+                                    ServiceLayerApproval.TaskViewStatus = taskreadStatus;
                                     //Add message to update triggering VIP queue to trigger request update.
                                     RequestUpdateTrigger(requestid, UserID, backendId);
+                                    //InsightLogger.TrackSpecificEvent("Missing Conformation:" + missingconfirmationlimit);
                                     //check for Missing confirmation limit
                                     if (ServiceLayerApproval.Missingconfirmations > missingconfirmationlimit)
                                     {
@@ -162,11 +221,17 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                                         ServiceLayerApproval.BackendConfirmed = true;
                                         ServiceLayerApproval.Missingconfirmations = 0;
                                         ServiceLayerApproval.Status = approver.Status;
+                                        
                                     }
                                 }
                             }
                             else
                             {
+                                //if user approve /reject the unread task from backend application then need to update the task view status as read
+                                if (approver.Status != WaitingStatus)
+                                {
+                                    ServiceLayerApproval.TaskViewStatus = taskreadStatus;
+                                }
                                 ServiceLayerApproval.Status = approver.Status;
                             }
                             ServiceLayerApproval.DueDate = approver.DueDate;
@@ -394,6 +459,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
+                //create object for RequestUpdateDAL class
                 //calling DAL method to add update userbackend entity
                 RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
                 UserBackendEntity userbackend = requestupdatedal.GetUserBackend(userId, BackendId);
@@ -407,6 +473,8 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                     userbackend.OpenRequests = requestupdatedal.GetOpenRequestsCount(userId, BackendId);
                     userbackend.OpenApprovals = requestupdatedal.GetOpenApprovalsCount(userId, BackendId);
                     userbackend.UrgentApprovals = requestupdatedal.GetUrgentApprovalsCount(userId, BackendId);
+                    //declare int variable for calculating average request latency
+                    int averageRequestLatency = 0;
                     //if request count more than one.
                     if (requestscount > 0)
                     {
@@ -416,7 +484,9 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                         userbackend.LastRequestSize = Convert.ToInt32(Totalrequestssize / requestscount);
                         userbackend.LastAllRequestsSize = Totalrequestssize;
                         //updating average, last request latencies for user backend
-                        userbackend.AverageRequestLatency = GetAverage(userbackend.AverageRequestLatency, userbackend.TotalRequestsCount, TotalRequestlatency, requestscount);
+                        averageRequestLatency = GetAverage(userbackend.AverageRequestLatency, userbackend.TotalRequestsCount, TotalRequestlatency, requestscount);
+                        //if average requestlatency is zero then set TotalRequestlatency vlaue as average request latency
+                        userbackend.AverageRequestLatency = (averageRequestLatency > 0) ? averageRequestLatency : TotalRequestlatency;
                         userbackend.AverageAllRequestsLatency = GetAverage(userbackend.AverageAllRequestsLatency, userbackend.TotalBatchRequestsCount, TotalRequestlatency, requestscount);
                         userbackend.LastRequestLatency = Convert.ToInt32(TotalRequestlatency / requestscount);
                         userbackend.LastAllRequestsLatency = TotalRequestlatency;
@@ -426,7 +496,7 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                     }
                     //calculate latency from update triggering to service layer
                     TimeSpan latencyDiff = serviceLayerUpdateTimestamp - Convert.ToDateTime(userbackend.QueueMsgEntryTimestamp);
-                    userbackend.LastPullLatency = latencyDiff.Milliseconds;
+                    userbackend.LastPullLatency = (int)latencyDiff.TotalMilliseconds;
                     userbackend.LastUpdate = DateTime.Now;
                     userbackend.UpdateTriggered = false;
                     //calling DAL method to update userbackend
@@ -489,32 +559,41 @@ namespace adidas.clb.job.RequestsUpdate.APP_Code.BL
                 callerMethodName = CallerInformation.TrackCallerMethodName();
                 //declare int local variable for getting avg Request Latency
                 int avgRequestLatency = 0;
+                //declare string variable for converting backend entity into json string
+                //string backendjsonstring = Newtonsoft.Json.JsonConvert.SerializeObject(backend);
+                string backendid = backend.BackendID;
                 //if request count greathan zero.
                 if (requestscount > 0)
                 {
                     //updating average, last request sizes for backend
+                    InsightLogger.TrackSpecificEvent("RequestUpdateWebJob ::  action:Calculate  backend(" + backendid + ") AverageRequestSize , existing AverageRequestSize:" + backend.AverageRequestSize + " Exisiting Total Request Count :" + backend.TotalRequestsCount + ",current batch TotalRequestsSize: " + Totalrequestssize + "current batch requsetcount: " + requestscount);
                     backend.AverageRequestSize = GetAverage(backend.AverageRequestSize, backend.TotalRequestsCount, Totalrequestssize, requestscount);
                     backend.LastRequestSize = Convert.ToInt32(Totalrequestssize / requestscount);
                     //updating average, last request latencies for backend
-                    InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:caliculate backend tracking variables, existing AverageRequestLatency:" + backend.AverageRequestLatency + " TotalRequestsLatency: " + TotalRequestlatency + " requsetcount: " + requestscount);
+                    InsightLogger.TrackSpecificEvent("RequestUpdateWebJob ::  action:Calculate  backend(" + backendid + ") AverageRequestLatency , existing AverageRequestLatency:" + backend.AverageRequestLatency + " Exisiting Total Request Count :" + backend.TotalRequestsCount + ",current batch TotalRequestsLatency: " + TotalRequestlatency + "current batch requsetcount: " + requestscount);
                     avgRequestLatency = GetAverage(backend.AverageRequestLatency, backend.TotalRequestsCount, TotalRequestlatency, requestscount);
                     //if avgRequestLatency is lessthan or equal to zero then set current Request Latency value to AverageRequestLatency
                     backend.AverageRequestLatency = (avgRequestLatency > 0) ? avgRequestLatency : TotalRequestlatency;
-                    InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:caliculate backend tracking variables, current AverageRequestLatency:" + backend.AverageRequestLatency);
-                    InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:caliculate backend tracking variables, existing AverageALLRequestLatency:" + backend.AverageAllRequestsLatency + " TotalBatchRequestsCount: " + backend.TotalBatchRequestsCount + " TotalRequestsLatency: " + TotalRequestlatency + " requsetcount: " + requestscount);
+                    InsightLogger.TrackSpecificEvent("RequestUpdateWebJob ::  action:Calculate  backend(" + backendid + ") AverageAllRequestsLatency, existing AverageALLRequestLatency:" + backend.AverageAllRequestsLatency + " TotalBatchRequestsCount: " + backend.TotalBatchRequestsCount + "current batch TotalRequestsLatency: " + TotalRequestlatency + "current batch requsetcount: " + requestscount);
                     backend.AverageAllRequestsLatency = GetAverage(backend.AverageAllRequestsLatency, backend.TotalBatchRequestsCount, TotalRequestlatency, requestscount);
-                    InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:caliculate backend tracking variables, current AverageAllRequestsLatency:" + backend.AverageAllRequestsLatency);
                     backend.LastRequestLatency = Convert.ToInt32(TotalRequestlatency / requestscount);
-                    InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:caliculate backend tracking variables, current LastRequestLatency:" + backend.LastRequestLatency);
                     backend.LastAllRequestsLatency = TotalRequestlatency;
-                    InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:caliculate backend tracking variables, current LastAllRequestsLatency:" + backend.LastAllRequestsLatency);
                     //updaing total requests per userbackend and total request batches/messages per userbackend
                     backend.TotalRequestsCount = backend.TotalRequestsCount + requestscount;
                     backend.TotalBatchRequestsCount = backend.TotalBatchRequestsCount + 1;
+
+                    InsightLogger.TrackSpecificEvent("RequestUpdateWebJob ::  action: backend(" + backendid + ") updated AverageRequestSize:" + backend.AverageRequestSize);
+                    InsightLogger.TrackSpecificEvent("RequestUpdateWebJob ::  action: backend(" + backendid + ") updated LastRequestSize:" + backend.LastRequestSize);
+                    InsightLogger.TrackSpecificEvent("RequestUpdateWebJob :: action: backend(" + backendid + ") Updated AverageRequestLatency:" + backend.AverageRequestLatency);
+                    InsightLogger.TrackSpecificEvent("RequestUpdateWebJob :: action: backend(" + backendid + ") updated AverageAllRequestsLatency :" + backend.AverageAllRequestsLatency);
+                    InsightLogger.TrackSpecificEvent("RequestUpdateWebJob ::  action: backend(" + backendid + ") updated LastRequestLatency:" + backend.LastRequestLatency);
+                    InsightLogger.TrackSpecificEvent("RequestUpdateWebJob :: action:  backend(" + backendid + ") updated LastAllRequestsLatency:" + backend.LastAllRequestsLatency);
+
+                    //calling DAL method to update backend entity
+                    RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
+                    requestupdatedal.UpdateBackend(backend);                   
                 }
-                //calling DAL method to update backend entity
-                RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
-                requestupdatedal.UpdateBackend(backend);
+                
             }
             catch (DataAccessException DALexception)
             {

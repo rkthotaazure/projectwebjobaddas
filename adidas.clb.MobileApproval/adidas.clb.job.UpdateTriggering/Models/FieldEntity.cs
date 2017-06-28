@@ -13,7 +13,7 @@ using Microsoft.WindowsAzure.Storage.Table;
 namespace adidas.clb.job.UpdateTriggering.Models
 {
     /// <summary>
-    /// class which implements model for Field object.
+    /// This class defines model for Field Enity.
     /// </summary>
     public class FieldEntity : TableEntity
     {

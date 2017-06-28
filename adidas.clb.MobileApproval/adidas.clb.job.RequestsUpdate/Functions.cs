@@ -52,16 +52,20 @@ namespace adidas.clb.job.RequestsUpdate
                 //declare int variable for get total request count from backend response
                 int requestcount = 0;
                 DateTime? utQueueEntryTimestamp = null;
+                //Declare UserBackendEntity object
+                UserBackendEntity userbackend = null;
+                //declare string varaible
+                string latencyvaluesstrr = string.Empty;
                 //check if requests were available
                 if (backendrequestslist != null && backendrequestslist.Count > 0)
                 {
                     //get request count in backend response
-                    requestcount = backendrequestslist.Count;                   
+                    requestcount = backendrequestslist.Count;
                     if (!string.IsNullOrEmpty(requestsdata.UserId) && !string.IsNullOrEmpty(requestsdata.BackendID))
                     {
                         //calling DAL method for getting userbackend entity details
                         RequestUpdateDAL requestupdatedal = new RequestUpdateDAL();
-                        UserBackendEntity userbackend = requestupdatedal.GetUserBackend(requestsdata.UserId, requestsdata.BackendID);
+                        userbackend = requestupdatedal.GetUserBackend(requestsdata.UserId, requestsdata.BackendID);
                         if (userbackend != null)
                         {
                             //if userbackend is not null then get userbackend UT queue message entry timestamp 
@@ -77,35 +81,35 @@ namespace adidas.clb.job.RequestsUpdate
                         List<Field> genericInfoFields = backendrequest.RequestsList.Fields.GenericInfo;
                         List<Field> overviewFields = backendrequest.RequestsList.Fields.Overview;
                         Request request = backendrequest.RequestsList;
-                        int reqLatency = 0;
+                        int reqLatency = 0;                       
                         //calling BL methods to add request , approval, approvers and fields
                         if (!string.IsNullOrEmpty(request.UserID))
                         {
                             reqLatency = 0;
                             InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:clearing request waiting flag, response:success");
-                            reqLatency = requsetupdatebl.AddUpdateRequest(backendrequest, request.UserID, requestsdata.BackendID, requestUpdateMsgTriggerTimestamp, utQueueEntryTimestamp);
                             InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:update request object, response:success, requestID:" + request.ID);
+                            //This method insert/update request approval entities details into Request Transaction table
                             requsetupdatebl.AddUpdateApproval(approvers, request.ID, backendrequest.RequestsList.UserID, requestsdata.BackendID, backend.MissingConfirmationsLimit, request.Title);
                             InsightLogger.TrackEvent("RequestUpdateWebJob :: method : requestupdate queue trigger, action:update/remove/create approval object, response:success");
+                            //This method insert/update request approvers details into Request Transaction table
                             requsetupdatebl.AddUpdateApprovers(approvers, request.ID);
+                            //This method insert/update request fileds(Overview & Genric information) details into Request Transaction table
                             requsetupdatebl.AddUpdateFields(genericInfoFields, overviewFields, request.ID);
+                            //This method insert/update request entity details into Request Transaction table
+                            reqLatency = requsetupdatebl.AddUpdateRequest(backendrequest, request.UserID, requestsdata.BackendID, requestUpdateMsgTriggerTimestamp, utQueueEntryTimestamp);
                             //caliculating request size                        
                             int requestsize = requsetupdatebl.CalculateRequestSize(backendrequest);
-                            //caliculating total of size for all requests
+                            //caliculating total size for all requests
                             TotalRequestsize = TotalRequestsize + requestsize;
-                            //caliculating total of latency for all requests
-                            if (reqLatency > 0)
-                            {
-                                //this is exisiting request in azure storage
-                                TotalRequestlatency = TotalRequestlatency + reqLatency;
-                            }
-                            else
-                            { //this is new request 
-                                TotalRequestlatency = TotalRequestlatency + request.Latency;
-
-                            }
-
+                            //caliculating total latency of all request                          
+                            TotalRequestlatency = TotalRequestlatency + reqLatency;
+                            latencyvaluesstrr = latencyvaluesstrr + "," + " RequestID :" + request.ID + " Latency in milliseconds :" + reqLatency;
                         }
+                    }
+                    if (!string.IsNullOrEmpty(latencyvaluesstrr))
+                    {
+                        //log each request latency 
+                        InsightLogger.TrackSpecificEvent("RequestUpdateWebJob :: " + latencyvaluesstrr);
                     }
 
                 }

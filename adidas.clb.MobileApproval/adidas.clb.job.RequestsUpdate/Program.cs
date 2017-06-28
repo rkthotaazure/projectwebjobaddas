@@ -23,6 +23,7 @@ namespace adidas.clb.job.RequestsUpdate
         {
             JobHostConfiguration config = new JobHostConfiguration();
             //QueueTrigger function runs singleton on a single instance
+            //this will sets how many number of queue messages processed at a time
             config.Queues.BatchSize = Convert.ToInt32(ConfigurationManager.AppSettings["QueueBatchSize"]);
             var host = new JobHost(config);
             log4net.Config.XmlConfigurator.Configure();

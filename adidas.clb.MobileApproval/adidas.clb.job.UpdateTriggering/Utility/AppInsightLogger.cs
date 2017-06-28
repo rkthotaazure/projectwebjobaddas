@@ -1,4 +1,9 @@
-﻿using Microsoft.ApplicationInsights;
+﻿//-----------------------------------------------------------
+// <copyright file="UserBackendEntity.cs" company="adidas AG">
+// Copyright (C) 2016 adidas AG.
+// </copyright>
+//-----------------------------------------------------------
+using Microsoft.ApplicationInsights;
 using Microsoft.WindowsAzure;
 using System;
 using System.Collections.Generic;
@@ -7,12 +12,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime;
+
 /// <summary>
-/// implements IAppInsight interface
+/// This class implements IAppInsight interface
 /// </summary>
 
 namespace adidas.clb.job.UpdateTriggering.Utility
 {
+    /// <summary>
+    /// This class provides methods for logging error,custom events,metric values into application insights
+    /// </summary>
     public sealed class AppInsightLogger : IAppInsight
     {
         //Create object for AppInsightLogger class

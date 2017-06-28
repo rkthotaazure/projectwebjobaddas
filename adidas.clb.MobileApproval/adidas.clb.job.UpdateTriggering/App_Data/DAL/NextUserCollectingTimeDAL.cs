@@ -23,25 +23,37 @@ using System.Timers;
 using Newtonsoft.Json;
 namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
 {
-    class NextUserCollectingTimeDAL
+    /// <summary>
+    /// This class provides the methods for insert /update the next collecting time of the userbackend entity
+    /// </summary>
+    public class NextUserCollectingTimeDAL
     {
-        //Application insights interface reference for logging the error details into Application Insight azure service.
+        //Application insights interface reference for logging the errors/custom events details into Application Insight azure service.
         static IAppInsight InsightLogger { get { return AppInsightLogger.Instance; } }
+        //get Reference data azure table name from configuration file
         public static string azureTableReference = ConfigurationManager.AppSettings["AzureTables.ReferenceData"];
+        //get UserDeviceConfiguration azure table name from configuration file
         public static string azureTableUserDeviceConfiguration = ConfigurationManager.AppSettings["AzureTables.UserDeviceConfiguration"];
-        //RequestTransactions
+        // get RequestTransactions azure table name from configuration file
         public static string azureTableRequestTransactions = ConfigurationManager.AppSettings["AzureTables.RequestTransactions"];
         //get NextCollectingTime Dividend from config
         public static int nextCollectingTimeDividend = Convert.ToInt32(ConfigurationManager.AppSettings["NextCollectingTimeDividend"]);
         //get default MinUpdateFrequency from config
         public static int defaultMinUpdateFrequency = Convert.ToInt32(ConfigurationManager.AppSettings["DefaultMinUpdateFrequency"]);
+        //get  missedUpdatesWaitingTimeInMinutes from config
         public static int missedUpdatesWaitingTimeInMinutes = Convert.ToInt32(ConfigurationManager.AppSettings["MissedUpdatesWaitingTimeInMinutes"]);
+        //get missedupdateFraction from config
         public static int missedupdateFraction = Convert.ToInt32(ConfigurationManager.AppSettings["MissedUpdatesWaitingTimeInMinutesFraction"]);
+        //declare UserBackendDAL object
         private UserBackendDAL objdal;
+        //declare UpdateTriggeringRules object
         private UpdateTriggeringRules utRules;
+        //declare constructor
         public NextUserCollectingTimeDAL()
         {
+            //create object for UserBackendDAL class
             objdal = new UserBackendDAL();
+            //create object for UpdateTriggeringRules class
             utRules = new UpdateTriggeringRules();
         }
         /// <summary>
@@ -69,21 +81,23 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     TableQuery<UserBackendEntity> tquery = new TableQuery<UserBackendEntity>().Where(TableQuery.GenerateFilterCondition(CoreConstants.AzureTables.RowKey, QueryComparisons.Equal, backend.RowKey));
                     List<UserBackendEntity> allUserBackends = UserDeviceConfigurationTable.ExecuteQuery(tquery).ToList();
                     int minUpdateFrequency = 0;
+                    //get minimum update frequency from all the userbackends
                     if (allUserBackends != null && allUserBackends.Count > 0)
                     {
                         minUpdateFrequency = allUserBackends.Min(r => r.DefaultUpdateFrequency);
-                    }
-                    //get minimum update frequency from User Backend list
+                    }                   
 
                     //InsightLogger.TrackEvent("UpdateTriggering, Action :: Collecting the minimum Default Update Frequency of all the userbackends under the backend :" + backendID + " , Response :: Minimum Update Frquency :" + minUpdateFrequency );
                     //Get next collecting hours based on update Triggering Rule :: R1                    
                     int nextCollectingTimeInMinutes;
+                    //here default update frequency is 1 minute
                     if (minUpdateFrequency < defaultMinUpdateFrequency)
                     {
                         nextCollectingTimeInMinutes = defaultMinUpdateFrequency;
                     }
                     else
                     {
+                        //from update triggering rule R1 part
                         nextCollectingTimeInMinutes = minUpdateFrequency / nextCollectingTimeDividend;
                     }
                     //update backend next collecting time in refernecedata table
@@ -133,7 +147,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
                     int oldminUpdateFrequency = ObjNextCollectingTime.MinimumUpdateFrequency;
                     DateTime oldMissingUpdateNextCollectingTime = ObjNextCollectingTime.MissingUpdateNextCollectingTime;
                     TimeSpan tspanmin = currentPulltimestamp.Subtract(oldMissingUpdateNextCollectingTime);
-                    int missedwaitingMins = tspanmin.Minutes;
+                    int missedwaitingMins = (int)tspanmin.TotalMinutes;
                     bool isMissingUpdateTrigger = ObjNextCollectingTime.MissingUpdateTrigger;
                     //if it is not first time then get the last collecting time for regular user updates from azure table
                     if (!isFirstTimePull)
@@ -344,6 +358,7 @@ namespace adidas.clb.job.UpdateTriggering.App_Data.DAL
             {
                 //Get Caller Method name from CallerInformation class
                 callerMethodName = CallerInformation.TrackCallerMethodName();
+                //get backends from reference data
                 List<NextUserCollectingTimeEntity> allBackends = DataProvider.RetrieveEntities<NextUserCollectingTimeEntity>(azureTableReference, CoreConstants.AzureTables.UpdateTriggerNextCollectingTime);
                 return allBackends;
             }
