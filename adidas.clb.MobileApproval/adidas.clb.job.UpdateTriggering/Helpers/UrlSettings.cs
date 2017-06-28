@@ -1,4 +1,9 @@
-﻿using System;
+﻿//-----------------------------------------------------------
+// <copyright file="Program.cs" company="adidas AG">
+// Copyright (C) 2016 adidas AG.
+// </copyright>
+//-----------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -7,6 +12,9 @@ using adidas.clb.job.UpdateTriggering.Exceptions;
 using adidas.clb.job.UpdateTriggering.Utility;
 namespace adidas.clb.job.UpdateTriggering.Helpers
 {
+    /// <summary>
+    /// This class provides authorization for calling the baceknd api
+    /// </summary>
     public class UrlSettings
     {
 

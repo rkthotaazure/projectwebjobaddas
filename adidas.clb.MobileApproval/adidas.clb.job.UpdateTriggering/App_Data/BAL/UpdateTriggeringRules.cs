@@ -13,6 +13,9 @@ using System.Threading.Tasks;
 
 namespace adidas.clb.job.UpdateTriggering.App_Data.BAL
 {
+    /// <summary>
+    /// This class methods define the update triggering rules
+    /// </summary>
     public  class UpdateTriggeringRules
     {
         //Application insights interface reference for logging the error details into Application Insight azure service.

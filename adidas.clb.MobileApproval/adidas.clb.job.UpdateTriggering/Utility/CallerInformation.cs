@@ -7,12 +7,12 @@ using System.Runtime.CompilerServices;
 namespace adidas.clb.job.UpdateTriggering.Utility
 {
     /// <summary>
-    /// Implements Callinformation class
+    /// Thic class provides the methods for  track call method information 
     /// </summary>
-    class CallerInformation
+    public class CallerInformation
     {
         /// <summary>
-        /// This method gives information about the caller of any function
+        /// This method gives information about the method name,cs file,line number
         /// </summary>
         /// <param name="message"></param>
         /// <param name="File_name"></param>

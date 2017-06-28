@@ -13,7 +13,7 @@ using Microsoft.WindowsAzure.Storage.Table;
 namespace adidas.clb.job.UpdateTriggering.Models
 {
     /// <summary>
-    /// class which implements model for Approval entity.
+    ///  This class defines  model for Approval entity.
     /// </summary>
     public class ApprovalEntity : TableEntity
     {

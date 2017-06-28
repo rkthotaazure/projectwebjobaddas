@@ -102,6 +102,7 @@ namespace adidas.clb.job.UpdateTriggering.Utility
             public const int TotalHours = 23;
             public const int TotalMinutes = 59;
             public const int singledigit = 9;
+            public const int zero = 0;
             public const string TotalSeconds = "00";
         }
 

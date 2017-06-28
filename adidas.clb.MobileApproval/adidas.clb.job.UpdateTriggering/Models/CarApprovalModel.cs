@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace adidas.clb.job.UpdateTriggering.Models
 {
     /// <summary>
-    /// class which implements model for CAR pdf details obj.
+    /// This class defines  model for CAR pdf details obj.
     /// </summary>
     class CarApprovalModel
     {

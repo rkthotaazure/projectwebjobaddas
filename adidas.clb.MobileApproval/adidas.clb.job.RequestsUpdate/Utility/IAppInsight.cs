@@ -14,6 +14,7 @@ namespace adidas.clb.job.RequestsUpdate.Utility
     interface IAppInsight
     {
         void TrackEvent(string message);
+        void TrackSpecificEvent(string message);
         void TrackMetric(string message, long duration);
         void Exception(string message, Exception exception, string EventID);       
     }

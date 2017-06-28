@@ -1,4 +1,9 @@
-﻿using System;
+﻿//-----------------------------------------------------------
+// <copyright file="CarApprovalModel.cs" company="adidas AG">
+// Copyright (C) 2016 adidas AG.
+// </copyright>
+//-----------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +11,9 @@ using System.Threading.Tasks;
 
 namespace adidas.clb.job.UpdateTriggering.Models
 {
+    /// <summary>
+    /// This class defines  model for Error details obj.
+    /// </summary>
     public class Error
     {
         public string _type { get; set; }

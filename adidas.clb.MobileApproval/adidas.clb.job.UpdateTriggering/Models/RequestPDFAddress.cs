@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace adidas.clb.job.UpdateTriggering.Models
 {
     /// <summary>
-    /// class which implements model for Request pdf obj.
+    ///Thic  class defines model for Request pdf obj.
     /// </summary>
     public class RequestPDFAddress
     {

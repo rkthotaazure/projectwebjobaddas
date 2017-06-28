@@ -8,9 +8,9 @@ using Microsoft.WindowsAzure.Storage.Table;
 namespace adidas.clb.job.UpdateTriggering.Models
 {
     /// <summary>
-    /// Implements RequestSynchEntity Class
+    /// This class defines Request Synch Entity Class
     /// </summary>
-    class RequestSynchEntity : TableEntity
+    public class RequestSynchEntity : TableEntity
     {
         public RequestSynchEntity(string BackendRowKey, string RequestID)
         {
