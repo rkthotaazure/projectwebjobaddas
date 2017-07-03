@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adidas.clb.MobileApproval", "adidas.clb.MobileApproval\adidas.clb.MobileApproval.csproj", "{EEDD59F6-B081-4522-A2D3-62CDC867BC00}"
 EndProject
@@ -13,11 +13,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adidas.clb.job.RequestsUpda
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adidas.clb.job.GeneratePDF", "adidas.clb.job.GeneratePDF\adidas.clb.job.GeneratePDF.csproj", "{F174592A-367D-4955-A2CA-7FEF4CF0FB26}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adidas.clb.MobBackendAgents", "addias.clb.MobBackendAgents\adidas.clb.MobBackendAgents.csproj", "{FD200425-9FE0-42A3-B62C-EE95E2F4A0E8}"
+EndProject
 Global
-	GlobalSection(SubversionScc) = preSolution
-		Svn-Managed = True
-		Manager = AnkhSVN - Subversion Support for Visual Studio
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -43,8 +41,16 @@ Global
 		{F174592A-367D-4955-A2CA-7FEF4CF0FB26}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F174592A-367D-4955-A2CA-7FEF4CF0FB26}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F174592A-367D-4955-A2CA-7FEF4CF0FB26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD200425-9FE0-42A3-B62C-EE95E2F4A0E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD200425-9FE0-42A3-B62C-EE95E2F4A0E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD200425-9FE0-42A3-B62C-EE95E2F4A0E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD200425-9FE0-42A3-B62C-EE95E2F4A0E8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
 	EndGlobalSection
 EndGlobal
